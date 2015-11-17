@@ -1,0 +1,21 @@
+This is a build of NASM for DOS on 32-bit computers.  Nothing older
+than a 386 is supported.  Sorry.
+
+This file includes an unmodified version of CWSDPMI, distributed under
+the terms listed in the file cwsdpmi.doc.  The current version of
+CWSDPMI can be downloaded from:
+
+    http://clio.rice.edu/cwsdpmi/
+
+              NASM, the Netwide Assembler.
+
+Many many developers all over the net respect NASM for what it is
+- a widespread (thus netwide), portable (thus netwide!), very
+flexible and mature assembler tool with support for many output
+formats (thus netwide!!).
+
+NASM itself is distributed under the terms of the "simplified"
+(2-clause) BSD license.  See the file LICENSE.  NASM can be downloaded
+from:
+
+    http://www.nasm.us/

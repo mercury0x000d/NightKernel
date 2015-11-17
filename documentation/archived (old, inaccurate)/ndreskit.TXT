@@ -1,0 +1,139 @@
+NightDOS
+Version 1.0
+
+Resource Kit
+
+Overview
+---------
+
+NightDOS is a 32-bit kernel replacement for the FreeDOS operating system.
+
+NightDOS Structure
+-----------------
+
+The following diagram shows how the various layers of NightDOS are connected:
+
++-----------------+ +-----------------+ +-------------------+
+|		  | |                 | |		    |
+| 16-bit DOS	  | | 32-bit NightDOS | | Win32 Console     |
+| Application     | | Application     | | Application       |
+|		  | |		      | |		    |
++-----------------+ +-----------------+ +-------------------+
+		|	    |				 |
+		|	    |				 |
+		|	+------------------------+       |
+		|	|			 |	 |
+		|	|	Virtual Machine	 |	 |
+		+-------|	Manager		 |-------+
+			|			 |
+			+------------------------+
+					|
+					|
+					|   	+-------------------------+
+					|	|			  |
+					|	|   File System Manager   |-----+
+					|	|			  |	|
+					|	+-------------------------+	|
+					|	      |		|		|
+					|	      |		|		|
+					|	+-------------+ |	+---------------+
+					|	|	      | |	|		|
+					|	| FAT32	      |	|	|  CDFS		|
+					|	|	      |	|	|		|
+					|	+-------------+	|	+---------------+
+					|			|
+					|			|
+	+-------------------------------------------------------+
+	|							|
+	|							|
+	|	NightDOS 32-bit kernel / IO Supervisor		|
+	|							|
+	|							|
+	+-------------------------------------------------------+
+				|
+				|
+	+-------------------------------------------------------+
+	|							|
+	|			Hardware devices		|
+	|							|
+	+-------------------------------------------------------+
+
+
+
+
+
+
+
+NightDOS Resource Kit
+
+NightDOS uses linear memory addresses, and operates in protected
+mode on the Intel x86 architecture.  
+
+Hardware Layer 
+---------------
+This is the core of the computer, your basic mouse, keyboard, hard
+drives, and such. Without an operating system, these parts can do
+nothing for you. Since NightDOS implements a multi-tasking kernel, it
+must isolate applications from the hardware and virtualize the
+hardware to prevent system crashes. This virtualization allows for
+multiple requests to be made to the hardware, which is then
+prioritized and serialized by the next layer in NightDOS...  
+
+The I/O Supervisor 
+-------------------
+This controls all input and output of the operating
+system. This is a highly critical portion of code that prioritizes
+and fields requests from different processes for hardware device
+input/output.  
+
+Kernel 
+-------------------
+NightDOS's kernel consists of 3 components. The kernel portion's
+primary job is to schedule processes for running, this kernel has
+been tweaked and optimized to run very fast using hand-tuned assembly
+code to optimize code and data usage.  
+
+The File System portion of the kernel handles all block device
+requests (whether local or remote) using a unified set of procedures
+and data structures.  This allows seamless integration of multiple
+file systems through an installable file system manager. All
+instances of file activity are invisible to the caller as this
+portion of the kernel routes information to the correct device.
+
+The final portion of the kernel is the memory manager. As the most
+important part of NightDOS's core components, the memory manager
+allocates memory on a demand basis. It also performs proper cleanup
+after programs terminates and works behind the scenes to achieve
+maximum performance under loaded conditions. It does this by
+implementing a swap file.  This file contains pages of memory that
+are not being used. This swap file exists on the hard drive and can
+be on its own partition to save space. This file grows and shrinks
+with the needs of the system and is removed when the system is
+shutdown. 
+
+NightDOS's memory manager also utilizes the V86 mode common on 386 and
+later processors to provide a 16-bit virtualized DOS mode for classic
+applications to run. In addition, NightDOS is also able to run certain
+32-bit Windows console applications, in addition to its own catalog
+of 32-bit applications.  As a drop in replacement for the standard
+FreeDOS kernel, the typical user will retain their compatibility with
+the DOS applications they are used to running, and gain the 32-bit
+protected mode abilities, task switching between applications, and
+increased overall performance in a DOS environment. 
+
+NightDOS API
+
+
+INT 2F -- NightDOS -- INSTALLATION CHECK
+AX = 4E4Bh (NK)
+
+Return
+
+AX=Status
+
+	Value	Description
+	---------------------------------------------------------
+	4E4Bh	NightDOS not installed
+	0000h	NightDOS installed
+
+BX=NightDOS version number

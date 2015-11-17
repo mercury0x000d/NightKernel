@@ -1,0 +1,28 @@
+Start			End				Size						Description
+
+0x00000000		0x000003FF		1 KB						interrupt vector table
+0x00000400		0x000004FF		256 bytes					BIOS data area (remapped here from CMOS)
+0x00000500		0x00000500		1 byte						kernel major version
+0x00000501		0x00000501		1 byte						kernel minor version
+0x00000502		0x00000502		1 byte						kernel revision number
+0x00000503		0x00000503		1 byte						timer tick value - increments 256 times per second
+0x00000504		0x00000507		4 bytes						seconds since boot - increments when timer tick value resets to 0
+0x00000508		0x0000050B		4 bytes						highest accessable RAM address (top byte of memory)
+0x0000050C		0x0000050F		4 bytes						empty
+0x00000510		0x0000051F		16 bytes					ASCIIZ CPU vendor ID
+0x00000520		0x000005FF		224 bytes					keyboard/event buffer
+0x00000600		0x00007BFF		30207 bytes (29.49 KB)		kernel space (kernel is loaded here by freeDOS bootloader)
+0x00007C00		0x00007DFF		512 bytes					bootloader (copied here by BIOS, can be overwritten)
+0x00007E00		0x00007FFF		512 bytes					available, unused
+0x00008000		0x00017FFF		64 KB						IDT
+0x00018000		0x00027FFF		64 KB						GDT
+0x00028000		0x0009FBFF		490495 bytes (478.99 KB)	available
+0x0009FC00		0x0009FFFF		1 KB						extended BIOS data area
+0x000A0000		0x000AFFFF		64 KB						video buffer for EGA/VGA graphics modes
+0x000B0000		0x000B7FFF		32 KB						video buffer for EGA/VGA graphics modes
+0x000B8000		0x000BFFFF		32 KB						video buffer for color text and CGA graphics
+0x000C0000		0x000DFFFF		128 KB						device-mounted ROMs
+0x000E0000		0x0010FFEF		196591 bytes (191.98 KB)	BIOS ROM
+0x0010FFF0		0x001FFFFF		983055 bytes (960.01 KB)    applications use
+0x00200000		0x002FFFFF		1 MB						memory allocation bitmap
+0x00300000		0xFFFFFFFF		?							application use

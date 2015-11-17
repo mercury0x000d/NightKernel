@@ -1,0 +1,161 @@
+The complete interrupt table employed by the Night DOS Kernel. Interrupt handlers 0 through 31 are for internal CPU exceptions and handlers 32 - 47 are remapped by the kernel from their normal places for other hardware.
+
+
+0x00		Divide error
+			Occurs during a DIV or an IDIV instruction when the divisor is zero or a quotient
+			overflow occurs.
+
+0x01		Single-step/debug
+			Occurs for any of a number of conditions:
+			 - Instruction address breakpoint fault
+			 - Data address breakpoint trap
+			 - General detect fault
+			 - Single-step trap
+			 - Task-switch breakpoint trap
+
+0x02		Nonmaskable interrupt
+			Occurs because of a nonmaskable hardware interrupt.
+
+0x03		Breakpoint:
+			Occurs when the processor encounters an INT 3 instruction.
+
+0x04		Overflow:
+			Occurs when the processor encounters an INTO instruction
+			and the OF (overflow) flag is set.
+
+0x05		Bounds check (BOUND instruction):
+			Occurs when the processor, while executing a BOUND instruction, finds that the operand
+			exceeds the specified
+			limit.
+
+0x06		Invalid opcode:
+			Occurs when an invalid opcode is detected.
+
+0x07		Coprocessor not available:
+			Occurs for one of two conditions:
+			- The processor encounters an ESC (escape) instruction
+				and the EM (emulate) bit of CR0 (control register zero)
+				is set.
+			- The processor encounters either the WAIT instruction or
+				an ESC instruction and both the MP (monitor
+				coprocessor) and TS (task switched) bits of CR0 are set.
+
+0x08		Double fault:
+			Occurs when the processor detects an exception while trying to invoke the handler for
+			a prior exception.
+
+0x09		Coprocessor segment overrun:
+			Occurs when a page or segment violation is detected while transferring the middle
+			portion of a coprocessor operand to the NPX.
+
+0x0A		Invalid TSS:
+			Occurs if, during a task switch, the new TSS is invalid.
+
+0x0B		Segment not present:
+			Occurs when the processor detects that the present bit of a descriptor is zero.
+
+0x0C		Stack exception:
+			Occurs for one of two conditions:
+			- As a result of a limit violation in any operation that
+				refers to SS (stack segment register)
+			- When attempting to load SS with a descriptor that is
+				marked as not-present but is otherwise valid
+
+0x0D		General protection violation:
+			Each protection violation that does not cause another exception causes a general
+			protection exception.
+			- Exceeding segment limit when using CS, DS, ES, FS, or GS
+			- Exceeding segment limit when referencing a descriptor
+				table
+			- Transferring control to a segment that is not executable
+			- Writing to a read-only data segment or a code segment
+			- Reading from an execute-only segment
+			- Loading SS with a read-only descriptor
+			- Loading SS, DS, ES, FS, or GS with a descriptor of a system
+				segment
+			- Loading DS, ES, FS, or GS with the descriptor of an
+				executable segment that is also not readable
+			- Loading SS with the descriptor of an executable segment
+			- Accessing memory through DS, ES, FS, or GS when the segment
+				register contains a NULL selector
+			- Switching to a busy task
+			- Violating privilege rules
+			- Loading CR0 with PG=1 and PE=0
+			- Interrupt or exception through trap or interrupt gate from
+				V86 mode to a privilege level other than 0
+
+0x0E		Page fault:
+			Occurs when paging is enabled (PG=1) and the processor detects one of the following
+			conditions while translating
+			a linear address to a physical address:
+			- The page-directory or page-table entry needed for the
+				address translation has 0 in its present bit.
+			- The current procedure does not have sufficient privilege
+				to access the indicated page.
+
+0x0F		(Reserved)
+
+0x10		Coprocessor error:
+			Occurs when the processor detects a signal from the coprocessor on the ERROR# input pin.
+
+0x11		Reserved by Intel
+
+0x12		Reserved by Intel
+
+0x13		Reserved by Intel
+
+0x14		Reserved by Intel
+
+0x15		Reserved by Intel
+
+0x16		Reserved by Intel
+
+0x17		Reserved by Intel
+
+0x18		Reserved by Intel
+
+0x19		Reserved by Intel
+
+0x1A		Reserved by Intel
+
+0x1B		Reserved by Intel
+
+0x1C		Reserved by Intel
+
+0x1D		Reserved by Intel
+
+0x1E		Reserved by Intel
+
+0x1F		Reserved by Intel
+
+0x20		Timer
+
+0x21		Keyboard
+
+0x22		Cascade for PIC2
+
+0x23		Serial port 2
+
+0x24		Serial port 1
+
+0x25		Reserved
+
+0x26		Diskette drive
+
+0x27		LPT port 1
+
+0x28		CMOS Real Time Clock
+
+0x29		CGA Vertical Retrace
+
+0x2A		Reserved
+
+0x2B		Reserved
+
+0x2C		Auxiliary device (mouse)
+
+0x2D		FPU
+
+0x2E		Hard drive controller
+
+0x2F		Reserved
