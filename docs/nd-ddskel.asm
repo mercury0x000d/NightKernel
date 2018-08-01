@@ -55,6 +55,14 @@ DriverHeader:
 .ReadCodePointer								dd 0x00000000
 .WriteCodePointer								dd 0x00000000
 
+; additional driver functions
+
+.ProbeDevice									dd 0x00000000 ; Called to query the existence of a device and driver compatibility
+.Remove											dd 0x00000000 ; Called when device is removed
+.Online											dd 0x00000000 ; Called to put the device online (after offlining it)
+.Offline										dd 0x00000000 ; Called to put the device offline for removal (may fail)
+.Suspend										dd 0x00000000 ; Called when a device wants to go to sleep mode
+.Resume											dd 0x00000000 ; Called to bring the device out of sleep mode
 
 
 ; due to the nature of the Night driver detection model, the driver init code must directly follow the header
