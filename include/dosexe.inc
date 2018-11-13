@@ -17,6 +17,9 @@
 DosSignatureWord           	dw  0x5A4D
 PESignatureWord            	dd  0x50450000
 
+; EXECSTATE Types
+ESEXE                   dw 0x0001   ; Program is an EXE file, if this value isn't given then its a .COM file
+ESOVERLAY               dw 0x0002   ; Program is an overlay
 ; Machine types for PE Windows 9x/NT EXE COFF file header
 
 MACHINE_UNKNOWN			dw 0x0 	
@@ -93,6 +96,19 @@ struc OPTIONALHEADER
     OHSizeOfInitData:       resd 1  ; Size of the initialized data section
     OHSizeOfUninitData:     resd 1  ; Size of the uninitialized data (BSS)
     OHEntryPoint:           resd 1  ; Address of the entry point relative to the image base
-    OHBaseOfCode            resd 1  ; Image base
+    OHBaseOfCode:           resd 1  ; Image base
 endstruc
 
+struc IMAGEDATADICTIONARY
+    VirtualAddress:         resd 1  ; RVA starting address in the file
+    RVASize:                resd 1  ; Size in bytes
+endstruc
+
+struc DOSEXECSTATE
+    esReserved:             resw 1  ; reserved
+    esFlags:                resw 1  ; type flags
+    esProgName:             resd 1  ; points to ASCIIZ string of program name
+    esPSP:                  resw 1  ; PSP segment of the new program
+    esStartAddr:            resd 1  ; Starting CS:IP of the new program
+    esProgSize:             resd 1  ; program size, including PSP
+endstruc
