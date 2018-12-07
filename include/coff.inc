@@ -18,6 +18,15 @@
 I386MAGIC                       dw 0x014C
 I386AIXMAGIC                    dw 0x0175
 
+; COFF Characteristics
+
+IMAGE_FILE_RELOCS_STRIPPED      dw 0x0001
+IMAGE_FILE_EXECUTABLE_IMAGE     dw 0x0002    ; Image only
+IMAGE_FILE_LINE_NUMS_STRIPPED   dw 0x0004
+IMAGE_FILE_LOCAL_SYMS_STRIPPED  dw 0x0008   
+IMAGE_FILE_AGGRESSIVE_WS_TRIM   dw 0x0010
+IMAGE_FILE_LARGE_ADDRESS_AWARE  dw 0x0020
+
 ; COFF File Header Flags
 F_RELFLG                        dw 0x0001    ; Relocation information stripped from the file
 F_EXEC                          dw 0x0002    ; The file is relocatable (no unresolved external references)

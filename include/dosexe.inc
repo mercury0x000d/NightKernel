@@ -1,6 +1,6 @@
 ; Night Kernel
 ; Copyright 1995 - 2018 by mercury0x0d
-; dos.inc is a part of the Night Kernel
+; dosexe.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -43,11 +43,16 @@ MACHINE_RISCV64         dw 0x5064   ; RISC-V 64-bit address space
 MACHINE_RISCV128        dw 0x5128   ; RISC-V 128-bit address space
 MACHINE_SH3             dw 0x1A2    ; Hitachi SH3
 MACHINE_SH3DSP          dw 0x1A3    ; Hitachi Sh3 DSP
-MACHINE_SH4             dw 0x1a6    ; Hitachi SH4
+MACHINE_SH4             dw 0x1A6    ; Hitachi SH4
 MACHINE_SH5             dw 0x1A8    ; Hitachi SH5
 MACHINE_THUMB           dw 0x1C2    ; Thumb
 MACHINE_WCEMIPSV2       dw 0x169    ; MIPS little-endian WCE v2
 
+; PE Characteristics
+
+PENORELOCATIONS         dw 0x0001   ; There are no relocations in the file
+PEEXECUTABLE            dw 0x0002   ; File is an executable image (not an OBJ or LIB)
+PEDLL                   dw 0x2000   ; File is a dynamic link library, not a program
 ; Optional Header Magic Numbers
 
 MAGIC_PE32              db 0x10B    ; Standard executable file
