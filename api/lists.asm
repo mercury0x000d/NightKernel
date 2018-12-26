@@ -547,13 +547,3 @@ LMListSlotFreeTest:
 	mov esp, ebp
 	pop ebp
 ret 4
-
-
-
-; list format:
-; dword		signature
-; dword		total size of list in bytes
-; dword		number of elements total
-; dword		number of elements used
-; dword		size of each element in bytes
-; 			...followed by the actual list data

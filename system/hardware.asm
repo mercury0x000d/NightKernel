@@ -19,6 +19,8 @@
 ; 32-bit function listing:
 ; A20Enable						Enables the A20 line of the processor's address bus using the "Fast A20 enable" method
 ; CPUSpeedDetect				Determines how many iterations of random activities the CPU is capable of in one second
+; DriverLegacyLoad				Scans all drivers in the kernel and runs each legacy driver found
+; PartitionEnumerate			Scans the partition tables of all drives in the drive list and loads their data into the partitions list
 ; PITInit						Init the PIT for our timing purposes
 ; Random						Returns a random number using the XORShift method
 ; Reboot						Performs a warm reboot of the PC
@@ -56,7 +58,7 @@ A20Enable:
 	; it failed, so we have to say so
 	push 4
 	push 0
-	push fastA20Fail$
+	push .fastA20Fail$
 	call Print32
 	call PrintRegs32
 
@@ -65,6 +67,8 @@ A20Enable:
 	mov esp, ebp
 	pop ebp
 ret
+
+.fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
 
 
 
@@ -101,6 +105,86 @@ CPUSpeedDetect:
 	jne .loop1
 
 	mov dword [ebp + 8], ecx
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+DriverLegacyLoad:
+	; Scans all drivers in the kernel and runs each legacy driver found
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+	; start a loop here which will cycle until the driver signature is no longer found
+	mov esi, DriverSpaceStart
+
+	.DriverDiscoveryLoop:
+		; preserve the search address
+		push esi
+
+		; search for the signature of the first driver
+		push kDriverSignature$
+		push dword 16
+		push esi
+		call MemSearchString
+		pop edi
+
+		; test the result
+		cmp edi, 0
+		jne .CheckLegacy
+		
+		; if we get here, we got a zero back... so no driver was found
+		jmp .NextDriverIteration
+
+		.CheckLegacy:
+		; well, ok, we found some random driver... let's see if it can handle this device
+		
+		; get edi pointing to the driver flags
+		add edi, 28
+
+		; see if we have a legacy driver
+		mov eax, [edi]
+		and eax, 10000000000000000000000000000000b
+		cmp eax, 10000000000000000000000000000000b
+		je .DriverIsLegacy
+
+		; if we get here, it's not a legacy driver
+		jmp .NextDriverIteration
+
+		.DriverIsLegacy:
+		; this driver should do the trick!
+		; point edi to the start of the driver's init code
+		add edi, 12
+
+		; run the driver
+		call edi
+
+		.NextDriverIteration:
+		; go back and scan again for another driver
+		pop esi
+		inc esi
+
+		; exit if we're at the end of driver space
+		cmp esi, DriverSpaceEnd
+		je .DriverScanDone
+
+	jmp .DriverDiscoveryLoop
+	.DriverScanDone:
+	; get rid of that extra copy of esi we saved earlier...
+	pop esi
+
+	; push the return value on the stack and exit
+	mov dword [ebp + 16], edi
+
 
 	mov esp, ebp
 	pop ebp
@@ -199,7 +283,3 @@ Reboot:
 	mov esp, ebp
 	pop ebp
 ret
-
-
-
-fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00

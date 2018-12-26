@@ -23,8 +23,9 @@
 ; C01ATASectorWriteLBA28		Writes sectors to disk using LBA28
 ; C01DetectChannelDevices		Checks both of the device spots on the ATA channel specified and saves their data to the drives list
 ; C01DriveIdentify				Returns identifying information about the device specified
+; C01InterruptHandlerPrimary	Interrupt handler for ATA interrupts
+; C01InterruptHandlerSecondary	Interrupt handler for ATA interrupts
 ; C01WaitForReady				Waits for bit 7 of the passed port value to go clear, then returns
-; C01InterruptHandler			Interrupt handler for ATA interrupts
 ; InternalDriveFoundPrint		Prints data about the drive discovered by C01DriveIdentify()
 
 
@@ -34,8 +35,8 @@ bits 32
 
 
 ; defines
-%define kATAChannelPrimary						0x0
-%define kATAChannelSecondary					0x1
+%define kATAChannelPrimary						0x00
+%define kATAChannelSecondary					0x01
 
 %define kATACommandReadPIO						0x20
 %define kATACommandReadPIOExt					0x24
@@ -59,8 +60,8 @@ bits 32
 %define kATACommandCacheFlushExt				0xEA
 %define kATACommandIdentify						0xEC
 
-%define kATADirectionRead						0x0
-%define kATADirectionWrite						0x1
+%define kATADirectionRead						0x00
+%define kATADirectionWrite						0x01
 
 %define kATAErrorNoAddressMark					0x01
 %define kATAErrorTrackZeroNotFound				0x02
@@ -71,28 +72,28 @@ bits 32
 %define kATAErrorUncorrectableData				0x40
 %define kATAErrorBadBlock						0x80
 
-%define kATARegisterData						0x0		; read/write
-%define kATARegisterError						0x1		; read only
-%define kATARegisterFeatures					0x1		; write only
-%define kATARegisterSecCount0					0x2		; read/write
-%define kATARegisterLBA0						0x3		; read/write
-%define kATARegisterLBA1						0x4		; read/write
-%define kATARegisterLBA2						0x5		; read/write
-%define kATARegisterLBA3						0x3		; read/write?
-%define kATARegisterLBA4						0x4		; read/write?
-%define kATARegisterLBA5						0x5		; read/write?
-%define kATARegisterHDDevSel					0x6		; read/write
-%define kATARegisterCommand						0x7		; write only
-%define kATARegisterStatus						0x7		; read only
-%define kATARegisterSecCount1					0x8		; read/write?
-%define kATARegisterControl						0xC		; write only
-%define kATARegisterAltStatus					0xC		; read only
-%define kATARegisterDeviceAddress				0xD		; ?
+%define kATARegisterData						0x00	; read/write
+%define kATARegisterError						0x01	; read only
+%define kATARegisterFeatures					0x01	; write only
+%define kATARegisterSecCount0					0x02	; read/write
+%define kATARegisterLBA0						0x03	; read/write
+%define kATARegisterLBA1						0x04	; read/write
+%define kATARegisterLBA2						0x05	; read/write
+%define kATARegisterLBA3						0x03	; read/write?
+%define kATARegisterLBA4						0x04	; read/write?
+%define kATARegisterLBA5						0x05	; read/write?
+%define kATARegisterHDDevSel					0x06	; read/write
+%define kATARegisterCommand						0x07	; write only
+%define kATARegisterStatus						0x07	; read only
+%define kATARegisterSecCount1					0x08	; read/write?
+%define kATARegisterControl						0x0C	; write only
+%define kATARegisterAltStatus					0x0C	; read only
+%define kATARegisterDeviceAddress				0x0D	; ?
 
-%define	kATAResultOK							0x0
-%define	kATAResultNoDrive						0x1
-%define	kATAResultError							0x2
-%define	kATAResultTimeout						0x3
+%define	kATAResultOK							0x00
+%define	kATAResultNoDrive						0x01
+%define	kATAResultError							0x02
+%define	kATAResultTimeout						0x03
 
 %define kATAStatusError							0x01
 %define kATAStatusIndex							0x02
@@ -107,16 +108,17 @@ bits 32
 
 Class01DriverHeader:
 .signature$										db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
+.driverFlags									dd 00100000000000000000000000000000b
+
+; PCI-based fields specific to this type of driver
 .classMatch										dd 0x00000001
 .subclassMatch									dd 0x00000001
 .progIfMatch									dd 0x0000FFFF
-.driverFlags									dd 0x00000000
-.ReadCodePointer								dd 0x00000000
-.WriteCodePointer								dd 0x00000000
+.ReadFunctionPointer							dd 0x00000000
+.WriteFunctionPointer							dd 0x00000000
 
 
 
-; due to the nature of the Night driver detection model, the driver init code must directly follow the header
 C01Init:
 	; Performs any necessary setup of the driver
 	;
@@ -143,11 +145,11 @@ C01Init:
 	; next we write the driverFlags based on how we're configured
 	; again, since this isn't a configurable driver, we don't have to do anything
 	; too special here, just set bit one to signify it's a block driver
-	mov dword [Class01DriverHeader.driverFlags], 0x00000001
+	;mov dword [Class01DriverHeader.driverFlags], 0x00000001
 
 	; set up our function pointers
-	mov dword [Class01DriverHeader.ReadCodePointer], C01ATASectorReadLBA28PIO
-	mov dword [Class01DriverHeader.WriteCodePointer], C01ATASectorWriteLBA28PIO
+	mov dword [Class01DriverHeader.ReadFunctionPointer], C01ATASectorReadLBA28PIO
+	mov dword [Class01DriverHeader.WriteFunctionPointer], C01ATASectorWriteLBA28PIO
 
 	; commandeer the apropriate interrupt handler addresses
 	push 0x8e
@@ -226,6 +228,9 @@ C01Init:
 	push eax
 
 	call C01DetectChannelDevices
+
+	; detect partitions
+
 
 	; exit with return status
 	mov eax, 0x00000000
@@ -627,7 +632,7 @@ C01DetectChannelDevices:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; dataBlock
+	sub esp, 4									; dataBlock (pointer to 512 byte buffer used by identify function)
 
 	; allocate a sector's worth of RAM
 	; add code here to determine the sector size first, then allocate
@@ -650,7 +655,74 @@ C01DetectChannelDevices:
 	je .SkipDevice0
 
 		; add the device data to the drives list
-		
+		; preserve the drive type (eax) for later
+		push eax
+
+		; get first free slot
+		push dword [tSystem.listDrives]
+		call LMListFindFirstFreeSlot
+		pop eax
+
+		; get the address of that slot into esi
+		push eax
+		push dword [tSystem.listDrives]
+		call LMItemGetAddress
+		pop esi
+
+		; save base port and device number to table
+		xor ecx, ecx
+		mov cx, word [ebp + 8]
+		mov dword [tDriveInfo.ATABasePort], ecx
+		mov dword [tDriveInfo.ATADeviceNumber], 0
+
+		; save device type to table
+		pop eax
+		mov dword [tDriveInfo.deviceFlags], eax
+
+		; fill in read and write addresses
+		cmp eax, 1
+		jne .Device0NotPATA
+			; if we get here, the drive type is PATA, so we set the appropriate values
+			mov dword [tDriveInfo.readSector], C01ATASectorReadLBA28PIO
+			mov dword [tDriveInfo.writeSector], C01ATASectorWriteLBA28PIO
+
+		.Device0NotPATA:
+		cmp eax, 3
+		jne .Device0NotATAPI
+			; if we get here, the drive type is ATAPI, so we set the appropriate values
+			mov dword [tDriveInfo.readSector], C01ATAPISectorReadPIO
+		.Device0NotATAPI:
+
+		; allocate 1 MiB cache for this drive and save the address
+		push 1048576
+		call MemAllocate
+		pop dword [tDriveInfo.cacheAddress]
+
+		; save esi
+		push esi
+
+		; fill in model
+		push 40
+		mov edi, esi
+		add edi, 24
+		push edi
+		mov edi, dword [ebp - 4]
+		add edi, 54
+		push edi
+		call MemCopy
+
+		; restore esi
+		pop esi
+
+		; fill in serial
+		push 20
+		mov edi, esi
+		add edi, 88
+		push edi
+		mov edi, dword [ebp - 4]
+		add edi, 20
+		push edi
+		call MemCopy
 
 		; print what we've found
 		push eax
@@ -676,6 +748,55 @@ C01DetectChannelDevices:
 	je .SkipDevice1
 
 		; add the device data to the drives list
+		; preserve the drive type (eax) for later
+		push eax
+
+		; get first free slot
+		push dword [tSystem.listDrives]
+		call LMListFindFirstFreeSlot
+		pop eax
+
+		; get the address of that slot into esi
+		push eax
+		push dword [tSystem.listDrives]
+		call LMItemGetAddress
+		pop esi
+
+		; save base port and device number to table
+		xor ecx, ecx
+		mov cx, word [ebp + 8]
+		mov dword [tDriveInfo.ATABasePort], ecx
+		mov dword [tDriveInfo.ATADeviceNumber], 0
+
+		; save device type to table
+		pop eax
+		mov dword [tDriveInfo.deviceFlags], eax
+
+		; fill in read and write addresses
+		mov eax, 3
+		cmp eax, 1
+		jnz .Device1NotPATA
+			; if we get here, the drive type is PATA, so we set the appropriate values
+			mov dword [tDriveInfo.readSector], C01ATASectorReadLBA28PIO
+			mov dword [tDriveInfo.writeSector], C01ATASectorWriteLBA28PIO
+
+		.Device1NotPATA:
+		cmp eax, 3
+		jnz .Device1NotATAPI
+			; if we get here, the drive type is ATAPI, so we set the appropriate values
+			mov dword [tDriveInfo.readSector], C01ATAPISectorReadPIO
+		.Device1NotATAPI:
+
+		; allocate 1 MiB cache for this drive and save the address
+		push 1048576
+		call MemAllocate
+		pop dword [tDriveInfo.cacheAddress]
+
+		; fill in model
+		; tDriveInfo.model
+
+		; fill in serial
+		; tDriveInfo.serial
 
 
 		; print what we've found
@@ -921,37 +1042,6 @@ ret 8
 
 
 
-C01WaitForReady:
-	; Waits for bit 7 of the passed port value to go clear, then returns
-	; Note: I should add a timeout value to this code eventually to avoid getting stuck in an infinite loop if
-	; something weird happens with the drive
-	;
-	;  input:
-	;   port number
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	mov edx, [ebp + 8]
-
-	.PortTestLoop:
-		in al, dx
-		and al, 0x80
-		cmp al, 0
-		je .PortTestLoopDone
-	jmp .PortTestLoop
-
-	.PortTestLoopDone:
-
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
 C01InterruptHandlerPrimary:
 	; Interrupt handler for ATA interrupts
 	;
@@ -1005,12 +1095,43 @@ iretd
 
 
 
+C01WaitForReady:
+	; Waits for bit 7 of the passed port value to go clear, then returns
+	; Note: I should add a timeout value to this code eventually to avoid getting stuck in an infinite loop if
+	; something weird happens with the drive
+	;
+	;  input:
+	;   port number
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+	mov edx, [ebp + 8]
+
+	.PortTestLoop:
+		in al, dx
+		and al, 0x80
+		cmp al, 0
+		je .PortTestLoopDone
+	jmp .PortTestLoop
+
+	.PortTestLoopDone:
+
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
 InternalDriveFoundPrint:
 	; Prints data about the drive discovered by C01DriveIdentify()
 	; Note: this function writes into the device info block, effectively destroying its accuracy
 	;
 	;  input:
-	;   buffer address for results of Identify command
+	;   buffer address containing results of Identify command
 	;   ATA channel I/O base port
 	;	device number (0 or 1)
 	;	device type
@@ -1057,8 +1178,10 @@ InternalDriveFoundPrint:
 	; build and print the drive discovered string
 	; push device number
 	push edx
+
 	; push the port number
 	push ebx
+
 	; save everything, trim and push the serial string address, restore everything
 	mov edi, esi
 	add edi, 20
@@ -1068,6 +1191,7 @@ InternalDriveFoundPrint:
 	push edi
 	call StringTrimRight
 	popa
+
 	; save everything, trim and push the model string, restore everything
 	mov edi, esi
 	add edi, 54
@@ -1077,8 +1201,10 @@ InternalDriveFoundPrint:
 	push edi
 	call StringTrimRight
 	popa
+
 	; build the string
 	push kPrintText$
+
 	; select which formatting string to use based on the type of drive this is
 	cmp ecx, 3
 	jne .SkipATAPIString
@@ -1088,6 +1214,7 @@ InternalDriveFoundPrint:
 	push .foundATAFormat$
 	.ResumeStringBuild:
 	call StringBuild
+
 	; print the string
 	push kPrintText$
 	call PrintIfConfigBits32
@@ -1098,13 +1225,3 @@ InternalDriveFoundPrint:
 ret 16
 .foundATAFormat$								db 'Found ATA device ^s (^s) at port 0x^p4^h:^p1^d', 0x00
 .foundATAPIFormat$								db 'Found ATAPI device ^s (^s) at port 0x^p4^h:^p1^d', 0x00
-
-
-
-; drive info struct
-tDriveData:
-.driveType										db 0x00
-.ATAIOBasePort									dw 0x0000
-.ATADeviceNumber								db 0x00
-.driveModel$									times 64 db 0x00
-.driveSerial$									times 32 db 0x00

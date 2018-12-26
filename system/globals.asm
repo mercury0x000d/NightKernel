@@ -16,20 +16,25 @@
 
 
 
-; vars 'n' such
+; vars, konstants, 'n' such
 kTrue											dd 0x11111111
 kFalse											dd 0x00000000
 kKernelStack									dd 8192
-kHexDigits										db '0123456789ABCDEF'
 kPrintText$										times 256 db 0x00
+kDriverSignature$								db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
 
 
 
-; structures
+; arrays
+kKeyTable:										db '  1234567890-=  qwertyuiop[]  asdfghjkl; ` \zxcvbnm,0/ *               789-456+1230.  '
+
+
+
+; strucTures
 tSystem:
-	.versionMajor								db 0x00
-	.versionMinor								db 0x13
 	.copyright$									db 'Night Kernel, copyright 1995 - 2018', 0x00
+	.versionMajor								db 0x00
+	.versionMinor								db 0x14
 	.memoryInstalledBytes						dd 0x00000000
 	.memoryInitialAvailableBytes				dd 0x00000000
 	.memoryCurrentAvailableBytes				dd 0x00000000
@@ -47,8 +52,10 @@ tSystem:
 	.delayValue									dd 0x00000000
 	.lastError									dd 0x00000000
 	.keyboardType								dw 0x0000
-	.PCITableAddress							dd 0x00000000				; will be zero if no PCI support
+	.listPCIDevices								dd 0x00000000				; will be zero if no PCI support
 	.PCIDeviceCount								dd 0x00000000
+	.listDrives									dd 0x00000000
+	.listPartitions								dd 0x00000000
 	.multicoreAvailable							db 0x00
 	.CPUIDVendor$								times 16 db 0x00
 	.CPUIDBrand$								times 64 db 0x00
@@ -73,19 +80,37 @@ tSystem:
 	.mousePacketByte2							db 0x00
 	.mousePacketByte3							db 0x00
 	.mousePacketByte4							db 0x00
-	.driveListAddress							dd 0x00000000
 	.configBitsHint$							db 'ConfigBits'
 	.configBits									dd 00000000000000000000000000000111b
 
+; tDriveInfo, for the drives list (120 bytes)
+%define tDriveInfo.ATABasePort					(esi + 00)
+%define tDriveInfo.ATADeviceNumber				(esi + 04)
+%define tDriveInfo.deviceFlags					(esi + 08)
+%define tDriveInfo.cacheAddress					(esi + 12)
+%define tDriveInfo.readSector					(esi + 16)
+%define tDriveInfo.writeSector					(esi + 20)
+%define tDriveInfo.model						(esi + 24)		; model is 64 bytes
+%define tDriveInfo.serial						(esi + 88)		; serial is 32 bytes
+
+; tPartitionInfo, for the partitions list (80 bytes)
+%define tPartitionInfo.ATAbasePort				(esi + 00)
+%define tPartitionInfo.ATAdevice				(esi + 04)
+%define tPartitionInfo.attributes				(esi + 08)
+%define tPartitionInfo.startingCHS				(esi + 12)
+%define tPartitionInfo.endingCHS				(esi + 16)
+%define tPartitionInfo.systemID					(esi + 20)
+%define tPartitionInfo.startingLBA				(esi + 24)
+%define tPartitionInfo.sectorCount				(esi + 28)
+%define tPartitionInfo.driveListNumber			(esi + 32)
+%define tPartitionInfo.readSector				(esi + 36)
+%define tPartitionInfo.writeSector				(esi + 40)
+%define tPartitionInfo.fileLoad					(esi + 44)
+%define tPartitionInfo.fileSave					(esi + 48)
 
 
-; arrays
-kKeyTable:										db '  1234567890-=  qwertyuiop[]  asdfghjkl; ` \zxcvbnm,0/ *               789-456+1230.  '
-tEvent:
 
-
-
-; random kernel infos follow...
+; random infos follow...
 
 
 
@@ -94,7 +119,7 @@ tEvent:
 ; 0x00000000		0x000003FF		1 KiB						interrupt vector table
 ; 0x00000400		0x000004FF		256 bytes					BIOS data area (remapped here from CMOS)
 ; 0x00000500		0x000005FF		256 bytes					temporary stack
-; 0x00000600		0x00007BFF		30207 bytes (29.49 KiB)		kernel space (kernel is loaded here by freeDOS bootloader)
+; 0x00000600		0x00007BFF		30207 bytes (29.49 KiB)		kernel space (kernel is loaded here by FreeDOS bootloader)
 ; 0x00007C00		0x00007DFF		512 bytes					bootloader (copied here by BIOS, can be overwritten)
 ; 0x00007E00		0x0009FBFF		622080 bytes (607.50 KiB)	available, unused
 ; 0x0009FC00		0x0009FFFF		1 KiB						extended BIOS data area
@@ -106,7 +131,7 @@ tEvent:
 
 
 
-; Result Codes for API routines
+; Result Codes for API routines (needs addressed)
 ; 0xF000			Success, no error
 ; 0xF001			Value specified is too low
 ; 0xF002			Value specified is too high
@@ -116,7 +141,7 @@ tEvent:
 
 
 
-; Event Codes
+; Event Codes (needs addressed)
 ; Note - Event codes 80 - FF are reserved for software and interprocess communication
 ; 00				Null (nothing is waiting in the queue)
 ; 01				Key down

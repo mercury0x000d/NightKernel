@@ -390,7 +390,7 @@ ret
 	call Print32
 
 	; print the kernel string
-	mov byte [cursorY], 3
+	mov byte [cursorY], 5
 	push tSystem.copyright$
 	call Print32
 
@@ -402,17 +402,56 @@ ret
 	mov al, byte [tSystem.versionMajor]
 	push eax
 	
-
 	push kPrintText$
 	push .versionFormat$
 	call StringBuild
 
 	; print the version string
+	inc byte [cursorY]
 	push kPrintText$
 	call Print32
 
 	; print the CPU string
+	inc byte [cursorY]
 	push tSystem.CPUIDBrand$
+	call Print32
+
+	; build the drive list string
+	mov eax, [tSystem.listDrives]
+	push eax
+	push kPrintText$
+	push .listDriveFormat$
+	call StringBuild
+
+	; print the drive list string
+	inc byte [cursorY]
+	push kPrintText$
+	call Print32
+
+
+	; build the partition list string
+	mov eax, [tSystem.listPartitions]
+	push eax
+	push kPrintText$
+	push .listPartitionFormat$
+	call StringBuild
+
+	; print the drive list string
+	inc byte [cursorY]
+	push kPrintText$
+	call Print32
+
+
+	; build the PCI devices List string
+	mov eax, [tSystem.listPCIDevices]
+	push eax
+	push kPrintText$
+	push .listPCIDevicesFormat$
+	call StringBuild
+
+	; print the drive list string
+	inc byte [cursorY]
+	push kPrintText$
 	call Print32
 
 	; wait for a keypress before leaving
@@ -425,6 +464,9 @@ ret
 ret
 .systemInfoText$								db 'System Information', 0x00
 .versionFormat$									db 'Kernel version ^p2^h.^h', 0x00
+.listPCIDevicesFormat$							db 'PCI Devices List          0x^p8^h', 0x00
+.listDriveFormat$								db 'Drive List                0x^p8^h', 0x00
+.listPartitionFormat$							db 'Partition List            0x^p8^h', 0x00
 
 
 
@@ -553,7 +595,7 @@ ret
 	mov eax, dword [.currentDevice]
 	dec eax
 	push eax
-	push dword [tSystem.PCITableAddress]
+	push dword [tSystem.listPCIDevices]
 	call LMItemGetAddress
 	pop eax
 
@@ -618,7 +660,7 @@ ret
 
 
 DebugVBoxLogWrite:
-	; Writes a string specidfied to the VirtualBOX guest log
+	; Writes a string specidfied to the VirtualBox guest log
 	;
 	;  input:
 	;   string address

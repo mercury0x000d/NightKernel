@@ -1834,3 +1834,7 @@ StringWordGet:
 	mov esp, ebp
 	pop ebp
 ret 16
+
+
+
+kHexDigits										db '0123456789ABCDEF'

@@ -169,7 +169,7 @@ PCIDetect:
 
 	; write a value to the port
 	mov dx, kPCIAddressPort
-	mov eax, 0x19801988
+	mov eax, 0x20150000
 	out dx, eax
 
 	; clear eax for sanity and to give the previous write time to "settle in"
@@ -179,7 +179,7 @@ PCIDetect:
 	in eax, dx
 
 	; now compare to see what we got
-	cmp eax, 0x19801988
+	cmp eax, 0x20150000
 	je .ItMatched
 	mov ebx, dword [kFalse]
 	jmp .AllDone
@@ -212,14 +212,14 @@ PCIDriverSearch:
 	mov ebp, esp
 
 	; start a loop here which will cycle until the driver signature is no longer found
-	mov esi, StartOfDriverSpace
+	mov esi, DriverSpaceStart
 
 	.DriverDiscoveryLoop:
-		; preserve the seearch address
+		; preserve the search address
 		push esi
 
 		; search for the signature of the first driver
-		push .driverSignature$
+		push kDriverSignature$
 		push dword 16
 		push esi
 		call MemSearchString
@@ -227,16 +227,32 @@ PCIDriverSearch:
 
 		; test the result
 		cmp edi, 0
-		jne .CheckDeviceSupport
-		
+		jne .CheckPCI
+
 		; if we get here, we got a zero back... so no driver was found
-		jmp .DriverScanDone
+		jmp .NextIteration
+
+
+		.CheckPCI:
+		; sweet, we gots us a driver address! I wonder if it's a PCI driver...
+		; modify edi to point to the driver flags
+		add edi, 16
+
+		; read the flags to see if we have a PCI driver
+		mov ebx, [edi]
+
+		and ebx, 00100000000000000000000000000000b
+		cmp ebx, 00100000000000000000000000000000b
+		je .CheckDeviceSupport
+
+		; if we get here, it's not a PCI driver. back to the drawing board!
+		jmp .NextIteration
 
 		.CheckDeviceSupport:
-		; well, ok, we found some random driver... let's see if it can handle this device
-		
+		; well, ok, we have a PCI driver... let's see if it can handle this device!
+
 		; get edi pointing to the start of the driver header values
-		add edi, 16
+		add edi, 4
 
 		; clear our "flag" register for the following tests
 		mov ebx, 0x00000000
@@ -277,13 +293,18 @@ PCIDriverSearch:
 		.DriverIsAppropriate:
 		; this driver should do the trick!
 		; point edi to the start of the driver's init code
-		add edi, 16
+		add edi, 12
 		jmp .DriverScanDone
 
 		.NextIteration:
 		; go back and scan again for another driver
 		pop esi
 		inc esi
+
+		; exit if we're at the end of driver space
+		cmp esi, DriverSpaceEnd
+		je .DriverScanDone
+
 	jmp .DriverDiscoveryLoop
 	.DriverScanDone:
 	; get rid of that extra copy of esi we saved earlier...
@@ -295,7 +316,6 @@ PCIDriverSearch:
 	mov esp, ebp
 	pop ebp
 ret 8
-.driverSignature$								db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
 
 
 
@@ -456,10 +476,10 @@ PCIInitBus:
 	push 268
 	push dword [tSystem.PCIDeviceCount]
 	call LMListNew
-	pop dword [tSystem.PCITableAddress]
+	pop dword [tSystem.listPCIDevices]
 
 	; check to make sure we didn't get a null address
-	cmp dword [tSystem.PCITableAddress], 0
+	cmp dword [tSystem.listPCIDevices], 0
 	jne .AddressValid
 	mov eax, 0xDEAD0100
 	jmp $
@@ -492,7 +512,7 @@ PCIInitBus:
 
 		; set up the target address
 		push dword [ebp - 4]
-		push dword [tSystem.PCITableAddress]
+		push dword [tSystem.listPCIDevices]
 		call LMItemGetAddress
 		pop esi
 
@@ -586,7 +606,7 @@ PCILiveRead:
 	; we start by building a value out of the bus, device, function and register values provided
 	mov eax, 0x00000000							; clear the destination
 	mov ebx, [ebp + 8]							; load the PCI bus provided
-	and ebx, 0x000000FF							; PCI registers are 8 bits, so make sure it's in range
+	and ebx, 0x000000FF							; PCI busses are 8 bits, so make sure it's in range
 	or eax, ebx									; copy the bits into our destination
 	shl eax, 5									; shift left 5 bits to get ready for the next section
 
@@ -701,7 +721,7 @@ PCILoadDrivers:
 	sub esp, 4									; PCIProgIf
 
 	; first get the number of elements in the PCI list
-	push dword [tSystem.PCITableAddress]
+	push dword [tSystem.listPCIDevices]
 	call LMListGetElementCount
 	pop ecx
 
@@ -713,7 +733,7 @@ PCILoadDrivers:
 
 		; get the address of this PCI function from the list
 		push ecx
-		push dword [tSystem.PCITableAddress]
+		push dword [tSystem.listPCIDevices]
 		call LMItemGetAddress
 		pop esi
 
@@ -1003,7 +1023,7 @@ PCIReadDWord:
 	mov ebp, esp
 
 	; scan the list for the proper device
-	mov ecx, dword [tSystem.PCITableAddress]
+	mov ecx, dword [tSystem.listPCIDevices]
 	add ecx, 20
 
 	.RegisterSearchLoop:

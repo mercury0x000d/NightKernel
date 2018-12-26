@@ -107,7 +107,6 @@ call PrintIfConfigBits16
 lgdt [GDTStart]
 
 
-
 ; enter protected mode. YAY!
 push progressText05$
 call PrintIfConfigBits16
@@ -149,7 +148,6 @@ add eax, ebx
 mov esp, eax
 ; push a null to stop any traces which may attempt to analyze the stack later
 push 0x00000000
-
 
 
 ; set up our interrupt handlers and IDT
@@ -196,11 +194,17 @@ call KeyboardInit
 ; allocate the system lists
 push progressText0D$
 call PrintIfConfigBits32
-; the drives list will be 64 entries of 1024 bytes each
-push 1024
-push 64
+; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element)
+push 120
+push 256
 call LMListNew
-pop dword [tSystem.driveListAddress]
+pop dword [tSystem.listDrives]
+
+; the partitions list will be 256 entries of 76 bytes each (the size of a single tPartitionInfo element)
+push 76
+push 256
+call LMListNew
+pop dword [tSystem.listPartitions]
 
 
 
@@ -236,6 +240,11 @@ push progressText10$
 call PrintIfConfigBits32
 call PCILoadDrivers
 
+; load drivers for legacy devices
+call DriverLegacyLoad
+
+; enumerate partitions
+call PartitionEnumerate
 
 
 
@@ -245,25 +254,6 @@ call PCILoadDrivers
 ; PLEASE ENJOY YOUR STAY
 
 ; remaining for reentrancy: StringBuild()
-
-
-
-
-
-;; FAT testing
-;push 0x200000
-;push 1
-;push 0
-;push 0
-;push 0x01F0
-;call C01ATASectorReadLBA28PIO
-;
-;push 32
-;push 0x200000
-;call PrintRAM32
-;
-;jmp $
-
 
 
 
@@ -560,6 +550,7 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 
 
 ; includes for system routines
+%include "system/globals.asm"
 %include "api/misc.asm"
 %include "api/lists.asm"
 %include "api/strings.asm"
@@ -568,10 +559,10 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 %include "system/cmos.asm"
 %include "system/debug.asm"
 %include "system/gdt.asm"
-%include "system/globals.asm"
 %include "system/hardware.asm"
 %include "system/interrupts.asm"
 %include "system/memory.asm"
+%include "system/partitions.asm"
 %include "system/pci.asm"
 %include "system/pic.asm"
 %include "system/power.asm"
@@ -579,10 +570,7 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 
 
 
-StartOfDriverSpace:
-
-
-
 ; includes for drivers
+DriverSpaceStart:
 %include "drivers/ATA Controller.asm"
-
+DriverSpaceEnd:
