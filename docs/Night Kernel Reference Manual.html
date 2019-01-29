@@ -11,8 +11,8 @@
 	</style>
 
 	<body>
-		<p>
-			<h1>Night Kernel Reference Manual</h1>
+		<h1 align="center">Night Kernel Reference Manual</h1>
+		<p align="center">
 			<i>Internal details and technical notes.</i><br>
 			<br>
 			<br>
@@ -21,8 +21,8 @@
 			<br>
 		</p>
 
+		<h3>Contents</h3>
 		<p>
-			<h3>Contents</h3>
 			<a href="#About">Section 0 - About the Night Kernel</a><br>
 			<a href="#Building">Section 1 - Building and Running the Kernel</a><br>
 			<a href="#Debug">Section 2 - The Kernel Debug Menu</a><br>
@@ -38,13 +38,13 @@
 			<br>
 		</p>
 
+		<h2><a name="About">Section 0 - About the Night Kernel</a></h2>
 		<p>
-			<h2><a name="About">Section 0 - About the Night Kernel</a></h2>
 			The Night kernel has been designed from the ground up to be a full 32-bit drop-in replacement for the original 16-bit kernel of the FreeDOS operating system, and is intended to be loaded by the existing FreeDOS bootloader. Night is built with handcrafted assembly code using the NASM assembler, employs linear memory addressing, and operates in Protected Mode on the Intel x86 architecture. The completed kernel will allow users to enjoy modern abilities such as task switching between applications, protected memory, and increased overall performance in a DOS environment while maintaining full compatibility with their existing DOS applications.<br>
 			<br>
 			Currently, the Night Kernel is a work in progress; most of the code written to this point is providing internal functionality, and as such the kernel is not yet suitable for everyday use. Night will not, at present, run user applications.<br>
 			<br>
-			The <i>Night Kernel Reference Manual</i> is intended to reflect the current design state of the Night Kernel and is updated alongside each release as necessary to include details about the inner workings of the kernel. The information herein may be confidently adhered to and may be trusted above any other possibly conflicting sources. Only the current in-use code of the kernel itself should be considered more authoritative.<br>
+			The <i>Night Kernel Reference Manual</i> is intended to reflect the current design state of the Night Kernel and is updated alongside each release as necessary to include details about the inner workings of the kernel. The information herein may be confidently adhered to and trusted above any other, possibly conflicting, sources. Only the current in-use code of the kernel itself could be considered more authoritative.<br>
 			<br>
 			<br>
 			<br>
@@ -52,8 +52,8 @@
 			<br>
 		</p>
 
+		<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 		<p>
-			<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt the directions to whatever other compatible environment you like. Also, there are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch without any additional modules.<br>
 			<br>
 			<br>
@@ -106,9 +106,9 @@
 			<br>
 		</p>
 
+		<h2><a name="Debug">Section 2 - The Kernel Debug Menu</a></h2>
 		<p>
-			<h2><a name="Debug">Section 2 - The Kernel Debug Menu</a></h2>
-			After booting into the kernel, you will be presented with the Kernel Debug Menu. In the completed kernel, this menu will only be accessible after being enabled via ConfigBits, but as the kernel currently does not run applications, it makes sense to have this menu enabled by default.<br>
+			After booting into the kernel the Kernel Debug Menu will appear. In the completed kernel this menu will only be accessible after being enabled via ConfigBits, but as the kernel currently does not run applications, it makes sense to have this menu display by default.<br>
 			<br>
 			The Debug Menu displays the current date and time as well as the number of ticks and seconds since boot, an indication that the kernel's internal timer tick interrput is functioning normally.<br>
 			The menu also provides the following options:<br>
@@ -136,8 +136,8 @@
 			<br>
 		</p>
 
+		<h2><a name="Drivers">Section 3 - The Night Kernel Driver Model</a></h2>
 		<p>
-			<h2><a name="Drivers">Section 3 - The Night Kernel Driver Model</a></h2>
 			<h3>Driver Structure</h3>
 			Every Night driver begins with a driver header, laid out as follows:<br>
 			<br>
@@ -281,8 +281,8 @@
 			<br>
 		</p>
 
+		<h2><a name="Config">Section 4 - Setting Options with ConfigBits</a></h2>
 		<p>
-			<h2><a name="Config">Section 4 - Setting Options with ConfigBits</a></h2>
 			The Night Kernel offers configurable options which can be selected by altering certain bits in a specific value located within the kernel itself. Currently, the sole method of changing these options is to use a hex editor to locate the string <i>ConfigBits</i> in the kernel binary and changing the 32-bit value immediately following it. This allows options in the kernel to be changed without the need to recompile the kernel entirely. A utility will be created at later date which can automate selecting these options. At this point in time, the following options are defined:<br>
 			<br>
 			<code>
@@ -322,8 +322,8 @@
 			<br>
 		</p>
 
+		<h2><a name="Lists">Section 5 - The List Manager</a></h2>
 		<p>
-			<h2><a name="Lists">Section 5 - The List Manager</a></h2>
 			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A list, in this context, is simply a series of blocks of data stored back-to-back preceeded by a header containing a handful of 32-bit values which describe aspects of the list.<br>
 			<br>
 			Lists are structured as follows:<br>
@@ -370,8 +370,8 @@
 			<br>
 		</p>
 
+		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
-			<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 			12/26/2018, 0.14 Update - File system driver subsystem<br>
 			&emsp;New<br>
 			&emsp;&emsp;- Kernel: Added <code>DriverLegacyLoad()</code> to hardware.asm<br>
@@ -688,8 +688,9 @@
 			<br>
 			<br>
 		</p>
+
+		<h2><a name="License">Appendix 1 - GNU General Public License</a></h2>
 		<p>
-			<h2><a name="License">Appendix 1 - GNU General Public License</a></h2>
 			The Night Kernel is free software (in both senses of the word) and is released under the terms of the GPL. The complete text of that license follows.<br>
 			<br>
 			<br>
@@ -916,5 +917,6 @@
 			<br>
 			END OF TERMS AND CONDITIONS<br>
 		</p>
+
 	</body>
 </html>
