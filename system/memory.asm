@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
+; Copyright 1995 - 2019 by mercury0x0d
 ; memory.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -165,6 +165,11 @@ MemoryInit:
 		add dword [tSystem.memoryInstalledBytes], ecx
 
 		; test the output to see what we've just found
+		; Type 1 - Usable RAM
+		; Type 2 - Reserved, unusable
+		; Type 3 - ACPI reclaimable memory
+		; Type 4 - ACPI NVS memory
+		; Type 5 - Area containing bad memory
 		mov ecx, dword [bp - 48]				; attributes
 		cmp ecx, 0x01
 		jne .SkipCheckBlock
@@ -188,6 +193,8 @@ MemoryInit:
 
 	.Done:
 
+	; add code here to set up space tracking
+
 	mov sp, bp
 	pop bp
 ret
@@ -208,9 +215,9 @@ MemAllocate:
 	;  output:
 	;   address of requested block, or zero if call fails
 
-	; This routine temporarily uses a "dummy" allocation scheme; it simply allocates the amount of RAM requested beginning
-	; at the 2 MB mark and increasing upward with no error checking whatsoever. This will allow basic allocate calls to
-	; function for development purposes until the full paged memory manager is completed.
+	; This routine temporarily uses a "dummy" allocation scheme; it simply allocates the amount of RAM requested beginning at the start of
+	; the largest block available according to the BIOS memory map and increases upward with no error checking whatsoever. This will allow
+	; basic allocate calls to function for development purposes until the full physical memory manager is completed.
 
 	push ebp
 	mov ebp, esp
@@ -230,6 +237,9 @@ MemAllocate:
 	mov dword [ebp + 8], eax
 	add eax, ecx
 	mov [.nextAllocation], eax
+
+	; add code here to mark space tracking with what we just allocated
+
 
 	mov esp, ebp
 	pop ebp

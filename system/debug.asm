@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
+; Copyright 1995 - 2019 by mercury0x0d
 ; debug.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -42,11 +42,22 @@ DebugMenu:
 	cmp byte [.flag], 1
 	je .DrawMenu
 
-		push dword 36								; size of each element
-		push dword 256								; number of elements
-		call LMListNew
-		pop edx
-		mov dword [PCITable.PCIClassTable], edx
+		; if we get here, this hasn't been set up yet... so let's do so!
+
+		; the list will be 256 entries of 36 bytes each
+		; 256 * 36 + 16 = 9232
+		; allocate memory for the list
+		push 9232
+		call MemAllocate
+		pop edi
+		mov [PCITable.PCIClassTable], edi
+
+		; set up the list header
+		push 36
+		push 256
+		push edi
+		call LMListInit
+
 
 		; write all the strings to the list area
 		push dword 20
@@ -482,7 +493,7 @@ ret
 	cmp dword [.currentDevice], 0
 	jne .PrintSpecificDevice
 	
-		; if we get here, the counter is 0 so we print all devices
+		; if we get here, the index is 0 so we print all devices
 	
 		; build and print the device count string
 		push dword [tSystem.PCIDeviceCount]

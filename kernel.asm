@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
+; Copyright 1995 - 2019 by mercury0x0d
 ; Kernel.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -194,17 +194,35 @@ call KeyboardInit
 ; allocate the system lists
 push progressText0D$
 call PrintIfConfigBits32
-; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element)
+
+; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element) plus header
+; 256 * 120 + 16 = 30736
+; allocate memory for the list
+push 30736
+call MemAllocate
+pop edi
+mov [tSystem.listDrives], edi
+
+; set up the list header
 push 120
 push 256
-call LMListNew
-pop dword [tSystem.listDrives]
+push edi
+call LMListInit
+
 
 ; the partitions list will be 256 entries of 76 bytes each (the size of a single tPartitionInfo element)
+; 256 * 76 + 16 = 19472
+; allocate memory for the list
+push 19472
+call MemAllocate
+pop edi
+mov [tSystem.listPartitions], edi
+
+; set up the list header
 push 76
 push 256
-call LMListNew
-pop dword [tSystem.listPartitions]
+push edi
+call LMListInit
 
 
 

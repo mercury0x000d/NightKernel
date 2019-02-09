@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
+; Copyright 1995 - 2019 by mercury0x0d
 ; pci.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -470,21 +470,34 @@ PCIInitBus:
 	; see how many PCI functions we have
 	push 0
 	call PCIGetFunctionCount
-	pop dword [tSystem.PCIDeviceCount]
+	pop eax
+	mov [tSystem.PCIDeviceCount], eax
 
 	; create a list with that many entries of 268 bytes each
-	push 268
-	push dword [tSystem.PCIDeviceCount]
-	call LMListNew
-	pop dword [tSystem.listPCIDevices]
+	; functions * 268 + 16 = mem reqeust
+	mov ebx, 268
+	mul ebx
+	add eax, 16
+
+	; allocate memory for the list
+	push eax
+	call MemAllocate
+	pop edi
+	mov [tSystem.listPCIDevices], edi
 
 	; check to make sure we didn't get a null address
-	cmp dword [tSystem.listPCIDevices], 0
+	cmp edi, 0
 	jne .AddressValid
 	mov eax, 0xDEAD0100
 	jmp $
 
 	.AddressValid:
+	; set up the list header
+	push 268
+	push dword [tSystem.PCIDeviceCount]
+	push edi
+	call LMListInit
+	
 	; cycle through all busses and devices on those busses, copying all registers into RAM
 	; clear the values
 	mov dword [ebp - 4], 0
@@ -1024,7 +1037,7 @@ PCIReadDWord:
 
 	; scan the list for the proper device
 	mov ecx, dword [tSystem.listPCIDevices]
-	add ecx, 20
+	add ecx, 16
 
 	.RegisterSearchLoop:
 		; set the check flag for the following tests

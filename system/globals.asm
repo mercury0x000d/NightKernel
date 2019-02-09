@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
+; Copyright 1995 - 2019 by mercury0x0d
 ; globals.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -32,9 +32,9 @@ kKeyTable:										db '  1234567890-=  qwertyuiop[]  asdfghjkl; ` \zxcvbnm,0/ *
 
 ; strucTures
 tSystem:
-	.copyright$									db 'Night Kernel, copyright 1995 - 2018', 0x00
+	.copyright$									db 'Night Kernel, Copyright 1995 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x14
+	.versionMinor								db 0x15
 	.memoryInstalledBytes						dd 0x00000000
 	.memoryInitialAvailableBytes				dd 0x00000000
 	.memoryCurrentAvailableBytes				dd 0x00000000
@@ -52,10 +52,6 @@ tSystem:
 	.delayValue									dd 0x00000000
 	.lastError									dd 0x00000000
 	.keyboardType								dw 0x0000
-	.listPCIDevices								dd 0x00000000				; will be zero if no PCI support
-	.PCIDeviceCount								dd 0x00000000
-	.listDrives									dd 0x00000000
-	.listPartitions								dd 0x00000000
 	.multicoreAvailable							db 0x00
 	.CPUIDVendor$								times 16 db 0x00
 	.CPUIDBrand$								times 64 db 0x00
@@ -82,6 +78,11 @@ tSystem:
 	.mousePacketByte4							db 0x00
 	.configBitsHint$							db 'ConfigBits'
 	.configBits									dd 00000000000000000000000000000111b
+	.listDrives									dd 0x00000000
+	.listMemory									dd 0x00000000
+	.listPartitions								dd 0x00000000
+	.listPCIDevices								dd 0x00000000				; will be zero if no PCI support
+	.PCIDeviceCount								dd 0x00000000
 
 ; tDriveInfo, for the drives list (120 bytes)
 %define tDriveInfo.ATABasePort					(esi + 00)
@@ -92,6 +93,11 @@ tSystem:
 %define tDriveInfo.writeSector					(esi + 20)
 %define tDriveInfo.model						(esi + 24)		; model is 64 bytes
 %define tDriveInfo.serial						(esi + 88)		; serial is 32 bytes
+
+; tMemoryInfo, for the physical memory allocator to track blocks
+%define tMemInfo.address						(esi + 00)
+%define tMemInfo.size							(esi + 04)
+%define tMemInfo.task							(esi + 08)
 
 ; tPartitionInfo, for the partitions list (80 bytes)
 %define tPartitionInfo.ATAbasePort				(esi + 00)
