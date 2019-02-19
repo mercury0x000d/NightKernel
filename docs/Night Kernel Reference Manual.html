@@ -30,28 +30,43 @@
 			<a href="#Drivers">Section 4 - The Night Kernel Driver Model</a><br>
 			<a href="#Config">Section 5 - Setting Options with ConfigBits</a><br>
 			<a href="#Lists">Section 6 - The List Manager</a><br>
-			<a href="#Changelog">Appendix 0 - Version History</a><br>
-			<a href="#License">Appendix 1 - GNU General Public License</a><br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
+			<a href="#APIResultCodes">Appendix 0 - API Result Codes</a><br>
+			<a href="#Changelog">Appendix 1 - Version History</a><br>
+			<a href="#License">Appendix 2 - GNU General Public License</a><br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="About">Section 0 - About the Night Kernel</a></h2>
 		<p>
+			<b>A synopsis of <i>Night</i>:</b><br>
+			<br>
 			The Night kernel has been designed from the ground up to be a full 32-bit drop-in replacement for the original 16-bit kernel of the FreeDOS operating system, and is intended to be loaded by the existing FreeDOS bootloader. Night is built with handcrafted assembly code using the NASM assembler, employs linear memory addressing, and operates in Protected Mode on the Intel x86 architecture. The completed kernel will allow users to enjoy modern abilities such as task switching between applications, protected memory, and increased overall performance in a DOS environment while maintaining full compatibility with their existing DOS applications.<br>
 			<br>
 			Currently, the Night Kernel is a work in progress; most of the code written to this point is providing internal functionality, and as such the kernel is not yet suitable for everyday use. Night will not, at present, run user applications.<br>
 			<br>
+			<br>
+			<br>
+			<b>Days before Night:</b><br>
+			<br>
+			Although the Night project itself began in June of 2015, its roots go back much further. The original idea to build a custom operating system from scratch was inspired in the mid 1990s by the lackluster release of Microsoft's Windows 95. This idea formed the basis of a simple shell featuring character graphics coded in IBM BASICA on a PC XT running an early version of MS-DOS. After a subsequent upgrade to a 80486 machine, the next version of the project began life as a QBASIC application, quickly migrated to Visual BASIC, and soon after became the first to have color graphics, a rudimentary UI and windowing toolkit, and mouse control. As the project continued, it naturally became desirable to employ true multitasking but the problem with that, of course, is that running multiple simultaneous DOS programs at once, reliably, under a BASIC shell would be much too complex to be feasible. In response, the code base was updated to Power BASIC, making possible the incorporation of a virtual machine which would allow applications compiled for it to run concurrently. In short order, the project had its own assembler and BASIC-to-assembly-bytecode converter as well, breathing new life into the project which had by now taken on the name <i>Exelyx</i>. It was evolved to one last form - a DPMI-powered rewrite in Watcom C - before being retired permanently in August of 2016. Though Exelyx is dead, some key sections of code developed during its lifespan have now been adapted, in part, for use in a new and refined platform; one which will rely on no underlying operating system or drivers, but shall supply the facilities to manage every aspect of the user's machine completely on its own.<br>
+			<br>
+			That project is <i>Night.</i><br>
+			<br>
+			<br>
+			<br>
+			<b>About this manual:</b><br>
+			<br>
 			The <i>Night Kernel Reference Manual</i> is intended to reflect the current design state of the Night Kernel and is updated alongside each release as necessary to include details about the inner workings of the kernel. The information herein may be confidently adhered to and trusted above any other, possibly conflicting, sources. Only the current in-use code of the kernel itself could be considered more authoritative.<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 		<p>
@@ -100,18 +115,18 @@
 					<td>Performs all of the above steps: builds Night, mounts the included disk image and copies to it the newly build kernel, then launches the virtual machine.</td>
 				</tr>
 			</table>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="DebugMenu">Section 2 - The Kernel Debug Menu</a></h2>
 		<p>
 			After booting into the kernel the Kernel Debug Menu will appear. In the completed kernel this menu will only be accessible after being enabled via ConfigBits, but as the kernel currently does not run applications, it makes sense to have this menu display by default.<br>
 			<br>
-			The Debug Menu displays the current date and time as well as the number of ticks and seconds since boot, an indication that the kernel's internal timer tick interrput is functioning normally.<br>
+			The Debug Menu displays the current date and time as well as the number of ticks and seconds since boot, an indication that the kernel's internal timer tick interrupt is functioning normally.<br>
 			The menu also provides the following options:<br>
 			<br>
 			<table style="width:100%">
@@ -129,13 +144,17 @@
 					<td>PCI Devices</td>
 					<td>Details the PCI devices detected on the system and allows browsing of the PCI register information for each using the Page Up and Page Down keys.</td>
 				</tr>
+				<tr>
+					<td>Memory Details</td>
+					<td>Provides a dump of the memory list used to track both free and allocated physical RAM.</td>
+				</tr>
 			</table>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="Debugging">Section 3 - Debugging the Night Kernel</a></h2>
 		<p>
@@ -151,7 +170,7 @@
 					<th><i>Description</i></th>
 				</tr>
 				<tr>
-					<td>d</td>
+					<td>d (address)</td>
 					<td>Dump memory at address specified</td>
 				</tr>
 				<tr>
@@ -159,22 +178,22 @@
 					<td>Display registers</td>
 				</tr>
 				<tr>
-					<td>u16</td>
+					<td>u16 (address)</td>
 					<td>Unassemble 16-bit code at address specified</td>
 				</tr>
 				<tr>
-					<td>u32</td>
+					<td>u32 (address)</td>
 					<td>Unassemble 32-bit code at address specified</td>
 				</tr>
 			</table>
 			<br>
 			The VirtualBox debugger has many more features as well. You can type <i>help commands</i> in the debug console for a complete list of commands available or <i>help</i> for a summary of help options.<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="Drivers">Section 4 - The Night Kernel Driver Model</a></h2>
 		<p>
@@ -311,19 +330,19 @@
 				</table>
 			</code>
 			<br>
-			The <code>classMatch</code>, <code>subclassMatch</code>, and <code>progIfMatch</code> fields are all used to match the driver to the device found on the PCI bus. A value of 0xFFFF in any of these fields means that the driver matches all values of that field; all other values are taken literally. For example, for the ATA driver, <code>classMatch</code> is set to 1, <code>subClassMatch</code> is set to 1, and <code>ProgIfMatch</code> is set to 0xFFFF, meaning that this driver can handle all devices with class 01 and subclass 01.<br>
+			The <code>classMatch</code>, <code>subclassMatch</code>, and <code>progIfMatch</code> fields are all used to match the driver to the device found on the PCI bus. A value of 0xFFFF in any of these fields means that the driver matches all values of that field; all other values are taken literally. For example, for the ATA driver, <code>classMatch</code> is set to 1, <code>subClassMatch</code> is set to 1, and <code>ProgIfMatch</code> is set to 0xFFFF, meaning that this driver can handle any devices with Class 1, Subclass 1, and any ProgIf (Program Interface) value at all.<br>
 			<br>
 			The function pointers <code>WriteCodePointer</code> and <code>ReadCodePointer</code> are how the kernel calls the read and write functions of the driver.<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="Config">Section 5 - Setting Options with ConfigBits</a></h2>
 		<p>
-			The Night Kernel offers configurable options which can be selected by altering certain bits in a specific value located within the kernel itself. Currently, the sole method of changing these options is to use a hex editor to locate the string <i>ConfigBits</i> in the kernel binary and changing the 32-bit value immediately following it. This allows options in the kernel to be changed without the need to recompile the kernel entirely. A utility will be created at later date which can automate selecting these options. At this point in time, the following options are defined:<br>
+			The Night Kernel offers configurable options which can be selected by altering certain bits in a specific value located within the kernel itself. Currently, the sole method of changing these options in an already-compiled kernel is to use a hex editor to locate the string <i>ConfigBits</i> in the binary and changing the 32-bit value immediately following it. This allows options in the kernel to be changed without the need to recompile the kernel entirely. A utility will be created at later date which can automate selecting these options. At this point in time, the following options are defined:<br>
 			<br>
 			<code>
 				<table style="width:100%">
@@ -355,16 +374,16 @@
 					</tr>
 				</table>
 			</code>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
 		<h2><a name="Lists">Section 6 - The List Manager</a></h2>
 		<p>
-			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A list, in this context, is simply a series of blocks of data stored back-to-back preceeded by a header containing a handful of 32-bit values which describe aspects of the list.<br>
+			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A list, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceeded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
 			<br>
 			Lists are structured as follows:<br>
 			<br>
@@ -395,7 +414,7 @@
 					</tr>
 					<tr>
 						<td>0x0C</td>
-						<td>sizeList</td>
+						<td>listSize</td>
 						<td>Total size of this list (header and data) in bytes</td>
 					</tr>
 					<tr>
@@ -404,16 +423,84 @@
 					</tr>
 				</table>
 			</code>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
-		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
+		<h2><a name="APIResultCodes">Appendix 0 - API Result Codes</a></h2>
 		<p>
-			2/9/2019, 0.15 Update - File system driver subsystem<br>
+			<table style="width:100%">
+				<col width = 10%>
+				<col width = 90%>
+				<tr>
+					<th><i>Code</i></th>
+					<th><i>Description</i></th>
+				</tr>
+				<tr>
+					<td>0x0000</td>
+					<td>Success, no error</td>
+				</tr>
+				<tr>
+					<td>0xF000</td>
+					<td>Invalid parameter</td>
+				</tr>
+				<tr>
+					<td>0xF001</td>
+					<td>Value specified is too low</td>
+				</tr>
+				<tr>
+					<td>0xF002</td>
+					<td>Value specified is too high</td>
+				</tr>
+				<tr>
+					<td>0xFF00</td>
+					<td>PS2 Controller write command timeout</td>
+				</tr>
+				<tr>
+					<td>0xFF01</td>
+					<td>PS2 Controller write data timeout</td>
+				</tr>
+				<tr>
+					<td>0xFF02</td>
+					<td>PS2 Controller read data timeout</td>
+				</tr>
+			</table>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<h2><a name="Changelog">Appendix 1 - Version History</a></h2>
+		<p>
+			00/00/2019, 0.16 Update - Full physical memory management implementation<br>
+			&emsp;New<br>
+			&emsp;&emsp;- Kernel: Added LMElementDuplicate() and LMElementDelete() to <i>lists.asm</i><br>
+			&emsp;&emsp;- Kernel: Added MemDispose() to <i>memory.asm</i><br>
+			&emsp;&emsp;- Kernel: Added StackTrace() to <i>debug.asm</i> so our BSOD can now dump the actual stack values<br>
+			&emsp;&emsp;- Manual: Added info on the Debug Menu's new <i>Memory Details</i> option<br>
+			&emsp;&emsp;- Manual: Waxed nostalgic on the history of Night's precursor<br>
+			<br>
+			&emsp;Changed<br>
+			&emsp;&emsp;- Kernel: Separated List Manager routines into an external and internal group to minimize duplication of list validity checking<br>
+			&emsp;&emsp;- Kernel: Updated titles of certain List Manager functions for uniformity<br>
+			&emsp;&emsp;- Manual: Minor updates to List Manager section<br>
+			<br>
+			&emsp;Fixed<br>
+			&emsp;&emsp;- Kernel: Further polished List Manager code<br>
+			&emsp;&emsp;- Kernel: Improper memory write in ATA Controller driver<br>
+			&emsp;&emsp;- Kernel: List Manager routines now have proper error testing and handling<br>
+			&emsp;&emsp;- Kernel: MemAllocate() now uses the List Manager to keep a list of blocks allocated<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			2/9/2019, 0.15 Update - Start of refinements for upcoming Memory Manager additions<br>
 			&emsp;Changed<br>
 			&emsp;&emsp;- Kernel: List Manager code overhaul in preparation for upcoming Memory Manager feature additions<br>
 			&emsp;&emsp;- Kernel: Updated copyright dates in all files<br>
@@ -734,14 +821,14 @@
 			&emsp;-Fast A20 enable<br>
 			&emsp;-introduced system info structure<br>
 			&emsp;-Maarten's memory code<br>
-			<br>
-			<br>
-			<br>
-			<br>
-			<br>
 		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
-		<h2><a name="License">Appendix 1 - GNU General Public License</a></h2>
+		<h2><a name="License">Appendix 2 - GNU General Public License</a></h2>
 		<p>
 			The Night Kernel is free software (in both senses of the word) and is released under the terms of the GPL. The complete text of that license follows.<br>
 			<br>

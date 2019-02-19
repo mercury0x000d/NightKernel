@@ -19,6 +19,7 @@
 ; 32-bit function listing:
 ; DebugMenu						Implements the in-kernel debugging menu
 ; DebugVBOXLogWrite				Writes a string specidfied to the VirtualBOX guest log
+; StackTrace					Traces the stack and prints a list of return addresses
 
 
 
@@ -48,8 +49,10 @@ DebugMenu:
 		; 256 * 36 + 16 = 9232
 		; allocate memory for the list
 		push 9232
+		push dword 1
 		call MemAllocate
 		pop edi
+
 		mov [PCITable.PCIClassTable], edi
 
 		; set up the list header
@@ -65,132 +68,154 @@ DebugMenu:
 		push dword 0
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 24
 		push PCITable.PCI01$
 		push dword 1
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 19
 		push PCITable.PCI02$
 		push dword 2
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 19
 		push PCITable.PCI03$
 		push dword 3
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 22
 		push PCITable.PCI04$
 		push dword 4
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 18
 		push PCITable.PCI05$
 		push dword 5
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 14
 		push PCITable.PCI06$
 		push dword 6
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 32
 		push PCITable.PCI07$
 		push dword 7
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 26
 		push PCITable.PCI08$
 		push dword 8
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 13
 		push PCITable.PCI09$
 		push dword 9
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 16
 		push PCITable.PCI0A$
 		push dword 10
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 10
 		push PCITable.PCI0B$
 		push dword 11
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 15
 		push PCITable.PCI0C$
 		push dword 12
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 20
 		push PCITable.PCI0D$
 		push dword 13
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 27
 		push PCITable.PCI0E$
 		push dword 14
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 36
 		push PCITable.PCI0F$
 		push dword 15
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 22
 		push PCITable.PCI10$
 		push dword 16
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 29
 		push PCITable.PCI11$
 		push dword 17
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 23
 		push PCITable.PCI12$
 		push dword 18
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 30
 		push PCITable.PCI13$
 		push dword 19
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 12
 		push PCITable.PCI40$
 		push dword 64
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 
 		push dword 17
 		push PCITable.PCIFF$
 		push dword 255
 		push dword [PCITable.PCIClassTable]
 		call LMItemAddAtSlot
+		pop eax
 		mov byte [.flag], 1
 
 	.DrawMenu:
@@ -328,7 +353,7 @@ DebugMenu:
 		.TestFor3:
 		cmp al, 0x33							; choice 3
 		jne .TestFor4
-		call .Exit
+		call .MemoryDetails
 		jmp .DrawMenu
 
 		.TestFor4:
@@ -377,7 +402,7 @@ ret
 .kDebugMenu$									db 'Kernel Debug Menu', 0x00
 .kDebugText1$									db '1 - System Info', 0x00
 .kDebugText2$									db '2 - PCI Devices', 0x00
-.kDebugText3$									db '3 - ', 0x00
+.kDebugText3$									db '3 - Memory Details', 0x00
 .kDebugText4$									db '4 - ', 0x00
 .kDebugText5$									db '5 - ', 0x00
 .kDebugText6$									db '6 - ', 0x00
@@ -387,6 +412,79 @@ ret
 .kDebugText0$									db '0 - ', 0x00
 .ticksFormat$									db 'Ticks since boot: ^p10^d     Seconds since boot:^d', 0x00
 .dateTimeFormat$								db '^p2^d:^d:^d.^p3^d     ^p2^d/^d/^h^d', 0x00
+
+
+
+.MemoryDetails:
+	; clear the screen first
+	call ScreenClear32
+
+	; print the description of this page and header
+	mov byte [textColor], 7
+	mov byte [backColor], 0
+	push .memoryDetailsText$
+	call Print32
+
+	inc byte [cursorY]
+	mov byte [textColor], 7
+	mov byte [backColor], 0
+	push .memoryDetailsHeader$
+	call Print32
+
+	; set up a loop to step through all elements in the memory list for printing
+	push dword 0
+	push dword [tSystem.listMemory]
+	call LMElementCountGet
+	pop ecx
+	pop edx
+	mov edx, ecx
+
+	.MemoryListDumpLoop:
+
+		; calculate what index we're on
+		mov eax, edx
+		sub eax, ecx
+
+		; save the important stuff for later
+		push ecx
+		push edx
+
+		; get the address of this element
+		push eax
+		push dword [tSystem.listMemory]
+		call LMElementAddressGet
+		pop esi
+		; ignore error code
+		pop ecx
+
+		; print the data
+		push dword [tMemInfo.task]
+		push dword [tMemInfo.size]
+		push dword [tMemInfo.address]
+		push kPrintText$
+		push .memoryDetailsFormat$
+		call StringBuild
+
+		push kPrintText$
+		call Print32
+
+		; restore the important stuff
+		pop edx
+		pop ecx
+
+	loop .MemoryListDumpLoop
+
+	; wait for a keypress before leaving
+	push 0
+	call KeyWait
+	pop eax
+
+	; clear the screen and exit!
+	call ScreenClear32
+ret
+.memoryDetailsText$								db 'Memory Details', 0x00
+.memoryDetailsHeader$							db ' Address        Size           Task (0 = unallocated, 1 = kernel)', 0x00
+.memoryDetailsFormat$							db '^p8 0x^h     0x^h^p2     0x^h', 0x00
 
 
 
@@ -440,6 +538,19 @@ ret
 	call Print32
 
 
+	; build the memory list string
+	mov eax, [tSystem.listMemory]
+	push eax
+	push kPrintText$
+	push .listMemoryFormat$
+	call StringBuild
+
+	; print the memory list string
+	inc byte [cursorY]
+	push kPrintText$
+	call Print32
+
+
 	; build the partition list string
 	mov eax, [tSystem.listPartitions]
 	push eax
@@ -475,9 +586,10 @@ ret
 ret
 .systemInfoText$								db 'System Information', 0x00
 .versionFormat$									db 'Kernel version ^p2^h.^h', 0x00
-.listPCIDevicesFormat$							db 'PCI Devices List          0x^p8^h', 0x00
 .listDriveFormat$								db 'Drive List                0x^p8^h', 0x00
 .listPartitionFormat$							db 'Partition List            0x^p8^h', 0x00
+.listPCIDevicesFormat$							db 'PCI Devices List          0x^p8^h', 0x00
+.listMemoryFormat$								db 'Memory List               0x^p8^h', 0x00
 
 
 
@@ -542,8 +654,13 @@ ret
 			mov al, byte [PCIDeviceInfo.PCIClass]
 			push eax
 			push dword [PCITable.PCIClassTable]
-			call LMItemGetAddress
-			; no need to pop the return value off the stack here from the above call since it needs to be there anyway
+			call LMElementAddressGet
+			pop edx
+			; ignore error code
+			pop ecx
+
+			; save the address for later
+			push edx
 
 			; build the rest of the PCI data into line 1 for this device
 			mov eax, 0x00000000
@@ -607,8 +724,11 @@ ret
 	dec eax
 	push eax
 	push dword [tSystem.listPCIDevices]
-	call LMItemGetAddress
+	call LMElementAddressGet
 	pop eax
+	; ignore error code
+	pop ecx
+
 
 	; adjust the address to skip the pci bus/device/function data
 	add eax, 12
@@ -668,56 +788,6 @@ ret
 .PCIFunction									dd 0x00000000
 .currentDevice									dd 0x00000000
 
-
-
-DebugVBoxLogWrite:
-	; Writes a string specidfied to the VirtualBox guest log
-	;
-	;  input:
-	;   string address
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	; get the address of the string
-	mov esi, [ebp + 8]
-	
-	; get the string's length
-	push esi
-	call StringLength
-	pop ecx
-
-	; save the length for later
-	mov ebx, ecx
-	
-	; write to the log
-	mov dx, 0x0504
-	rep outsb
-
-	; VirtualBox seems to buffer all output to the log and only flush on every 512th byte, as long as it's not null
-	; we allow for this behaviour here
-	mov ecx, 511
-	sub ecx, ebx
-	.hoop:
-		mov dx, 0x504
-		mov al, 0
-		out dx, al
-	loop .hoop
-
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
-kDebugger$										db 'What a horrible Night to have a bug.', 0x00
-kSadThing$										db 0x27, 'Tis a sad thing that your process has ended here!', 0x00
-
-
-
 ; struct to hold all data about a single PCI device for the system menu
 PCIDeviceInfo:
 .PCIVendorID									dw 0x0000
@@ -773,3 +843,95 @@ PCITable:
 .PCI13$											db 'Non-Essential Instrumentation', 0x00
 .PCI40$											db 'Coprocessor', 0x00
 .PCIFF$											db 'Unassigned class', 0x00
+kDebugger$										db 'What a horrible Night to have a bug.', 0x00
+kSadThing$										db 0x27, 'Tis a sad thing that your process has ended here!', 0x00
+
+
+
+DebugVBoxLogWrite:
+	; Writes a string specidfied to the VirtualBox guest log
+	;
+	;  input:
+	;   string address
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+	; get the address of the string
+	mov esi, [ebp + 8]
+	
+	; get the string's length
+	push esi
+	call StringLength
+	pop ecx
+
+	; save the length for later
+	mov ebx, ecx
+	
+	; write to the log
+	mov dx, 0x0504
+	rep outsb
+
+	; VirtualBox seems to buffer all output to the log and only flush on every 512th byte, as long as it's not null
+	; we allow for this behaviour here
+	mov ecx, 511
+	sub ecx, ebx
+	.hoop:
+		mov dx, 0x504
+		mov al, 0
+		out dx, al
+	loop .hoop
+
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+StackDump:
+	; Traces the stack and prints a list of return addresses
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+	; set the starting point of our trace
+	mov ebx, [esp]
+
+	.TraceLoop:
+		; see if we're done
+		cmp ebx, 0
+		je .done
+
+		; load the previous stack frame's eip into edx
+		mov edx, [ebx + 4]							
+
+		; load the previous stack frame's ebp into ebx
+		mov ebx, [ebx + 0]							
+		
+		; print the address we found
+		pusha
+		push edx
+		push kPrintText$
+		push .traceFormat$
+		call StringBuild
+
+		; print the string we just built
+		push kPrintText$
+		call Print32
+		popa
+
+	jmp	.TraceLoop
+
+	.done:
+	leave
+ret
+.traceFormat$									db ' ^p8^h', 0x00

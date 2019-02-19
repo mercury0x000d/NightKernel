@@ -17,7 +17,7 @@
 
 
 ; vars, konstants, 'n' such
-kTrue											dd 0x11111111
+kTrue											dd 0x00000001
 kFalse											dd 0x00000000
 kKernelStack									dd 8192
 kPrintText$										times 256 db 0x00
@@ -34,11 +34,9 @@ kKeyTable:										db '  1234567890-=  qwertyuiop[]  asdfghjkl; ` \zxcvbnm,0/ *
 tSystem:
 	.copyright$									db 'Night Kernel, Copyright 1995 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x15
+	.versionMinor								db 0x16
 	.memoryInstalledBytes						dd 0x00000000
 	.memoryInitialAvailableBytes				dd 0x00000000
-	.memoryCurrentAvailableBytes				dd 0x00000000
-	.memoryBlockAddress							dd 0x00000000
 	.hours										db 0x00
 	.minutes									db 0x00
 	.seconds									db 0x00
@@ -94,11 +92,6 @@ tSystem:
 %define tDriveInfo.model						(esi + 24)		; model is 64 bytes
 %define tDriveInfo.serial						(esi + 88)		; serial is 32 bytes
 
-; tMemoryInfo, for the physical memory allocator to track blocks
-%define tMemInfo.address						(esi + 00)
-%define tMemInfo.size							(esi + 04)
-%define tMemInfo.task							(esi + 08)
-
 ; tPartitionInfo, for the partitions list (80 bytes)
 %define tPartitionInfo.ATAbasePort				(esi + 00)
 %define tPartitionInfo.ATAdevice				(esi + 04)
@@ -117,35 +110,6 @@ tSystem:
 
 
 ; random infos follow...
-
-
-
-; Memory Map (obsolete?)
-; Start				End				Size						Description
-; 0x00000000		0x000003FF		1 KiB						interrupt vector table
-; 0x00000400		0x000004FF		256 bytes					BIOS data area (remapped here from CMOS)
-; 0x00000500		0x000005FF		256 bytes					temporary stack
-; 0x00000600		0x00007BFF		30207 bytes (29.49 KiB)		kernel space (kernel is loaded here by FreeDOS bootloader)
-; 0x00007C00		0x00007DFF		512 bytes					bootloader (copied here by BIOS, can be overwritten)
-; 0x00007E00		0x0009FBFF		622080 bytes (607.50 KiB)	available, unused
-; 0x0009FC00		0x0009FFFF		1 KiB						extended BIOS data area
-; 0x000A0000		0x000AFFFF		64 KiB						video buffer for EGA/VGA graphics modes
-; 0x000B0000		0x000B7FFF		32 KiB						video buffer for EGA/VGA graphics modes
-; 0x000B8000		0x000BFFFF		32 KiB						video buffer for color text and CGA graphics
-; 0x000C0000		0x000DFFFF		128 KiB						device-mounted ROMs
-; 0x000E0000		0x0010FFEF		196591 bytes (191.98 KiB)	BIOS ROM
-
-
-
-; Result Codes for API routines (needs addressed)
-; 0xF000			Success, no error
-; 0xF001			Value specified is too low
-; 0xF002			Value specified is too high
-; 0xFF00			PS2 Controller write command timeout
-; 0xFF01			PS2 Controller write data timeout
-; 0xFF02			PS2 Controller read data timeout
-
-
 
 ; Event Codes (needs addressed)
 ; Note - Event codes 80 - FF are reserved for software and interprocess communication

@@ -32,6 +32,16 @@
 
 
 
+; globals
+cursorX											db 0x01
+cursorY											db 0x01
+textColor										db 0x07
+backColor										db 0x00
+kMaxLines										db 25
+kBytesPerScreen									dw 4000
+
+
+
 bits 16
 
 
@@ -806,13 +816,3 @@ ScreenClear32:
 	mov esp, ebp
 	pop ebp
 ret
-
-
-
-; globals
-cursorX											db 0x01
-cursorY											db 0x01
-textColor										db 0x07
-backColor										db 0x00
-kMaxLines										db 25
-kBytesPerScreen									dw 4000

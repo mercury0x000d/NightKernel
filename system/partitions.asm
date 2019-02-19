@@ -69,13 +69,16 @@ PartitionEnumerate:
 
 	; allocate a buffer for the sectors we're going to read, save the address for later
 	push 512
+	push dword 1
 	call MemAllocate
 	pop dword [ebp - 4]
 
 	; step through the drives list and discover partitions on each hard drive (other drive types are excluded)
+	push dword 0
 	push dword [tSystem.listDrives]
-	call LMListGetElementCount
+	call LMElementCountGet
 	pop dword [ebp - 8]
+	pop eax
 
 	; clear our counter
 	mov dword [ebp - 12], 0
@@ -84,9 +87,11 @@ PartitionEnumerate:
 		; get the address of this drive list element and save it for later
 		push dword [ebp - 12]
 		push dword [tSystem.listDrives]
-		call LMItemGetAddress
+		call LMElementAddressGet
 		pop esi
 		mov [ebp - 16], esi
+		; ignore error code
+		pop eax
 
 		; see if this drive is a hard drive
 		cmp dword [tDriveInfo.deviceFlags], 1
@@ -167,16 +172,18 @@ ret
 .BuildPartitionEntry:
 	; get first free slot in the partition list
 	push dword [tSystem.listPartitions]
-	call LMListFindFirstFreeSlot
+	call LMSlotFindFirstFree
 	pop eax
 	mov [ebp - 28], eax
 
 	; get the starting address of that specific slot into esi and save it for later
 	push eax
 	push dword [tSystem.listPartitions]
-	call LMItemGetAddress
+	call LMElementAddressGet
 	pop esi
 	mov [ebp - 20], esi
+	; ignore error code
+	pop eax
 
 	; save base port and device info (from this drive's slot in the drive list) to the slot we're writing in the partition table
 	mov esi, [ebp - 16]

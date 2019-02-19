@@ -83,7 +83,7 @@ mov byte [backColor], 0
 ; init and probe RAM
 push progressText01$
 call PrintIfConfigBits16
-call MemoryInit
+call MemProbe
 
 
 
@@ -105,6 +105,7 @@ call APMEnable
 push progressText04$
 call PrintIfConfigBits16
 lgdt [GDTStart]
+
 
 
 ; enter protected mode. YAY!
@@ -136,13 +137,23 @@ call A20Enable
 
 
 
-; now that we have a temporary stack and access to all the memory addresses,
-; let's allocate some RAM for the real stack
+; memory list init
 push progressText07$
 call PrintIfConfigBits32
+call MemInit
+
+
+
+; now that we have a temporary stack and access to all the memory addresses,
+; let's allocate some RAM for the real stack
+push progressText08$
+call PrintIfConfigBits32
+
 push dword [kKernelStack]
+push dword 1
 call MemAllocate
 pop eax
+
 mov ebx, [kKernelStack]
 add eax, ebx
 mov esp, eax
@@ -150,8 +161,9 @@ mov esp, eax
 push 0x00000000
 
 
+
 ; set up our interrupt handlers and IDT
-push progressText08$
+push progressText09$
 call PrintIfConfigBits32
 call IDTInit
 call ISRInitAll
@@ -159,7 +171,7 @@ call ISRInitAll
 
 
 ; setup and remap both PICs
-push progressText09$
+push progressText0A$
 call PrintIfConfigBits32
 call PICInit
 call PICDisableIRQs
@@ -169,7 +181,7 @@ call PITInit
 
 
 ; load system data into the info struct
-push progressText0A$
+push progressText0B$
 call PrintIfConfigBits32
 call SetSystemRTC							; load the RTC values into the system struct
 call SetSystemCPUID							; set some info from the CPU into the system struct
@@ -178,27 +190,28 @@ call SetSystemCPUSpeed						; write the CPU speed info to the system struct
 
 
 ; setup that mickey!
-push progressText0B$
+push progressText0C$
 call PrintIfConfigBits32
 call MouseInit
 
 
 
 ; setup keyboard
-push progressText0C$
+push progressText0D$
 call PrintIfConfigBits32
 call KeyboardInit
 
 
 
 ; allocate the system lists
-push progressText0D$
+push progressText0E$
 call PrintIfConfigBits32
 
 ; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element) plus header
 ; 256 * 120 + 16 = 30736
 ; allocate memory for the list
 push 30736
+push dword 1
 call MemAllocate
 pop edi
 mov [tSystem.listDrives], edi
@@ -214,6 +227,7 @@ call LMListInit
 ; 256 * 76 + 16 = 19472
 ; allocate memory for the list
 push 19472
+push dword 1
 call MemAllocate
 pop edi
 mov [tSystem.listPartitions], edi
@@ -227,14 +241,14 @@ call LMListInit
 
 
 ; let's get some interrupts firing!
-push progressText0E$
+push progressText0F$
 call PrintIfConfigBits32
 sti
 
 
 
 ; find out how many PCI devices we have and save that info to the system struct
-push progressText0F$
+push progressText10$
 call PrintIfConfigBits32
 push 0
 call PCIDetect
@@ -253,8 +267,9 @@ jmp .PCISkip
 .PCISkip:
 
 
+
 ; load drivers for PCI devices
-push progressText10$
+push progressText11$
 call PrintIfConfigBits32
 call PCILoadDrivers
 
@@ -273,6 +288,20 @@ call PartitionEnumerate
 
 ; remaining for reentrancy: StringBuild()
 
+;push dword 32
+;push dword 0x200000
+;call walk_stack
+;jmp $
+
+;#########################################################################################
+;pusha
+;push dword 16
+;push dword 0x100000
+;call PrintRAM32
+;popa
+;inc byte [cursorY]
+;jmp $
+;#########################################################################################
 
 
 
@@ -544,24 +573,23 @@ InfiniteLoop:
 	.SkipDebugMenu:
 jmp InfiniteLoop
 
-
-
-progressText01$									db 'MemoryInit', 0x00
+progressText01$									db 'Probing BIOS memory map', 0x00
 progressText02$									db 'SetSystemAPM', 0x00
 progressText03$									db 'APMEnable', 0x00
 progressText04$									db 'LoadGDT', 0x00
 progressText05$									db 'Entering Protected Mode', 0x00
 progressText06$									db 'A20Enable', 0x00
-progressText07$									db 'Stack setup', 0x00
-progressText08$									db 'IDTInit', 0x00
-progressText09$									db 'Remaping PICs', 0x00
-progressText0A$									db 'Load system data to the info struct', 0x00
-progressText0B$									db 'MouseInit', 0x00
-progressText0C$									db 'KeyboardInit', 0x00
-progressText0D$									db 'Allocating list space', 0x00
-progressText0E$									db 'Enabling interrupts', 0x00
-progressText0F$									db 'Initializing PCI bus', 0x00
-progressText10$									db 'Loading drivers', 0x00
+progressText07$									db 'Memory list init', 0x00
+progressText08$									db 'Stack setup', 0x00
+progressText09$									db 'IDTInit', 0x00
+progressText0A$									db 'Remaping PICs', 0x00
+progressText0B$									db 'Load system data to the info struct', 0x00
+progressText0C$									db 'MouseInit', 0x00
+progressText0D$									db 'KeyboardInit', 0x00
+progressText0E$									db 'Allocating list space', 0x00
+progressText0F$									db 'Enabling interrupts', 0x00
+progressText10$									db 'Initializing PCI bus', 0x00
+progressText11$									db 'Loading drivers', 0x00
 memE820Unsupported$								db 'Could not detect memory, function unsupported', 0x00
 PCIFailed$										db 'PCI Controller not detected', 0x00
 
@@ -575,7 +603,6 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 %include "io/ps2.asm"
 %include "io/serial.asm"
 %include "system/cmos.asm"
-%include "system/debug.asm"
 %include "system/gdt.asm"
 %include "system/hardware.asm"
 %include "system/interrupts.asm"
@@ -585,10 +612,15 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 %include "system/pic.asm"
 %include "system/power.asm"
 %include "video/screen.asm"
+%include "system/debug.asm"
 
 
 
 ; includes for drivers
 DriverSpaceStart:
 %include "drivers/ATA Controller.asm"
+%include "drivers/FAT12.asm"
+;%include "drivers/FAT16Small.asm"
+;%include "drivers/FAT16Large.asm"
+;%include "drivers/FAT32.asm"
 DriverSpaceEnd:

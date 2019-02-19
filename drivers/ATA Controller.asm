@@ -632,11 +632,15 @@ C01DetectChannelDevices:
 
 	push ebp
 	mov ebp, esp
+	
+	; local variables
 	sub esp, 4									; dataBlock (pointer to 512 byte buffer used by identify function)
+	sub esp, 4									; buffer for address of current drive list slot being used
 
 	; allocate a sector's worth of RAM
 	; add code here to determine the sector size first, then allocate
 	push 512
+	push dword 1
 	call MemAllocate
 	pop dword [ebp - 4]
 
@@ -660,14 +664,17 @@ C01DetectChannelDevices:
 
 		; get first free slot
 		push dword [tSystem.listDrives]
-		call LMListFindFirstFreeSlot
+		call LMSlotFindFirstFree
 		pop eax
 
 		; get the address of that slot into esi
 		push eax
 		push dword [tSystem.listDrives]
-		call LMItemGetAddress
+		call LMElementAddressGet
 		pop esi
+		mov [ebp - 8], esi
+		; ignore error code
+		pop ecx
 
 		; save base port and device number to table
 		xor ecx, ecx
@@ -694,8 +701,10 @@ C01DetectChannelDevices:
 		.Device0NotATAPI:
 
 		; allocate 1 MiB cache for this drive and save the address
-		push 1048576
+		push dword 1048576
+		push dword 1
 		call MemAllocate
+		mov esi, [ebp - 8]
 		pop dword [tDriveInfo.cacheAddress]
 
 		; save esi
@@ -753,14 +762,16 @@ C01DetectChannelDevices:
 
 		; get first free slot
 		push dword [tSystem.listDrives]
-		call LMListFindFirstFreeSlot
+		call LMSlotFindFirstFree
 		pop eax
 
 		; get the address of that slot into esi
 		push eax
 		push dword [tSystem.listDrives]
-		call LMItemGetAddress
+		call LMElementAddressGet
 		pop esi
+		; ignore error code
+		pop ecx
 
 		; save base port and device number to table
 		xor ecx, ecx
@@ -788,7 +799,8 @@ C01DetectChannelDevices:
 		.Device1NotATAPI:
 
 		; allocate 1 MiB cache for this drive and save the address
-		push 1048576
+		push dword 1048576
+		push dword 1
 		call MemAllocate
 		pop dword [tDriveInfo.cacheAddress]
 

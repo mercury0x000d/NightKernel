@@ -95,14 +95,10 @@ CriticalError:
 	inc byte [cursorY]
 	push .text3$
 	call Print32
-	push 16
-	mov eax, esp
-	add eax, 4
-	push eax
-	call PrintRAM32
-
-	; print stack dump
-	add byte [cursorY], 5
+	call StackDump
+	
+	; print continue message
+	inc byte [cursorY]
 	push .text4$
 	call Print32
 
@@ -147,6 +143,7 @@ IDTInit:
 
 	; allocate 64 KiB for the IDT
 	push dword 65536
+	push dword 1
 	call MemAllocate
 	pop eax
 	mov dword [kIDTPtr], eax

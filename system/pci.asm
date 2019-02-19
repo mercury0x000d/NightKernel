@@ -481,6 +481,7 @@ PCIInitBus:
 
 	; allocate memory for the list
 	push eax
+	push dword 1
 	call MemAllocate
 	pop edi
 	mov [tSystem.listPCIDevices], edi
@@ -526,8 +527,10 @@ PCIInitBus:
 		; set up the target address
 		push dword [ebp - 4]
 		push dword [tSystem.listPCIDevices]
-		call LMItemGetAddress
+		call LMElementAddressGet
 		pop esi
+		; ignore error code
+		pop eax
 
 		; copy PCI bus location info to the table
 		mov eax, [ebp - 8]
@@ -734,9 +737,11 @@ PCILoadDrivers:
 	sub esp, 4									; PCIProgIf
 
 	; first get the number of elements in the PCI list
+	push dword 0
 	push dword [tSystem.listPCIDevices]
-	call LMListGetElementCount
+	call LMElementCountGet
 	pop ecx
+	pop eax
 
 	; adjust ecx to be in range
 	dec ecx
@@ -747,8 +752,10 @@ PCILoadDrivers:
 		; get the address of this PCI function from the list
 		push ecx
 		push dword [tSystem.listPCIDevices]
-		call LMItemGetAddress
+		call LMElementAddressGet
 		pop esi
+		; ignore error code
+		pop eax
 
 		; get the PCI function data from the list
 		mov eax, dword [esi]
