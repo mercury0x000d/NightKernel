@@ -3,13 +3,83 @@
 		<meta http-equiv="Content-Type" content="text/html">
 		<title>Night Kernel Reference Manual</title>
 	</head>
-
+	
 	<style>
-		table, th, td {border: 1px solid lightgray; border-collapse: collapse;}
-		th, td {padding: 4px;}
-		th {text-align: left;}
-	</style>
+		caption
+		{
+			padding: 10px;
+			caption-side: bottom ;
+			font:8pt arial;
+		}
 
+		table, th, td
+		{
+			border: 1px solid lightgray;
+			border-collapse: collapse;
+		}
+
+		th, td
+		{
+			padding: 4px;
+			vertical-align: top;
+		}
+
+		th
+		{
+			text-align: left;
+		}
+
+		ol
+		{
+			padding-left: 15;
+		}
+
+
+		.accordion
+		{
+			background-color: #E0E0E0;
+			color: #000000;
+			cursor: pointer;
+			padding: 4px;
+			width: 100%;
+			border: none;
+			text-align: left;
+			outline: none;
+			transition: 0.2s;
+		}
+
+		.active, .accordion:hover
+		{
+			background-color: #C0C0C0;
+		}
+
+		.accordion:after
+		{
+			color: #808080;
+			content: '\002B';
+			float: right;
+			font-weight: bold;
+			margin-left: 8px;
+		}
+
+		.active:after
+		{
+			color: #808080;
+			content: "\2212";
+			float: right;
+			font-weight: bold;
+			margin-left: 8px;
+		}
+
+		.panel
+		{
+			padding: 0 4px;
+			background-color: white;
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.2s ease-out;
+		}
+	</style>
 	<body>
 		<h1 align="center">Night Kernel Reference Manual</h1>
 		<p align="center">
@@ -19,20 +89,36 @@
 			<br>
 			<br>
 			<br>
-		</p>
-
-		<h3>Contents</h3>
-		<p>
+			<b>Contents</b><br>
+			<br>
 			<a href="#About">Section 0 - About the Night Kernel</a><br>
+			<br>
 			<a href="#Building">Section 1 - Building and Running the Kernel</a><br>
+			<br>
 			<a href="#DebugMenu">Section 2 - The Kernel Debug Menu</a><br>
+			<br>
 			<a href="#Debugging">Section 3 - Debugging the Night Kernel</a><br>
-			<a href="#Drivers">Section 4 - The Night Kernel Driver Model</a><br>
-			<a href="#Config">Section 5 - Setting Options with ConfigBits</a><br>
-			<a href="#Lists">Section 6 - The List Manager</a><br>
-			<a href="#APIResultCodes">Appendix 0 - API Result Codes</a><br>
-			<a href="#Changelog">Appendix 1 - Version History</a><br>
-			<a href="#License">Appendix 2 - GNU General Public License</a><br>
+			<br>
+			<a href="#Conventions">Section 4 - Coding Conventions Used in Night</a><br>
+			<br>
+			<a href="#Drivers">Section 5 - The Night Kernel Driver Model</a><br>
+			<br>
+			<a href="#Config">Section 6 - Setting Options with ConfigBits</a><br>
+			<br>
+			<a href="#Lists">Section 7 - The List Manager</a><br>
+			<br>
+			<a href="#MemoryManagement">Section 8 - Memory Management in Night</a><br>
+			<br>
+			<br>
+			<br>
+			<a href="#Changelog">Appendix 0 - Version History</a><br>
+			<br>
+			<a href="#KnownIssues">Appendix 1 - Known Issues</a><br>
+			<br>
+			<a href="#FunctionReference">Appendix 2 - Internal Function Reference</a><br>
+			<br>
+			<a href="#License">Appendix 3 - GNU General Public License</a><br>
+			<br>
 		</p>
 		<br>
 		<br>
@@ -40,6 +126,7 @@
 		<br>
 		<br>
 
+		<hr>
 		<h2><a name="About">Section 0 - About the Night Kernel</a></h2>
 		<p>
 			<b>A synopsis of <i>Night</i>:</b><br>
@@ -50,11 +137,11 @@
 			<br>
 			<br>
 			<br>
-			<b>Days before Night:</b><br>
+			<b>Days before the Night:</b><br>
 			<br>
 			Although the Night project itself began in June of 2015, its roots go back much further. The original idea to build a custom operating system from scratch was inspired in the mid 1990s by the lackluster release of Microsoft's Windows 95. This idea formed the basis of a simple shell featuring character graphics coded in IBM BASICA on a PC XT running an early version of MS-DOS. After a subsequent upgrade to a 80486 machine, the next version of the project began life as a QBASIC application, quickly migrated to Visual BASIC, and soon after became the first to have color graphics, a rudimentary UI and windowing toolkit, and mouse control. As the project continued, it naturally became desirable to employ true multitasking but the problem with that, of course, is that running multiple simultaneous DOS programs at once, reliably, under a BASIC shell would be much too complex to be feasible. In response, the code base was updated to Power BASIC, making possible the incorporation of a virtual machine which would allow applications compiled for it to run concurrently. In short order, the project had its own assembler and BASIC-to-assembly-bytecode converter as well, breathing new life into the project which had by now taken on the name <i>Exelyx</i>. It was evolved to one last form - a DPMI-powered rewrite in Watcom C - before being retired permanently in August of 2016. Though Exelyx is dead, some key sections of code developed during its lifespan have now been adapted, in part, for use in a new and refined platform; one which will rely on no underlying operating system or drivers, but shall supply the facilities to manage every aspect of the user's machine completely on its own.<br>
 			<br>
-			That project is <i>Night.</i><br>
+			That project is <i>Night</i>.<br>
 			<br>
 			<br>
 			<br>
@@ -68,6 +155,7 @@
 		<br>
 		<br>
 
+		<hr>
 		<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 		<p>
 			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt the directions to whatever other compatible environment you like. Also, there are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch without any additional modules.<br>
@@ -92,6 +180,7 @@
 			If you're running in a Linux environment and have both VirtualBox and NASM installed, you can use the included makefile found in the root of the repo to streamline building and testing. The rules it accepts are as follows:<br>
 			<br>
 			<table style="width:100%">
+				<caption>Table 1.1 - Make options</caption>
 				<col width = 10%>
 				<col width = 90%>
 				<tr>
@@ -122,6 +211,7 @@
 		<br>
 		<br>
 
+		<hr>
 		<h2><a name="DebugMenu">Section 2 - The Kernel Debug Menu</a></h2>
 		<p>
 			After booting into the kernel the Kernel Debug Menu will appear. In the completed kernel this menu will only be accessible after being enabled via ConfigBits, but as the kernel currently does not run applications, it makes sense to have this menu display by default.<br>
@@ -130,6 +220,7 @@
 			The menu also provides the following options:<br>
 			<br>
 			<table style="width:100%">
+				<caption>Table 2.1 - Debug Menu selection summary</caption>
 				<col width = 10%>
 				<col width = 90%>
 				<tr>
@@ -156,6 +247,7 @@
 		<br>
 		<br>
 
+		<hr>
 		<h2><a name="Debugging">Section 3 - Debugging the Night Kernel</a></h2>
 		<p>
 			When the kernel is built, NASM will generate a map file, <i>kernel.map</i>, containing the addresses of all statically allocated structures and variables in the kernel. Any memory blocks allocated at runtime will not show here, but pointers to them can be found under the System Info option in the Debug Menu or by directly accessing the pointers in the tSystem struct.<br>
@@ -163,6 +255,7 @@
 			The makefile will start VirtualBox with the <i>--debug-command-line</i> option, which enables the debugger console of the virtual machine. This console allows viewing of register and memory contents, and permits disassembling code as well. Some of the commands most useful for debugging Night are listed below:<br>
 			<br>
 			<table style="width:100%">
+				<caption>Table 3.1 - Useful VirtualBox Debugger commands</caption>
 				<col width = 10%>
 				<col width = 90%>
 				<tr>
@@ -195,13 +288,133 @@
 		<br>
 		<br>
 
-		<h2><a name="Drivers">Section 4 - The Night Kernel Driver Model</a></h2>
+		<hr>
+		<h2><a name="Conventions">Section 4 - Coding Conventions Used in Night</a></h2>
+		<p>
+			<i>"C ... all the power of assembly language programming with all the ease of assembly language programming."</i><br>
+			&emsp; - Stuart Cheshire, <i>Tricks of the Mac Game Programming Gurus</i><br>
+			<br>
+			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readibility than comparable C code.<br>
+			<br>
+			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from the Memory Manager:<br>
+			<code>
+				<p style="background-color: DimGray">
+					<br>
+					<span style="color: Chartreuse">&nbsp; MemAllocateAligned:</span>
+					<br>
+					<span style="color: LightGray">
+						&nbsp;&nbsp;&nbsp;&nbsp; ; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ; input:<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;requesting task number<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;requested memory size in bytes<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;alignment necessary<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ; output:<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;address of requested block, or zero if call fails<br>
+					</span>
+					<br>
+				</p>
+			</code>
+			Every function in Night begins with the function label; in this case it's <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, what it expects for input, and what it returns as output. <br>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<p style="background-color: DimGray">
+					<br>
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; push</span> <span style="color: Orange">ebp</span><br>
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">ebp</span><span style="color: White">,</span> <span style="color: Orange">esp</span><br>
+					<br>
+				</p>
+			</code>
+			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can use local variables in the function and it also provides a handy way to reference the various parameters passed from the caller. This is the standard entry procedure for nearly every Night function.<br>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<p style="background-color: DimGray">
+					<br>
+					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; allocate local variables</span><br>
+
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; sub</span> <span style="color: Orange">esp</span><span style="color: White">, </span> <span style="color: Fuchsia">20</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">blockAddress</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">-</span> <span style="color: Fuchsia">4</span><span style="color: White">]</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">blockAddressAligned</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">-</span> <span style="color: Fuchsia">8</span><span style="color: White">]</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">blockLeadingSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">-</span> <span style="color: Fuchsia">12</span><span style="color: White">]</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">blockTrailingSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">-</span> <span style="color: Fuchsia">16</span><span style="color: White">]</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">blockRequestedSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">-</span> <span style="color: Fuchsia">20</span><span style="color: White">]</span><br>
+					<br>
+				</p>
+			</code>
+			After EBP has been set, we can then define in reference to it any local variables needed in this function. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need, then the individual variables can be defined. Note that defining the variables with labels is <i>not</i> technically required (using bare references like <code>dword [ebp - 4]</code> in the code directly is perfectly valid) but using the <i>% define</i> directive essentially tells NASM something to the effect of, "Every time you see <i>blockTrailingSize</i> in the code below, go ahead and substitute it with <i><code>dword [ebp - 16]</code></i>" which makes the code much easier for us humans to read.<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<p style="background-color: DimGray">
+					<br>
+					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; make sure alignment is 2 or greater to avoid both wasted time (1) and division by zero errors (0)</span><br>
+			
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; cmp</span> <span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">+</span> <span style="color: Fuchsia">16</span><span style="color: White">],</span> <span style="color: Fuchsia">2</span><br>
+
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; jb</span> <span style="color: Chartreuse">.Exit</span><br>
+					<br>
+					<span style="color: White">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</span><br>
+					<br>
+				</p>
+			</code>
+			Next in this function is an example of how passed parameters are accessed. Values pushed onto the stack by the caller begin at <code>[EBP + 8]</code> and ascend from there. Since all of Night's functions expect 32-bit parameters, this means that the first parameter passed will live at <code>[EBP + 8]</code>, the second at <code>[EBP + 12]</code>, the third at <code>[EBP + 16]</code>, and so on. In the example above, the <code>cmp</code> command referencing <code>[EBP + 16]</code> is comparing the third parameter (or <i>alignment necessary</i>, as specified further above in the function's input and output description) to the value 2.<br>
+			<br>
+			A handy way of remembering which EBP references are which is <i>locals</i> are <i>lower</i> than EBP, and <i>parameters</i> are <i>positive</i>.<br>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<p style="background-color: DimGray">
+					<br>
+					<span style="color: Chartreuse">&nbsp;&nbsp;&nbsp;&nbsp; .Exit:</span><br>
+
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">esp</span><span style="color: White">,</span> <span style="color: Orange">ebp</span><br>
+
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; pop</span> <span style="color: Orange">ebp</span><br>
+
+					<span style="color: DeepPink">&nbsp; ret</span> <span style="color: Fuchsia">8</span><br>
+					<br>
+				</p>
+			</code>
+			And now, skipping ahead to the end, the <code>mov</code> and <code>pop</code> lines comprise the standard exit procedure for nearly all functions in the Night kernel. In short, they undo the entry procedure performed at the start of this function and restore the stack to the state it was prior.<br>
+			<br>
+			The <code>ret 8</code> instruction will not only return to the caller, but also takes an additional eight bytes off the stack. Why eight bytes? The answer lies in the difference in the number of input parameters versus output parameters. In this example, the function takes in three parameters (12 bytes) as input and returns one parameter (4 bytes) as output. The eight byte difference is balanced out by specifying that value at the end of the <code>ret</code> instruction. By the same token, if the function instead took one parameter for input and returned one parameter for output, a simple <code>ret</code> could be used since there would be no difference in the number of bytes in and out on the stack.<br>
+			<br>
+			<br>
+			<br>
+			P.S.: Install Nessphoro's NASM x86 Assembly package to get Sublime Text to use the fancy color coding shown above. :)<br>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<hr>
+		<h2><a name="Drivers">Section 5 - The Night Kernel Driver Model</a></h2>
 		<p>
 			<h3>Driver Structure</h3>
 			Every Night driver begins with a driver header, laid out as follows:<br>
 			<br>
 			<code>
 				<table style="width:100%">
+					<caption>Table 5.1 - Driver header format</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -219,12 +432,13 @@
 				</table>
 			</code>
 			<br>
-			The Night Kernel uses a modular approach to drivers, allowing individual driver files to be added or removed at will without having to alter any other sections of the kernel's code. The <code>signature</code> field allows the kernel to discover the driver regardless of where it may lie in the kernel's address space.<br>
+			The Night Kernel uses a modular approach to drivers, allowing individual driver files to be added or removed at will without having to alter any other sections of the kernel's code. The <code>signature</code> field allows the kernel to discover the driver regardless of where it may lie in the kernel's driver address space.<br>
 			<br>
 			The <code>driverFlags</code> field is a bank of flags to identify attributes about this driver. Currently, the following bit definitions are supported:<br>
 			<br>
 			<code>
 				<table style="width:100%">
+					<caption>Table 5.2 - Driver flags bit definitions</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -271,6 +485,7 @@
 			Fields specific to this driver type:<br>
 			<code>
 				<table style="width:100%">
+					<caption>Table 5.3 - File system driver sub-header format</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -301,6 +516,7 @@
 			Fields specific to this driver type:<br>
 			<code>
 				<table style="width:100%">
+					<caption>Table 5.4 - PCI driver sub-header format</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -340,12 +556,14 @@
 		<br>
 		<br>
 
-		<h2><a name="Config">Section 5 - Setting Options with ConfigBits</a></h2>
+		<hr>
+		<h2><a name="Config">Section 6 - Setting Options with ConfigBits</a></h2>
 		<p>
 			The Night Kernel offers configurable options which can be selected by altering certain bits in a specific value located within the kernel itself. Currently, the sole method of changing these options in an already-compiled kernel is to use a hex editor to locate the string <i>ConfigBits</i> in the binary and changing the 32-bit value immediately following it. This allows options in the kernel to be changed without the need to recompile the kernel entirely. A utility will be created at later date which can automate selecting these options. At this point in time, the following options are defined:<br>
 			<br>
 			<code>
 				<table style="width:100%">
+					<caption>Table 6.1 - Configbits options</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -381,7 +599,8 @@
 		<br>
 		<br>
 
-		<h2><a name="Lists">Section 6 - The List Manager</a></h2>
+		<hr>
+		<h2><a name="Lists">Section 7 - The List Manager</a></h2>
 		<p>
 			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A list, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceeded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
 			<br>
@@ -389,6 +608,7 @@
 			<br>
 			<code>
 				<table style="width:100%">
+					<caption>Table 7.1 - List Manager header format</caption>
 					<col width = 10%>
 					<col width = 10%>
 					<col width = 90%>
@@ -430,44 +650,43 @@
 		<br>
 		<br>
 
-		<h2><a name="APIResultCodes">Appendix 0 - API Result Codes</a></h2>
+		<hr>
+		<h2><a name="MemoryManagement">Section 8 - Memory Management in Night</a></h2>
 		<p>
-			<table style="width:100%">
-				<col width = 10%>
-				<col width = 90%>
-				<tr>
-					<th><i>Code</i></th>
-					<th><i>Description</i></th>
-				</tr>
-				<tr>
-					<td>0x0000</td>
-					<td>Success, no error</td>
-				</tr>
-				<tr>
-					<td>0xF000</td>
-					<td>Invalid parameter</td>
-				</tr>
-				<tr>
-					<td>0xF001</td>
-					<td>Value specified is too low</td>
-				</tr>
-				<tr>
-					<td>0xF002</td>
-					<td>Value specified is too high</td>
-				</tr>
-				<tr>
-					<td>0xFF00</td>
-					<td>PS2 Controller write command timeout</td>
-				</tr>
-				<tr>
-					<td>0xFF01</td>
-					<td>PS2 Controller write data timeout</td>
-				</tr>
-				<tr>
-					<td>0xFF02</td>
-					<td>PS2 Controller read data timeout</td>
-				</tr>
-			</table>
+			Memory allocation is an important part of any operating system, and Night is no different. Upon boot, Night will probe the BIOS memory map using function 0xE820 of interrupt 0x15. After obtaining these results, the single largest block of RAM found in the map will be selected for use as the entire physical memory pool. This memory block holds the memory list at its lower end, which is used by the List Manager to track what sections of physical RAM have been allocated to which processes. The format of an individual memory list entry is shown below.<br>
+			<br>
+			<code>
+				<table style="width:100%">
+					<caption>Table 8.1 - Format of a Memory List element</caption>
+					<col width = 10%>
+					<col width = 10%>
+					<col width = 90%>
+					<tr>
+						<th><i>Offset</i></th>
+						<th><i>Name</i></th>
+						<th><i>Description</i></th>
+					</tr>
+					<tr>
+						<td>0x00</td>
+						<td>address</td>
+						<td>The starting physical address of this block of memory</td>
+					</tr>
+					<tr>
+						<td>0x04</td>
+						<td>size</td>
+						<td>The size of this physical block</td>
+					</tr>
+					<tr>
+						<td>0x08</td>
+						<td>task</td>
+						<td>The task number which allocated this block. A zero in this field means the block is free for use, ergo memory requests specifying zero as the allocating task will be rejected.</td>
+					</tr>
+				</table>
+			</code>
+			<br>
+			Although most versions of MS-DOS support First-Fit, Best-Fit, and Last-Fit allocation strategies, Night currently uses Best-Fit exclusively. Memory requests are fulfilled from the top-down, meaning that the first block allocated will be located at the end of the memory area and subsequent allocations will grow downwards toward the Memory List, much like stack operation.<br>
+			<br>
+			Another difference is the time at which free memory blocks are combined; MS-DOS performs this task upon every allocation attempt, but Night combines upon every deallocation.<br>
 		</p>
 		<br>
 		<br>
@@ -475,13 +694,40 @@
 		<br>
 		<br>
 
-		<h2><a name="Changelog">Appendix 1 - Version History</a></h2>
+		<hr>
+		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
+			3/4/2019, 0.17 Update - Memory Manager upgrades<br>
+			&emsp;New<br>
+			&emsp;&emsp;- Kernel: Added <i>%define</i> symbols for various local variables in <i>lists.asm</i> and <i>memory.asm</i> to improve readability<br>
+			&emsp;&emsp;- Kernel: Added MemAllocateAligned(), MemAddressToBlock(), and MemAddressAlign() to <i>memory.asm</i><br>
+			&emsp;&emsp;- Kernel: Added MemShrinkFromBeginning() and MemShrinkFromEnd() to <i>memory.asm</i><br>
+			&emsp;&emsp;- Manual: Added <i>Coding Conventions Used in Night</i> section<br>
+			&emsp;&emsp;- Manual: Added <i>Known Issues</i> section<br>
+			&emsp;&emsp;- Manual: Added some sweet table captioning style to the NKRM!<br>
+			<br>
+			&emsp;Changed<br>
+			&emsp;&emsp;- Kernel: Moved error checking out of LM_Internal_SlotFreeTest() and into LMSlotFreeTest()<br>
+			&emsp;&emsp;- Kernel: Moved function listings from <i>lists.asm</i> and <i>memory.asm</i> into the NKRM<br>
+			&emsp;&emsp;- Kernel: Removed the dynamic memory list/memory block border, implying a slight internal change in how memory is allocated.<br>
+			&emsp;&emsp;- Kernel: Split some existing memory management code off into Mem_Internal_MemListGrow() and Mem_Internal_MemListShrink()<br>
+			&emsp;&emsp;- Manual: Rolled the existing <i>API Result Codes</i> section into its new replacement: the <i>Internal Function Reference</i> section<br>
+			<br>
+			&emsp;Fixed<br>
+			&emsp;&emsp;- Kernel: Fixed memory allocation algorithm to actually implement the "best-fit" strategy<br>
+			&emsp;&emsp;- Kernel: Improved Memory Manager error checking/handling and corrected some other minor errors. Foresight is never a bad thing, kids.<br>
+			&emsp;&emsp;- Kernel: MemMergeBlocks() now updates the memory list properly<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
 			2/19/2019, 0.16 Update - Full physical memory management implementation<br>
 			&emsp;New<br>
 			&emsp;&emsp;- Kernel: Added LMElementDuplicate() and LMElementDelete() to <i>lists.asm</i><br>
 			&emsp;&emsp;- Kernel: Added MemDispose() to <i>memory.asm</i><br>
 			&emsp;&emsp;- Kernel: Added StackTrace() to <i>debug.asm</i> so our BSOD can now dump the actual stack values<br>
+			&emsp;&emsp;- Manual: Added <i>API Result Codes</i> section<br>
 			&emsp;&emsp;- Manual: Added info on the Debug Menu's new <i>Memory Details</i> option<br>
 			&emsp;&emsp;- Manual: Waxed nostalgic on the history of Night's precursor<br>
 			<br>
@@ -828,7 +1074,849 @@
 		<br>
 		<br>
 
-		<h2><a name="License">Appendix 2 - GNU General Public License</a></h2>
+		<hr>
+		<h2><a name="KnownIssues">Appendix 1 - Known Issues</a></h2>
+		<p>
+			<ul>
+				<li>The date and time returned by the kernel is inconsistently incorrect due to erroneous detection of formatting values in the hardware RTC</li>
+			</ul>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<hr>
+		<h2><a name="FunctionReference">Appendix 2 - Internal Function Reference</a></h2>
+		<p>
+			<ul>
+				<li>Public functions are intended for calling from any other routines.</li>
+				<li>Internal functions are only intended to be called by the kernel internally.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<b>List Manager Functions - <i>lists.asm</i></b><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A0.1 - List Manager 32-bit public functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>LMElementAddressGet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Element address</li>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Returns the address of the specified element in the list specified</td>
+				</tr>
+				<tr>
+					<td>LMElementCountGet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Dummy value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Number of total element slots in this list</li>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Returns the number of elements in the list specified</td>
+				</tr>
+				<tr>
+					<td>LMElementCountSet</td>
+					<td>	
+						<ol>
+							<li>List address</li>
+							<li>New number of total element slots in this list</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Sets the total number of elements in the list specified</td>
+				</tr>
+				<tr>
+					<td>LMElementDelete</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number to be deleted</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Deletes the element at the slot number specified from the list specified</td>
+				</tr>
+				<tr>
+					<td>LMElementDuplicate</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number to be duplicated</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Duplicates the element at the slot number specified in the list specified</td>
+				</tr>
+				<tr>
+					<td>LMElementSizeGet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Dummy value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>List element size</li>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Returns the size of elements in the list specified</td>
+				</tr>
+				<tr>
+					<td>LMElementValidate</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element to check</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>
+								Result<br>
+								True - The element is in range<br>
+								False - The element is not in range
+							</li>
+						</ol>
+					</td>
+					<td>Tests the element specified to be sure it not outside the bounds of the list</td>
+				</tr>
+				<tr>
+					<td>LMItemAddAtSlot</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Slot at which to add element</li>
+							<li>New item address</li>
+							<li>New item size</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Adds an item to the list specified at the list slot specified</td>
+				</tr>
+				<tr>
+					<td>LMListCompact</td>
+					<td>
+						<ol>
+							<li>List address</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Compacts the list specified (eliminates empty slots to make list contiguous)</td>
+				</tr>
+				<tr>
+					<td>LMListInit</td>
+					<td>
+						<ol>
+							<li>Address</li>
+							<li>Number of elements</li>
+							<li>Size of each element</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Creates a new list from the parameters specified at the address specified</td>
+				</tr>
+				<tr>
+					<td>LMListSearch</td>
+					<td>
+
+					</td>
+					<td>
+
+					</td>
+					<td>Searches the list specified for the element specified</td>
+				</tr>
+				<tr>
+					<td>LMListValidate</td>
+					<td>
+						<ol>
+							<li>List address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>
+								Result<br>
+								True - The regions are identical<br>
+								False - The regions are different
+							</li>
+						</ol>
+					</td>
+					<td>Tests the list specified for the 'list' signature at the beginning</td>
+				</tr>
+				<tr>
+					<td>LMSlotFindFirstFree</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Dummy value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Element number of first free slot</li>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Finds the first free slot available in the list specified</td>
+				</tr>
+				<tr>
+					<td>LMSlotFreeTest</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>
+								Result<br>
+								True - Element empty<br>
+								False - Element not empty
+							</li>
+						</ol>
+					</td>
+					<td>Tests the element specified in the list specified to see if it is free</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+
+			32-bit Internal Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A0.2 - List Manager 32-bit internal functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>LM_Internal_ElementAddressGet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Element address</li>
+						</ol>
+					</td>
+					<td>Returns the address of the specified element in the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ElementCountGet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Number of total element slots in this list</li>
+						</ol>
+					</td>
+					<td>Returns the number of elements in the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ElementCountSet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>New number of total element slots in this list</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Sets the total number of elements in the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ElementDelete</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number to be deleted</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Deletes the element at the slot number specified from the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ElementDuplicate</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number to be duplicated</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Duplicates the element at the slot number specified in the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ElementSizeGet</td>
+					<td>
+						<ol>
+							<li>List address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>List element size</li>
+						</ol>
+					</td>
+					<td>Returns the size of elements in the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ItemAddAtSlot</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Slot at which to add element</li>
+							<li>New item address</li>
+							<li>New item size</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Adds an item to the list specified at the list slot specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ListCompact</td>
+					<td>
+					</td>
+					<td>
+					</td>
+					<td>Compacts the list specified (eliminates empty slots to make list contiguous)</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_ListSearch</td>
+					<td>
+					</td>
+					<td>
+					</td>
+					<td>Searches the list specified for the element specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_SlotFindFirstFree</td>
+					<td>
+						<ol>
+							<li>List address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Element number of first free slot</li>
+						</ol>
+					</td>
+					<td>Finds the first free slot available in the list specified</td>
+				</tr>
+				<tr>
+					<td>LM_Internal_SlotFreeTest</td>
+					<td>
+						<ol>
+							<li>List address</li>
+							<li>Element number</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result<br>
+								True - Element empty<br>
+								False - Element not empty
+							</li>
+						</ol>
+					</td>
+					<td>Tests the element specified in the list specified to see if it is free</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<b>Memory Manager Functions - <i>memory.asm</i></b><br>
+			<br>
+			16-bit function listing:<br>
+			<table style="width:100%">
+				<caption>Table A0.3 - Memory Manager 16-bit functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>MemProbe</td>
+					<td>n/a</td>
+					<td>n/a</td>
+					<td>Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM, and fills in the appropriate system data structures for later use by the memory manager</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A0.4 - Memory Manager 32-bit public functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>MemAddressAlign</td>
+					<td>
+						<ol>
+							<li>Address to align</li>
+							<li>Alignment value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Aligned address</li>
+						</ol>
+					</td>
+					<td>Returns the aligned version of the address specified, aligned as specified</td>
+				</tr>
+				<tr>
+					<td>MemAddressToBlock</td>
+					<td>
+						<ol>
+							<li>Block address</li>
+							<li>Dummy value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Element number of block</li>
+							<li>Result<br>
+								True - Block was matched<br>
+								False - Block was not matched
+							</li>
+						</ol>
+					</td>
+					<td>Returns the block number referenced by the address specified</td>
+				</tr>
+				<tr>
+					<td>MemAllocate</td>
+					<td>
+						<ol>
+							<li>Requesting task number</li>
+							<li>Requested memory size in bytes</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Address of requested block, or zero if call fails</li>
+						</ol>
+					</td>
+					<td>Returns the address of a memory block of the requested size, or zero if unavailble</td>
+				</tr>
+				<tr>
+					<td>MemAllocateAligned</td>
+					<td>
+						<ol>
+							<li>Requesting task number</li>
+							<li>Requested memory size in bytes</li>
+							<li>Alignment necessary</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Address of requested block, or zero if call fails</li>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble</td>
+				</tr>
+				<tr>
+					<td>MemCompare</td>
+					<td>
+						<ol>
+							<li>Region 1 address</li>
+							<li>Region 2 address</li>
+							<li>Comparison length</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result<br>
+								True - The regions are identical<br>
+								False - The regions are different
+							</li>
+						</ol>
+					</td>
+					<td>Compares two regions in memory of a specified length for equality</td>
+				</tr>
+				<tr>
+					<td>MemCopy</td>
+					<td>
+						<ol>
+							<li>Source address</li>
+							<li>Destination address</li>
+							<li>Transfer length</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Copies the specified number of bytes from one address to another</td>
+				</tr>
+				<tr>
+					<td>MemDispose</td>
+					<td>
+						<ol>
+							<li>Address of block (as provided by MemAllocate())</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Notifies the memory manager that the block specified by the address given is now free for reuse</td>
+				</tr>
+				<tr>
+					<td>MemFill</td>
+					<td>
+						<ol>
+							<li>Address</li>
+							<li>Length</li>
+							<li>Byte value</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Fills the range of memory given with the byte value specified</td>
+				</tr>
+				<tr>
+					<td>MemFindMostSuitable</td>
+					<td>
+						<ol>
+							<li>Size requested</li>
+							<li>Dummy value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Most suitable element</li>
+							<li>Result<br>
+								True - A suitable block was found<br>
+								False - A suitable block was not found
+							</li>
+						</ol>
+					</td>
+					<td>Returns the element number of the most suitable free block for handling a request of the size specified</td>
+				</tr>
+				<tr>
+					<td>MemInit</td>
+					<td>
+						n/a
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Inititlizes the Memory Manager</td>
+				</tr>
+				<tr>
+					<td>MemMergeBlocks</td>
+					<td>
+						<ol>
+							<li>Memory list element number</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Merges any neighboring free memory list elements into the one specified</td>
+				</tr>
+				<tr>
+					<td>MemSearchWord</td>
+					<td>
+						<ol>
+							<li>Search range start</li>
+							<li>Search region length</li>
+							<li>Word for which to search</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Address of match (zero if not found)</li>
+						</ol>
+					</td>
+					<td>Searches the memory range specified for the given word value</td>
+				</tr>
+				<tr>
+					<td>MemSearchDWord</td>
+					<td>
+						<ol>
+							<li>Search range start</li>
+							<li>Search region length</li>
+							<li>DWord for which to search</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Address of match (zero if not found)</li>
+						</ol>
+					</td>
+					<td>Searches the memory range specified for the given dword value</td>
+				</tr>
+				<tr>
+					<td>MemSearchString</td>
+					<td>
+						<ol>
+							<li>Search range start</li>
+							<li>Search region length</li>
+							<li>Address of string for which to search</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Address of match (zero if not found)</li>
+						</ol>
+					</td>
+					<td>Searches the memory range specified for the given string</td>
+				</tr>
+				<tr>
+					<td>MemShrinkFromBeginning</td>
+					<td>
+						<ol>
+							<li>Block address</li>
+							<li>New size</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Shrinks the block of memory specified to the size specified by trimming space off the beginning</td>
+				</tr>
+				<tr>
+					<td>MemShrinkFromEnd</td>
+					<td>
+						<ol>
+							<li>Block address</li>
+							<li>New size</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Result code</li>
+						</ol>
+					</td>
+					<td>Shrinks the block of memory specified to the size specified by trimming space off the end</td>
+				</tr>
+				<tr>
+					<td>MemSwapWordBytes</td>
+					<td>
+						<ol>
+							<li>Source address</li>
+							<li>Number of words to process</li>
+							
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Swaps the bytes in a series of words starting at the address specified</td>
+				</tr>
+				<tr>
+					<td>MemSwapDWordWord</td>
+					<td>
+						<ol>
+							<li>Source address</li>
+							<li>Number of dwords to process</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>Swaps the words in a series of dwords starting at the address specified</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			32-bit Internal Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A0.5 - Memory Manager 32-bit internal functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>Mem_Internal_MemListGrow</td>
+					<td>
+						<ol>
+							<li>Element to duplicate during grow</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>
+								Result<br>
+								True - Grow was successful<br>
+								False - Grow was unsuccessful
+							</li>
+						</ol>
+					</td>
+					<td>Adds an element to the list itself and duplicates the element specified</td>
+				</tr>
+
+				<tr>
+					<td>Mem_Internal_MemListShrink</td>
+					<td>
+						<ol>
+							<li>Element to duplicate during shrink</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>
+								Result<br>
+								True - Shrink was successful<br>
+								False - Shrink was unsuccessful
+							</li>
+						</ol>
+					</td>
+					<td>Subtracts an element from the list itself and deletes that element</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<table style="width:100%">
+				<caption>Table A0.6 - Function return codes</caption>
+				<col width = 10%>
+				<col width = 90%>
+				<tr>
+					<th><i>Code</i></th>
+					<th><i>Description</i></th>
+				</tr>
+				<tr>
+					<td>0x0000</td>
+					<td>Success, no error</td>
+				</tr>
+				<tr>
+					<td>0xF000</td>
+					<td>Invalid parameter</td>
+				</tr>
+				<tr>
+					<td>0xF001</td>
+					<td>Value specified is too low</td>
+				</tr>
+				<tr>
+					<td>0xF002</td>
+					<td>Value specified is too high</td>
+				</tr>
+				<tr>
+					<td>0xFE00</td>
+					<td>Insufficient memory</td>
+				</tr>
+				<tr>
+					<td>0xFF00</td>
+					<td>PS2 Controller write command timeout</td>
+				</tr>
+				<tr>
+					<td>0xFF01</td>
+					<td>PS2 Controller write data timeout</td>
+				</tr>
+				<tr>
+					<td>0xFF02</td>
+					<td>PS2 Controller read data timeout</td>
+				</tr>
+			</table>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<hr>
+		<h2><a name="License">Appendix 3 - GNU General Public License</a></h2>
 		<p>
 			The Night Kernel is free software (in both senses of the word) and is released under the terms of the GPL. The complete text of that license follows.<br>
 			<br>
@@ -1057,5 +2145,33 @@
 			END OF TERMS AND CONDITIONS<br>
 		</p>
 
+
 	</body>
+	
+	<!-- <button class="accordion">LMElementAddressGet</button><div class="panel"></div> -->
+	<script>
+	var accdn = document.getElementsByClassName("accordion");
+	var index;
+
+	for (index = 0; index < accdn.length; index++)
+	{
+		accdn[index].addEventListener
+		(
+			"click", function()
+			{
+				this.classList.toggle("active");
+				var panel = this.nextElementSibling;
+				if (panel.style.maxHeight)
+				{
+					panel.style.maxHeight = null;
+				}
+
+			else
+			{
+				panel.style.maxHeight = panel.scrollHeight + "px";
+			}
+			}
+		);
+	}
+	</script>
 </html>

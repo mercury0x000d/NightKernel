@@ -34,9 +34,10 @@ kKeyTable:										db '  1234567890-=  qwertyuiop[]  asdfghjkl; ` \zxcvbnm,0/ *
 tSystem:
 	.copyright$									db 'Night Kernel, Copyright 1995 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x16
+	.versionMinor								db 0x17
 	.memoryInstalledBytes						dd 0x00000000
 	.memoryInitialAvailableBytes				dd 0x00000000
+	.memoryListReservedSpace					dd 0x00000000
 	.hours										db 0x00
 	.minutes									db 0x00
 	.seconds									db 0x00

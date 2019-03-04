@@ -918,6 +918,9 @@ PCILoadDrivers:
 		.NextIteration:
 		pop ecx
 
+		; skip a line for clarity
+		inc byte [cursorY]
+
 	; I would've used "loop" here, but the code the loop contains is too big :/
 	; and for some reason, VirtualBox (or the processor itself?) doesn't properly set the overflow flag on some machines
 	dec ecx

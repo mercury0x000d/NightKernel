@@ -46,7 +46,7 @@ DebugMenu:
 		; if we get here, this hasn't been set up yet... so let's do so!
 
 		; the list will be 256 entries of 36 bytes each
-		; 256 * 36 + 16 = 9232
+		; 256 * 36 + 16 = 9232 (0x2410)
 		; allocate memory for the list
 		push 9232
 		push dword 1
@@ -329,7 +329,6 @@ DebugMenu:
 
 		push kPrintText$
 		call Print32
-
 
 
 		pop eax
