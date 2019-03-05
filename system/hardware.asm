@@ -52,22 +52,19 @@ A20Enable:
 	mov al, 0x00
 	in al, 0x92
 	and al, 0x02
+
 	cmp al, 0
 	jnz .success
-
-	; it failed, so we have to say so
-	push 4
-	push 0
-	push .fastA20Fail$
-	call Print32
-	call PrintRegs32
-
+		; it failed, so we have to say so and make sure we hang here
+		push .fastA20Fail$
+		call Print32
+		call PrintRegs32
+		;jmp $
 	.success:
 
 	mov esp, ebp
 	pop ebp
 ret
-
 .fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
 
 

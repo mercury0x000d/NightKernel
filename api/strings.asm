@@ -48,6 +48,11 @@
 
 
 
+; globals
+kHexDigits										db '0123456789ABCDEF'
+
+
+
 bits 16
 
 
@@ -732,7 +737,7 @@ StringCharPrepend:
 	;
 	;  input:
 	;   string address
-	;   ASCII code of cahracter to add
+	;   ASCII code of character to add
 	;
 	;  output:
 	;   n/a
@@ -1082,31 +1087,36 @@ StringPadLeft:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; length of string specified
+
+
+	; allocate local variables
+	sub esp, 4
+	%define strLen								dword [ebp - 4]
+
 
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop dword [ebp - 4]
+	pop strLen
 
 	; exit if the string specified is already greater than the length given
 	mov eax, dword [ebp + 16]
-	mov ebx, dword [ebp - 4]
+	mov ebx, strLen
 	cmp ebx, eax
 	jae .Exit
 
 	; calculate number of characters we need to add into eax and save it for later
-	sub eax, dword [ebp - 4]
+	sub eax, strLen
 	push eax
 
 	; calculate source and dest addresses
 	mov esi, dword [ebp + 8]
-	add esi, dword [ebp - 4]
+	add esi, strLen
 	mov edi, esi
 	add edi, eax
 
 	; loop to shift bytes down by the number of characters being inserted, plus one to allow for the null
-	mov ecx, dword [ebp - 4]
+	mov ecx, strLen
 	inc ecx
 	pushf
 	std
@@ -1144,25 +1154,30 @@ StringPadRight:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; length of string specified
+
+
+	; allocate local variables
+	sub esp, 4
+	%define strLen								dword [ebp - 4]
+
 
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop dword [ebp - 4]
+	pop strLen
 
 	; exit if the string specified is already greater than the length given
 	mov eax, dword [ebp + 16]
-	mov ebx, dword [ebp - 4]
+	mov ebx, strLen
 	cmp ebx, eax
 	jae .Exit
 
 	; calculate number of characters we need to add into eax
-	sub eax, dword [ebp - 4]
+	sub eax, strLen
 
 	; calculate write address and save for later
 	mov ebx, dword [ebp + 8]
-	add ebx, dword [ebp - 4]
+	add ebx, strLen
 	push ebx
 
 	; MemFill the characters onto the end of the string
@@ -1290,12 +1305,17 @@ StringSearchCharList:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; the length of the main string
-	sub esp, 4									; the length of the list string
-	sub esp, 4									; return value
+
+
+	; allocate local variables
+	sub esp, 12
+	%define mainStrLen							dword [ebp - 4]
+	%define listStrLen							dword [ebp - 8]
+	%define returnValue							dword [ebp - 12]
+
 
 	; init return value to an absurdly high number 
-	mov dword [ebp - 12], 0xFFFFFFFF
+	mov returnValue, 0xFFFFFFFF
 
 	; get length of the main string
 	push dword [ebp + 8]
@@ -1305,7 +1325,7 @@ StringSearchCharList:
 	; exit if the string was null, save eax if not
 	cmp eax, 0
 	je .Exit
-	mov dword [ebp - 4], eax
+	mov mainStrLen, eax
 
 	; get length of the list string
 	push dword [ebp + 12]
@@ -1315,10 +1335,10 @@ StringSearchCharList:
 	; exit if the string was null, save eax if not
 	cmp eax, 0
 	je .Exit
-	mov dword [ebp - 8], eax
+	mov listStrLen, eax
 
 	; this loop cycles through all characters of the list string
-	mov ecx, dword [ebp - 8]
+	mov ecx, listStrLen
 	mov esi, [ebp + 12]
 	.scanLoop:
 
@@ -1329,7 +1349,7 @@ StringSearchCharList:
 		mov ebx, ecx
 
 		; scan the main string for this character
-		mov ecx, dword [ebp - 4]
+		mov ecx, mainStrLen
 		mov edi, [ebp + 8]
 		repne scasb
 
@@ -1341,12 +1361,12 @@ StringSearchCharList:
 			sub edi, [ebp + 8]
 
 			; compare to see if this value is lower (e.g. "nearer") than the last one
-			mov eax, dword [ebp - 12]
+			mov eax, returnValue
 			cmp edi, eax
 			jnb .NextIteration
 
 			; it was closer, so save this value
-			mov dword [ebp - 12], edi
+			mov returnValue, edi
 
 		.NextIteration:
 		; do the next pass through the loop
@@ -1356,12 +1376,12 @@ StringSearchCharList:
 	
 	.Exit:
 	; see if the return value is still 0xFFFFFFFF and make it zero if so
-	cmp dword [ebp - 12], 0xFFFFFFFF
+	cmp returnValue, 0xFFFFFFFF
 	jne .NoAdjust
-	mov dword [ebp - 12], 0
+	mov returnValue, 0
 
 	.NoAdjust:
-	mov eax, dword [ebp - 12]
+	mov eax, returnValue
 	mov dword [ebp + 12], eax
 
 	mov esp, ebp
@@ -1520,14 +1540,19 @@ StringTruncateLeft:
 	push ebp
 	mov ebp, esp
 
+	; allocate local variables
+	sub esp, 4
+	%define strLength							dword [ebp - 4]
+
+
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop dword [ebp - 4]
+	pop strLength
 
 	; exit if the string specified is shorter than the length given
 	mov eax, dword [ebp + 12]
-	mov ebx, dword [ebp - 4]
+	mov ebx, strLength
 	cmp eax, ebx
 	jae .Exit
 
@@ -1563,16 +1588,20 @@ StringTruncateRight:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; length of string specified
+
+	; allocate local variables
+	sub esp, 4
+	%define strLength							dword [ebp - 4]
+
 
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop dword [ebp - 4]
+	pop strLength
 
 	; exit if the string specified is shorter than the length given
 	mov eax, dword [ebp + 12]
-	mov ebx, dword [ebp - 4]
+	mov ebx, strLength
 	cmp eax, ebx
 	jae .Exit
 
@@ -1604,11 +1633,16 @@ StringWordCount:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; the length of the main string
-	sub esp, 4									; the length of the list string
-	sub esp, 4									; wordCount
-	sub esp, 1									; lastType
-	sub esp, 2									; temporary string for current byte being tested
+
+
+	; allocate local variables
+	sub esp, 15
+	%define mainStrLen							dword [ebp - 4]
+	%define listStrLen							dword [ebp - 8]
+	%define wordCount							dword [ebp - 12]
+	%define lastType							byte [ebp - 13]
+	%define currentByteTemp						word [ebp - 15]
+
 
 	; get eax ready for writing to the return value in case we have to exit immediately
 	mov eax, 0
@@ -1621,7 +1655,7 @@ StringWordCount:
 	; exit if the string was null, save eax if not
 	cmp ebx, 0
 	je .Exit
-	mov dword [ebp - 4], ebx
+	mov mainStrLen, ebx
 
 	; get length of the list string
 	push dword [ebp + 12]
@@ -1631,15 +1665,15 @@ StringWordCount:
 	; exit if the string was null, save eax if not
 	cmp ebx, 0
 	je .Exit
-	mov dword [ebp - 8], ebx
+	mov listStrLen, ebx
 
 	; set up loop value
-	mov ecx, dword [ebp - 4]
+	mov ecx, mainStrLen
 
 	; set up local variables here
-	mov byte [ebp - 13], 0
-	mov word [ebp - 15], 0
-	mov dword [ebp - 12], 0
+	mov lastType, 0
+	mov currentByteTemp, 0
+	mov wordCount, 0
 	mov esi, dword [ebp + 8]
 
 	; loop to process the characters
@@ -1668,28 +1702,28 @@ StringWordCount:
 		cmp edx, 0
 		je .NotASeperator
 			; make a note that this character was a separator
-			mov byte [ebp - 13], 2
+			mov lastType, 2
 			jmp .NextIteration
 
 		.NotASeperator:
 
 			; if the last character wasn't a separator, increment wordCount
-			mov bl, byte [ebp - 13]
+			mov bl, lastType
 
 			cmp bl, 1
 			je .SkipIncrement
-				inc dword [ebp - 12]
+				inc wordCount
 			.SkipIncrement:
 
 			; make a note that this character was not a separator
-			mov byte [ebp - 13], 1
+			mov lastType, 1
 
 		.NextIteration:
 
 	loop .WordLoop
 
 	; get eax ready for writing the return value
-	mov eax, dword [ebp - 12]
+	mov eax, wordCount
 
 	.Exit:
 	mov dword [ebp + 12], eax
@@ -1714,11 +1748,16 @@ StringWordGet:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; the length of the main string
-	sub esp, 4									; the length of the list string
-	sub esp, 4									; wordCount
-	sub esp, 1									; lastType
-	sub esp, 2									; temporary string for current byte being tested
+
+
+	; allocate local variables
+	sub esp, 15
+	%define mainStrLen							dword [ebp - 4]
+	%define listStrLen							dword [ebp - 8]
+	%define wordCount							dword [ebp - 12]
+	%define lastType							byte [ebp - 13]
+	%define currentByteTemp						word [ebp - 15]
+
 
 	; get eax ready for writing to the return value in case we have to exit immediately
 	mov eax, 0
@@ -1731,7 +1770,7 @@ StringWordGet:
 	; exit if the string was null, save eax if not
 	cmp ebx, 0
 	je .Exit
-	mov dword [ebp - 4], ebx
+	mov mainStrLen, ebx
 
 	; get length of the list string
 	push dword [ebp + 12]
@@ -1741,15 +1780,15 @@ StringWordGet:
 	; exit if the string was null, save eax if not
 	cmp ebx, 0
 	je .Exit
-	mov dword [ebp - 8], ebx
+	mov listStrLen, ebx
 
 	; set up our loop value
-	mov ecx, dword [ebp - 4]
+	mov ecx, mainStrLen
 
 	; set up local variables here
-	mov byte [ebp - 13], 0
-	mov word [ebp - 15], 0
-	mov dword [ebp - 12], 0
+	mov lastType, 0
+	mov currentByteTemp, 0
+	mov wordCount, 0
 	mov esi, dword [ebp + 8]
 
 	; clear out the temp word string
@@ -1786,7 +1825,7 @@ StringWordGet:
 		je .NotASeperator
 			; see if we have the requested word and exit if so
 			mov eax, [ebp + 16]
-			mov ebx, [ebp - 12]
+			mov ebx, wordCount
 			cmp eax, ebx
 			je .WordFound
 
@@ -1796,21 +1835,21 @@ StringWordGet:
 			stosb
 
 			; make a note that this character was a separator
-			mov byte [ebp - 13], 2
+			mov lastType, 2
 			jmp .NextIteration
 
 		.NotASeperator:
 
 			; if the last character wasn't a separator, increment wordCount
-			mov bl, byte [ebp - 13]
+			mov bl, lastType
 
 			cmp bl, 1
 			je .SkipIncrement
-				inc dword [ebp - 12]
+				inc wordCount
 			.SkipIncrement:
 
 			; make a note that this character was not a separator
-			mov byte [ebp - 13], 1
+			mov lastType, 1
 
 			; add this character to wordReturned$
 			pusha
@@ -1826,7 +1865,7 @@ StringWordGet:
 
 	.WordFound:
 	; get eax ready for writing the return value
-	mov eax, dword [ebp - 12]
+	mov eax, wordCount
 
 	.Exit:
 	mov dword [ebp + 12], eax
@@ -1834,7 +1873,3 @@ StringWordGet:
 	mov esp, ebp
 	pop ebp
 ret 16
-
-
-
-kHexDigits										db '0123456789ABCDEF'

@@ -16,30 +16,42 @@
 
 
 
-; 32-bit function listing:
-; PCICalculateNext				Calculates the proper value of the next spot on the PCI bus
-; PCICheckForFunction			Checks the bus/device/function specified to see if there's something there
-; PCIDetect						Pokes the 32-bit I/O register at 0x0CF8 to see if there's a PCI controller there
-; PCIDriverSearch				Scans all the drivers in the kernel to see if any match the class/subclass/progif given
-; PCIGetFunctionCount			Returns the total number of functions across all PCI busses in the system
-; PCIGetNextFunction			Starts a scans at the bus/device/function specified to find the next function in order
-; PCIInitBus					Scans all PCI busses and shadows all data to a List Manager list
-; PCILiveRead					Reads a 32-bit register value from the PCI target specified
-; PCILiveWrite					Writes a 32-bit value to the target PCI register specified
-; PCILoadDrivers				Cycles through all functions in the PCI list and loads drivers for each
-; PCIReadAll					Gets all info for the specified PCI device and fills it into the struct at the given address
-; PCIReadByte					Reads a byte register from the PCI target specified
-; PCIReadWord					Reads a word register from the PCI target specified
-; PCIReadDWord					Reads a dword register from the PCI target specified
-; PCIWriteByte					Writes a byte value to the PCI target specified
-; PCIWriteWord					Writes a word value to the PCI target specified
-; PCIWriteDword					Writes a dword value to the PCI target specified
-
-
-
-; definesb
+; defines
 %define kPCIAddressPort							0x0CF8
 %define kPCIDataPort							0x0CFC
+
+
+
+bits 16
+
+
+
+PCIProbe:
+	; Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push bp
+	mov bp, sp
+
+	; execute the PCI BIOS call
+	mov eax, 0xB101
+	mov edi, 0
+	int 0x1A
+
+	; save the PCI capabilities
+	mov dword [tSystem.PCICapabilities], eax
+
+	; save the PCI version info
+	mov dword [tSystem.PCIVersion], ebx
+
+	mov sp, bp
+	pop bp
+ret
 
 
 
@@ -51,12 +63,12 @@ PCICalculateNext:
 	; Calculates the proper value of the next spot on the PCI bus
 	;
 	;  input:
-	;   PCI Bus
+	;	PCI Bus
 	;	PCI Device
 	;	PCI Function
 	;
 	;  output:
-	;   next PCI Bus
+	;	next PCI Bus
 	;	next PCI Device
 	;	next PCI Function
 
@@ -111,12 +123,12 @@ PCICheckForFunction:
 	; Checks the bus/device/function specified to see if there's something there
 	;
 	;  input:
-	;   PCI Bus
+	;	PCI Bus
 	;	PCI Device
 	;	PCI Function
 	;
 	;  output:
-	;   result
+	;	result
 	;		kTrue - function was found
 	;		kFalse - function was not found
 
@@ -153,60 +165,17 @@ ret 8
 
 
 
-PCIDetect:
-	; Pokes the 32-bit I/O register at 0x0CF8 to see if there's a PCI controller there
-	;
-	;  input:
-	;   dummy value
-	;
-	;  output:
-	;   PCI controller presence
-	;		0 = false
-	;		1 = true
-
-	push ebp
-	mov ebp, esp
-
-	; write a value to the port
-	mov dx, kPCIAddressPort
-	mov eax, 0x20150000
-	out dx, eax
-
-	; clear eax for sanity and to give the previous write time to "settle in"
-	mov eax, 0x00000000
-	
-	; read it back
-	in eax, dx
-
-	; now compare to see what we got
-	cmp eax, 0x20150000
-	je .ItMatched
-	mov ebx, dword [kFalse]
-	jmp .AllDone
-
-	.ItMatched:
-	mov ebx, dword [kTrue]
-
-	.AllDone:
-	mov dword [ebp + 8], ebx
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
 PCIDriverSearch:
 	; Scans all the drivers in the kernel to see if any match the class/subclass/progif given and returns
 	; a function pointer to the driver's init function if found, or zero if not found
 	;
 	;  input:
-	;   PCI Class value
-	;   PCI Subclass value
-	;   PCI ProgIf value
+	;	PCI Class value
+	;	PCI Subclass value
+	;	PCI ProgIf value
 	;
 	;  output:
-	;   driver init function address (or zero if no appropriate driver found)
+	;	driver init function address (or zero if no appropriate driver found)
 
 	push ebp
 	mov ebp, esp
@@ -330,22 +299,27 @@ PCIGetFunctionCount:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; PCIBus
-	sub esp, 4									; PCIDevice
-	sub esp, 4									; PCIFunction
-	sub esp, 4									; PCIDeviceCount
+
+
+	; allocate local variables
+	sub esp, 16
+	%define PCIBus								dword [ebp - 4]
+	%define PCIDevice							dword [ebp - 8]
+	%define PCIFunction							dword [ebp - 12]
+	%define PCIDeviceCount						dword [ebp - 16]
+
 
 	; init the values
-	mov dword [ebp - 4], 0
-	mov dword [ebp - 8], 0
-	mov dword [ebp - 12], 0
-	mov dword [ebp - 16], 0
+	mov PCIBus, 0
+	mov PCIDevice, 0
+	mov PCIFunction, 0
+	mov PCIDeviceCount, 0
 
 	; start the scanning loop
 	.ScanLoop:
-	push dword [ebp - 12]
-	push dword [ebp - 8]
-	push dword [ebp - 4]
+	push PCIFunction
+	push PCIDevice
+	push PCIBus
 	call PCICheckForFunction
 	pop eax
 
@@ -354,30 +328,30 @@ PCIGetFunctionCount:
 	jne .NothingFound
 
 	; if we get here, something was found, so increment the counter
-	inc dword [ebp - 16]
+	inc PCIDeviceCount
 
 	.NothingFound:
 
 	; increment to the next function slot
-	push dword [ebp - 12]
-	push dword [ebp - 8]
-	push dword [ebp - 4]
+	push PCIFunction
+	push PCIDevice
+	push PCIBus
 	call PCICalculateNext
-	pop dword [ebp - 12]
-	pop dword [ebp - 8]
-	pop dword [ebp - 4]
+	pop PCIFunction
+	pop PCIDevice
+	pop PCIBus
 
 	; add all the values together to be tested
-	mov eax, dword [ebp - 4]
-	add eax, dword [ebp - 8]
-	add eax, dword [ebp - 12]
+	mov eax, PCIBus
+	add eax, PCIDevice
+	add eax, PCIFunction
 
 	; see if we're done, loop again if not
 	cmp eax, 0x0002FFFD
 	jne .ScanLoop
 
 	; and we exit!
-	mov eax, dword [ebp - 16]
+	mov eax, PCIDeviceCount
 	mov dword [ebp + 8], eax
 
 	mov esp, ebp
@@ -462,10 +436,15 @@ PCIInitBus:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; currentElement
-	sub esp, 4									; PCIBus
-	sub esp, 4									; PCI Device
-	sub esp, 4									; PCI Function
+
+
+	; allocate local variables
+	sub esp, 16
+	%define currentElement						dword [ebp - 4]
+	%define PCIBus								dword [ebp - 8]
+	%define PCIDevice							dword [ebp - 12]
+	%define PCIFunction							dword [ebp - 16]
+
 
 	; see how many PCI functions we have
 	push 0
@@ -501,31 +480,31 @@ PCIInitBus:
 	
 	; cycle through all busses and devices on those busses, copying all registers into RAM
 	; clear the values
-	mov dword [ebp - 4], 0
-	mov dword [ebp - 8], 0
-	mov dword [ebp - 12], 0
+	mov currentElement, 0
+	mov PCIBus, 0
+	mov PCIDevice, 0
 	mov dword [ebp - 16], 0
 
 	.FunctionLoop:
-		push dword [ebp - 16]
-		push dword [ebp - 12]
-		push dword [ebp - 8]
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		call PCIGetNextFunction
-		pop dword [ebp - 16]
-		pop dword [ebp - 12]
-		pop dword [ebp - 8]
+		pop PCIFunction
+		pop PCIDevice
+		pop PCIBus
 
 		; see if we're done yet
-		mov eax, dword [ebp - 8]
-		add eax, dword [ebp - 12]
-		add eax, dword [ebp - 16]
+		mov eax, PCIBus
+		add eax, PCIDevice
+		add eax, PCIFunction
 		cmp eax, 0x0002FFFD
 		je .LoopDone
 
 		; now that we have a valid device, let's copy all the registers
 
 		; set up the target address
-		push dword [ebp - 4]
+		push currentElement
 		push dword [tSystem.listPCIDevices]
 		call LMElementAddressGet
 		pop esi
@@ -533,15 +512,15 @@ PCIInitBus:
 		pop eax
 
 		; copy PCI bus location info to the table
-		mov eax, [ebp - 8]
+		mov eax, PCIBus
 		mov [esi], eax
 		add esi, 4
 
-		mov eax, [ebp - 12]
+		mov eax, PCIDevice
 		mov [esi], eax
 		add esi, 4
 
-		mov eax, [ebp - 16]
+		mov eax, PCIFunction
 		mov [esi], eax
 		add esi, 4
 
@@ -561,9 +540,9 @@ PCIInitBus:
 
 			; get the register
 			push edx
-			push dword [ebp - 16]
-			push dword [ebp - 12]
-			push dword [ebp - 8]
+			push PCIFunction
+			push PCIDevice
+			push PCIBus
 			call PCILiveRead
 			pop eax
 
@@ -582,16 +561,16 @@ PCIInitBus:
 		loop .ReadLoop
 
 		; advance to the next slot
-		push dword [ebp - 16]
-		push dword [ebp - 12]
-		push dword [ebp - 8]
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		call PCICalculateNext
-		pop dword [ebp - 16]
-		pop dword [ebp - 12]
-		pop dword [ebp - 8]
+		pop PCIFunction
+		pop PCIDevice
+		pop PCIBus
 
 		; move to the next element
-		inc dword [ebp - 4]
+		inc currentElement
 
 	jmp .FunctionLoop
 
@@ -729,12 +708,17 @@ PCILoadDrivers:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 4									; PCIBus
-	sub esp, 4									; PCIDevice
-	sub esp, 4									; PCIFunction
-	sub esp, 4									; PCIClass
-	sub esp, 4									; PCISubclass
-	sub esp, 4									; PCIProgIf
+
+
+	; allocate local variables
+	sub esp, 24
+	%define PCIBus								dword [ebp - 4]
+	%define PCIDevice							dword [ebp - 8]
+	%define PCIFunction							dword [ebp - 12]
+	%define PCIClass							dword [ebp - 16]
+	%define PCISubclass							dword [ebp - 20]
+	%define PCIProgIf							dword [ebp - 24]
+
 
 	; first get the number of elements in the PCI list
 	push dword 0
@@ -759,13 +743,13 @@ PCILoadDrivers:
 
 		; get the PCI function data from the list
 		mov eax, dword [esi]
-		mov dword [ebp - 4], eax
+		mov PCIBus, eax
 		add esi, 4
 		mov eax, dword [esi]
-		mov dword [ebp - 8], eax
+		mov PCIDevice, eax
 		add esi, 4
 		mov eax, dword [esi]
-		mov dword [ebp - 12], eax
+		mov PCIFunction, eax
 
 		; clear our print string
 		push dword 0
@@ -778,9 +762,9 @@ PCILoadDrivers:
 		; maybe make these three separate routines in the future for handiness?
 		; get the class, subclass, and progif values for this device so we can search for a suitable driver
 		push dword 0x00000002
-		push dword [ebp - 12]
-		push dword [ebp - 8]
-		push dword [ebp - 4]
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		call PCIReadDWord
 		pop eax
 
@@ -788,26 +772,26 @@ PCILoadDrivers:
 		shr eax, 8
 		mov ebx, eax
 		and ebx, 0x000000FF
-		mov dword [ebp - 24], ebx
+		mov PCIProgIf, ebx
 
 		shr eax, 8
 		mov ebx, eax
 		and ebx, 0x000000FF
-		mov dword [ebp - 20], ebx
+		mov PCISubclass, ebx
 
 		shr eax, 8
 		mov ebx, eax
 		and ebx, 0x000000FF
-		mov dword [ebp - 16], ebx
+		mov PCIClass, ebx
 
 
 		; tell the user what we're doing here
-		push dword [ebp - 24]
-		push dword [ebp - 20]
-		push dword [ebp - 16]
-		push dword [ebp - 12]
-		push dword [ebp - 8]
-		push dword [ebp - 4]
+		push PCIProgIf
+		push PCISubclass
+		push PCIClass
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		push kPrintText$
 		push .locatingDriver$
 		call StringBuild
@@ -816,9 +800,9 @@ PCILoadDrivers:
 
 		; check for a function driver (that is, one for the exact ProgIf value)
 		; search for precise driver first for this exact class/subclass/prog if 
-		push dword [ebp - 24]
-		push dword [ebp - 20]
-		push dword [ebp - 16]
+		push PCIProgIf
+		push PCISubclass
+		push PCIClass
 		call PCIDriverSearch
 		pop eax
 
@@ -835,9 +819,9 @@ PCILoadDrivers:
 		
 		; now we can run the driver's init code
 		push 0
-		push dword [ebp - 12]
-		push dword [ebp - 8]
-		push dword [ebp - 4]
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		call eax
 		pop ecx
 
@@ -850,8 +834,8 @@ PCILoadDrivers:
 		; if we get here, a suitable driver wasn't found, so now we'll search for a driver that handles
 		; the entire subclass (all prog if values)
 		push dword 0x0000FFFF
-		push dword [ebp - 20]
-		push dword [ebp - 16]
+		push PCISubclass
+		push PCIClass
 		call PCIDriverSearch
 		pop eax
 
@@ -868,9 +852,9 @@ PCILoadDrivers:
 		
 		; now we can run the driver's init code
 		push 0
-		push dword [ebp - 12]
-		push dword [ebp - 8]
-		push dword [ebp - 4]
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		call eax
 		pop ecx
 
@@ -882,7 +866,7 @@ PCILoadDrivers:
 		; still nothing?!? ok, search for a driver for the entire class (all subclasses and prog if values)
 		push dword 0x0000FFFF
 		push dword 0x0000FFFF
-		push dword [ebp - 16]
+		push PCIClass
 		call PCIDriverSearch
 		pop eax
 
@@ -899,9 +883,9 @@ PCILoadDrivers:
 		
 		; now we can run the driver's init code
 		push 0
-		push dword [ebp - 12]
-		push dword [ebp - 8]
-		push dword [ebp - 4]
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
 		call eax
 		pop ecx
 

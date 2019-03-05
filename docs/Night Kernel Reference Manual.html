@@ -353,7 +353,7 @@
 					<br>
 				</p>
 			</code>
-			After EBP has been set, we can then define in reference to it any local variables needed in this function. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need, then the individual variables can be defined. Note that defining the variables with labels is <i>not</i> technically required (using bare references like <code>dword [ebp - 4]</code> in the code directly is perfectly valid) but using the <i>% define</i> directive essentially tells NASM something to the effect of, "Every time you see <i>blockTrailingSize</i> in the code below, go ahead and substitute it with <i><code>dword [ebp - 16]</code></i>" which makes the code much easier for us humans to read.<br>
+			Now that EBP has been set, offsets from it may be defined to represent any local variables needed in this function. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need, then the individual variables can be defined. Note that defining the variables with labels is <i>not</i> technically required (using bare references like <code>dword [ebp - 4]</code> in the code directly is perfectly valid) but using the <i>% define</i> directive essentially tells NASM something to the effect of, "Every time you see <i>blockTrailingSize</i> in the code below, go ahead and substitute it with <i><code>dword [ebp - 16]</code></i>" which makes the code much easier for us humans to read.<br>
 			<br>
 			<br>
 			<br>
@@ -697,6 +697,26 @@
 		<hr>
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
+			3/5/2019, 0.18 Update - Bugfixes for PCI handling on real hardware<br>
+			&emsp;New<br>
+			&emsp;&emsp;- Kernel: Added <i>%define</i> symbols for various local variables in multiple files to improve readability<br>
+			&emsp;&emsp;- Kernel: Added Reboot option to Debug Menu<br>
+			&emsp;&emsp;- Kernel: Added <i>PCIProbe</i> to <i>pci.asm</i><br>
+			<br>
+			&emsp;Changed<br>
+			&emsp;&emsp;- Kernel: Deleted the 32-bit PCIDetect() since we now have the 16-bit PCIProbe()<br>
+			&emsp;&emsp;- Kernel: Moved function listings from <i>pci.asm</i> into the NKRM<br>
+			&emsp;&emsp;- Manual: Updated <i>Known Issues</i> section<br>
+			<br>
+			&emsp;Fixed<br>
+			&emsp;&emsp;- Kernel: Fixed the use of a variable without assignment in one of the string routines<br>
+			&emsp;&emsp;- Kernel: PCI controller initialization is now handled properly, fixing an infinite loop on real hardware due to a poor detection technique<br>
+			&emsp;&emsp;- Manual: Removed some stray Javascript left over from a previous design test of "accordion" sections<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
 			3/4/2019, 0.17 Update - Memory Manager upgrades<br>
 			&emsp;New<br>
 			&emsp;&emsp;- Kernel: Added <i>%define</i> symbols for various local variables in <i>lists.asm</i> and <i>memory.asm</i> to improve readability<br>
@@ -1078,6 +1098,7 @@
 		<h2><a name="KnownIssues">Appendix 1 - Known Issues</a></h2>
 		<p>
 			<ul>
+				<li>Currently only the Fast A20 Enable method is supported, which fails on some real hardware</li>
 				<li>The date and time returned by the kernel is inconsistently incorrect due to erroneous detection of formatting values in the hardware RTC</li>
 			</ul>
 		</p>
@@ -1101,7 +1122,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A0.1 - List Manager 32-bit public functions</caption>
+				<caption>Table A2.1 - List Manager 32-bit public functions</caption>
 				<col width = 20%>
 				<col width = 20%>
 				<col width = 20%>
@@ -1336,7 +1357,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A0.2 - List Manager 32-bit internal functions</caption>
+				<caption>Table A2.2 - List Manager 32-bit internal functions</caption>
 				<col width = 20%>
 				<col width = 20%>
 				<col width = 20%>
@@ -1499,9 +1520,9 @@
 
 			<b>Memory Manager Functions - <i>memory.asm</i></b><br>
 			<br>
-			16-bit function listing:<br>
+			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A0.3 - Memory Manager 16-bit functions</caption>
+				<caption>Table A2.3 - Memory Manager 16-bit public functions</caption>
 				<col width = 20%>
 				<col width = 20%>
 				<col width = 20%>
@@ -1525,7 +1546,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A0.4 - Memory Manager 32-bit public functions</caption>
+				<caption>Table A2.4 - Memory Manager 32-bit public functions</caption>
 				<col width = 20%>
 				<col width = 20%>
 				<col width = 20%>
@@ -1814,7 +1835,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A0.5 - Memory Manager 32-bit internal functions</caption>
+				<caption>Table A2.5 - Memory Manager 32-bit internal functions</caption>
 				<col width = 20%>
 				<col width = 20%>
 				<col width = 20%>
@@ -1867,8 +1888,288 @@
 			<br>
 			<br>
 
+			<b><i>pci.asm</i></b><br>
+			<br>
+			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A0.6 - Function return codes</caption>
+				<caption>Table A2.6 - pci.asm 16-bit public functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>PCIProbe</td>
+					<td>n/a</td>
+					<td>n/a</td>
+					<td>Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A2.7 - pci.asm 32-bit public functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>PCICalculateNext</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>next PCI Bus</li>
+							<li>next PCI Device</li>
+							<li>next PCI Function</li>
+						</ol>
+					</td>
+					<td>Calculates the proper value of the next spot on the PCI bus</td>
+				</tr>
+				<tr>
+					<td>PCICheckForFunction</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>
+								Result<br>
+								True - Function was found<br>
+								False - Function was not found
+							</li>
+						</ol>
+					</td>
+					<td>Checks the bus/device/function specified to see if there's something there</td>
+				</tr>
+				<tr>
+					<td>PCIDriverSearch</td>
+					<td>
+						<ol>
+							<li>PCI Class value</li>
+							<li>PCI Subclass value</li>
+							<li>PCI ProgIf value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Driver init function address<br>
+							(or zero if no appropriate driver found)</li>
+						</ol>
+					</td>
+					<td>Scans all the drivers in the kernel to see if any match the class/subclass/progif given</td>
+				</tr>
+				<tr>
+					<td>PCIGetFunctionCount</td>
+					<td>
+						<ol>
+							<li>Dummy value</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>PCI device count</li>
+						</ol>
+					</td>
+					<td>Returns the total number of functions across all PCI busses in the system</td>
+				</tr>
+				<tr>
+					<td>PCIGetNextFunction</td>
+					<td>
+						<ol>
+							<li>Starting PCI Bus</li>
+							<li>Starting PCI Device</li>
+							<li>Starting PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Next occupied PCI Bus</li>
+							<li>Next occupied PCI Device</li>
+							<li>Next occupied PCI Function</li>
+						</ol>
+					</td>
+					<td>Starts a scans at the bus/device/function specified to find the next function in order</td>
+				</tr>
+				<tr>
+					<td>PCIInitBus</td>
+					<td>n/a</td>
+					<td>n/a</td>
+					<td>Scans all PCI busses and shadows all data to a List Manager list</td>
+				</tr>
+				<tr>
+					<td>PCILiveRead</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>Reads a 32-bit register value from the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>PCILiveWrite</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+							<li>Value to write</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Writes a 32-bit value to the target PCI register specified</td>
+				</tr>
+				<tr>
+					<td>PCILoadDrivers</td>
+					<td>n/a</td>
+					<td>n/a</td>
+					<td>Cycles through all functions in the PCI list and loads drivers for each</td>
+				</tr>
+				<tr>
+					<td>PCIReadAll</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI info struct address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Gets all info for the specified PCI device and fills it into the struct at the given address</td>
+				</tr>
+				<tr>
+					<td>PCIReadByte</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>Reads a byte register from the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>PCIReadWord</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>Reads a word register from the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>PCIReadDWord</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>Reads a dword register from the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>PCIWriteByte</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Writes a byte value to the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>PCIWriteWord</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Writes a word value to the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>PCIWriteDword</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Writes a dword value to the PCI target specified</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<table style="width:100%">
+				<caption>Table A2.8 - Function return codes</caption>
 				<col width = 10%>
 				<col width = 90%>
 				<tr>
@@ -2147,31 +2448,4 @@
 
 
 	</body>
-	
-	<!-- <button class="accordion">LMElementAddressGet</button><div class="panel"></div> -->
-	<script>
-	var accdn = document.getElementsByClassName("accordion");
-	var index;
-
-	for (index = 0; index < accdn.length; index++)
-	{
-		accdn[index].addEventListener
-		(
-			"click", function()
-			{
-				this.classList.toggle("active");
-				var panel = this.nextElementSibling;
-				if (panel.style.maxHeight)
-				{
-					panel.style.maxHeight = null;
-				}
-
-			else
-			{
-				panel.style.maxHeight = panel.scrollHeight + "px";
-			}
-			}
-		);
-	}
-	</script>
 </html>

@@ -335,7 +335,8 @@ DebugMenu:
 
 		cmp al, 0x30							; choice 0
 		jne .TestFor1
-		jmp .Exit
+		call Reboot
+		jmp .DrawMenu
 
 		.TestFor1:
 		cmp al, 0x31							; choice 1
@@ -408,7 +409,7 @@ ret
 .kDebugText7$									db '7 - ', 0x00
 .kDebugText8$									db '8 - ', 0x00
 .kDebugText9$									db '9 - ', 0x00
-.kDebugText0$									db '0 - ', 0x00
+.kDebugText0$									db '0 - Reboot', 0x00
 .ticksFormat$									db 'Ticks since boot: ^p10^d     Seconds since boot:^d', 0x00
 .dateTimeFormat$								db '^p2^d:^d:^d.^p3^d     ^p2^d/^d/^h^d', 0x00
 

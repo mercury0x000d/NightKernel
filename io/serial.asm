@@ -771,9 +771,14 @@ SerialSetBaud:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 2									; divisorLatchLow
-	sub esp, 2									; divisorLatchHigh
-	sub esp, 2									; lineControl
+
+
+	; allocate local variables
+	sub esp, 6
+	%define divisorLatchLow						word [ebp - 2]
+	%define divisorLatchHigh					word [ebp - 4]
+	%define lineControl							word [ebp - 6]
+
 
 	; get the port number off the stack and test it out
 	mov eax, [ebp + 8]
@@ -804,31 +809,31 @@ SerialSetBaud:
 	jmp .selectDone
 
 	.setPort1:
-	mov word [ebp - 2], 0x03F8
-	mov word [ebp - 4], 0x03F9
-	mov word [ebp - 6], 0x03FB
+	mov divisorLatchLow, 0x03F8
+	mov divisorLatchHigh, 0x03F9
+	mov lineControl, 0x03FB
 	jmp .selectDone
 
 	.setPort2:
-	mov word [ebp - 2], 0x02F8
-	mov word [ebp - 4], 0x02F9
-	mov word [ebp - 6], 0x02FB
+	mov divisorLatchLow, 0x02F8
+	mov divisorLatchHigh, 0x02F9
+	mov lineControl, 0x02FB
 	jmp .selectDone
 
 	.setPort3:
-	mov word [ebp - 2], 0x03E8
-	mov word [ebp - 4], 0x03E9
-	mov word [ebp - 6], 0x03EB
+	mov divisorLatchLow, 0x03E8
+	mov divisorLatchHigh, 0x03E9
+	mov lineControl, 0x03EB
 	jmp .selectDone
 
 	.setPort4:
-	mov word [ebp - 2], 0x02E8
-	mov word [ebp - 4], 0x02E9
-	mov word [ebp - 6], 0x02EB
+	mov divisorLatchLow, 0x02E8
+	mov divisorLatchHigh, 0x02E9
+	mov lineControl, 0x02EB
 
 	.selectDone:
 	; set the DLAB bit of the LCR
-	mov dx, [ebp - 6]
+	mov dx, lineControl
 	in al, dx
 	or al, 10000000b
 	out dx, al
@@ -840,16 +845,16 @@ SerialSetBaud:
 	div ebx
 
 	; set the Divisor Latch low byte
-	mov dx, [ebp - 2]
+	mov dx, divisorLatchLow
 	out dx, al
 
 	; set the Divisor Latch high byte
-	mov dx, [ebp - 4]
+	mov dx, divisorLatchHigh
 	shr ax, 8
 	out dx, al
 
 	; clear the DLAB bit of the LCR
-	mov dx, [ebp - 6]
+	mov dx, lineControl
 	in al, dx
 	and al, 01111111b
 	out dx, al

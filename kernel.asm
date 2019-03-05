@@ -35,6 +35,7 @@ org 0x0600
 cld
 cli
 
+
 main:
 ; init the stack segment
 mov ax, 0x0000
@@ -47,6 +48,7 @@ mov ds, ax
 mov es, ax
 mov fs, ax
 mov gs, ax
+
 
 ; set hardware text mode
 mov ah, 0x00
@@ -101,7 +103,14 @@ call APMEnable
 
 
 
-; load that GDT
+; probe the PCI controller while we still can
+push progressText10$
+call PrintIfConfigBits16
+call PCIProbe
+
+
+
+; load that GDT!
 push progressText04$
 call PrintIfConfigBits16
 lgdt [GDTStart]
@@ -247,306 +256,33 @@ sti
 
 
 
-; find out how many PCI devices we have and save that info to the system struct
-push progressText10$
-call PrintIfConfigBits32
-push 0
-call PCIDetect
-pop eax
-cmp eax, [kTrue]
-jne .PCIFail
+; if we have a PCI controller in the first place, find out how many PCI devices we have and save that info to the system struct
+cmp dword [tSystem.PCIVersion], 0
+je .NoPCI
 
-call PCIInitBus
-jmp .PCISkip
+	; if we get here, we have PCI
+	; so let's init things!
+	call PCIInitBus
 
-.PCIFail:
+	; now load drivers for PCI devices
+	push progressText11$
+	call PrintIfConfigBits32
+	call PCILoadDrivers
+	jmp .PCIComplete
+
+.NoPCI:
 push PCIFailed$
 call Print32
-jmp .PCISkip
 
-.PCISkip:
-
+.PCIComplete:
 
 
-; load drivers for PCI devices
-push progressText11$
-call PrintIfConfigBits32
-call PCILoadDrivers
 
 ; load drivers for legacy devices
 call DriverLegacyLoad
 
 ; enumerate partitions
 call PartitionEnumerate
-
-
-
-; WELCOME TO THE CODE TESTING AREA
-; AUTHORIZED PERSONNEL ONLY
-; DISPLAY ID TAGS AT ALL TIMES
-; PLEASE ENJOY YOUR STAY
-
-; remaining for reentrancy: StringBuild()
-
-;push dword 32
-;push dword 0x200000
-;call walk_stack
-;jmp $
-
-;#########################################################################################
-;pusha
-;push dword 16
-;push dword 0x100000
-;call PrintRAM32
-;popa
-;inc byte [cursorY]
-;jmp $
-;#########################################################################################
-
-
-
-;; ATA sector testing
-;
-;push 0x200000
-;push 1
-;push 303030
-;push 0
-;push 0x01F0
-;call C01SectorWriteLBA28PIO
-;
-;push 0x300000
-;push 1
-;push 303030
-;push 0
-;push 0x01F0
-;call C01SectorReadLBA28PIO
-;
-;push 3
-;push 0x200000
-;call PrintRAM32
-;
-;push 8
-;push 0x20023E
-;call PrintRAM32
-;
-;push 32
-;push 0x300000
-;call PrintRAM32
-;
-;
-;jmp $
-
-
-
-
-
-;; ATAPI sector read testing
-;push 0x200000
-;push 1
-;push 0x00000010
-;push 0
-;push 0x0170
-;call C01ATAPISectorReadPIO
-;
-;push 0x300000
-;push 1
-;push 0x00000011
-;push 0
-;push 0x0170
-;call C01ATAPISectorReadPIO
-
-
-
-
-;; StringAppend/Prepend testing
-;push 65
-;push string$
-;call StringCharPrepend
-;
-;push 66
-;push string$
-;call StringCharPrepend
-;
-;push 67
-;push string$
-;call StringCharPrepend
-;
-;push string$
-;call Print32
-;
-;jmp $
-;
-;string$							db 'Four score and seven years ago', 0x00
-
-
-
-
-
-;; StringTruncate testing
-;push 13
-;push string$
-;call StringTruncateLeft
-;
-;push string$
-;call Print32
-;
-;jmp $
-;
-;string$							db 'Four score and seven years ago', 0x00
-
-
-
-
-
-;; StringPad testing
-;push 40
-;push 65
-;push string$
-;call StringPadLeft
-;
-;push string$
-;call Print32
-;
-;jmp $
-;
-;string$							db 'Four score and seven years ago', 0x00
-;buffer$							times 128 db 0x00
-
-
-
-
-
-;; StringFindFirstMatch testing
-;push matchlist$
-;push string$
-;call StringFindFirstMatch
-;pop eax
-;call PrintRegs32
-;jmp $
-;
-;string$							db 'Four score and seven years ago', 0x00
-;matchlist$							db 'xaeiou', 0x00
-
-
-
-
-
-;; GDT routine tests
-;push 0x0000000F
-;push 0x000000FA
-;push 0x00088888
-;push 0x01234567
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTBuild
-
-;push 0x12345678
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTSetBaseAddress
-;
-;push 0x95327
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTSetLimitAddress
-;
-;push 0x22
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTSetAccessFlags
-;
-;push 0x88
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTSetSizeFlags
-;
-;
-;
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTGetBaseAddress
-;pop eax
-;call PrintRegs32
-;
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTGetLimitAddress
-;pop eax
-;call PrintRegs32
-;
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTGetAccessFlags
-;pop eax
-;call PrintRegs32
-;
-;mov eax, GDTStart
-;add eax, 24
-;push eax
-;call GDTGetSizeFlags
-;pop eax
-;call PrintRegs32
-;jmp $
-
-
-
-
-;; GetWord testing
-;call ScreenClear32
-;
-;push stringA$
-;call Print32
-;
-;push stringB$
-;call Print32
-;
-;
-;push sep$
-;push string$
-;call StringWordCount
-;pop ecx
-;
-;call PrintRegs32
-;
-;mov edx, 0
-;.wordloop:
-;	inc edx
-;	pusha
-;
-;	push scratch$
-;	push edx
-;	push sep$
-;	push string$
-;	call StringWordGet
-;
-;	push 0x27
-;	push scratch$
-;	call StringCharPrepend
-;
-;	push 0x27
-;	push scratch$
-;	call StringCharAppend
-;
-;	push scratch$
-;	call Print32
-;
-;	popa
-;loop .wordloop
-;.done:
-;jmp $
-;string$							db 'Shopping list for dinner: oranges, grapes, apples, screwdrivers.', 0x00
-;sep$							db ', .:', 0x00
-;stringA$						db 'The string is: "Shopping list for dinner: oranges, grapes, apples, screwdrivers."', 0x00
-;stringB$						db 'The separator is: ", .:"', 0x00
-;scratch$						times 32 db 0x00
 
 
 

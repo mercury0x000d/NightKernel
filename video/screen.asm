@@ -408,7 +408,11 @@ Print32:
 
 	push ebp
 	mov ebp, esp
+
+	; allocate local variables
 	sub esp, 1
+	%define tempByte							byte [ebp - 1]
+
 
 	mov esi, [ebp + 8]
 	
@@ -420,7 +424,7 @@ Print32:
 
 	rol bl, 4
 	or cl, bl
-	mov [ebp - 1], cl
+	mov tempByte, cl
 
 	; set up the pointer
 	mov edi, 0xB8000
@@ -453,7 +457,7 @@ Print32:
 	mov di, bx
 
 	; load the color attribute to bl
-	mov bl, [ebp - 1]
+	mov bl, tempByte
 
 	.loopBegin:
 		lodsb
@@ -558,8 +562,10 @@ PrintRAM32:
 
 	push ebp
 	mov ebp, esp
-	sub esp, 17
-	sub esp, 81
+
+	; allocate local variables
+	sub esp, 17									; space for ASCII dump
+	sub esp, 81									; space for address and hex dunp
 
 	mov edi, [ebp + 8]
 	mov ecx, [ebp + 12]

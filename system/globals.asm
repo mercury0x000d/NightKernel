@@ -34,7 +34,7 @@ kKeyTable:										db '  1234567890-=  qwertyuiop[]  asdfghjkl; ` \zxcvbnm,0/ *
 tSystem:
 	.copyright$									db 'Night Kernel, Copyright 1995 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x17
+	.versionMinor								db 0x18
 	.memoryInstalledBytes						dd 0x00000000
 	.memoryInitialAvailableBytes				dd 0x00000000
 	.memoryListReservedSpace					dd 0x00000000
@@ -82,6 +82,8 @@ tSystem:
 	.listPartitions								dd 0x00000000
 	.listPCIDevices								dd 0x00000000				; will be zero if no PCI support
 	.PCIDeviceCount								dd 0x00000000
+	.PCIVersion									dd 0x00000000
+	.PCICapabilities							dd 0x00000000
 
 ; tDriveInfo, for the drives list (120 bytes)
 %define tDriveInfo.ATABasePort					(esi + 00)

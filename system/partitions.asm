@@ -58,38 +58,41 @@ PartitionEnumerate:
 	push ebp
 	mov ebp, esp
 
-	; storage on the stack for local variables
-	sub esp, 4									; address of sector buffer
-	sub esp, 4									; number of elements in the drives list
-	sub esp, 4									; current element of drive list being processed
-	sub esp, 4									; address of current element of drive list being processed
-	sub esp, 4									; address of current element of partition list being processed
-	sub esp, 4									; offset of the beginning of the current partition's data relative to the start of the sector
-	sub esp, 4									; current element of partition list being written to
+
+	; allocate local variables
+	sub esp, 28
+	%define sectorBufferAddr					dword [ebp - 4]		; address of sector buffer
+	%define driveListElementCount				dword [ebp - 8]		; number of elements in the drives list
+	%define driveListCurrentElement				dword [ebp - 12]	; current element of drive list being processed
+	%define driveListCurrentElementAddr			dword [ebp - 16]	; address of current element of drive list being processed
+	%define partitionListCurrentElementAddr		dword [ebp - 20]	; address of current element of partition list being processed
+	%define offset								dword [ebp - 24]	; offset of the beginning of the current partition's data relative to the start of the sector
+	%define partitionListCurrentElement			dword [ebp - 28]	; current element of partition list being written to
+
 
 	; allocate a buffer for the sectors we're going to read, save the address for later
 	push 512
 	push dword 1
 	call MemAllocate
-	pop dword [ebp - 4]
+	pop sectorBufferAddr
 
 	; step through the drives list and discover partitions on each hard drive (other drive types are excluded)
 	push dword 0
 	push dword [tSystem.listDrives]
 	call LMElementCountGet
-	pop dword [ebp - 8]
+	pop driveListElementCount
 	pop eax
 
 	; clear our counter
-	mov dword [ebp - 12], 0
+	mov driveListCurrentElement, 0
 
 	.DriveListLoop:
 		; get the address of this drive list element and save it for later
-		push dword [ebp - 12]
+		push driveListCurrentElement
 		push dword [tSystem.listDrives]
 		call LMElementAddressGet
 		pop esi
-		mov [ebp - 16], esi
+		mov driveListCurrentElementAddr, esi
 		; ignore error code
 		pop eax
 
@@ -100,7 +103,7 @@ PartitionEnumerate:
 		; if we get here, it was a hard drive... let's discover some partitions!
 
 		; load the first sector
-		push dword [ebp - 4]
+		push sectorBufferAddr
 		push 1
 		push 0
 		push dword [tDriveInfo.ATADeviceNumber]
@@ -109,55 +112,55 @@ PartitionEnumerate:
 
 		; if partition A exists, add it to the partitions list
 		.checkForPartitionA:
-		mov esi, [ebp - 4]
+		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetA
 		add esi, edi
 		mov ecx, [tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .checkForPartitionB
-		mov [ebp - 24], edi
+		mov offset, edi
 		call .BuildPartitionEntry
 		
 		; if partition B exists, add it to the partitions list
 		.checkForPartitionB:
-		mov esi, [ebp - 4]
+		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetB
 		add esi, edi
 		mov ecx, [tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .checkForPartitionC
-		mov [ebp - 24], edi
+		mov offset, edi
 		call .BuildPartitionEntry
 
 		
 		; if partition C exists, add it to the partitions list
 		.checkForPartitionC:
-		mov esi, [ebp - 4]
+		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetC
 		add esi, edi
 		mov ecx, [tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .checkForPartitionD
-		mov [ebp - 24], edi
+		mov offset, edi
 		call .BuildPartitionEntry
 
 		
 		; if partition D exists, add it to the partitions list
 		.checkForPartitionD:
-		mov esi, [ebp - 4]
+		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetD
 		add esi, edi
 		mov ecx, [tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .NextPartition
-		mov [ebp - 24], edi
+		mov offset, edi
 		call .BuildPartitionEntry
 
 
 		.NextPartition:
-		inc dword [ebp - 12]
-		mov eax, dword [ebp - 8]
-		mov ebx, dword [ebp - 12]
+		inc driveListCurrentElement
+		mov eax, driveListElementCount
+		mov ebx, driveListCurrentElement
 		cmp ebx, eax
 		je .LoopDone
 
@@ -174,57 +177,57 @@ ret
 	push dword [tSystem.listPartitions]
 	call LMSlotFindFirstFree
 	pop eax
-	mov [ebp - 28], eax
+	mov partitionListCurrentElement, eax
 
 	; get the starting address of that specific slot into esi and save it for later
 	push eax
 	push dword [tSystem.listPartitions]
 	call LMElementAddressGet
 	pop esi
-	mov [ebp - 20], esi
+	mov partitionListCurrentElementAddr, esi
 	; ignore error code
 	pop eax
 
 	; save base port and device info (from this drive's slot in the drive list) to the slot we're writing in the partition table
-	mov esi, [ebp - 16]
+	mov esi, driveListCurrentElementAddr
 	mov ecx, [tDriveInfo.ATABasePort]
 	mov edx, [tDriveInfo.ATADeviceNumber]
-	mov esi, [ebp - 20]
+	mov esi, partitionListCurrentElementAddr
 	mov [tPartitionInfo.ATAbasePort], ecx
 	mov [tPartitionInfo.ATAdevice], edx
 
 	; save device flags to this entry in the partition table
-	mov esi, [ebp - 16]
+	mov esi, driveListCurrentElementAddr
 	xor ecx, ecx
 	mov cl, [tDriveInfo.deviceFlags]
-	mov esi, [ebp - 20]
+	mov esi, partitionListCurrentElementAddr
 	mov [tPartitionInfo.attributes], ecx
 
 	; save system ID to this entry in the partition table
-	mov esi, [ebp - 4]
-	add esi, [ebp - 24]
+	mov esi, sectorBufferAddr
+	add esi, offset
 	xor ecx, ecx
 	mov cl, [tPartitionLayout.systemID]
-	mov esi, [ebp - 20]
+	mov esi, partitionListCurrentElementAddr
 	mov [tPartitionInfo.systemID], ecx
 
 	; save starting LBA to this entry in the partition table
-	mov esi, [ebp - 4]
-	add esi, [ebp - 24]
+	mov esi, sectorBufferAddr
+	add esi, offset
 	mov ecx, [tPartitionLayout.startingLBA]
-	mov esi, [ebp - 20]
+	mov esi, partitionListCurrentElementAddr
 	mov [tPartitionInfo.startingLBA], ecx
 
 	; save sector count to this entry in the partition table
-	mov esi, [ebp - 4]
-	add esi, [ebp - 24]
+	mov esi, sectorBufferAddr
+	add esi, offset
 	mov ecx, [tPartitionLayout.sectorCount]
-	mov esi, [ebp - 20]
+	mov esi, partitionListCurrentElementAddr
 	mov [tPartitionInfo.sectorCount], ecx
 
 	; save drive list number to this entry in the partition table
-	mov esi, [ebp - 20]
-	mov ecx, [ebp - 12]
+	mov esi, partitionListCurrentElementAddr
+	mov ecx, driveListCurrentElement
 	mov [tPartitionInfo.driveListNumber], ecx
 
 
@@ -283,7 +286,7 @@ ret
 		add edi, 12
 
 		; push the partition list index, run the driver, then return
-		push dword [ebp - 28]
+		push partitionListCurrentElement
 		call edi
 		pop eax
 		jmp .FilesystemDetectDone
@@ -302,14 +305,14 @@ ret
 	; if we get here, we found no drivers to handle the file system type of this partition...
 	; so to be friendly, let's print a message saying so, if ConfigBits allows us to be verbose, that is :)
 	; first get the address of this drive list element into eax
-	mov eax, [ebp - 16]
+	mov eax, driveListCurrentElementAddr
 
 	; add 24 to point eax to the model string and push it for the StringBuild call
 	add eax, 24
 	push eax
 
 	; now calculate the size of the partition
-	mov esi, [ebp - 20]
+	mov esi, partitionListCurrentElementAddr
 	mov eax, [tPartitionInfo.systemID]
 	push eax
 

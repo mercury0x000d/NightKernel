@@ -28,6 +28,14 @@
 
 
 
+; globals
+; make the key buffer allocated in the future
+kKeyBufferWrite									db 0x00
+kKeyBufferRead									db 0x00
+kKeyBuffer										times 256 db 0x00
+
+
+
 bits 32
 
 
@@ -566,11 +574,3 @@ PS2ControllerWaitDataWrite:
 	mov esp, ebp
 	pop ebp
 ret
-
-
-
-; globals
-; make the key buffer allocated in the future
-kKeyBufferWrite									db 0x00
-kKeyBufferRead									db 0x00
-kKeyBuffer										times 256 db 0x00

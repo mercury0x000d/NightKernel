@@ -246,7 +246,7 @@ InterruptUnimplemented:
 	mov ebp, esp
 
 	pusha
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	jmp $ ; for debugging, makes sure the system hangs for now
 	push kUnsupportedInt$
 	call PrintRegs32
 	call PICIntComplete
@@ -1582,6 +1582,7 @@ ISR20:
 
 	pusha
 	pushf
+
 	inc dword [tSystem.ticksSinceBoot]
 	inc byte [tSystem.ticks]
 	cmp byte [tSystem.ticks], 0
@@ -1612,8 +1613,10 @@ ISR20:
 	jne .done
 	mov byte [tSystem.year], 0
 	inc byte [tSystem.century]
+
 	.done:
 	call PICIntComplete
+
 	popf
 	popa
 
@@ -2011,7 +2014,7 @@ ISR2D:
 	pusha
 	pushf
 	mov edx, 0x0000002D
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	jmp $ ; for debugging, makes sure the system hangs upon exception for now
 	call PICIntComplete
 	popf
 	popa
@@ -2030,7 +2033,7 @@ ISR2E:
 	pusha
 	pushf
 	mov edx, 0x0000002E
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	jmp $ ; for debugging, makes sure the system hangs upon exception for now
 	call PICIntComplete
 	popf
 	popa
@@ -2049,7 +2052,7 @@ ISR2F:
 	pusha
 	pushf
 	mov edx, 0x0000002F
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	jmp $ ; for debugging, makes sure the system hangs upon exception for now
 	call PICIntComplete
 	popf
 	popa
