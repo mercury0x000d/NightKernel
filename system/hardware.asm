@@ -30,6 +30,8 @@
 bits 32
 
 
+section text:
+align 4
 
 A20Enable:
 	; Enables the A20 line of the processor's address bus using the "Fast A20 enable" method
@@ -65,7 +67,7 @@ A20Enable:
 	mov esp, ebp
 	pop ebp
 ret
-.fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
+
 
 
 
@@ -254,7 +256,7 @@ Random:
 	mov esp, ebp
 	pop ebp
 ret
-.randomSeed										dd 0x92D68CA2
+
 
 
 
@@ -280,3 +282,8 @@ Reboot:
 	mov esp, ebp
 	pop ebp
 ret
+
+section data:
+align 4
+.fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
+.randomSeed										dd 0x92D68CA2
