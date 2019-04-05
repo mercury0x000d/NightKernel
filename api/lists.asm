@@ -16,6 +16,8 @@
 
 
 
+
+
 ; tListInfo struct, the header used to manage lists
 %define tListInfo.signature						(esi + 00)
 %define tListInfo.elementSize					(esi + 04)
@@ -24,10 +26,15 @@
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 LMElementAddressGet:
 	; Returns the address of the specified element in the list specified
 	;
@@ -82,6 +89,9 @@ ret
 
 
 
+
+
+section .text
 LMElementCountGet:
 	; Returns the total number of elements in the list specified
 	;
@@ -120,6 +130,9 @@ ret
 
 
 
+
+
+section .text
 LMElementCountSet:
 	; Sets the total number of elements in the list specified
 	;
@@ -158,6 +171,9 @@ ret 4
 
 
 
+
+
+section .text
 LMElementDelete:
 	; Deletes the element specified from the list specified
 	;
@@ -209,6 +225,9 @@ ret 4
 
 
 
+
+
+section .text
 LMElementDuplicate:
 	; Duplicates the element specified in the list specified
 	;
@@ -260,6 +279,9 @@ ret 4
 
 
 
+
+
+section .text
 LMElementSizeGet:
 	; Returns the elements size of the list specified
 	;
@@ -299,6 +321,9 @@ ret
 
 
 
+
+
+section .text
 LMElementValidate:
 	; Tests the element specified to be sure it not outside the bounds of the list
 	;
@@ -333,6 +358,9 @@ ret 4
 
 
 
+
+
+section .text
 LMItemAddAtSlot:
 	; Adds an item to the list specified at the list slot specified
 	;
@@ -387,6 +415,9 @@ ret 12
 
 
 
+
+
+section .text
 LMListCompact:
 	; Compacts the list specified (eliminates empty slots to make list contiguous)
 	;
@@ -408,6 +439,9 @@ ret 4
 
 
 
+
+
+section .text
 LMListInit:
 	; Creates a new list from the parameters specified at the address specified
 	;
@@ -454,6 +488,9 @@ ret 12
 
 
 
+
+
+section .text
 LMListSearch:
 	; Searches all elements of the list specified for the data specified
 	;
@@ -476,6 +513,9 @@ ret
 
 
 
+
+
+section .text
 LMListValidate:
 	; Tests the list specified for the 'list' signature at the beginning
 	;
@@ -509,6 +549,9 @@ ret
 
 
 
+
+
+section .text
 LMSlotFindFirstFree:
 	; Finds the first empty element in the list specified
 	;
@@ -548,6 +591,9 @@ ret
 
 
 
+
+
+section .text
 LMSlotFreeTest:
 	; Tests the element specified in the list specified to see if it is free
 	;
@@ -599,6 +645,9 @@ ret 4
 
 
 
+
+
+section .text
 LM_Internal_ElementAddressGet:
 	; Returns the address of the specified element in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -640,6 +689,9 @@ ret 4
 
 
 
+
+
+section .text
 LM_Internal_ElementCountGet:
 	; Returns the total number of elements in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -666,6 +718,9 @@ ret
 
 
 
+
+
+section .text
 LM_Internal_ElementCountSet:
 	; Sets the total number of elements in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -691,6 +746,9 @@ ret 8
 
 
 
+
+
+section .text
 LM_Internal_ElementDelete:
 	; Deletes the element specified from the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -787,6 +845,9 @@ ret 8
 
 
 
+
+
+section .text
 LM_Internal_ElementDuplicate:
 	; Duplicates the element specified in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -882,6 +943,9 @@ ret 8
 
 
 
+
+
+section .text
 LM_Internal_ElementSizeGet:
 	; Returns the elements size of the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -908,6 +972,9 @@ ret
 
 
 
+
+
+section .text
 LM_Internal_ItemAddAtSlot:
 	; Adds an item to the list specified at the list slot specified
 	;
@@ -980,6 +1047,9 @@ ret 16
 
 
 
+
+
+section .text
 LM_Internal_ListCompact:
 
 	push ebp
@@ -993,6 +1063,9 @@ ret
 
 
 
+
+
+section .text
 LM_Internal_ListSearch:
 
 	push ebp
@@ -1006,6 +1079,9 @@ ret
 
 
 
+
+
+section .text
 LM_Internal_SlotFindFirstFree:
 	; Finds the first empty element in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
@@ -1063,6 +1139,9 @@ ret
 
 
 
+
+
+section .text
 LM_Internal_SlotFreeTest:
 	; Tests the element specified in the list specified to see if it is free
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions

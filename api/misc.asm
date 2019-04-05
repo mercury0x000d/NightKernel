@@ -1,6 +1,6 @@
 ; Night Kernel
 ; Copyright 1995 - 2019 by mercury0x0d
-; api.asm is a part of the Night Kernel
+; misc.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -16,19 +16,18 @@
 
 
 
+
+
 ; 16-bit function listing:
 ; SetSystemAPM					Gets the APM interface version and saves results to the tSystem structure
 
+
+
 ; 32-bit function listing:
-; CRC32							Generates a CRC-32/JAMCRC checksum for the memory block specified
-; SetSystemCPUID				Probes the CPU using CPUID instruction and saves results to the tSystem structure
-; SetSystemCPUSpeed				Writes CPU speed info to the tSystem structure
-; SetSystemRTC					Copies the RTC time and date into the tSystem structure
+; BCDToDecimal					Converts a 32-bit BCD number to decimal
 ; TimerWait						Waits the specified number of ticks
 
 
-
-; Miscellaneous routines which will eventually comprise the Night API
 
 
 
@@ -36,6 +35,9 @@ bits 16
 
 
 
+
+
+section .text
 SetSystemAPM:
 	; Gets the APM interface version and saves results to the tSystem structure
 	;
@@ -67,12 +69,17 @@ ret
 
 
 
+
+
 bits 32
 
 
 
-SetSystemCPUID:
-	; Probes the CPU using CPUID instruction and saves results to the tSystem structure
+
+
+section .text
+BCDToDecimal:
+	; Converts a 32-bit BCD number to decimal
 	;
 	;  input:
 	;   n/a
@@ -83,56 +90,44 @@ SetSystemCPUID:
 	push ebp
 	mov ebp, esp
 
-	; get vendor ID
-	mov eax, 0x00000000
-	cpuid
-	mov esi, tSystem.CPUIDVendor$
-	mov [tSystem.CPUIDLargestBasicQuery], eax
-	mov [esi], ebx
-	add esi, 4
-	mov [esi], edx
-	add esi, 4
-	mov [esi], ecx
-	; get processor brand string
-	mov eax, 0x80000000
-	cpuid
-	cmp eax, 0x80000004
-	jnae .done
-	mov [tSystem.CPUIDLargestExtendedQuery], eax
+	sub esp, 8
+	%define accumulatedValue					dword [ebp - 4]
+	%define magnitude							dword [ebp - 8]
 
-	mov eax, 0x80000002
-	cpuid
-	mov esi, tSystem.CPUIDBrand$
-	mov [esi], eax
-	add esi, 4
-	mov [esi], ebx
-	add esi, 4
-	mov [esi], ecx
-	add esi, 4
-	mov [esi], edx
-	add esi, 4
 
-	mov eax, 0x80000003
-	cpuid
-	mov [esi], eax
-	add esi, 4
-	mov [esi], ebx
-	add esi, 4
-	mov [esi], ecx
-	add esi, 4
-	mov [esi], edx
-	add esi, 4
+	; init our "magnitude" value - it starts at 1 and multiplies by 10 every pass through the loop
+	mov magnitude, 1
 
-	mov eax, 0x80000004
-	cpuid
-	mov [esi], eax
-	add esi, 4
-	mov [esi], ebx
-	add esi, 4
-	mov [esi], ecx
-	add esi, 4
-	mov [esi], edx
-	.done:
+	; clear the accumulator variable
+	mov accumulatedValue, 0
+
+	; cycle through this 8 times since there are 8 possible digits in a 32-bit BCD number
+	mov ecx, 8
+	.DecodeLoop:
+		; get the least significant BCD digit into bl
+		mov ebx, dword [ebp + 8]
+		and ebx, 0x0F
+
+		; multiply bl by the current magnitude
+		mov eax, magnitude
+		mov edx, 0
+		mul ebx
+
+		; add the result to the accumulator
+		add accumulatedValue, eax
+
+		; quick multiply times 10 (shift to multiply by 8, then add two more)
+		mov eax, magnitude
+		shl magnitude, 3
+		add magnitude, eax
+		add magnitude, eax
+
+		; rotate the next nibble into position
+		ror dword [ebp + 8], 4
+	loop .DecodeLoop
+
+	mov eax, accumulatedValue
+	mov [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
@@ -140,138 +135,9 @@ ret
 
 
 
-SetSystemCPUSpeed:
-	; Writes CPU speed info to the tSystem structure
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	; save the flags
-	pushf
-
-	; make sure interrupts are on so we have a timer to use
-	sti
-	
-	; check the speed
-	call CPUSpeedDetect
-	pop eax
-	mov [tSystem.delayValue], eax
-	
-	; restore the flags and exit
-	popf
-
-	mov esp, ebp
-	pop ebp
-ret
 
 
-
-SetSystemRTC:
-	; Copies the RTC time and date into the tSystem structure
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	; wait until the status register tells us the RTC is busy
-	mov al, 0x0A
-	out 0x70, al
-	.pollStatus1:
-		in al, 0x71
-		and al, 10000000b
-		cmp al, 10000000b
-		je .flagSet
-	jmp .pollStatus1
-	.flagSet:
-
-	; wait until the status register tells us the RTC is not busy
-	mov al, 0x0A
-	out 0x70, al
-	.pollStatus2:
-		in al, 0x71
-		and al, 10000000b
-		cmp al, 00000000b
-		je .flagClear
-	jmp .pollStatus2
-	.flagClear:
-
-	; set binary format and 24 hour mode
-	mov al, 0x0B
-	out 0x70, al
-	in al, 0x71
-	or al, 00000110b
-	mov bl, al
-	mov al, 0x0B
-	out 0x70, al
-	mov al, bl
-	out 0x71, al
-	
-	; get the century
-	mov al, 0x32
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.century], al
-	
-	; get the year
-	mov al, 0x09
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.year], al
-	
-	; get the month
-	mov al, 0x08
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.month], al
-	
-	; get the day
-	mov al, 0x07
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.day], al
-	
-	; get the hour
-	mov al, 0x04
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.hours], al
-	
-	; get the minutes
-	mov al, 0x02
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.minutes], al
-	
-	; get the seconds
-	mov al, 0x00
-	out 0x70, al
-	mov eax, 0x00000000
-	in al, 0x71
-	mov byte [tSystem.seconds], al
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
+section .text
 TimerWait:
 	; Waits the specified number of ticks
 	;
@@ -284,26 +150,18 @@ TimerWait:
 	push ebp
 	mov ebp, esp
 
-	mov eax, [ebp + 8]
-	
-	mov ebx, 0x00000000
 
-	.mainLoop:
-		; set up the first pass of the inner delay loop
-		mov dl, [tSystem.ticks]
-		mov dh, dl
+	; sample the current number of ticks since boot
+	mov eax, [tSystem.ticksSinceBoot]
+	.timerLoop:
+		; get elamsed ticks as of right now
+		mov ebx, [tSystem.ticksSinceBoot]
+		
+		; see if enough ticks have passed
+		sub ebx, eax
+		cmp ebx, dword [ebp + 8]
+	jb .timerLoop
 
-		.timerLoop:
-			mov dl, [tSystem.ticks]
-			cmp dl, dh
-			jne .loopExit
-		jmp .timerLoop
-		.loopExit:
-		inc ebx
-		cmp eax, ebx
-		je .done
-	jmp .mainLoop
-	.done:
 
 	mov esp, ebp
 	pop ebp

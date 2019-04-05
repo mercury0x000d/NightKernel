@@ -16,9 +16,13 @@
 
 
 
+
+
 ; defines
 %define kPCIAddressPort							0x0CF8
 %define kPCIDataPort							0x0CFC
+
+
 
 
 
@@ -26,6 +30,9 @@ bits 16
 
 
 
+
+
+section .text
 PCIProbe:
 	; Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct
 	;
@@ -55,10 +62,15 @@ ret
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 PCICalculateNext:
 	; Calculates the proper value of the next spot on the PCI bus
 	;
@@ -119,6 +131,9 @@ ret
 
 
 
+
+
+section .text
 PCICheckForFunction:
 	; Checks the bus/device/function specified to see if there's something there
 	;
@@ -165,6 +180,9 @@ ret 8
 
 
 
+
+
+section .text
 PCIDriverSearch:
 	; Scans all the drivers in the kernel to see if any match the class/subclass/progif given and returns
 	; a function pointer to the driver's init function if found, or zero if not found
@@ -288,6 +306,9 @@ ret 8
 
 
 
+
+
+section .text
 PCIGetFunctionCount:
 	; Returns the total number of functions across all PCI busses in the system
 	;
@@ -360,6 +381,9 @@ ret
 
 
 
+
+
+section .text
 PCIGetNextFunction:
 	; Starts a scans at the bus/device/function specified to find the next function in order
 	;
@@ -425,6 +449,9 @@ ret
 
 
 
+
+
+section .text
 PCIInitBus:
 	; Scans all PCI busses and shadows all data to a List Manager list
 	;
@@ -582,6 +609,9 @@ ret
 
 
 
+
+
+section .text
 PCILiveRead:
 	; Reads a 32-bit register value from the PCI target specified
 	; Note: This function reads directly from the PCI bus, not from the shadowed PCI data in RAM
@@ -639,6 +669,9 @@ ret 12
 
 
 
+
+
+section .text
 PCILiveWrite:
 	; Writes a 32-bit value to the target PCI register specified
 	;
@@ -696,6 +729,9 @@ ret 24
 
 
 
+
+
+section .text
 PCILoadDrivers:
 	; Cycles through all functions in the PCI list and loads drivers for each
 	;
@@ -914,6 +950,8 @@ PCILoadDrivers:
 	mov esp, ebp
 	pop ebp
 ret
+
+section .data
 .locatingDriver$								db 'Locating driver for ^p3^d-^p2^d-^d (Class 0x^h, Subclass 0x^h, ProgIf 0x^h)', 0x00
 .exactDriverFound$								db 'Function driver found, running Init...', 0x00
 .subclassDriverFound$							db 'Subclass driver found, running Init...', 0x00
@@ -922,6 +960,9 @@ ret
 
 
 
+
+
+section .text
 PCIReadAll:
 	; Gets all info for the specified PCI device and fills it into the struct at the given address
 	;
@@ -978,6 +1019,9 @@ ret 16
 
 
 
+
+
+section .text
 PCIReadByte:
 	; Reads a byte register from the PCI target specified
 	;
@@ -996,6 +1040,9 @@ ret
 
 
 
+
+
+section .text
 PCIReadWord:
 	; Reads a word register from the PCI target specified
 	;
@@ -1014,6 +1061,9 @@ ret
 
 
 
+
+
+section .text
 PCIReadDWord:
 	; Reads a dword register from the PCI target specified
 	;
@@ -1140,6 +1190,9 @@ ret 12
 
 
 
+
+
+section .text
 PCIWriteByte:
 	; Writes a byte value to the PCI target specified
 	;
@@ -1157,6 +1210,9 @@ ret
 
 
 
+
+
+section .text
 PCIWriteWord:
 	; Writes a word value to the PCI target specified
 	;
@@ -1174,6 +1230,9 @@ ret
 
 
 
+
+
+section .text
 PCIWriteDword:
 	; Writes a dword value to the PCI target specified
 	;

@@ -16,21 +16,27 @@
 
 
 
+
+
 ; 32-bit function listing:
-; PICDisableIRQs				Disables all IRQ lines across both PICs
-; PICInit						Init & remap both PICs to use int numbers 0x20 - 0x2f
-; PICIntComplete				Tells both PICs the interrupt has been handled
-; PICMaskAll					Masks all interrupts
-; PICMaskSet					Masks all interrupts
-; PICUnmaskAll					Unmasks all interrupts
+; PICInit						Initializes & remaps both PICs to use int numbers 0x20 - 0x2F
+; PICIntComplete				Tells both PICs the pending interrupt has been handled
+; PICIRQDisable					Disables the IRQ specified
+; PICIRQDisableAll				Disables all IRQ lines across both PICs
+; PICIRQEnable					Enables the IRQ specified
+; PICIRQEnableAll				Enables all IRQ lines across both PICs
+
+
 
 
 
 ; defines
-%define kPIC1CmdPort							0x0020
-%define kPIC1DataPort							0x0021
-%define kPIC2CmdPort							0x00a0
-%define kPIC2DataPort							0x00a1
+%define kPIC1CmdPort							word 0x0020
+%define kPIC1DataPort							word 0x0021
+%define kPIC2CmdPort							word 0x00A0
+%define kPIC2DataPort							word 0x00A1
+
+
 
 
 
@@ -38,7 +44,185 @@ bits 32
 
 
 
-PICDisableIRQs:
+
+
+section .text
+PICInit:
+	; Initializes & remaps both PICs to use int numbers 0x20 - 0x2F
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; set ICW1
+	mov al, 0x11
+
+	; set up PIC 1
+	mov dx, kPIC1CmdPort
+	out dx, al
+
+	; set up PIC 2
+	mov dx, kPIC2CmdPort
+	out dx, al
+
+	; set base interrupt to 0x20 (ICW2)
+	mov al, 0x20
+	mov dx, kPIC1DataPort
+	out dx, al
+
+	; set base interrupt to 0x28 (ICW2)
+	mov al, 0x28
+	mov dx, kPIC2DataPort
+	out dx, al
+
+	; set ICW3 to cascade PICs together
+	mov al, 0x04
+	mov dx, kPIC1DataPort
+	out dx, al
+	
+	; set ICW3 to cascade PICs together
+	mov al, 0x02
+	mov dx, kPIC2DataPort
+	out dx, al
+
+	; set PIC 1 to x86 mode with ICW4
+	mov al, 0x05
+	mov dx, kPIC1DataPort
+	out dx, al
+
+	; set PIC 2 to x86 mode with ICW4
+	mov al, 0x01
+	mov dx, kPIC2DataPort
+	out dx, al
+
+	; zero the data register of PIC 1
+	mov al, 0
+	mov dx, kPIC1DataPort
+	out dx, al
+
+	; zero the data register of PIC 2
+	mov dx, kPIC2DataPort
+	out dx, al
+
+	mov al, 0xFD
+	mov dx, kPIC1DataPort
+	out dx, al
+
+	mov al, 0xFF
+	mov dx, kPIC2DataPort
+	out dx, al
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+PICIntComplete:
+	; Tells both PICs the pending interrupt has been handled
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; set the interrupt complete bit
+	mov al, 0x20
+
+	; write bit to PIC 1
+	mov dx, kPIC1CmdPort
+	out dx, al
+
+	; write bit to PIC 2
+	mov dx, kPIC2CmdPort
+	out dx, al
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+PICIRQDisable:
+	; Disables the IRQ specified
+	;
+	;  input:
+	;   IRQ number
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; get the IRQ number being specified
+	mov eax, dword [ebp + 8]
+
+
+	; make sure it's 15 or lower for sanity
+	and al, 0x0F
+
+	; copy al to cl for later use
+	mov cl, al
+
+	; determine if we should send this to PIC1 or PIC2
+	cmp al, 8
+	jb .PIC1
+
+	; if we get here, it was for PIC 2
+	sub cl, 8
+	mov dx, kPIC2DataPort
+	jmp .CalculuateBits
+
+	.PIC1:
+	mov dx, kPIC1DataPort
+
+
+	.CalculuateBits:
+	; calculate which bit will be set
+	mov bl, 00000001b
+	shl bl, cl
+
+
+	; modify the Interrupt Mask Register
+	in al, dx
+	or al, bl
+
+	
+	; write the new register value
+	out dx, al
+
+
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+
+
+section .text
+PICIRQDisableAll:
 	; Disables all IRQ lines across both PICs
 	;
 	;  input:
@@ -50,124 +234,18 @@ PICDisableIRQs:
 	push ebp
 	mov ebp, esp
 
-	mov al, 0xFF								; disable IRQs
-	mov dx, kPIC1DataPort						; set up PIC 1
-	out dx, al
-	mov dx, kPIC2DataPort						; set up PIC 2
-	out dx, al
 
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-PICInit:
-	; Init & remap both PICs to use int numbers 0x20 - 0x2f
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	mov al, 0x11								; set ICW1
-	mov dx, kPIC1CmdPort						; set up PIC 1
-	out dx, al
-	mov dx, kPIC2CmdPort						; set up PIC 2
-	out dx, al
-
-	mov al, 0x20								; set base interrupt to 0x20 (ICW2)
-	mov dx, kPIC1DataPort
-	out dx, al
-
-	mov al, 0x28								; set base interrupt to 0x28 (ICW2)
-	mov dx, kPIC2DataPort
-	out dx, al
-
-	mov al, 0x04								; set ICW3 to cascade PICs together
-	mov dx, kPIC1DataPort
-	out dx, al
-	mov al, 0x02								; set ICW3 to cascade PICs together
-	mov dx, kPIC2DataPort
-	out dx, al
-
-	mov al, 0x05								; set PIC 1 to x86 mode with ICW4
-	mov dx, kPIC1DataPort
-	out dx, al
-
-	mov al, 0x01								; set PIC 2 to x86 mode with ICW4
-	mov dx, kPIC2DataPort
-	out dx, al
-
-	mov al, 0									; zero the data register
-	mov dx, kPIC1DataPort
-	out dx, al
-	mov dx, kPIC2DataPort
-	out dx, al
-
-	mov al, 0xFD
-	mov dx, kPIC1DataPort
-	out dx, al
+	; disable IRQs
 	mov al, 0xFF
-	mov dx, kPIC2DataPort
-	out dx, al
 
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-PICIntComplete:
-	; Tells both PICs the interrupt has been handled
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	mov al, 0x20								; sets the interrupt complete bit
-	mov dx, kPIC1CmdPort							; write bit to PIC 1
-	out dx, al
-
-	mov dx, kPIC2CmdPort							; write bit to PIC 2
-	out dx, al
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-PICMaskAll:
-	; Masks all interrupts
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
+	; write PIC 1
 	mov dx, kPIC1DataPort
-	in al, dx
-	and al, 0xff
 	out dx, al
 
+	; write PIC 2
 	mov dx, kPIC2DataPort
-	in al, dx
-	and al, 0xff
 	out dx, al
+
 
 	mov esp, ebp
 	pop ebp
@@ -175,11 +253,14 @@ ret
 
 
 
-PICMaskSet:
-	; Masks all interrupts
+
+
+section .text
+PICIRQEnable:
+	; Enables the IRQ specified
 	;
 	;  input:
-	;   n/a
+	;   IRQ number
 	;
 	;  output:
 	;   n/a
@@ -187,24 +268,56 @@ PICMaskSet:
 	push ebp
 	mov ebp, esp
 
+
+	; get the IRQ number being specified
+	mov eax, dword [ebp + 8]
+
+
+	; make sure it's 15 or lower for sanity
+	and al, 0x0F
+
+	; copy al to cl for later use
+	mov cl, al
+
+	; determine if we should send this to PIC1 or PIC2
+	cmp al, 8
+	jb .PIC1
+
+	; if we get here, it was for PIC 2
+	sub cl, 8
+	mov dx, kPIC2DataPort
+	jmp .CalculuateBits
+
+	.PIC1:
 	mov dx, kPIC1DataPort
+
+
+	.CalculuateBits:
+	; calculate which bit will be set
+	mov bl, 11111110b
+	shl bl, cl
+
+
+	; modify the Interrupt Mask Register
 	in al, dx
-	and al, 0xff
+	and al, bl
+
+	
+	; write the new register value
 	out dx, al
 
-	mov dx, kPIC2DataPort
-	in al, dx
-	and al, 0xff
-	out dx, al
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
-PICUnmaskAll:
-	; Unmasks all interrupts
+
+
+section .text
+PICIRQEnableAll:
+	; Enables all IRQ lines across both PICs
 	;
 	;  input:
 	;   n/a
@@ -215,13 +328,37 @@ PICUnmaskAll:
 	push ebp
 	mov ebp, esp
 
+
+	; set the byte
 	mov al, 0x00
+
+	; write to PIC 1
 	mov dx, kPIC1DataPort
 	out dx, al
 
+	; write to PIC 2
 	mov dx, kPIC2DataPort
 	out dx, al
+
 
 	mov esp, ebp
 	pop ebp
 ret
+
+; IRQ mappings for future reference
+; IRQ0		Timer
+; IRQ1		PS/2 Port 1
+; IRQ2		Cascade to second 8259A
+; IRQ3		Serial port 2
+; IRQ4		Serial port 1
+; IRQ5		Parallel Port 2 (reserved on PS/2 systems)
+; IRQ6		Diskette drive
+; IRQ7		Parallel Port 1
+; IRQ8		CMOS Real time clock
+; IRQ9		CGA vertical retrace
+; IRQ10		Reserved
+; IRQ11		Reserved
+; IRQ12		PS/2 Port 2 (reserved on AT systems)
+; IRQ13		FPU
+; IRQ14		Hard disk controller
+; IRQ15		Reserved

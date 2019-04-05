@@ -16,12 +16,18 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; PartitionEnumerate			Scans the partition tables of all drives in the drive list and loads their data into the partitions list
 
 
 
+
+
 bits 32
+
+
 
 
 
@@ -46,6 +52,9 @@ bits 32
 
 
 
+
+
+section .text
 PartitionEnumerate:
 	; Scans the partition tables of all drives in the drive list and loads their data into the partitions list
 	;
@@ -327,4 +336,6 @@ ret
 	; mov dword [ebp + 16], edi
 	.FilesystemDetectDone:
 ret
+
+section .data
 .NoFSDriver$									db 'No handler present for type ^p20x^h partition found on ^s', 0x00

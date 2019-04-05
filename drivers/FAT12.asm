@@ -16,6 +16,8 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; FAT12FileCreate				Creates a new file at the path specified
 ; FAT12FileDelete				Deletes the file specified
@@ -28,10 +30,15 @@
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 FSType01DriverHeader:
 .signature$										db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
 .driverFlags									dd 01000000000000000000000000000000b
@@ -43,6 +50,9 @@ FSType01DriverHeader:
 
 
 
+
+
+section .text
 FSType01Init:
 	; Performs any necessary setup of the driver
 	;
@@ -124,6 +134,8 @@ FSType01Init:
 	mov esp, ebp
 	pop ebp
 ret
+
+section .data
 .FAT12Found$									db '^d KiB FAT12 (type 0x01) partition found on ^s', 0x00
 
 
@@ -150,6 +162,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileCreate:
 	; Creates a new file at the path specified
 	;
@@ -172,6 +187,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileDelete:
 	; Deletes the file specified
 	;
@@ -193,6 +211,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileInfoGet:
 	; Returns info data for the file specified
 	;
@@ -216,6 +237,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileInfoSet:
 	; Writes info data for the file specified
 	;
@@ -239,6 +263,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileRead:
 	; Reads data from the file structure on disk to a memory buffer
 	;
@@ -263,6 +290,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileSizeGet:
 	; Gets the size of the file specified
 	;
@@ -284,6 +314,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileSizeSet:
 	; Sets the size of the file specified
 	; Note: If necessary, additional clusters will be allocated or disposed of to meet the size requested
@@ -307,6 +340,9 @@ ret
 
 
 
+
+
+section .text
 FAT12FileWrite:
 	; Writes data from memory to the file structure on disk
 	;

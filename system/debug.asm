@@ -16,6 +16,8 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; DebugMenu						Implements the in-kernel debugging menu
 ; DebugVBOXLogWrite				Writes a string specidfied to the VirtualBOX guest log
@@ -23,10 +25,15 @@
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 DebugMenu:
 	; Implements the in-kernel debugging menu
 	;
@@ -224,38 +231,42 @@ DebugMenu:
 
 	mov byte [cursorX], 1
 	mov byte [cursorY], 1
-	push .kDebugMenu$
+	push .debugMenu$
 	call Print32
 
 	mov byte [cursorY], 3
-	push .kDebugText1$
+	push .debugText1$
 	call Print32
 
-	push .kDebugText2$
+	push .debugText2$
 	call Print32
 
-	push .kDebugText3$
+	push .debugText3$
 	call Print32
 
-	push .kDebugText4$
+	push .debugText4$
 	call Print32
 
-	push .kDebugText5$
+	push .debugText5$
 	call Print32
 
-	push .kDebugText6$
+	push .debugText6$
 	call Print32
 
-	push .kDebugText7$
+	push .debugText7$
 	call Print32
 
-	push .kDebugText8$
+	push .debugText8$
 	call Print32
 
-	push .kDebugText9$
+	push .debugText9$
 	call Print32
 
-	push .kDebugText0$
+	push .debugText0$
+	call Print32
+
+	inc byte [cursorY]
+	push .escMessage$
 	call Print32
 
 	.DebugLoop:
@@ -274,7 +285,6 @@ DebugMenu:
 		call MemFill
 
 		; do the ticks/seconds since boot string
-		push dword [tSystem.secondsSinceBoot]
 		push dword [tSystem.ticksSinceBoot]
 
 		push kPrintText$
@@ -296,19 +306,11 @@ DebugMenu:
 		push eax
 
 		mov eax, 0x00000000
-		mov al, byte [tSystem.century]
-		push eax
-
-		mov eax, 0x00000000
 		mov al, byte [tSystem.day]
 		push eax
 
 		mov eax, 0x00000000
 		mov al, byte [tSystem.month]
-		push eax
-
-		mov eax, 0x00000000
-		mov al, byte [tSystem.ticks]
 		push eax
 
 		mov eax, 0x00000000
@@ -331,39 +333,65 @@ DebugMenu:
 		call Print32
 
 
+		; show mouse location and buttons
+		mov eax, 0
+		mov al, byte [tSystem.mouseButtons]
+		push eax
+
+		mov eax, 0
+		mov ax, word [tSystem.mouseZ]
+		push eax
+
+		mov eax, 0
+		mov ax, word [tSystem.mouseY]
+		push eax
+
+		mov eax, 0
+		mov ax, word [tSystem.mouseX]
+		push eax
+
+		push kPrintText$
+		push .mouseFormat$
+		call StringBuild
+
+		mov byte [cursorY], 22
+		push kPrintText$
+		call Print32
+
+
 		pop eax
 
-		cmp al, 0x30							; choice 0
+		cmp al, 0x45							; choice 0
 		jne .TestFor1
 		call Reboot
 		jmp .DrawMenu
 
 		.TestFor1:
-		cmp al, 0x31							; choice 1
+		cmp al, 0x16							; choice 1
 		jne .TestFor2
 		call .SystemInfo
 		jmp .DrawMenu
 
 		.TestFor2:
-		cmp al, 0x32							; choice 2
+		cmp al, 0x1E							; choice 2
 		jne .TestFor3
 		call .PCIDevices
 		jmp .DrawMenu
 
 		.TestFor3:
-		cmp al, 0x33							; choice 3
+		cmp al, 0x26							; choice 3
 		jne .TestFor4
 		call .MemoryDetails
 		jmp .DrawMenu
 
 		.TestFor4:
-		cmp al, 0x34							; choice 4
+		cmp al, 0x25							; choice 4
 		jne .TestFor5
 		call .Exit
 		jmp .DrawMenu
 
 		.TestFor5:
-		cmp al, 0x35							; choice 5
+		cmp al, 0x2E							; choice 5
 		jne .TestFor6
 		call .Exit
 		jmp .DrawMenu
@@ -375,19 +403,19 @@ DebugMenu:
 		jmp .DrawMenu
 
 		.TestFor7:
-		cmp al, 0x37							; choice 7
+		cmp al, 0x3D							; choice 7
 		jne .TestFor8
 		jmp .Exit
 		jmp .DrawMenu
 
 		.TestFor8:
-		cmp al, 0x38							; choice 8
+		cmp al, 0x3E							; choice 8
 		jne .TestFor9
 		jmp .Exit
 		jmp .DrawMenu
 
 		.TestFor9:
-		cmp al, 0x39							; choice 9
+		cmp al, 0x46							; choice 9
 		jne .DebugLoop
 		jmp .Exit
 		jmp .DrawMenu
@@ -398,23 +426,28 @@ DebugMenu:
 	mov esp, ebp
 	pop ebp
 ret
+
+section .data
 .flag											db 0x00
-.kDebugMenu$									db 'Kernel Debug Menu', 0x00
-.kDebugText1$									db '1 - System Info', 0x00
-.kDebugText2$									db '2 - PCI Devices', 0x00
-.kDebugText3$									db '3 - Memory Details', 0x00
-.kDebugText4$									db '4 - ', 0x00
-.kDebugText5$									db '5 - ', 0x00
-.kDebugText6$									db '6 - ', 0x00
-.kDebugText7$									db '7 - ', 0x00
-.kDebugText8$									db '8 - ', 0x00
-.kDebugText9$									db '9 - ', 0x00
-.kDebugText0$									db '0 - Reboot', 0x00
-.ticksFormat$									db 'Ticks since boot: ^p10^d     Seconds since boot:^d', 0x00
-.dateTimeFormat$								db '^p2^d:^d:^d.^p3^d     ^p2^d/^d/^h^d', 0x00
+.debugMenu$										db 'Kernel Debug Menu', 0x00
+.debugText1$									db '1 - System Info', 0x00
+.debugText2$									db '2 - PCI Devices', 0x00
+.debugText3$									db '3 - Memory Details', 0x00
+.debugText4$									db '4 - ', 0x00
+.debugText5$									db '5 - ', 0x00
+.debugText6$									db '6 - ', 0x00
+.debugText7$									db '7 - ', 0x00
+.debugText8$									db '8 - ', 0x00
+.debugText9$									db '9 - ', 0x00
+.debugText0$									db '0 - Reboot', 0x00
+.escMessage$									db 'Press Escape from any sub menu above to return to this main menu', 0x00
+.ticksFormat$									db 'Ticks since boot: ^p10^d', 0x00
+.dateTimeFormat$								db '^p2^d:^d:^d     ^p2^d/^d/^d', 0x00
+.mouseFormat$									db 'X: ^p4^d     Y: ^d     Z: ^d     Buttons: ^p8^b     ', 0x00
 
 
 
+section .text
 .MemoryDetails:
 	; clear the screen first
 	call ScreenClear32
@@ -474,20 +507,21 @@ ret
 
 	loop .MemoryListDumpLoop
 
-	; wait for a keypress before leaving
-	push 0
-	call KeyWait
-	pop eax
+	; wait for escape before leaving
+	call .WaitForEscape
 
 	; clear the screen and exit!
 	call ScreenClear32
 ret
+
+section .data
 .memoryDetailsText$								db 'Memory Details', 0x00
 .memoryDetailsHeader$							db ' Address        Size           Task (0 = unallocated, 1 = kernel)', 0x00
 .memoryDetailsFormat$							db '^p8 0x^h     0x^h^p2     0x^h', 0x00
 
 
 
+section .text
 .SystemInfo:
 	; clear the screen first
 	call ScreenClear32
@@ -576,23 +610,38 @@ ret
 	push kPrintText$
 	call Print32
 
-	; wait for a keypress before leaving
-	push 0
-	call KeyWait
-	pop eax
+
+	; build the PCI devices List string
+	mov eax, [tSystem.listTasks]
+	push eax
+	push kPrintText$
+	push .listTasksFormat$
+	call StringBuild
+
+	; print the drive list string
+	inc byte [cursorY]
+	push kPrintText$
+	call Print32
+
+	; ESC lets us leave, kids
+	call .WaitForEscape
 
 	; clear the screen and exit!
 	call ScreenClear32
 ret
+
+section .data
 .systemInfoText$								db 'System Information', 0x00
 .versionFormat$									db 'Kernel version ^p2^h.^h', 0x00
 .listDriveFormat$								db 'Drive List                0x^p8^h', 0x00
 .listPartitionFormat$							db 'Partition List            0x^p8^h', 0x00
 .listPCIDevicesFormat$							db 'PCI Devices List          0x^p8^h', 0x00
+.listTasksFormat$								db 'Tasks List                0x^p8^h', 0x00
 .listMemoryFormat$								db 'Memory List               0x^p8^h', 0x00
 
 
 
+section .text
 .PCIDevices:
 	call ScreenClear32
 
@@ -743,15 +792,15 @@ ret
 		push 0
 		call KeyWait
 		pop eax
-	
+
 		; see what was pressed
-		cmp eax, 0x39
+		cmp eax, 0x7D
 		je .PageUp
 	
-		cmp eax, 0x33
+		cmp eax, 0x7A
 		je .PageDown
 	
-		cmp eax, 0x31
+		cmp eax, 0x76
 		je .End
 
 	jmp .GetInputLoop
@@ -778,6 +827,17 @@ ret
 	; clear the screen and exit
 	call ScreenClear32
 ret
+
+.WaitForEscape:
+	; does exactly what it says
+	push 0
+	call KeyWait
+	pop eax
+	cmp al, 0x76
+	jne .WaitForEscape
+ret
+
+section .data
 .PCIInfoText$									db 'PCI Devices', 0x00
 .PCIDeviceCountText$							db '^d PCI devices found', 0x00
 .PCIDeviceListingText$							db 'Shadowed register space for device ^d of ^d', 0x00
@@ -848,6 +908,9 @@ kSadThing$										db 0x27, 'Tis a sad thing that your process has ended here!'
 
 
 
+
+
+section .text
 DebugVBoxLogWrite:
 	; Writes a string specidfied to the VirtualBox guest log
 	;
@@ -891,6 +954,9 @@ ret 4
 
 
 
+
+
+section .text
 StackDump:
 	; Traces the stack and prints a list of return addresses
 	;
@@ -932,6 +998,9 @@ StackDump:
 	jmp	.TraceLoop
 
 	.done:
-	leave
+	mov esp, ebp
+	pop ebp
 ret
+
+section .data
 .traceFormat$									db ' ^p8^h', 0x00

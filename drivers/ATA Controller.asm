@@ -16,6 +16,8 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; C01Init						Performs any necessary setup of the driver
 ; C01ATAPISectorReadPIO
@@ -29,8 +31,6 @@
 ; InternalDriveFoundPrint		Prints data about the drive discovered by C01DriveIdentify()
 
 
-
-bits 32
 
 
 
@@ -106,6 +106,15 @@ bits 32
 
 
 
+
+
+bits 32
+
+
+
+
+
+section .text
 Class01DriverHeader:
 .signature$										db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
 .driverFlags									dd 00100000000000000000000000000000b
@@ -119,6 +128,9 @@ Class01DriverHeader:
 
 
 
+
+
+section .text
 C01Init:
 	; Performs any necessary setup of the driver
 	;
@@ -239,10 +251,15 @@ C01Init:
 	mov esp, ebp
 	pop ebp
 ret 12
-.driverIntro$									db 'General Class 01 Storage Driver, 2018 by mercury0x0d', 0x00
+
+section .data
+.driverIntro$									db 'General Class 01 Storage Driver, 2018 by Mercury0x0D', 0x00
 
 
 
+
+
+section .text
 C01ATAPISectorReadPIO:
 	; Reads sectors from an ATAPI device
 	;
@@ -416,6 +433,9 @@ iretd
 
 
 
+
+
+section .text
 C01ATASectorReadLBA28PIO:
 	; Reads sectors from disk using LBA28 in PIO mode
 	;
@@ -431,6 +451,7 @@ C01ATASectorReadLBA28PIO:
 
 	push ebp
 	mov ebp, esp
+
 
 	; mask off starting sector to give us 28 bits
 	and dword [ebp + 16], 0x0FFFFFFF
@@ -507,12 +528,16 @@ C01ATASectorReadLBA28PIO:
 	mov edi, dword [ebp + 24]
 	rep insw
 
+
 	mov esp, ebp
 	pop ebp
 ret 20
 
 
 
+
+
+section .text
 C01ATASectorWriteLBA28PIO:
 	; Writes sectors to disk using LBA28 in PIO mode
 	;
@@ -528,6 +553,7 @@ C01ATASectorWriteLBA28PIO:
 
 	push ebp
 	mov ebp, esp
+
 
 	; mask off starting sector to give us 28 bits
 	and dword [ebp + 16], 0x0FFFFFFF
@@ -614,12 +640,16 @@ C01ATASectorWriteLBA28PIO:
 	push edx
 	call C01WaitForReady
 
+
 	mov esp, ebp
 	pop ebp
 ret 20
 
 
 
+
+
+section .text
 C01DetectChannelDevices:
 	; Checks both of the device spots on the ATA channel specified and saves their data to the drives list
 	;
@@ -831,6 +861,9 @@ ret 8
 
 
 
+
+
+section .text
 C01DriveIdentify:
 	; Returns identifying information about the device specified
 	;
@@ -1054,6 +1087,9 @@ ret 8
 
 
 
+
+
+section .text
 C01InterruptHandlerPrimary:
 	; Interrupt handler for ATA interrupts
 	;
@@ -1080,6 +1116,10 @@ C01InterruptHandlerPrimary:
 iretd
 
 
+
+
+
+section .text
 C01InterruptHandlerSecondary:
 	; Interrupt handler for ATA interrupts
 	;
@@ -1107,6 +1147,9 @@ iretd
 
 
 
+
+
+section .text
 C01WaitForReady:
 	; Waits for bit 7 of the passed port value to go clear, then returns
 	; Note: I should add a timeout value to this code eventually to avoid getting stuck in an infinite loop if
@@ -1138,6 +1181,9 @@ ret 4
 
 
 
+
+
+section .text
 InternalDriveFoundPrint:
 	; Prints data about the drive discovered by C01DriveIdentify()
 	; Note: this function writes into the device info block, effectively destroying its accuracy
@@ -1231,9 +1277,11 @@ InternalDriveFoundPrint:
 	push kPrintText$
 	call PrintIfConfigBits32
 
+
 	mov esp, ebp
 	pop ebp
-.Exit:
 ret 16
+
+section .data
 .foundATAFormat$								db 'Found ATA device ^s (^s) at port 0x^p4^h:^p1^d', 0x00
 .foundATAPIFormat$								db 'Found ATAPI device ^s (^s) at port 0x^p4^h:^p1^d', 0x00
