@@ -16,22 +16,31 @@
 
 
 
+
+
 ; 16-bit function listing:
-; ScreenClear16					Clears the text mode screen
 ; Print16						Prints an ASCIIZ string directly to the screen
 ; PrintIfConfigBits16			Prints an ASCIIZ string directly to the screen only if the configbits option is set
 ; PrintRegs16					Quick register dump routine for real mode
+; ScreenClear16					Clears the text mode screen
+; ScreenScroll16				Scrolls the text mode screen by the specified number of lines
+
+
 
 ; 32-bit function listing:
-; ScreenClear32					Clears the text mode screen
 ; CursorHome					Returns the text mode cursor to the "home" (upper left) position
 ; Print32						Prints an ASCIIZ string directly to the screen
 ; PrintIfConfigBits32			Prints an ASCIIZ string directly to the screen only if the configbits option is set
 ; PrintRAM32					Prints a range of RAM bytes to the screen
 ; PrintRegs32					Quick register dump routine for protected mode
+; ScreenClear32					Clears the text mode screen
+; ScreenScroll32				Scrolls the text mode screen by the specified number of lines
 
 
 
+
+
+section .data
 ; globals
 cursorX											db 0x01
 cursorY											db 0x01
@@ -42,10 +51,15 @@ kBytesPerScreen									dw 4000
 
 
 
+
+
 bits 16
 
 
 
+
+
+section .text
 Print16:
 	; Prints an ASCIIZ string directly to the screen.
 	; Note: Uses text mode (assumed already set) not VESA.
@@ -59,7 +73,26 @@ Print16:
 
 	push bp
 	mov bp, sp
+
+	; allocate variables
 	sub sp, 1
+
+
+	; see if we need to scroll the output
+	mov bl, byte [kMaxLines]
+	mov al, byte [cursorY]
+	cmp al, bl
+	jbe .SkipScroll
+		; if we get here, we need to scroll the display
+
+		; see how many lines need scrolled
+		sub al, bl
+		and eax, 0x000000FF
+		push dword eax
+		call ScreenScroll16
+
+	.SkipScroll:
+
 
 	mov si, [ebp + 4]
 	
@@ -133,43 +166,9 @@ Print16:
 	inc al
 	mov [cursorY], al
 
-	; see if we need to scroll the output
-	mov bl, byte [kMaxLines]
-	inc bl
-	cmp al, bl
-	jne .SkipScroll
-
-		; if we get here, we need to scroll the display
-		mov cx, word [kBytesPerScreen]
-
-		; divide the counter by 8 since we're copying that many bytes at a time
-		shr cx, 3
-
-		mov ax, 0xB800
-		mov si, 160
-		mov di, 0
-		mov gs, ax
-		.copyLoop:
-			; read data in
-			mov eax, [gs:si]
-			add si, 4
-			mov ebx, [gs:si]
-			add si, 4
-			
-			; write data out
-			mov [gs:di], eax
-			add di, 4
-			mov [gs:di], ebx
-			add di, 4
-		loop .copyLoop
-
-		; update the cursor Y position
-		mov al, byte [kMaxLines]
-		mov byte [cursorY], al
-
-	.SkipScroll:
 	; restore es
 	pop es
+
 
 	mov sp, bp
 	pop bp
@@ -177,6 +176,9 @@ ret 2
 
 
 
+
+
+section .text
 PrintIfConfigBits16:
 	; Prints an ASCIIZ string directly to the screen only if the configbits option is set
 	;
@@ -204,6 +206,9 @@ ret 2
 
 
 
+
+
+section .text
 PrintRegs16:
 	; Quick register dump routine for real mode
 	;
@@ -322,11 +327,16 @@ PrintRegs16:
 	mov sp, bp
 	pop bp
 ret
+
+section .data
 .output1$										db ' AX 0000    BX 0000    CX 0000    DX 0000 ', 0x00
 .output2$										db ' SI 0000    DI 0000    SP 0000    BP 0000 ', 0x00
 
 
 
+
+
+section .text
 ScreenClear16:
 	; Clears the text mode screen
 	; Note: For use in Protected Mode only
@@ -370,10 +380,79 @@ ret
 
 
 
+
+
+section .text
+ScreenScroll16:
+	; Scrolls the text mode screen by the specified number of lines
+	;
+	;  input:
+	;   Number of lines to scroll
+	;
+	;  output:
+	;   n/a
+
+	push bp
+	mov bp, sp
+
+	; allocate local variables
+	sub sp, 2
+	%define lineCount							word [bp - 2]
+
+
+	mov cx, word [ebp + 4]
+
+	.ScrollLoop:
+		; preserve the line counter
+		mov lineCount, cx
+
+		mov cx, word [kBytesPerScreen]
+
+		; divide the counter by 8 since we're copying that many bytes at a time
+		shr cx, 3
+
+		mov ax, 0xB800
+		mov si, 160
+		mov di, 0
+		mov gs, ax
+		.copyLoop:
+			; read data in
+			mov eax, [gs:si]
+			add si, 4
+			mov ebx, [gs:si]
+			add si, 4
+			
+			; write data out
+			mov [gs:di], eax
+			add di, 4
+			mov [gs:di], ebx
+			add di, 4
+		loop .copyLoop
+
+		; restore line counter
+		mov cx, lineCount
+	loop .ScrollLoop
+
+	; update the cursor Y position
+	mov al, byte [kMaxLines]
+	mov byte [cursorY], al
+
+
+	mov sp, bp
+	pop bp
+ret 2
+
+
+
+
+
 bits 32
 
 
 
+
+
+section .text
 CursorHome:
 	; Returns the text mode cursor to the "home" (upper left) position
 	;
@@ -395,6 +474,9 @@ ret
 
 
 
+
+
+section .text
 Print32:
 	; Prints an ASCIIZ string directly to the screen.
 	; Note: Uses text mode (assumed already set) not VESA.
@@ -412,6 +494,22 @@ Print32:
 	; allocate local variables
 	sub esp, 1
 	%define tempByte							byte [ebp - 1]
+
+
+	; see if we need to scroll
+	mov bl, byte [kMaxLines]
+	mov al, byte [cursorY]
+	cmp al, bl
+	jbe .SkipScroll
+		; if we get here, we need to scroll the display
+
+		; see how many lines need scrolled
+		sub al, bl
+		and eax, 0x000000FF
+		push dword eax
+		call ScreenScroll32
+
+	.SkipScroll:
 
 
 	mov esi, [ebp + 8]
@@ -480,41 +578,6 @@ Print32:
 	inc al
 	mov [cursorY], al
 
-	; see if we need to scroll the output
-	mov bl, byte [kMaxLines]
-	inc bl
-	cmp al, bl
-	jne .SkipScroll
-
-		; if we get here, we need to scroll the display
-		mov eax, 0x00000000
-		mov ax, word [kBytesPerScreen]
-		mov ecx, eax
-
-		; divide the counter by 8 since we're copying that many bytes at a time
-		shr ecx, 3
-
-		mov esi, 0xB80A0
-		mov edi, 0xB8000
-		.copyLoop:
-			; read data in
-			mov eax, [esi]
-			add esi, 4
-			mov ebx, [esi]
-			add esi, 4
-			
-			; write data out
-			mov [edi], eax
-			add edi, 4
-			mov [edi], ebx
-			add edi, 4
-		loop .copyLoop
-
-		; update the cursor Y position
-		mov al, byte [kMaxLines]
-		mov byte [cursorY], al
-
-	.SkipScroll:
 
 	mov esp, ebp
 	pop ebp
@@ -522,6 +585,9 @@ ret 4
 
 
 
+
+
+section .text
 PrintIfConfigBits32:
 	; Prints an ASCIIZ string directly to the screen only if the configbits option is set
 	;
@@ -550,6 +616,9 @@ ret 4
 
 
 
+
+
+section .text
 PrintRAM32:
 	; Prints a range of RAM bytes to the screen
 	;
@@ -657,10 +726,15 @@ PrintRAM32:
 	mov esp, ebp
 	pop ebp
 ret 8
+
+section .data
 .format$										db '^p8 ^h  ^p2 ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h   ^s ', 0x00
 
 
 
+
+
+section .text
 PrintRegs32:
 	; Quick register dump routine for protected mode
 	;
@@ -779,11 +853,16 @@ PrintRegs32:
 	mov esp, ebp
 	pop ebp
 ret
+
+section .data
 .output1$										db ' EAX 00000000    EBX 00000000    ECX 00000000    EDX 00000000 ', 0x00
 .output2$										db ' ESI 00000000    EDI 00000000    ESP 00000000    EBP 00000000 ', 0x00
 
 
 
+
+
+section .text
 ScreenClear32:
 	; Clears the text mode screen
 	; Note: For use in Protected Mode only
@@ -822,3 +901,67 @@ ScreenClear32:
 	mov esp, ebp
 	pop ebp
 ret
+
+
+
+
+
+section .text
+ScreenScroll32:
+	; Scrolls the text mode screen by the specified number of lines
+	;
+	;  input:
+	;   Number of lines to scroll
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+	; allocate local variables
+	sub esp, 4
+	%define lineCount							dword [ebp - 4]
+
+
+	mov ecx, dword [ebp + 8]
+
+	.ScrollLoop:
+		; preserve the line counter
+		mov lineCount, ecx
+
+		; get how many bytes we have per screen full of info
+		mov ecx, 0x00000000
+		mov cx, word [kBytesPerScreen]
+
+		; divide the counter by 8 since we're copying that many bytes at a time
+		shr ecx, 3
+
+		mov esi, 0xB80A0
+		mov edi, 0xB8000
+		.copyLoop:
+			; read data in
+			mov eax, [esi]
+			add esi, 4
+			mov ebx, [esi]
+			add esi, 4
+			
+			; write data out
+			mov [edi], eax
+			add edi, 4
+			mov [edi], ebx
+			add edi, 4
+		loop .copyLoop
+
+		; restore line counter
+		mov ecx, lineCount
+	loop .ScrollLoop
+
+	; update the cursor Y position
+	mov al, byte [kMaxLines]
+	mov byte [cursorY], al
+
+
+	mov esp, ebp
+	pop ebp
+ret 4

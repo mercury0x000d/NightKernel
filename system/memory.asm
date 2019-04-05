@@ -16,6 +16,8 @@
 
 
 
+
+
 ; tMemoryInfo, for the physical memory allocator to track blocks
 %define tMemInfo.address						(esi + 00)
 %define tMemInfo.size							(esi + 04)
@@ -23,10 +25,392 @@
 
 
 
+
+
 bits 16
 
 
 
+
+
+section .text
+A20Check:
+	; Checks status of the A20 line
+	;
+	;  input:
+	;   Dummy value
+	;
+	;  output:
+	;	function result
+	;		0 - Disabled
+	;		1 - Enabled
+
+	push bp
+	mov bp, sp
+
+	; save ds and es since we'll be fiddling with them later
+	push ds
+	push es
+
+	mov ax, 0x2402
+	int 0x15
+
+	; if ah = 0, the call succeeded and we can exit now
+	cmp ah, 0
+	je .Exit
+
+
+	.ManualCheck:
+	; the BIOS function isn't available, so we need to probe it manually
+	xor ax, ax ; ax = 0
+	mov es, ax
+ 
+	not ax ; ax = 0xFFFF
+	mov ds, ax
+ 
+	mov di, 0x0500
+	mov si, 0x0510
+ 
+	mov al, byte [es:di]
+	push ax
+ 
+	mov al, byte [ds:si]
+	push ax
+ 
+	mov byte [es:di], 0x00
+	mov byte [ds:si], 0xFF
+ 
+	cmp byte [es:di], 0xFF
+ 
+	pop ax
+	mov byte [ds:si], al
+ 
+	pop ax
+	mov byte [es:di], al
+ 
+	mov ax, 0
+	je .Exit
+ 
+	mov ax, 1
+ 
+
+	.Exit:
+
+	; restore the segment registers we saved in the beginning to avoid a freak out
+	pop es
+	pop ds
+
+	mov word [bp + 4], ax
+
+	mov sp, bp
+	pop bp
+ret
+
+
+
+
+
+section .text
+A20Enable:
+	; Enables the A20 line using all methods in order
+	; Since A20 support is critical, this code will print an error then intentionally hang if unsuccessful
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push bp
+	mov bp, sp
+
+
+	; check if already enabled
+	push word 0
+	call A20Check
+	pop ax
+
+	cmp ax, 0x0001
+	jne .NotPreenabled
+		; if we get here, the A20 line is already enabled by... someone... or... something. Spooky! O.O
+		push .A20AlreadyEnabled$
+		call PrintIfConfigBits16
+		jmp .Exit
+	.NotPreenabled:
+
+
+	; attempt BIOS method
+	call A20EnableBIOS
+
+	; check if it worked
+	push word 0
+	call A20Check
+	pop ax
+
+	cmp ax, 0x0001
+	jne .BIOSFailed
+		; if we get here, the Port 0xEE method succeeded
+		push .BIOSSuccess$
+		call PrintIfConfigBits16
+		jmp .Exit
+	.BIOSFailed:
+
+	; print the fail
+	push .BIOSFail$
+	call PrintIfConfigBits16
+
+
+	; attempt Port EE method
+	call A20EnablePortEE
+
+	; check if it worked
+	push word 0
+	call A20Check
+	pop ax
+
+	cmp ax, 0x0001
+	jne .PortEEFailed
+		; if we get here, the Port 0xEE method succeeded
+		push .portEESuccess$
+		call PrintIfConfigBits16
+		jmp .Exit
+	.PortEEFailed:
+
+	; print the fail
+	push .portEEFail$
+	call PrintIfConfigBits16
+
+
+	; attempt Fast A20 method
+	call A20EnableFastA20
+
+	; check if it worked
+	push word 0
+	call A20Check
+	pop ax
+
+	cmp ax, 0x0001
+	jne .FastA20Failed
+		; if we get here, the FastA20 method succeeded
+		push .fastA20Success$
+		call PrintIfConfigBits16
+		jmp .Exit
+	.FastA20Failed:
+
+	; print the fail
+	push .fastA20Fail$
+	call PrintIfConfigBits16
+
+
+	; attempt Keyboard Controller method
+	call A20EnableKeyboardController
+
+	; check if it worked
+	push word 0
+	call A20Check
+	pop ax
+
+	cmp ax, 0x0001
+	jne .KeyboardControllerFailed
+		; if we get here, the Port 0xEE method succeeded
+		push .keyboardControllerSuccess$
+		call PrintIfConfigBits16
+		jmp .Exit
+	.KeyboardControllerFailed:
+
+	; print the fail
+	push .keyboardControllerFail$
+	call PrintIfConfigBits16
+
+
+	; if we get here, everything failed!
+	; Now we convey the sad, sad news
+	push .A20Fail$
+	call Print16
+
+	; Since A20 support is critical, we intentionally hang if unsuccessful
+	; a hard lockup should really get our point across
+	jmp $
+
+	.Exit:
+	mov sp, bp
+	pop bp
+ret
+
+section .data
+.A20AlreadyEnabled$								db 'A20 is already enabled', 0x00
+.BIOSFail$										db 'BIOS method failed', 0x00
+.BIOSSuccess$									db 'BIOS method succeeded', 0x00
+.portEEFail$									db 'Port EE method failed', 0x00
+.portEESuccess$									db 'Port EE method succeeded', 0x00
+.keyboardControllerFail$						db 'Keyboard controller method failed', 0x00
+.keyboardControllerSuccess$						db 'Keyboard controller method succeeded', 0x00
+.fastA20Fail$									db 'Fast A20 Enable method failed', 0x00
+.fastA20Success$								db 'Fast A20 Enable method succeeded', 0x00
+.A20Fail$										db 'Cannot start: All methods to enable A20 failed', 0x00
+
+
+
+
+
+section .text
+A20EnableBIOS:
+	; Enables the A20 line using BIOS interrrupt 0x15
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push bp
+	mov bp, sp
+
+
+	; ask the BIOS nicely, and it just may enable A20 for us
+	mov ax, 0x2401
+	int 0x15
+
+
+	mov sp, bp
+	pop bp
+ret
+
+
+
+
+
+section .text
+A20EnableFastA20:
+	; Enables the A20 line using the Fast A20 method
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push bp
+	mov bp, sp
+
+
+	; attempt Fast A20 Enable
+	in al, 0x92
+	or al, 00000010b
+	out 0x92, al
+
+
+	mov sp, bp
+	pop bp
+ret
+
+
+
+
+
+section .text
+A20EnableKeyboardController:
+	; Attempts to enables the A20 line using the keyboard controller method
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push bp
+	mov bp, sp
+
+	call .ReadyWait
+	mov al, 0xAD
+	out 0x64, al
+
+	call .ReadyWait
+	mov al, 0xD0
+	out 0x64, al
+
+	call .OutputWait
+	in al, 0x60
+	push ax
+
+	call .ReadyWait
+	mov al, 0xD1
+	out 0x64, al
+
+	call .ReadyWait
+	pop ax
+	or al, 00000010b
+	out 0x60, al
+
+	call .ReadyWait
+	mov al, 0xAE
+	out 0x64, al
+
+	call .ReadyWait
+
+
+	mov sp, bp
+	pop bp
+ret
+
+.OutputWait:
+	; set up a loop to read from the keyboard's controller until output is available
+
+	; "Good things come to those who wait... and death comes to those who wait too long!"
+	; With that in mind, we better set a timeout on this operation so that we don't
+	; get stuck in any nasty infinite loops
+	mov cx, 0xC000
+	.OutputTimeoutLoop:
+		in al, 0x64
+		test al, 00000001b
+		jnz .OutputAvailable
+	loop .OutputTimeoutLoop
+	.OutputAvailable:
+ret
+
+.ReadyWait:
+	; set up a loop to read from the keyboard's controller until output is available
+	; If we wanted an infinite loop, we'd visit Apple Campus.
+	mov cx, 0xC000
+	.ReadyTimeoutLoop:
+		in al, 0x64
+		test al, 00000010b
+		jnz .Ready
+	loop .ReadyTimeoutLoop
+	.Ready:
+ret
+
+
+
+
+
+section .text
+A20EnablePortEE:
+	; Enables the A20 line using the Port 0xEE method
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push bp
+	mov bp, sp
+
+
+	; perform Port 0xEE Enable
+	out 0xEE, al
+
+
+	mov sp, bp
+	pop bp
+ret
+
+
+
+
+
+section .text
 MemProbe:
 	; Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM,
 	; and fills in the appropriate system data structures for later use by the memory manager
@@ -187,7 +571,11 @@ MemProbe:
 	mov sp, bp
 	pop bp
 ret
+
+section .data
 .memoryMapLabels$								db '   Address            Size               Type', 0x00
+
+
 
 
 
@@ -195,6 +583,9 @@ bits 32
 
 
 
+
+
+section .text
 MemAddressAlign:
 	; Returns the aligned version of the address specified, aligned as specified
 	;
@@ -231,6 +622,9 @@ ret 4
 
 
 
+
+
+section .text
 MemAddressToBlock:
 	; Returns the block number referenced by the address specified
 	;
@@ -307,6 +701,9 @@ ret
 
 
 
+
+
+section .text
 MemAllocate:
 	; Returns the address of a memory block of the requested size, or zero if unavailble
 	;
@@ -345,9 +742,9 @@ MemAllocate:
 	cmp eax, [kTrue]
 	jne .Fail
 
-	; Here we do the heavy-lifting of handling this request. This is done by cloning the "best candidate" element we just found,
+	; Below we do the heavy-lifting of handling this request. This is done by cloning the "best candidate" element we just found,
 	; then editing the original to reflect a slightly lower amount of free space since we're trimming off of it to fulfill the
-	; memory request. The clone, which gets created right beside the original block in the memory list, will get set to values
+	; memory request. The clone, which gets created right after the original block in the memory list, will get set to values
 	; which reflect the details of the memory we're taking away.
 
 	; grow the memory list
@@ -429,6 +826,9 @@ ret 4
 
 
 
+
+
+section .text
 MemAllocateAligned:
 	; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble
 	;
@@ -573,6 +973,9 @@ ret 4
 
 
 
+
+
+section .text
 MemCompare:
 	; Compares two regions in memory of a specified length for equality
 	;
@@ -613,6 +1016,9 @@ ret 8
 
 
 
+
+
+section .text
 MemCopy:
 	; Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest)
 	;
@@ -681,6 +1087,9 @@ ret 12
 
 
 
+
+
+section .text
 MemDispose:
 	; Notifies the memory manager that the block specified by the address given is now free for reuse
 	;
@@ -728,6 +1137,9 @@ ret
 
 
 
+
+
+section .text
 MemFill:
 	; Fills the range of memory given with the byte value specified
 	;
@@ -763,6 +1175,9 @@ ret 12
 
 
 
+
+
+section .text
 MemFindMostSuitable:
 	; Returns the element number of the most suitable free block for handling a request of the size specified
 	;
@@ -867,6 +1282,9 @@ ret
 
 
 
+
+
+section .text
 MemInit:
 	; Initialize the memory list
 	;
@@ -934,6 +1352,9 @@ ret
 
 
 
+
+
+section .text
 MemMergeBlocks:
 	; Merges any neighboring free memory list elements into the one specified
 	;
@@ -1071,7 +1492,8 @@ MemMergeBlocks:
 		cmp eax, [kTrue]
 		je .AllGood
 
-			; there was a failure, 
+			; there was a failure, add code to handle it here
+			; this is probably safe to ignore since we are using all good blocks here
 
 		.AllGood:
 	ret
@@ -1084,6 +1506,9 @@ ret 4
 
 
 
+
+
+section .text
 MemSearchWord:
 	; Searches the memory range specified for the given word value
 	;
@@ -1127,6 +1552,9 @@ ret 8
 
 
 
+
+
+section .text
 MemSearchDWord:
 	; Searches the memory range specified for the given dword value
 	;
@@ -1170,6 +1598,9 @@ ret 8
 
 
 
+
+
+section .text
 MemSearchString:
 	; Searches the memory range specified for the given string
 	;
@@ -1255,6 +1686,9 @@ ret 8
 
 
 
+
+
+section .text
 MemShrinkFromBeginning:
 	; Shrinks the block of memory specified to the size specified by trimming space off the beginning
 	;
@@ -1374,6 +1808,9 @@ ret 4
 
 
 
+
+
+section .text
 MemShrinkFromEnd:
 	; Shrinks the block of memory specified to the size specified by trimming space off the end
 	;
@@ -1488,6 +1925,9 @@ ret 4
 
 
 
+
+
+section .text
 MemSwapWordBytes:
 	; Swaps the bytes in a series of words starting at the address specified
 	;
@@ -1517,6 +1957,9 @@ ret 8
 
 
 
+
+
+section .text
 MemSwapDwordWords:
 	; Swaps the words in a series of dwords starting at the address specified
 	;
@@ -1546,6 +1989,9 @@ ret 8
 
 
 
+
+
+section .text
 Mem_Internal_MemListGrow:
 	; Adds an element to the list itself and duplicates the element specified
 	;
@@ -1595,6 +2041,9 @@ ret
 
 
 
+
+
+section .text
 Mem_Internal_MemListShrink:
 	; Subtracts an element from the list itself and deletes that element
 	;

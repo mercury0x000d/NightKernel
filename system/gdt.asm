@@ -16,6 +16,8 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; GDTBuild						Encodes the values passed into the format recognized by the CPU
 ; GDTGetAccessFlags 			Returns the access flags from the GDT entry specifed
@@ -30,10 +32,15 @@
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 GDTBuild:
 	; Encodes the values passed into the format recognized by the CPU and stores the result at the address specified
 	;
@@ -50,11 +57,14 @@ GDTBuild:
 	push ebp
 	mov ebp, esp
 
+
 	; get destination pointer
 	mov edi, [ebp + 8]
 
+
 	; preserve edi
 	mov esi, edi
+
 
 	; encode base value
 	; move bits 0:15
@@ -70,6 +80,7 @@ GDTBuild:
 	ror eax, 8
 	mov [edi], al
 
+
 	; encode limit value
 	; restore edi
 	mov edi, esi
@@ -81,11 +92,13 @@ GDTBuild:
 	ror eax, 16
 	mov [edi], al
 
+
 	; encode access flags
 	; correct edi
 	dec edi
 	mov eax, [ebp + 20]
 	mov [edi], al
+
 
 	; encode size flags
 	; correct edi
@@ -96,8 +109,10 @@ GDTBuild:
 	or bl, al
 	mov [edi], bl
 
+
 	; ...aaaaand exit!
 	mov dword [ebp + 8], edx
+
 
 	mov esp, ebp
 	pop ebp
@@ -105,6 +120,9 @@ ret 20
 
 
 
+
+
+section .text
 GDTGetAccessFlags:
 	; Returns the access flags from the GDT entry specifed
 	;
@@ -117,13 +135,17 @@ GDTGetAccessFlags:
 	push ebp
 	mov ebp, esp
 
+
 	mov esi, [ebp + 8]
+
 
 	xor eax, eax
 	add esi, 5
 	mov al, byte [esi]
 
+
 	mov dword [ebp + 8], eax
+
 
 	mov esp, ebp
 	pop ebp
@@ -131,6 +153,9 @@ ret
 
 
 
+
+
+section .text
 GDTGetBaseAddress:
 	; Returns the base address from the GDT entry specifed
 	;
@@ -143,24 +168,30 @@ GDTGetBaseAddress:
 	push ebp
 	mov ebp, esp
 
+
 	mov esi, [ebp + 8]
+
 
 	; move bits 24:31 into eax
 	xor eax, eax
 	add esi, 7
 	mov al, byte [esi]
 
+
 	; move bits 16:23 into eax
 	shl eax, 8
 	sub esi, 3
 	mov al, byte [esi]
+
 
 	; move bits 0:15 into eax
 	shl eax, 16
 	sub esi, 2
 	mov ax, word [esi]
 
+
 	mov dword [ebp + 8], eax
+
 
 	mov esp, ebp
 	pop ebp
@@ -168,6 +199,9 @@ ret
 
 
 
+
+
+section .text
 GDTGetLimitAddress:
 	; Returns the limit address from the GDT entry specifed
 	;
@@ -180,20 +214,25 @@ GDTGetLimitAddress:
 	push ebp
 	mov ebp, esp
 
+
 	mov esi, [ebp + 8]
 	xor eax, eax
+
 
 	; move bits 16:19 into eax
 	add esi, 6
 	mov al, byte [esi]
 	and al, 0x0F
 
+
 	; move bits 0:15 into eax
 	shl eax, 16
 	sub esi, 6
 	mov ax, word [esi]
 
+
 	mov dword [ebp + 8], eax
+
 
 	mov esp, ebp
 	pop ebp
@@ -201,6 +240,9 @@ ret
 
 
 
+
+
+section .text
 GDTGetSizeFlags:
 	; Returns the size flags from the GDT entry specifed
 	;
@@ -213,14 +255,18 @@ GDTGetSizeFlags:
 	push ebp
 	mov ebp, esp
 
+
 	mov esi, [ebp + 8]
+
 
 	xor eax, eax
 	add esi, 6
 	mov al, byte [esi]
 	shr eax, 4
 
+
 	mov dword [ebp + 8], eax
+
 
 	mov esp, ebp
 	pop ebp
@@ -228,6 +274,9 @@ ret
 
 
 
+
+
+section .text
 GDTInit:
 	; Builds and loads the kernel's GDT into GDTR
 	;
@@ -248,6 +297,9 @@ ret
 
 
 
+
+
+section .text
 GDTSetAccessFlags:
 	; Sets the access flags to the GDT entry specifed
 	;
@@ -261,11 +313,14 @@ GDTSetAccessFlags:
 	push ebp
 	mov ebp, esp
 
+
 	mov edi, [ebp + 8]
 	mov eax, [ebp + 12]
 
+
 	add edi, 5
 	mov [edi], al
+
 
 	mov esp, ebp
 	pop ebp
@@ -273,6 +328,9 @@ ret 8
 
 
 
+
+
+section .text
 GDTSetBaseAddress:
 	; Sets the base address to the GDT entry specifed
 	;
@@ -286,23 +344,28 @@ GDTSetBaseAddress:
 	push ebp
 	mov ebp, esp
 
+
 	; get destination pointer
 	mov edi, [ebp + 8]
 	mov eax, [ebp + 12]
 
+
 	; move bits 0:15
 	add edi, 2
 	mov [edi], ax
+
 
 	; move bits 16:23
 	add edi, 2
 	ror eax, 16
 	mov [edi], al
 
+
 	; move bits 24:31
 	add edi, 3
 	ror eax, 8
 	mov [edi], al
+
 
 	mov esp, ebp
 	pop ebp
@@ -310,6 +373,9 @@ ret 8
 
 
 
+
+
+section .text
 GDTSetLimitAddress:
 	; Sets the limit address to the GDT entry specifed
 	;
@@ -323,16 +389,20 @@ GDTSetLimitAddress:
 	push ebp
 	mov ebp, esp
 
+
 	mov edi, [ebp + 8]
 	mov eax, [ebp + 12]
 
+
 	; move bits 0:15
 	mov [edi], ax
+
 
 	; move bits 16:19
 	add edi, 6
 	ror eax, 16
 	mov [edi], al
+
 
 	mov esp, ebp
 	pop ebp
@@ -340,6 +410,9 @@ ret 8
 
 
 
+
+
+section .text
 GDTSetSizeFlags:
 	; Sets the size flags to the GDT entry specifed
 	;
@@ -353,9 +426,11 @@ GDTSetSizeFlags:
 	push ebp
 	mov ebp, esp
 
+
 	; get destination pointer
 	mov edi, [ebp + 8]
 	mov eax, [ebp + 12]
+
 
 	; encode size flags
 	add edi, 6
@@ -364,14 +439,17 @@ GDTSetSizeFlags:
 	or bl, al
 	mov [edi], bl
 
+
 	mov esp, ebp
 	pop ebp
 ret 8
 
 
 
-GDTStart:
 
+
+section .data
+GDTStart:
 ; Null descriptor (Offset 0x00)
 ; this is normally all zeros, but it's also a great place to tuck away the GDT header info
 dw GDTEnd - GDTStart - 1						; size of GDT

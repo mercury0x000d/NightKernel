@@ -16,9 +16,13 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; CMOSRead						Reads the value of a CMOS register while maintaining proper setting of the NMI bit
 ; CMOSWrite						Writes the value of a CMOS register while maintaining proper setting of the NMI bit
+
+
 
 
 
@@ -26,6 +30,9 @@ bits 32
 
 
 
+
+
+section .text
 CMOSRead:
 	; Reads the value of a CMOS register while maintaining proper setting of the NMI bit
 	;
@@ -56,6 +63,9 @@ ret
 
 
 
+
+
+section .text
 CMOSWrite:
 	; Writes the value of a CMOS register while maintaining proper setting of the NMI bit
 	;

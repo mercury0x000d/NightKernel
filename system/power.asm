@@ -16,12 +16,18 @@
 
 
 
+
+
 ; 16-bit function listing:
 ; APMEnable						Activates the APM interface for all devices managed by the APM BIOS
 ; APMDisable					Disables the APM interface for all devices managed by the APM BIOS
 
+
+
 ; 32-bit function listing:
 ; APMShutdown					Shuts down the PC via the APM intereface
+
+
 
 
 
@@ -29,6 +35,9 @@ bits 16
 
 
 
+
+
+section .text
 APMEnable:
 	; Activates the APM interface for all devices managed by the APM BIOS
 	;
@@ -53,6 +62,9 @@ ret
 
 
 
+
+
+section .text
 APMDisable:
 	; Disables the APM interface for all devices managed by the APM BIOS
 	;
@@ -77,10 +89,15 @@ ret
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 APMShutdown:
 	; Shuts down the PC via the APM intereface
 	;

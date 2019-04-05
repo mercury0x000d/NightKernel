@@ -16,6 +16,8 @@
 
 
 
+
+
 ; 32-bit function listing:
 ; SerialGetBaud					Returns the current baud rate of the specified serial port
 ; SerialGetIER					Returns the Interrupt Enable Register for the specified serial port
@@ -34,10 +36,15 @@
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 SerialGetBaud:
 	; Returns the current baud rate of the specified serial port
 	;
@@ -153,6 +160,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetIER:
 	; Returns the Interrupt Enable Register for the specified serial port
 	;
@@ -231,6 +241,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetIIR:
 	; Returns the Interrupt Identification Register for the specified serial port
 	;
@@ -309,6 +322,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetLSR:
 	; Returns the Line Status Register for the specified serial port
 	;
@@ -387,6 +403,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetMSR:
 	; Returns the Modem Status Register for the specified serial port
 	;
@@ -465,6 +484,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetParity:
 	; Returns the current parity setting of the specified serial port
 	;
@@ -550,6 +572,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetStopBits:
 	; Returns the current number of stop bits for the specified serial port
 	;
@@ -631,6 +656,9 @@ ret
 
 
 
+
+
+section .text
 SerialGetWordSize:
 	; Returns the current number of data word bits for the specified serial port
 	;
@@ -711,6 +739,9 @@ ret
 
 
 
+
+
+section .text
 SerialPrintString:
 	; Prints an ASCIIZ string as a series of characters to serial port 1
 	;
@@ -736,10 +767,10 @@ SerialPrintString:
 		; we're still here, so let's send a character
 		out dx, al
 
-		mov cl, [tSystem.ticks]
+		mov ecx, dword [tSystem.ticksSinceBoot]
 		.timerloop:
-			mov ch, [tSystem.ticks]
-			cmp cl, ch
+			mov eax, [tSystem.ticksSinceBoot]
+			cmp al, cl
 			jne .timerdone
 		jmp .timerloop
 		.timerdone:
@@ -759,6 +790,9 @@ ret 4
 
 
 
+
+
+section .text
 SerialSetBaud:
 	; Returns the current baud rate of the specified serial port
 	;
@@ -872,6 +906,8 @@ ret
 
 
 
+
+section .text
 SerialSetIER:
 	; Sets the Interrupt Enable Register for the specified serial port
 	;
@@ -945,6 +981,9 @@ ret
 
 
 
+
+
+section .text
 SerialSetParity:
 	; Sets the parity of the specified serial port
 	;
@@ -1033,6 +1072,9 @@ ret
 
 
 
+
+
+section .text
 SerialSetStopBits:
 	; Sets the number of stop bits for the specified serial port
 	;
@@ -1117,6 +1159,9 @@ ret
 
 
 
+
+
+section .text
 SerialSetWordSize:
 	; Sets the number of data word bits for the specified serial port
 	;

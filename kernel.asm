@@ -1,6 +1,6 @@
 ; Night Kernel
 ; Copyright 1995 - 2019 by mercury0x0d
-; Kernel.asm is a part of the Night Kernel
+; kernel.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -16,11 +16,6 @@
 
 
 
-; here's where all the magic happens :)
-
-; Note: Any call to a kernel (or system library) function may destroy the
-; contents of eax, ebx, ecx, edx, edi and esi.
-
 
 
 [map all kernel.map]
@@ -28,12 +23,16 @@ bits 16
 
 
 
+
+
+section .text
+
 ; set origin point to where the FreeDOS bootloader loads this code
 org 0x0600
 
-; clear the direction flag and turn off interrupts
+
+; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
 cld
-cli
 
 
 main:
@@ -89,47 +88,67 @@ call MemProbe
 
 
 
-; get that good ol' APM info
+; enable the A20 line - one of the things we require for operation
 push progressText02$
+call PrintIfConfigBits16
+call A20Enable
+
+
+
+; get that good ol' APM info
+push progressText03$
 call PrintIfConfigBits16
 call SetSystemAPM
 
 
 
 ; enable the APM interface
-push progressText03$
+push progressText04$
 call PrintIfConfigBits16
 call APMEnable
 
 
 
 ; probe the PCI controller while we still can
-push progressText10$
+push progressText05$
 call PrintIfConfigBits16
 call PCIProbe
 
 
 
 ; load that GDT!
-push progressText04$
+push progressText06$
 call PrintIfConfigBits16
 lgdt [GDTStart]
 
 
 
 ; enter protected mode. YAY!
-push progressText05$
+push progressText07$
 call PrintIfConfigBits16
 mov eax, cr0
 or eax, 00000001b
 mov cr0, eax
 
 ; jump to start the kernel in 32-bit mode
-jmp 0x08:KernelStart
+jmp 0x08:ProtectedEntry
+
+
 
 bits 32
 
-KernelStart:
+
+
+ProtectedEntry:
+
+; When we were in Real Mode a moment ago, we used some BIOS calls to get things set up.
+; Unfortunately, they have a bad habit of enabling interrupts on their own, EVEN when they were not previously enabled.
+; That's not so bad for Real Mode, but here in Protected land, that's a Bad Thing waiting to happen.
+; So let's disable them again.
+cli
+
+
+
 ; init the registers, including the temporary stack
 mov ax, 0x0010
 mov ds, ax
@@ -139,15 +158,8 @@ mov esp, 0x0009FB00
 
 
 
-; enable the A20 line - one of the things we require for operation
-push progressText06$
-call PrintIfConfigBits32
-call A20Enable
-
-
-
 ; memory list init
-push progressText07$
+push progressText08$
 call PrintIfConfigBits32
 call MemInit
 
@@ -155,7 +167,7 @@ call MemInit
 
 ; now that we have a temporary stack and access to all the memory addresses,
 ; let's allocate some RAM for the real stack
-push progressText08$
+push progressText09$
 call PrintIfConfigBits32
 
 push dword [kKernelStack]
@@ -172,7 +184,7 @@ push 0x00000000
 
 
 ; set up our interrupt handlers and IDT
-push progressText09$
+push progressText0A$
 call PrintIfConfigBits32
 call IDTInit
 call ISRInitAll
@@ -180,40 +192,38 @@ call ISRInitAll
 
 
 ; setup and remap both PICs
-push progressText0A$
+push progressText0B$
 call PrintIfConfigBits32
 call PICInit
-call PICDisableIRQs
-call PICUnmaskAll
+call PICIRQDisableAll
+call PICIRQEnableAll
 call PITInit
 
 
 
-; load system data into the info struct
-push progressText0B$
-call PrintIfConfigBits32
-call SetSystemRTC							; load the RTC values into the system struct
-call SetSystemCPUID							; set some info from the CPU into the system struct
-call SetSystemCPUSpeed						; write the CPU speed info to the system struct
-
-
-
-; setup that mickey!
+; init the RTC
 push progressText0C$
 call PrintIfConfigBits32
-call MouseInit
+call RTCInit
 
 
 
-; setup keyboard
+; let's get some interrupts firing!
 push progressText0D$
 call PrintIfConfigBits32
-call KeyboardInit
+sti
+
+
+
+; load system data into the info struct
+push progressText0E$
+call PrintIfConfigBits32
+call SetSystemCPUID
 
 
 
 ; allocate the system lists
-push progressText0E$
+push progressText0F$
 call PrintIfConfigBits32
 
 ; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element) plus header
@@ -249,19 +259,14 @@ call LMListInit
 
 
 
-; let's get some interrupts firing!
-push progressText0F$
-call PrintIfConfigBits32
-sti
-
-
-
-; if we have a PCI controller in the first place, find out how many PCI devices we have and save that info to the system struct
+; if we have a PCI controller in the first place, init the bus, find out how many PCI devices we have, and save that info to the system struct
 cmp dword [tSystem.PCIVersion], 0
 je .NoPCI
 
 	; if we get here, we have PCI
 	; so let's init things!
+	push progressText10$
+	call PrintIfConfigBits32
 	call PCIInitBus
 
 	; now load drivers for PCI devices
@@ -279,66 +284,289 @@ call Print32
 
 
 ; load drivers for legacy devices
+push progressText12$
+call PrintIfConfigBits32
 call DriverLegacyLoad
 
+
+
 ; enumerate partitions
+push progressText13$
+call PrintIfConfigBits32
 call PartitionEnumerate
 
 
 
+; init Task Manager
+push progressText14$
+call PrintIfConfigBits32
+call TaskInit
+
+
+
+
+; skip this for now, it's just an experiment
+; comment out the jmp to run this code
+jmp PagingDone
+; experimental paging setup
+cli
+PDAddr									dd 0x00000000
+PTAddr									dd 0x00000000
+
+push 0
+call PageDirCreate
+pop dword [PDAddr]
+
+push 0
+call PageTableCreate
+pop dword [PTAddr]
+
+
+; insert page table into page directory while leaving the flags alone which we just set earlier
+mov ecx, dword [PDAddr]
+mov eax, [ecx]
+and eax, 3
+mov ebx, dword [PTAddr]
+or ebx, eax
+or ebx, 1			; set the "present" bit
+mov eax, dword [PDAddr]
+mov [eax], ebx
+
+
+
+
+
+; turn it all on!
+push dword [PDAddr]
+call PageDirLoad
+
+call PagingEnable
+
+mov eax, 0xcafebeef
+
+; at this point, the first 
+
+; hang here so we can survey our success!
+jmp $
+
+
+jmp PagingDone
+
+
+
+PageDirCreate:
+	push ebp
+	mov ebp, esp
+
+	sub esp, 4
+	%define PDAddress							dword [ebp - 4]
+
+	; get a chunk of RAM that's 4KiB in size and aligned on a 4096-byte boundary
+	push 4096
+	push 4096
+	push 0x01
+	call MemAllocateAligned
+	pop PDAddress
+
+	mov ecx, 1024
+	.zeroLoop:
+		mov eax, 4
+		mov edx, 0
+		mov ebx, ecx
+		dec ebx
+		mul ebx
+		add eax, PDAddress
+		mov dword [eax], 0x00000002
+	loop .zeroLoop
+
+	mov eax, PDAddress
+	mov dword [ebp + 8], eax
+
+	mov esp, ebp
+	pop ebp
+ret
+
+PageTableCreate:
+	push ebp
+	mov ebp, esp
+
+	sub esp, 4
+	%define PTAddress							dword [ebp - 4]
+
+	; get a chunk of RAM as before
+	push 4096
+	push 4096
+	push 0x01
+	call MemAllocateAligned
+	pop PTAddress
+
+	mov ecx, 1024
+	.zeroLoop:
+		mov eax, 4
+		mov edx, 0
+		mov ebx, ecx
+		dec ebx
+		mul ebx
+		add eax, PTAddress
+		push eax
+
+		mov eax, 0x1000
+		mul ebx
+		or eax, 3
+
+		pop ebx
+		mov dword [ebx], eax
+	loop .zeroLoop
+
+	mov eax, PTAddress
+	mov dword [ebp + 8], eax
+
+	mov esp, ebp
+	pop ebp
+ret
+
+pusha
+call PrintRegs32
+popa
+
+PageDirLoad:
+
+	push ebp
+	mov ebp, esp
+
+	mov eax, [ebp + 8]
+	mov cr3, eax
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+PagingEnable:
+	push ebp
+	mov ebp, esp
+
+	mov eax, cr0
+	or eax, 0x80000000
+	mov cr0, eax
+
+	mov esp, ebp
+	pop ebp
+ret
+
+PagingDone:
+
+
+
+
+
+
+mov eax, dword [tSystem.configBits]
+and eax, 000000000000000000000000000000001b
+cmp eax, 000000000000000000000000000000001b
+jne .SkipStartDelay
+	; if we get here, we're in Debug Mode
+	; wouldn't it be nice if we gave the user a moment to admire all those handy debug messages?
+	push 512
+	call TimerWait
+.SkipStartDelay:
+
 
 
 ; clear the screen and start!
-push 256
-call TimerWait
 call ScreenClear32
 
 
+;ScanCodeTestLoop:
+;	push 0
+;	call KeyWait
+;	pop eax
+;
+;	inc byte [cursorY]
+;	call PrintRegs32
+;
+;jmp ScanCodeTestLoop
+
+
+
+;push Task1
+;call TaskNew
+;pop eax
+;mov ebx, 0xBEEFCA1F
+;mov ecx, 0xBEEFCA1F
+;mov edx, 0xBEEFCA1F
+;call PrintRegs32
+;
+;
+;push Task2
+;call TaskNew
+;pop eax
+;mov ebx, 0xBEEFCA1F
+;mov ecx, 0xBEEFCA1F
+;mov edx, 0xBEEFCA1F
+;call PrintRegs32
+;
+;jmp $
 
 ; enter the infinite loop which runs the kernel
 InfiniteLoop:
 	; do stuff here, i guess... :)
 
+	; enter the Debug Menu if appropriate
 	mov eax, [tSystem.configBits]
 	and eax, 000000000000000000000000000000001b
 	cmp eax, 000000000000000000000000000000001b
 	jne .SkipDebugMenu
-
-	call DebugMenu
-
+		call DebugMenu
 	.SkipDebugMenu:
+
 jmp InfiniteLoop
 
+
+
+Task1:
+	inc dword [0x200000]
+jmp Task1
+
+
+Task2:
+	inc dword [0x200010]
+jmp Task1
+
+section .data
 progressText01$									db 'Probing BIOS memory map', 0x00
-progressText02$									db 'SetSystemAPM', 0x00
-progressText03$									db 'APMEnable', 0x00
-progressText04$									db 'LoadGDT', 0x00
-progressText05$									db 'Entering Protected Mode', 0x00
-progressText06$									db 'A20Enable', 0x00
-progressText07$									db 'Memory list init', 0x00
-progressText08$									db 'Stack setup', 0x00
-progressText09$									db 'IDTInit', 0x00
-progressText0A$									db 'Remaping PICs', 0x00
-progressText0B$									db 'Load system data to the info struct', 0x00
-progressText0C$									db 'MouseInit', 0x00
-progressText0D$									db 'KeyboardInit', 0x00
-progressText0E$									db 'Allocating list space', 0x00
-progressText0F$									db 'Enabling interrupts', 0x00
+progressText02$									db 'Beginning A20 enable procedure', 0x00
+progressText03$									db 'SetSystemAPM', 0x00
+progressText04$									db 'APMEnable', 0x00
+progressText05$									db 'LoadGDT', 0x00
+progressText06$									db 'Probing PCI controller', 0x00
+progressText07$									db 'Entering Protected Mode', 0x00
+progressText08$									db 'Memory list init', 0x00
+progressText09$									db 'Stack setup', 0x00
+progressText0A$									db 'IDTInit', 0x00
+progressText0B$									db 'Remaping PICs', 0x00
+progressText0C$									db 'Initializing RTC', 0x00
+progressText0D$									db 'Enabling interrupts', 0x00
+progressText0E$									db 'Load system data to the info struct', 0x00
+progressText0F$									db 'Allocating list space', 0x00
 progressText10$									db 'Initializing PCI bus', 0x00
-progressText11$									db 'Loading drivers', 0x00
+progressText11$									db 'Loading PCI drivers', 0x00
+progressText12$									db 'Loading legacy device drivers', 0x00
+progressText13$									db 'Enumerating partitions', 0x00
+progressText14$									db 'Initializing Task Manager', 0x00
 memE820Unsupported$								db 'Could not detect memory, function unsupported', 0x00
 PCIFailed$										db 'PCI Controller not detected', 0x00
 
 
-
+section .text
 ; includes for system routines
 %include "system/globals.asm"
 %include "api/misc.asm"
 %include "api/lists.asm"
 %include "api/strings.asm"
-%include "io/ps2.asm"
 %include "io/serial.asm"
 %include "system/cmos.asm"
+%include "system/cpu.asm"
 %include "system/gdt.asm"
 %include "system/hardware.asm"
 %include "system/interrupts.asm"
@@ -347,15 +575,19 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 %include "system/pci.asm"
 %include "system/pic.asm"
 %include "system/power.asm"
+%include "system/rtc.asm"
+%include "system/tasks.asm"
 %include "video/screen.asm"
 %include "system/debug.asm"
 
 
 
 ; includes for drivers
+section .text
 DriverSpaceStart:
 %include "drivers/ATA Controller.asm"
 %include "drivers/FAT12.asm"
+%include "drivers/PS2 Controller.asm"
 ;%include "drivers/FAT16Small.asm"
 ;%include "drivers/FAT16Large.asm"
 ;%include "drivers/FAT32.asm"

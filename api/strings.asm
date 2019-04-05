@@ -15,9 +15,14 @@
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
 
+
+
+
 ; 16-bit function listing:
 ; ConvertByteToHexString16		Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode
 ; ConvertWordToHexString16		Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
+
+
 
 ; 32-bit function listing:
 ; StringBuild					Builds a string out of the specified arguments
@@ -48,8 +53,13 @@
 
 
 
+
+
 ; globals
+section .data
 kHexDigits										db '0123456789ABCDEF'
+
+
 
 
 
@@ -57,6 +67,9 @@ bits 16
 
 
 
+
+
+section .text
 ConvertByteToHexString16:
 	; Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode
 	;
@@ -99,6 +112,9 @@ ret 4
 
 
 
+
+
+section .text
 ConvertWordToHexString16:
 	; Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
 	;
@@ -167,10 +183,15 @@ ret 4
 
 
 
+
+
 bits 32
 
 
 
+
+
+section .text
 StringBuild:
 	; Builds a string out of the specified arguments
 	;
@@ -284,7 +305,6 @@ StringBuild:
 	.LoopDone:
 	push edx
 ret
-
 ; local storage
 .sourceLength									dd 0x00000000
 .sourceAddress									dd 0x00000000
@@ -464,6 +484,9 @@ jmp .TokenDone
 
 
 
+
+
+section .text
 StringCaseLower:
 	; Converts a string to lower case
 	;
@@ -505,6 +528,9 @@ ret 4
 
 
 
+
+
+section .text
 StringCaseUpper:
 	; Converts a string to upper case
 	;
@@ -546,6 +572,9 @@ ret 4
 
 
 
+
+
+section .text
 StringCharAppend:
 	; Appends a character onto the end of the string specified
 	;
@@ -579,6 +608,9 @@ ret 8
 
 
 
+
+
+section .text
 StringCharDelete:
 	; Deletes the character at the location specified from the string
 	;
@@ -627,6 +659,10 @@ StringCharDelete:
 ret 8
 
 
+
+
+
+section .text
 StringCharInsert:
 	; Inserts a character into the string at the location specified
 	;
@@ -732,6 +768,9 @@ ret 12
 
 
 
+
+
+section .text
 StringCharPrepend:
 	; Prepends a character onto the beginning of the string specified
 	;
@@ -778,6 +817,9 @@ ret 8
 
 
 
+
+
+section .text
 StringFill:
 	; Fills the entire string specified with the character specified
 	;
@@ -812,6 +854,9 @@ ret 8
 
 
 
+
+
+section .text
 StringFromBinaryValue:
 	; Translates the value specified to a binary number in a zero-padded 32 byte string
 	; Note: No length checking is done on this string; make sure it's long enough to hold the converted number!z
@@ -860,6 +905,9 @@ ret 8
 
 
 
+
+
+section .text
 StringFromDecimalValue:
 	; Translates the value specified to a decimal number in a zero-padded 10 byte string
 	; Note: No length checking is done on this string; make sure it's long enough to hold the converted number!
@@ -908,6 +956,9 @@ ret 8
 
 
 
+
+
+section .text
 StringFromHexValue:
 	; Translates the value specified to a hexadecimal number in a zero-padded 8 byte string
 	; Note: No length checking is done on this string; make sure it's long enough to hold the converted number!
@@ -995,6 +1046,9 @@ ret 8
 
 
 
+
+
+section .text
 StringFromOctalValue:
 	; Translates the value specified to an octal number in a zero-padded 11 byte string
 	; Note: No length checking is done on this string; make sure it's long enough to hold the converted number!
@@ -1043,6 +1097,9 @@ ret 8
 
 
 
+
+
+section .text
 StringLength:
 	; Returns the length of the string specified
 	;
@@ -1074,6 +1131,9 @@ ret
 
 
 
+
+
+section .text
 StringPadLeft:
 	; Pads the left side of the string specified with the character specified until it is the length specified
 	;
@@ -1141,6 +1201,9 @@ ret 12
 
 
 
+
+
+section .text
 StringPadRight:
 	; Pads the right side of the string specified with the character specified until it is the length specified
 	;
@@ -1199,6 +1262,9 @@ ret 12
 
 
 
+
+
+section .text
 StringReplaceChars:
 	; Replaces all occurrances of the specified character with another character specified
 	;
@@ -1240,6 +1306,9 @@ ret 12
 
 
 
+
+
+section .text
 StringReplaceCharsInRange:
 	; Replaces any character within the range of ASCII codes specified with the specified character
 	;
@@ -1293,6 +1362,9 @@ ret 16
 
 
 
+
+
+section .text
 StringSearchCharList:
 	; Returns the position in the string specified of the first match from a list of characters
 	;
@@ -1390,6 +1462,9 @@ ret 4
 
 
 
+
+
+section .text
 StringTokenReplace:
 	; Finds the first occurrance of the token ^ character replaces it with a truncated binary number
 	;
@@ -1416,6 +1491,9 @@ ret
 
 
 
+
+
+section .text
 StringTrimLeft:
 	; Trims any occurrances of the character specified off the left side of the string
 	;
@@ -1477,6 +1555,9 @@ ret 8
 
 
 
+
+
+section .text
 StringTrimRight:
 	; Trims any occurrances of the character specified off the right side of the string
 	;
@@ -1527,6 +1608,9 @@ ret 8
 
 
 
+
+
+section .text
 StringTruncateLeft:
 	; Truncates the number of characters specified from the beginning of the string specified
 	;
@@ -1576,6 +1660,9 @@ ret 8
 
 
 
+
+
+section .text
 StringTruncateRight:
 	; Truncates the number of characters specified from the end of the string specified
 	;
@@ -1621,6 +1708,9 @@ ret 8
 
 
 
+
+
+section .text
 StringWordCount:
 	; Counts the words in the string specified when viewed as a sentence separated by the byte specified
 	;
@@ -1734,6 +1824,9 @@ ret 4
 
 
 
+
+
+section .text
 StringWordGet:
 	; Returns the word specified from the string specified when separated by the byte specified
 	;
