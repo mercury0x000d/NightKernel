@@ -693,9 +693,11 @@ C01DetectChannelDevices:
 		push eax
 
 		; get first free slot
+		push dword 0
 		push dword [tSystem.listDrives]
 		call LMSlotFindFirstFree
 		pop eax
+		pop ebx
 
 		; get the address of that slot into esi
 		push eax
@@ -791,9 +793,11 @@ C01DetectChannelDevices:
 		push eax
 
 		; get first free slot
+		push dword 0
 		push dword [tSystem.listDrives]
 		call LMSlotFindFirstFree
 		pop eax
+		pop ebx
 
 		; get the address of that slot into esi
 		push eax
@@ -1205,76 +1209,88 @@ InternalDriveFoundPrint:
 	push ebp
 	mov ebp, esp
 
-	mov esi, [ebp + 8]
-	mov ebx, [ebp + 12]
-	mov edx, [ebp + 16]
-	mov ecx, [ebp + 20]
+	; allocate local variables
+	sub esp, 8
+	%define modelNumberAddress					dword [ebp - 4]
+	%define serialNumberAddress					dword [ebp - 8]
 
-	; now we write a null into the data block to make sure the serial number string is usable
+
+	; calculate the model number address
+	mov eax, dword [ebp + 8]
+	add eax, 54
+	mov modelNumberAddress, eax
+
+	; calculate the serial number address
+	mov eax, dword [ebp + 8]
+	add eax, 20
+	mov serialNumberAddress, eax
+
+
+	; now we write a nulls into the data block after each string to make sure the model and serial number strings are usable
 	mov al, 0x00
-	mov edi, esi
-	add edi, 40
-	mov [edi], al
 
-	; do the same for the model number string
-	mov edi, esi
+	mov edi, dword [ebp + 8]
 	add edi, 94
 	mov [edi], al
 
-	; save everything
-	pusha
+	mov edi, dword [ebp + 8]
+	add edi, 40
+	mov [edi], al
 
-	; clear our print string
-	push dword 0
-	push dword 256
-	push kPrintText$
-	call MemFill
 
-	; restore everything
-	popa
-
-	; build and print the drive discovered string
-	; push device number
-	push edx
-
-	; push the port number
-	push ebx
-
-	; save everything, trim and push the serial string address, restore everything
-	mov edi, esi
-	add edi, 20
-	push edi
-	pusha
+	; trim the model string
 	push 32
+	mov edi, modelNumberAddress
 	push edi
 	call StringTrimRight
-	popa
 
-	; save everything, trim and push the model string, restore everything
-	mov edi, esi
-	add edi, 54
-	push edi
-	pusha
+
+	; trim the serial string address
 	push 32
+	mov edi, serialNumberAddress
 	push edi
 	call StringTrimRight
-	popa
 
-	; build the string
-	push kPrintText$
 
-	; select which formatting string to use based on the type of drive this is
-	cmp ecx, 3
+	; MemCopy whichever formatting string should be used based on the type of drive this is
+	push 80
+	push .scratch$
+	cmp dword [ebp + 20], 3
 	jne .SkipATAPIString
-	push .foundATAPIFormat$
-	jmp .ResumeStringBuild
+		push .foundATAPIFormat$
+		jmp .ResumeStringBuild
 	.SkipATAPIString:
-	push .foundATAFormat$
+		push .foundATAFormat$
 	.ResumeStringBuild:
-	call StringBuild
+	call MemCopy
+
+
+	; start building the string
+	push dword 0
+	mov edi, modelNumberAddress
+	push edi
+	push .scratch$
+	call StringTokenString
+
+	push dword 0
+	mov edi, serialNumberAddress
+	push edi
+	push .scratch$
+	call StringTokenString
+
+	push dword 3
+	push dword [ebp + 12]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 1
+	push dword [ebp + 16]
+	push .scratch$
+	call StringTokenDecimal
+
 
 	; print the string
-	push kPrintText$
+	push .scratch$
 	call PrintIfConfigBits32
 
 
@@ -1283,5 +1299,8 @@ InternalDriveFoundPrint:
 ret 16
 
 section .data
-.foundATAFormat$								db 'Found ATA device ^s (^s) at port 0x^p4^h:^p1^d', 0x00
-.foundATAPIFormat$								db 'Found ATAPI device ^s (^s) at port 0x^p4^h:^p1^d', 0x00
+.foundATAFormat$								db 'Found ATA device ^ (^) at port 0x^:^', 0x00
+.foundATAPIFormat$								db 'Found ATAPI device ^ (^) at port 0x^:^', 0x00
+
+section .bss
+.scratch$										resb 80

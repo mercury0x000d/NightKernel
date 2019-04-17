@@ -1,6 +1,6 @@
 # let's make a kernel image. or test it out. or both! :D
 
-asflags = -f bin -F null -g
+asflags = -f bin -F null -g -l night.lst
 
 
 

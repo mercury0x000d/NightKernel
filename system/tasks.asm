@@ -22,22 +22,7 @@
 ; TaskDetermineNext				Calculates the next task which should be run
 ; TaskInit						Initializes the Task Manager and its required data structure
 ; TaskNew						Sets up a new task for running
-; TaskSwitch					Switches to the task specified
 
-
-
-
-
-; tTaskInfo struct, used to... *GASP* manage tasks
-%define tTaskInfo.cr3							(esi + 00)
-%define tTaskInfo.entryPoint					(esi + 04)
-%define tTaskInfo.esp							(esi + 08)
-%define tTaskInfo.esp0							(esi + 12)
-%define tTaskInfo.stackAddress					(esi + 16)
-%define tTaskInfo.kernelStackAddress			(esi + 20)
-%define tTaskInfo.CPULoad						(esi + 24)
-%define tTaskInfo.priority						(esi + 28)
-%define tTaskInfo.name							(esi + 32)		; name field is 16 bytes (for now, may need to expand)
 
 
 
@@ -102,6 +87,23 @@
 ;	%endif
 ;	TSS_SIZE EQU $-tss_entry
 
+; privileged instructions
+; CLTS				Clear Task Switch Flag in Control Register CR0
+; HLT				Halt Processor
+; INVD				Invalidate Cache without writeback
+; INVLPG			Invalidate TLB Entry
+; LGDT				Loads an address of a GDT into GDTR
+; LLDT				Loads an address of a LDT into LDTR
+; LMSW				Load a new Machine Status WORD
+; LTR				Loads a Task Register into TR
+; MOV				Control Register	Copy data and store in Control Registers
+; MOV 				Debug Register	Copy data and store in debug registers
+; RDMSR				Read Model Specific Registers (MSR)
+; RDPMC				Read Performance Monitoring Counter
+; RDTSC				Read time Stamp Counter
+; WBINVD			Invalidate Cache with writeback
+; WRMSR				Write Model Specific Registers (MSR)
+
 
 
 
@@ -162,7 +164,7 @@ TaskInit:
 	mov [tSystem.listTasks], edi
 
 	; set up the list header
-	push 32
+	push 64
 	push 256
 	push edi
 	call LMListInit
@@ -187,6 +189,47 @@ ret
 
 
 section .text
+TaskKill:
+	; Kills the specified task
+	;
+	;  input:
+	;	Task number
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; get info on the current task
+	push dword [ebp + 8]
+	push dword [tSystem.listTasks]
+	call LMElementAddressGet
+	pop esi
+	pop ebx
+
+
+	; zero out this task's memory slot
+	push 0x00000000
+	push dword 64
+	push esi
+	call MemFill
+
+
+	; and finally, we clear out the currently running task info
+	mov dword [tSystem.currentTask], 0
+	mov dword [tSystem.currentTaskSlotAddress], 0
+
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+
+
+section .text
 TaskNew:
 	; Sets up a new task for running
 	;
@@ -205,70 +248,97 @@ TaskNew:
 	%define taskListSlotAddress					dword [ebp - 8]
 
 
-
-	; %define tTaskInfo.cr3							(esi + 00)
-	; %define tTaskInfo.entryPoint					(esi + 04)
-	; %define tTaskInfo.esp							(esi + 08)
-	; %define tTaskInfo.esp0						(esi + 12)
-	; %define tTaskInfo.stackAddress				(esi + 16)
-	; %define tTaskInfo.kernelStackAddress			(esi + 20)
-	; %define tTaskInfo.CPULoad						(esi + 24)
-	; %define tTaskInfo.priority					(esi + 28)
-	; %define tTaskInfo.name						(esi + 32)		; name field is 16 bytes (for now, may need to expand)
-
-	; PUSHA order: EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
-
-
-
 	; get first free slot in the task list
+	push dword 0
 	push dword [tSystem.listTasks]
 	call LMSlotFindFirstFree
 	pop eax
+	pop ebx
 	mov taskListSlot, eax
 
 
 	; get the starting address of that specific slot into esi
 	push eax
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listTasks]
 	call LMElementAddressGet
 	pop esi
 	pop eax
 	mov taskListSlotAddress, esi
 
 
-	; allocate some memory for this task's stack
-	push taskStackSize
-	push taskListSlot
-	call MemAllocate
-	pop eax
-	mov esi, taskListSlotAddress
-	mov [tTaskInfo.stackAddress], eax
-
-
-	; adjust the memory address to point to the stack pointer
-	add eax, taskStackSize
-	mov [tTaskInfo.esp], eax
-
-
-	; allocate some memory for this task's kernel stack
-	push taskKernelStackSize
-	push taskListSlot
-	call MemAllocate
-	pop eax
-	mov esi, taskListSlotAddress
-	mov [tTaskInfo.kernelStackAddress], eax
-
-	; adjust the memory address to point to the stack pointer
-	add eax, taskKernelStackSize
-	mov [tTaskInfo.esp0], eax
+	; set entry point (starting EIP)
+	mov eax, dword [ebp + 8]
+	mov [tTaskInfo.entryPoint], eax
 
 
 	; set up paging for this task's memory space
 
 
-	; set entry point (starting EIP)
-	mov eax, dword [ebp + 8]
-	mov [tTaskInfo.entryPoint], eax
+	; allocate some memory for this task's kernel stack
+	; Intel *strongly* recommends aligning a 32-bit stack on a 32-bit boundary, so we allocate aligned to 4 bytes
+	push dword 4
+	push taskKernelStackSize
+	push taskListSlot
+	call MemAllocateAligned
+	pop eax
+	mov esi, taskListSlotAddress
+	mov [tTaskInfo.kernelStackAddress], eax
+
+	; adjust this stack address to point to the other end of the stack, as the CPU will expect
+	add eax, taskKernelStackSize
+	mov [tTaskInfo.esp0], eax
+
+
+	; allocate some memory for this task's stack
+	; the task number is this task's slot number
+	push dword 4
+	push taskStackSize
+	push taskListSlot
+	call MemAllocateAligned
+	pop eax
+	mov esi, taskListSlotAddress
+	mov [tTaskInfo.stackAddress], eax
+
+
+	; adjust the stack address to point to the other end of the stack, as we did with the other stack a moment ago
+	; except this time, we don't save it just yet since we will be writing to that stack now
+	add eax, taskStackSize
+
+
+	; build this task's stack
+	; save our current stack pointer first
+	mov edx, esp
+
+	; set the new stack address
+	mov esp, eax
+
+	; push the eflags register this task will use
+	push dword 0x00200216
+
+	; push the cs register this task will use
+	push dword 0x08
+
+	; push the eip register this task will use
+	push dword [ebp + 8]
+
+	; push null for all 8 registers (eax, ebx, ecx, edx, esi, edi, esp, ebp)
+	; it's safe to push 0 here for esp since it will be set correctly from what's in the task structure anyway
+	push 0x00000000
+	push 0x00000000
+	push 0x00000000
+	push 0x00000000
+	push 0x00000000
+	push 0x00000000
+	push 0x00000000
+	push 0x00000000
+
+
+	; now save the current esp for this task
+	mov [tTaskInfo.esp], esp
+
+
+	; restore our original stack
+	mov esp, edx
 
 
 	; return the task number
@@ -278,6 +348,7 @@ TaskNew:
 	mov esp, ebp
 	pop ebp
 ret
+.taskingsetup			db 0x00
 
 
 
@@ -285,27 +356,71 @@ ret
 
 section .text
 TaskSwitch:
-	; Switches to the task specified
+	; Performs a context switch to the next task
 	;
 	;  input:
-	;	Task to which to switch
+	;	n/a
 	;
 	;  output:
 	;	n/a
 
-	push ebp
-	mov ebp, esp
 
-	; get task
-	mov edi, [ebp + 8]
-
-
-	; do stuff here
+	; see if tasking is disabled, skip context switching if so
+	cmp byte [tSystem.taskingEnable], 0
+	je .TaskingDisabled
 
 
+	; if currentTask is 0, that means the first task switch hasn't yet happened or the task that was running got killed
+	; in either case, we do not need to save task info
+	cmp dword [tSystem.currentTask], 0
+	je .SkipSaveState
 
-	mov dword [ebp + 8], edx
+		; save the registers of this task to its stack
+		pusha
+		mov esi, dword [tSystem.currentTaskSlotAddress]
+		mov [tTaskInfo.esp], esp
 
-	mov esp, ebp
-	pop ebp
-ret
+	.SkipSaveState:
+
+
+	; This will be slower than it could potentially be if we didn't use list manager calls here, but you know the old
+	; adage; first make it run, THEN make it run fast. We can always optimize this later.
+
+	; Set up a loop to determine the next task to which we should switch. We simply step through every task's ESP
+	; value until we get one that's non-zero, then use it.
+	mov ebx, dword [tSystem.currentTask]
+	.findNextTaskLoop:
+		; add one to the task number, then mask to make sure we stay under 255
+		inc ebx
+		and ebx, 0x000000FF
+
+
+		; We use a couple tricks here below for speed. First, we're calling an internal List Manager function directly instead
+		; of going through the slower public interface. This bypasses the parameter checking that's normally performed, but
+		; that's okay since we are managing the input internally, so we know it will be correct. Second, we use the EBX
+		; register to track the current task number we're testing. Why EBX? Because LM_Internal_ElementAddressGet() doesn't
+		; modify it, so we don't need to save it here, saving us a handful of CPU cycles.
+
+		; get that task number's starting address
+		push ebx
+		push dword [tSystem.listTasks]
+		call LM_Internal_ElementAddressGet
+		pop esi
+
+
+		; get the ESP register of this task into ecx
+		mov ecx, [tTaskInfo.esp]
+
+		; see if we have something that's not zero
+		cmp ecx, 0
+	je .findNextTaskLoop
+
+
+	; by the time we get here, we know what task to execute next
+	mov dword [tSystem.currentTaskSlotAddress], esi
+	mov dword [tSystem.currentTask], ebx
+	mov esp, ecx
+	popa
+
+	.TaskingDisabled:
+iret

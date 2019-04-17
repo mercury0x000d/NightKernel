@@ -23,7 +23,6 @@ section .data
 kTrue											dd 0x00000001
 kFalse											dd 0x00000000
 kKernelStack									dd 8192
-kPrintText$										times 256 db 0x00
 kDriverSignature$								db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
 
 
@@ -34,10 +33,13 @@ kDriverSignature$								db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x0
 tSystem:
 	.configBitsHint$							db 'ConfigBits'
 	.configBits									dd 00000000000000000000000000000111b
-	.copyright$									db 'Night Kernel, Copyright 1995 - 2019', 0x00
+	.copyright$									db 'Night Kernel, Copyright 2015 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x19
+	.versionMinor								db 0x1A
 	.ticksSinceBoot								dd 0x00000000
+	.currentTask								dd 0x00
+	.currentTaskSlotAddress						dd 0x00
+	.taskingEnable								db 0x00
 	.multicoreAvailable							db 0x00
 	.CPUIDVendor$								times 16 db 0x00
 	.CPUIDBrand$								times 64 db 0x00
@@ -119,6 +121,21 @@ section .bss
 %define tPartitionInfo.writeSector				(esi + 40)
 %define tPartitionInfo.fileLoad					(esi + 44)
 %define tPartitionInfo.fileSave					(esi + 48)
+
+
+
+
+
+; tTaskInfo struct, used to... *GASP* manage tasks (64 bytes)
+%define tTaskInfo.cr3							(esi + 00)
+%define tTaskInfo.entryPoint					(esi + 04)
+%define tTaskInfo.esp							(esi + 08)
+%define tTaskInfo.esp0							(esi + 12)
+%define tTaskInfo.stackAddress					(esi + 16)
+%define tTaskInfo.kernelStackAddress			(esi + 20)
+%define tTaskInfo.CPULoad						(esi + 24)
+%define tTaskInfo.priority						(esi + 28)
+%define tTaskInfo.name							(esi + 32)		; name field is 16 bytes (for now, may need to expand)
 
 
 

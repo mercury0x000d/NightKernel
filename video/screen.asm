@@ -42,10 +42,10 @@
 
 section .data
 ; globals
-cursorX											db 0x01
-cursorY											db 0x01
-textColor										db 0x07
-backColor										db 0x00
+gCursorX										db 0x01
+gCursorY										db 0x01
+gTextColor										db 0x07
+gBackColor										db 0x00
 kMaxLines										db 25
 kBytesPerScreen									dw 4000
 
@@ -62,8 +62,11 @@ bits 16
 section .text
 Print16:
 	; Prints an ASCIIZ string directly to the screen.
-	; Note: Uses text mode (assumed already set) not VESA.
 	; Note: For use in Real Mode only.
+	; Note: This function isn't as robust as its 32-bit cousin because... well... it doesn't need to be.
+	; Note: Another you-know-what.
+	; Note: No! Not another note!
+	; Note: Yes, another, and another! Until you come to your senses!
 	;
 	;  input:
 	;   address of string to print
@@ -80,7 +83,7 @@ Print16:
 
 	; see if we need to scroll the output
 	mov bl, byte [kMaxLines]
-	mov al, byte [cursorY]
+	mov al, byte [gCursorY]
 	cmp al, bl
 	jbe .SkipScroll
 		; if we get here, we need to scroll the display
@@ -100,8 +103,8 @@ Print16:
 	push es
 
 	; set up the foreground and background colors
-	mov bl, [backColor]
-	mov cl, [textColor]
+	mov bl, [gBackColor]
+	mov cl, [gTextColor]
 	and bx, 0x0F
 	and cx, 0x0F
 
@@ -117,7 +120,7 @@ Print16:
 
 	; adjust di for horizontal position
 	mov ax, 0x0000
-	mov al, [cursorX]
+	mov al, [gCursorX]
 	dec ax
 	shl ax, 1
 	mov bx, di
@@ -126,7 +129,7 @@ Print16:
 
 	; adjust di for vertical position
 	mov ax, 0x0000
-	mov al, [cursorY]
+	mov al, [gCursorY]
 	dec ax
 
 	; use a pair of shifts to multiply by 80
@@ -159,12 +162,12 @@ Print16:
 	.end:
 
 	; update cursor X position
-	mov byte [cursorX], 1
+	mov byte [gCursorX], 1
 
 	; update cursor Y position
-	mov al, [cursorY]
+	mov al, [gCursorY]
 	inc al
-	mov [cursorY], al
+	mov [gCursorY], al
 
 	; restore es
 	pop es
@@ -356,7 +359,7 @@ ScreenClear16:
 
 	; set up the word we're writing
 	xor ax, ax
-	mov ah, byte [backColor]
+	mov ah, byte [gBackColor]
 	shl ah, 4
 
 	; set up the loop value
@@ -371,8 +374,8 @@ ScreenClear16:
 	loop .aloop
 
 	; reset the cursor position
-	mov byte [cursorX], 1
-	mov byte [cursorY], 1
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 
 	mov sp, bp
 	pop bp
@@ -435,7 +438,7 @@ ScreenScroll16:
 
 	; update the cursor Y position
 	mov al, byte [kMaxLines]
-	mov byte [cursorY], al
+	mov byte [gCursorY], al
 
 
 	mov sp, bp
@@ -465,8 +468,8 @@ CursorHome:
 	push ebp
 	mov ebp, esp
 
-	mov byte [cursorX], 1
-	mov byte [cursorY], 1
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 
 	mov esp, ebp
 	pop ebp
@@ -479,26 +482,47 @@ ret
 section .text
 Print32:
 	; Prints an ASCIIZ string directly to the screen.
-	; Note: Uses text mode (assumed already set) not VESA.
-	; Note: For use in Real Mode only.
 	;
 	;  input:
-	;   address of string to print
+	;	address of string to print
+	;	X position
+	;	Y position
+	;	Foreground color
+	;	Background color
 	;
 	;  output:
-	;   n/a
+	;	Updated X position
+	;	Updated Y position
 
 	push ebp
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 1
-	%define tempByte							byte [ebp - 1]
+	sub esp, 5
+	%define cursorX								byte [ebp - 1]
+	%define cursorY								byte [ebp - 2]
+	%define textColor							byte [ebp - 3]
+	%define backColor							byte [ebp - 4]
+	%define tempByte							byte [ebp - 5]
+
+
+	; load parameters into local variables
+	mov eax, dword [ebp + 12]
+	mov cursorX, al
+
+	mov eax, dword [ebp + 16]
+	mov cursorY, al
+
+	mov eax, dword [ebp + 20]
+	mov textColor, al
+
+	mov eax, dword [ebp + 24]
+	mov backColor, al
 
 
 	; see if we need to scroll
 	mov bl, byte [kMaxLines]
-	mov al, byte [cursorY]
+	mov al, byte [gCursorY]
 	cmp al, bl
 	jbe .SkipScroll
 		; if we get here, we need to scroll the display
@@ -509,14 +533,18 @@ Print32:
 		push dword eax
 		call ScreenScroll32
 
+		; update the cursor Y position
+		mov al, byte [kMaxLines]
+		mov cursorY, al
+
 	.SkipScroll:
 
 
 	mov esi, [ebp + 8]
 	
 	; set up the foreground and background colors
-	mov bl, [backColor]
-	mov cl, [textColor]
+	mov bl, backColor
+	mov cl, textColor
 	and bx, 0x0F
 	and cx, 0x0F
 
@@ -529,7 +557,7 @@ Print32:
 
 	; adjust di for horizontal position
 	mov ax, 0x0000
-	mov al, [cursorX]
+	mov al, cursorX
 	dec ax
 	shl ax, 1
 	mov bx, di
@@ -538,7 +566,7 @@ Print32:
 
 	; adjust di for vertical position
 	mov ax, 0x0000
-	mov al, [cursorY]
+	mov al, cursorY
 	dec ax
 
 	; use a pair of shifts to multiply by 80
@@ -571,17 +599,25 @@ Print32:
 	.end:
 
 	; update cursor X position
-	mov byte [cursorX], 1
+	mov cursorX, 1
 
 	; update cursor Y position
-	mov al, [cursorY]
+	mov al, cursorY
 	inc al
-	mov [cursorY], al
+	mov cursorY, al
+
+
+	; return the resulting cursor values to the caller
+	mov eax, 0
+	mov al, cursorX
+	mov dword [ebp + 20], eax
+	mov al, cursorY
+	mov dword [ebp + 24], eax
 
 
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 12
 
 
 
@@ -600,16 +636,34 @@ PrintIfConfigBits32:
 	push ebp
 	mov ebp, esp
 
+
 	mov eax, [tSystem.configBits]
-	and eax, 000000000000000000000000000000010b
-	cmp eax, 000000000000000000000000000000010b
+	and eax, 00000000000000000000000000000010b
+	cmp eax, 00000000000000000000000000000010b
 	jne .NoPrint
 
-	push dword [ebp + 8]
-	call Print32
+		; if we get here, we need to print
+		mov eax, 0x00000000
+
+		push dword 0x00000000
+		push dword 0x00000007
+
+		mov al, byte [gCursorY]
+		push dword eax
+
+		mov al, byte [gCursorX]
+		push dword eax
+
+		push dword [ebp + 8]
+		call Print32
+
+		pop eax
+		mov byte [gCursorX], al
+
+		pop eax
+		mov byte [gCursorY], al
 
 	.NoPrint:
-
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -625,6 +679,10 @@ PrintRAM32:
 	;  input:
 	;   starting address
 	;	number of lines
+	;	X position
+	;	Y position
+	;	text color
+	;	background color
 	;
 	;  output:
 	;   n/a
@@ -632,103 +690,129 @@ PrintRAM32:
 	push ebp
 	mov ebp, esp
 
+
 	; allocate local variables
-	sub esp, 17									; space for ASCII dump
-	sub esp, 81									; space for address and hex dunp
+	sub esp, 20
+	%define cursorX								dword [ebp - 4]
+	%define cursorY								dword [ebp - 8]
+	%define currentByte							dword [ebp - 12]
+	%define lineCounter							dword [ebp - 16]
+	%define byteCounter							dword [ebp - 20]
 
-	mov edi, [ebp + 8]
-	mov ecx, [ebp + 12]
+	; load parameters into local variables
+	mov eax, dword [ebp + 16]
+	mov cursorX, eax
 
-	; throw a null on the end of the ascii string
-	mov byte [ebp - 1], 0
+	mov eax, dword [ebp + 20]
+	mov cursorY, eax
+
+	mov eax, dword [ebp + 8]
+	mov currentByte, eax
+
+	mov ecx, dword [ebp + 12]
+
 
 	.LineLoop:
-		; save the line counter and address pointer
-		push ecx
-		push edi
+		; update the line counter
+		mov lineCounter, ecx
 
-		pusha
 
-		; clear the output string, otherwise StringBuild() will throw a fit. Possible bug?
-		push 0
-		push 80
-		mov eax, ebp
-		sub eax, 98
-		push eax
+		; prep the print strings
+		push dword 80
+		push .scratch$
+		push .format$
+		call MemCopy
+
+		push dword 46
+		push dword 16
+		push .ASCII$
 		call MemFill
 
-		; clear the ASCII string too
-		push 46
-		push 16
-		mov eax, ebp
-		sub eax, 17
-		push eax
-		call MemFill
+		mov esi, .ASCII$
+		add esi, 16
+		mov byte [esi], 0
 
-		popa
 
-		; set up some variables for the future
-		mov esi, edi
-		mov ebx, ebp
-		sub ebx, 17
+		; write the starting address for this line to the string
+		push dword 8
+		push currentByte
+		push .scratch$
+		call StringTokenHexadecimal
 
-		; load the address of the ASCII text string to the stack for StringBuild()
-		push ebx
 
-		; load 16 bytes to the stack
-		mov eax, 0x00000000
 		mov ecx, 16
-		add edi, 15
 		.BytesLoad:
-			; load a byte to the stack for the hex sequence section...
-			mov al, [edi]
-			dec edi
-			push eax
+			; update the line counter
+			mov byteCounter, ecx
 
-			; ...and load a byte to the ASCII section
+			; load a byte from RAM
+			mov eax, 0x00000000
+			mov esi, currentByte
 			lodsb
 
-			; add that byte to the ASCII string if it's in printable range
+			; see if this byte is in printable range
 			cmp al, 32
 			jb .NotInRange
 			
 			cmp al, 127
 			ja .NotInRange
 
-			.IsInRange:
-			mov [ebx], al
+			; if we get here, the byte was in range
+			; so we need to write it into the scratch string
+			mov esi, .ASCII$
+			mov ebx, 16
+			sub ebx, ecx
+			add esi, ebx
+			mov byte [esi], al
+
 
 			.NotInRange:
-			inc ebx
+			; process this byte into the string
+			push dword 2
+			push eax
+			push .scratch$
+			call StringTokenHexadecimal
+
+			; increment the byte counter
+			inc currentByte
+
+			mov ecx, byteCounter
 		loop .BytesLoad
 
-		; set up the rest of the StringBuild() call
-		inc edi
-		push edi
-		mov eax, ebp
-		sub eax, 98
-		push eax
-		push .format$
-		call StringBuild
+
+		; add the ASCII dump string into the line string
+		push dword 0
+		push .ASCII$
+		push .scratch$
+		call StringTokenString
+
 
 		; print the string we just built
-		mov eax, ebp
-		sub eax, 98
-		push eax
+		push dword [ebp + 28]
+		push dword [ebp + 24]
+		push dword cursorY
+		push dword 1
+		push .scratch$
 		call Print32
+		pop eax
+		pop cursorY
 
-		; restore our values
-		pop edi
-		pop ecx
-		add edi, 16
-	loop .LineLoop
+
+		mov ecx, lineCounter
+	dec ecx
+	cmp ecx, 0
+	jne .LineLoop
 
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 24
 
 section .data
-.format$										db '^p8 ^h  ^p2 ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h ^h   ^s ', 0x00
+.format$										db ' 0x^  ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^  ^ ', 0x00
+
+section .bss
+.scratch$										resb 80
+.ASCII$											resb 17
 
 
 
@@ -762,7 +846,7 @@ PrintRegs32:
 	add ebx, 21
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get si
@@ -773,7 +857,7 @@ PrintRegs32:
 	add ebx, 5
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get bp
@@ -784,7 +868,7 @@ PrintRegs32:
 	add ebx, 53
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get sp
@@ -795,7 +879,7 @@ PrintRegs32:
 	add ebx, 37
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get bx
@@ -806,7 +890,7 @@ PrintRegs32:
 	add ebx, 21
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get dx
@@ -817,7 +901,7 @@ PrintRegs32:
 	add ebx, 53
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get cx
@@ -828,7 +912,7 @@ PrintRegs32:
 	add ebx, 37
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
 
 
 	; get ax
@@ -839,13 +923,51 @@ PrintRegs32:
 	add bx, 5
 	push ebx
 	push eax
-	call StringFromHexValue
+	call ConvertNumberHexToString
+
+
+	; print the strings
+	mov eax, 0x00000000
+
+	push dword 0x00000000
+	push dword 0x00000007
+
+	mov al, byte [gCursorY]
+	push dword eax
+
+	mov al, byte [gCursorX]
+	push dword eax
 
 	push .output1$
 	call Print32
 
+	pop eax
+	mov byte [gCursorX], al
+
+	pop eax
+	mov byte [gCursorY], al
+
+
+	mov eax, 0x00000000
+
+	push dword 0x00000000
+	push dword 0x00000007
+
+	mov al, byte [gCursorY]
+	push dword eax
+
+	mov al, byte [gCursorX]
+	push dword eax
+
 	push .output2$
 	call Print32
+
+	pop eax
+	mov byte [gCursorX], al
+
+	pop eax
+	mov byte [gCursorY], al
+
 
 	popf
 	popa
@@ -868,7 +990,7 @@ ScreenClear32:
 	; Note: For use in Protected Mode only
 	;
 	;  input:
-	;   n/a
+	;   color to which the screen will be cleared
 	;
 	;  output:
 	;   n/a
@@ -886,8 +1008,9 @@ ScreenClear32:
 	shl ecx, 1
 
 	; set up the word we're writing
+	mov ebx, dword [ebp + 8]
 	xor ax, ax
-	mov ah, byte [backColor]
+	mov ah, bl
 	shl ah, 4
 
 	.aloop:
@@ -900,7 +1023,7 @@ ScreenClear32:
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -956,10 +1079,6 @@ ScreenScroll32:
 		; restore line counter
 		mov ecx, lineCount
 	loop .ScrollLoop
-
-	; update the cursor Y position
-	mov al, byte [kMaxLines]
-	mov byte [cursorY], al
 
 
 	mov esp, ebp

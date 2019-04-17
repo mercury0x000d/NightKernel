@@ -91,7 +91,26 @@ FSType01Init:
 	jne .NoPrint
 
 		; we got here, so it's print time!
-		; first get the address of this drive list element into eax
+
+		; prep the print string
+		push 80
+		push .scratch$
+		push .FAT12Found$
+		call MemCopy
+
+
+		; now calculate the size of the partition
+		mov esi, [ebp - 8]
+		mov eax, [tPartitionInfo.sectorCount]
+		shr eax, 1
+
+		push dword 0
+		push eax
+		push .scratch$
+		call StringTokenDecimal
+
+
+		; get the address of this drive list element into eax
 		mov esi, [ebp - 8]
 		mov eax, [tPartitionInfo.driveListNumber]
 		push eax
@@ -101,25 +120,21 @@ FSType01Init:
 		; ignore error code
 		pop ecx
 
+
 		; add 24 to point eax to the model string and push it for the StringBuild call
 		add eax, 24
 		push eax
 
-		; now calculate the size of the partition
-		mov esi, [ebp - 8]
-		mov eax, [tPartitionInfo.sectorCount]
-		shr eax, 1
+
+		push dword 0
 		push eax
+		push .scratch$
+		call StringTokenString
 
-		push kPrintText$
-		push .FAT12Found$
-		call StringBuild
 
-		push kPrintText$
+		push .scratch$
 		call PrintIfConfigBits32
 	.NoPrint:
-
-
 
 
 	; fill in handler addresses
@@ -136,7 +151,10 @@ FSType01Init:
 ret
 
 section .data
-.FAT12Found$									db '^d KiB FAT12 (type 0x01) partition found on ^s', 0x00
+.FAT12Found$									db '^ KiB FAT12 (type 0x01) partition found on ^', 0x00
+
+section .bss
+.scratch$										resb 80
 
 
 
@@ -148,17 +166,17 @@ section .data
 
 
 ; get info from the first sector
-call .LoadBPB
-call .LoadExtendedBootRecord
-
-.LoadBPB:
-	; load information from the BIOS Parameter Block to this partition entry
-ret
-
-.LoadExtendedBootRecord:
-	; load information from the Extended Boot Record to this partition entry
-
-ret
+;call .LoadBPB
+;call .LoadExtendedBootRecord
+;
+;.LoadBPB:
+;	; load information from the BIOS Parameter Block to this partition entry
+;ret
+;
+;.LoadExtendedBootRecord:
+;	; load information from the Extended Boot Record to this partition entry
+;
+;ret
 
 
 

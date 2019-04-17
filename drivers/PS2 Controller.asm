@@ -1280,7 +1280,7 @@ PS2InitMouse:
 	jne .Done
 
 
-	; get, save, and print device ID
+	; get device ID
 	push dword [ebp + 8]
 	call PS2PortSendTo2
 	push dword 0
@@ -1344,7 +1344,7 @@ PS2InitMouse:
 	jne .Done
 
 
-	; get, save, and print device ID
+	; get device ID
 	push dword [ebp + 8]
 	call PS2PortSendTo2
 	push dword 0
@@ -1822,7 +1822,7 @@ PS2NewConnect:
 	pop ebx
 	; We don't care about checking for errors here.
 	; If it timed out, the device ID will be 0xFFFF anyway to indicate no device.
-	
+
 
 	; save the device ID to the appropriate spot
 	cmp dword [ebp + 8], 1
@@ -1964,6 +1964,7 @@ PS2Port2InterruptHandler:
 
 	; make a note of what this byte was for next time
 	mov byte [.lastByte], al
+
 
 	; handle the input we just got
 	push eax

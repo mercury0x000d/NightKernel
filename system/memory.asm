@@ -445,8 +445,8 @@ MemProbe:
 	mov byte [bp - 1], 0
 
 	; print the labels string if appropriate
-	mov byte [textColor], 7
-	mov byte [backColor], 0
+	mov byte [gTextColor], 7
+	mov byte [gBackColor], 0
 	push .memoryMapLabels$
 	call PrintIfConfigBits16
 
@@ -808,12 +808,20 @@ MemAllocate:
 	mov dword [tMemInfo.size], eax
 
 	; set the requesting task field
-	mov eax, [ebp + 8]
-	mov dword [tMemInfo.task], eax
+	mov ebx, [ebp + 8]
+	mov dword [tMemInfo.task], ebx
 
 	; prepare to return address of this block
 	mov dword [ebp + 12], ecx
+
+	; we don't want to hand out blocks that are all dirtied up with old data
+	push 0x00000000
+	push eax
+	push ecx
+	call MemFill
+
 	jmp .Exit
+
 
 	.Fail:
 	; If we get here, we had a problem, Houston. Fail. Fail fail. The failiest fail in Failtown fail.

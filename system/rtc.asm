@@ -21,6 +21,7 @@
 ; 32-bit function listing:
 ; RTCAdjustBCD					Adjusts the time values in the tSystem struct from BCD to decimal
 ; RTCInit						Initializes the RTC
+; RTCInterruptHandler			Handles RTC interrupts
 
 
 
@@ -181,3 +182,149 @@ section .data
 .notification24Hour$							db 'RTC is using 24 hour time', 0x00
 .notificationBCDMode$							db 'RTC format is BCD', 0x00
 .notificationBinaryMode$						db 'RTC format is Binary', 0x00
+
+
+
+
+
+section .text
+RTCInterruptHandler:
+	; Handles RTC interrupts
+	;
+	;  input:
+	;   n/a
+	;
+	;  output:
+	;   n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; save everything before we go mucking about!
+	pusha
+
+
+	; now grab the time values from the RTC:
+
+	; get the year
+	mov al, 0x09
+	out 0x70, al
+	mov eax, 0x00000000
+	in al, 0x71
+	mov byte [tSystem.year], al
+	
+	; get the month
+	mov al, 0x08
+	out 0x70, al
+	mov eax, 0x00000000
+	in al, 0x71
+	mov byte [tSystem.month], al
+	
+	; get the day
+	mov al, 0x07
+	out 0x70, al
+	mov eax, 0x00000000
+	in al, 0x71
+	mov byte [tSystem.day], al
+	
+	; get the hour
+	mov al, 0x04
+	out 0x70, al
+	mov eax, 0x00000000
+	in al, 0x71
+	mov byte [tSystem.hours], al
+	
+	; get the minutes
+	mov al, 0x02
+	out 0x70, al
+	mov eax, 0x00000000
+	in al, 0x71
+	mov byte [tSystem.minutes], al
+	
+	; get the seconds
+	mov al, 0x00
+	out 0x70, al
+	mov eax, 0x00000000
+	in al, 0x71
+	mov byte [tSystem.seconds], al
+
+
+	; see which hour mode is in use
+	mov al, byte [tSystem.RTCStatusRegisterB]
+	test al, 00000010b
+	jnz .Using24
+		; if we get here, 12 hour mode is being used so we adjust the values accordingly
+
+		; first, we see if bit 7 is set, which is used to signify PM
+		mov al, byte [tSystem.hours]
+		test al, 10000000b
+		jz .NotPM
+			; if we get here, the PM bit was set
+			and al, 01111111b
+
+			; now adjust to 24 hour since that's all the kernel uses internally
+			; see if we're using binary format
+			test byte [tSystem.RTCStatusRegisterB], 00000100b
+			jnz .BinaryHourAdjust
+
+				; if we get here, BCD mode is being used, so we do the comparison in BCD
+				cmp al, 0x12
+				je .ModificationsComplete
+
+				; if we get here, we need to adjust to 24 hour time using BCD
+				add al, 0x12
+				jmp .ModificationsComplete
+
+			.BinaryHourAdjust:
+			; if we get here, binary mode is being used, so we do the comparison in binary
+			cmp al, 12
+			je .ModificationsComplete
+
+			; if we get here, we need to adjust to 24 hour time using binary
+			add al, 12
+			jmp .ModificationsComplete
+
+		.NotPM:
+		; see if the hour is 12 or 0x12 and zero it
+		cmp al, 12
+		je .AdjustAM
+
+		cmp al, 0x12
+		je .AdjustAM
+
+		jmp .ModificationsComplete
+
+		.AdjustAM:
+		mov al, 0
+
+		.ModificationsComplete:
+
+		; and finally, write the modified value back to the tSystem struct
+		mov byte [tSystem.hours], al
+	.Using24:
+	; if we get here, 24 hour mode is being used, so no adjustment is needed
+
+
+
+	; see if we're using binary format and set the appropriate handler address
+	test byte [tSystem.RTCStatusRegisterB], 00000100b
+	jnz .UsingBinary
+		; if we get here, BCD mode is being used so we adjust the values accordingly
+		call RTCAdjustBCD
+	.UsingBinary:
+	; if we get here, Binary mode is being used, so no adjustment is needed
+
+
+
+	; Read Status Register C to tell the RTC we're good for another interrupt.
+	; We don't need to actually parse the result of this to see which of the three possible RTC interrupt
+	; types it was that just fired since we know we only have one of them enabled anyway.
+	mov al, 0x0C
+	out 0x70, al
+	in al, 0x71
+
+
+	mov esp, ebp
+	pop ebp
+ret

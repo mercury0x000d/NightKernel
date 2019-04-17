@@ -787,11 +787,6 @@ PCILoadDrivers:
 		mov eax, dword [esi]
 		mov PCIFunction, eax
 
-		; clear our print string
-		push dword 0
-		push dword 256
-		push kPrintText$
-		call MemFill
 
 		; now that we have a function, let's see if any drivers will be a good fit
 
@@ -822,17 +817,44 @@ PCILoadDrivers:
 
 
 		; tell the user what we're doing here
-		push PCIProgIf
-		push PCISubclass
-		push PCIClass
-		push PCIFunction
-		push PCIDevice
-		push PCIBus
-		push kPrintText$
+		push 64
+		push .scratch$
 		push .locatingDriver$
-		call StringBuild
-		push kPrintText$
+		call MemCopy
+
+		push dword 3
+		push PCIBus
+		push .scratch$
+		call StringTokenDecimal
+
+		push dword 2
+		push PCIDevice
+		push .scratch$
+		call StringTokenDecimal
+
+		push dword 2
+		push PCIFunction
+		push .scratch$
+		call StringTokenDecimal
+
+		push dword 2
+		push PCIClass
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push PCISubclass
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push PCIProgIf
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push .scratch$
 		call PrintIfConfigBits32
+
 
 		; check for a function driver (that is, one for the exact ProgIf value)
 		; search for precise driver first for this exact class/subclass/prog if 
@@ -939,7 +961,7 @@ PCILoadDrivers:
 		pop ecx
 
 		; skip a line for clarity
-		inc byte [cursorY]
+		inc byte [gCursorY]
 
 	; I would've used "loop" here, but the code the loop contains is too big :/
 	; and for some reason, VirtualBox (or the processor itself?) doesn't properly set the overflow flag on some machines
@@ -952,11 +974,14 @@ PCILoadDrivers:
 ret
 
 section .data
-.locatingDriver$								db 'Locating driver for ^p3^d-^p2^d-^d (Class 0x^h, Subclass 0x^h, ProgIf 0x^h)', 0x00
+.locatingDriver$								db 'Locating driver for ^-^-^ (Class 0x^, Subclass 0x^, ProgIf 0x^)', 0x00
 .exactDriverFound$								db 'Function driver found, running Init...', 0x00
 .subclassDriverFound$							db 'Subclass driver found, running Init...', 0x00
 .classDriverFound$								db 'Class driver found, running Init...', 0x00
 .noDriver$										db 'No driver found, continuing', 0x00
+
+section .bss
+.scratch$										resb 80
 
 
 
