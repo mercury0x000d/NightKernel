@@ -20,18 +20,36 @@
 
 ; 32-bit function listing:
 ; DebugMenu						Implements the in-kernel debugging menu
-; DebugVBOXLogWrite				Writes a string specidfied to the VirtualBOX guest log
+; DebugVBOXLogWrite				Writes a string specified to the VirtualBOX guest log
 ; StackTrace					Traces the stack and prints a list of return addresses
 
+extern Print32
+extern LMElementAddressGet, LMElementCountGet, LMItemAddAtSlot, LMListInit, LMListInit
+extern MemFill, MemAllocate
+extern StringBuild
 
 
+%include "../include/globals.inc"
 
+section .data
+.flag											db 0x00
+.debugMenu$										db 'Kernel Debug Menu', 0x00
+.debugText1$									db '1 - System Info', 0x00
+.debugText2$									db '2 - PCI Devices', 0x00
+.debugText3$									db '3 - Memory Details', 0x00
+.debugText4$									db '4 - ', 0x00
+.debugText5$									db '5 - ', 0x00
+.debugText6$									db '6 - ', 0x00
+.debugText7$									db '7 - ', 0x00
+.debugText8$									db '8 - ', 0x00
+.debugText9$									db '9 - ', 0x00
+.debugText0$									db '0 - Reboot', 0x00
+.escMessage$									db 'Press Escape from any sub menu above to return to this main menu', 0x00
+.ticksFormat$									db 'Ticks since boot: ^p10^d', 0x00
+.dateTimeFormat$								db '^p2^d:^d:^d     ^p2^d/^d/^d', 0x00
+.mouseFormat$									db 'X: ^p4^d     Y: ^d     Z: ^d     Buttons: ^p8^b     ', 0x00
 
 bits 32
-
-
-
-
 
 section .text
 DebugMenu:
@@ -426,25 +444,6 @@ DebugMenu:
 	mov esp, ebp
 	pop ebp
 ret
-
-section .data
-.flag											db 0x00
-.debugMenu$										db 'Kernel Debug Menu', 0x00
-.debugText1$									db '1 - System Info', 0x00
-.debugText2$									db '2 - PCI Devices', 0x00
-.debugText3$									db '3 - Memory Details', 0x00
-.debugText4$									db '4 - ', 0x00
-.debugText5$									db '5 - ', 0x00
-.debugText6$									db '6 - ', 0x00
-.debugText7$									db '7 - ', 0x00
-.debugText8$									db '8 - ', 0x00
-.debugText9$									db '9 - ', 0x00
-.debugText0$									db '0 - Reboot', 0x00
-.escMessage$									db 'Press Escape from any sub menu above to return to this main menu', 0x00
-.ticksFormat$									db 'Ticks since boot: ^p10^d', 0x00
-.dateTimeFormat$								db '^p2^d:^d:^d     ^p2^d/^d/^d', 0x00
-.mouseFormat$									db 'X: ^p4^d     Y: ^d     Z: ^d     Buttons: ^p8^b     ', 0x00
-
 
 
 section .text

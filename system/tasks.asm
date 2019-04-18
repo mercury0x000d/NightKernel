@@ -135,10 +135,6 @@ TaskDetermineNext:
 ret
 
 
-
-
-
-section .text
 TaskInit:
 	; Initializes the Task Manager routines
 	;

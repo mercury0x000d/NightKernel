@@ -76,8 +76,7 @@ bits 32
 
 
 
-
-section .text
+global BCDToDecimal
 BCDToDecimal:
 	; Converts a 32-bit BCD number to decimal
 	;
@@ -133,11 +132,6 @@ BCDToDecimal:
 	pop ebp
 ret
 
-
-
-
-
-section .text
 TimerWait:
 	; Waits the specified number of ticks
 	;
@@ -166,3 +160,5 @@ TimerWait:
 	mov esp, ebp
 	pop ebp
 ret 4
+
+%include "includes/globals.inc"

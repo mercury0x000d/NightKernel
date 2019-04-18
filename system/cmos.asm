@@ -62,10 +62,6 @@ CMOSRead:
 ret
 
 
-
-
-
-section .text
 CMOSWrite:
 	; Writes the value of a CMOS register while maintaining proper setting of the NMI bit
 	;

@@ -115,6 +115,7 @@ ret 4
 
 
 section .text
+global ConvertWordToHexString16
 ConvertWordToHexString16:
 	; Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
 	;
@@ -189,9 +190,7 @@ bits 32
 
 
 
-
-
-section .text
+global StringBuild
 StringBuild:
 	; Builds a string out of the specified arguments
 	;
@@ -1100,6 +1099,7 @@ ret 8
 
 
 section .text
+global StringLength
 StringLength:
 	; Returns the length of the string specified
 	;

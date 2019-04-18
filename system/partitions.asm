@@ -27,7 +27,7 @@
 
 bits 32
 
-
+%include "../include/globals.inc"
 
 
 

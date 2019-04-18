@@ -105,8 +105,8 @@
 %define kATAStatusBusy							0x80
 
 
-
-
+extern MemSwapWordBytes
+extern PrintIfConfigBits32
 
 bits 32
 

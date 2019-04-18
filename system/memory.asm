@@ -15,7 +15,7 @@
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
 
-
+%include "includes/globals.inc"
 
 
 ; tMemoryInfo, for the physical memory allocator to track blocks
@@ -24,8 +24,9 @@
 %define tMemInfo.task							(esi + 08)
 
 
-
-
+extern LMElementDelete, PrintIfConfigBits16, Print16, StringLength
+extern textColor, backColor, ConvertByteToHexString16, LMElementCountGet, LMElementAddressGet
+extern LMElementSizeGet, LMListInit, LMElementDuplicate
 
 bits 16
 
@@ -111,6 +112,7 @@ ret
 
 
 section .text
+global A20Enable
 A20Enable:
 	; Enables the A20 line using all methods in order
 	; Since A20 support is critical, this code will print an error then intentionally hang if unsuccessful
@@ -704,6 +706,7 @@ ret
 
 
 section .text
+global MemAllocate
 MemAllocate:
 	; Returns the address of a memory block of the requested size, or zero if unavailble
 	;
@@ -1140,6 +1143,7 @@ ret
 
 
 section .text
+global MemFill
 MemFill:
 	; Fills the range of memory given with the byte value specified
 	;
@@ -1599,8 +1603,7 @@ ret 8
 
 
 
-
-section .text
+global MemSearchString
 MemSearchString:
 	; Searches the memory range specified for the given string
 	;
@@ -1926,8 +1929,7 @@ ret 4
 
 
 
-
-section .text
+global MemSwapWordBytes
 MemSwapWordBytes:
 	; Swaps the bytes in a series of words starting at the address specified
 	;

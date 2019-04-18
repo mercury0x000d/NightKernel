@@ -151,11 +151,6 @@ GDTGetAccessFlags:
 	pop ebp
 ret
 
-
-
-
-
-section .text
 GDTGetBaseAddress:
 	; Returns the base address from the GDT entry specifed
 	;
@@ -197,11 +192,6 @@ GDTGetBaseAddress:
 	pop ebp
 ret
 
-
-
-
-
-section .text
 GDTGetLimitAddress:
 	; Returns the limit address from the GDT entry specifed
 	;
@@ -238,11 +228,6 @@ GDTGetLimitAddress:
 	pop ebp
 ret
 
-
-
-
-
-section .text
 GDTGetSizeFlags:
 	; Returns the size flags from the GDT entry specifed
 	;
@@ -272,11 +257,6 @@ GDTGetSizeFlags:
 	pop ebp
 ret
 
-
-
-
-
-section .text
 GDTInit:
 	; Builds and loads the kernel's GDT into GDTR
 	;
@@ -295,11 +275,6 @@ GDTInit:
 	pop ebp
 ret
 
-
-
-
-
-section .text
 GDTSetAccessFlags:
 	; Sets the access flags to the GDT entry specifed
 	;
@@ -326,11 +301,6 @@ GDTSetAccessFlags:
 	pop ebp
 ret 8
 
-
-
-
-
-section .text
 GDTSetBaseAddress:
 	; Sets the base address to the GDT entry specifed
 	;
@@ -371,11 +341,6 @@ GDTSetBaseAddress:
 	pop ebp
 ret 8
 
-
-
-
-
-section .text
 GDTSetLimitAddress:
 	; Sets the limit address to the GDT entry specifed
 	;
@@ -408,11 +373,6 @@ GDTSetLimitAddress:
 	pop ebp
 ret 8
 
-
-
-
-
-section .text
 GDTSetSizeFlags:
 	; Sets the size flags to the GDT entry specifed
 	;
@@ -443,10 +403,6 @@ GDTSetSizeFlags:
 	mov esp, ebp
 	pop ebp
 ret 8
-
-
-
-
 
 section .data
 GDTStart:

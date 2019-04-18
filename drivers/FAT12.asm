@@ -30,6 +30,7 @@
 
 
 
+%include "../include/globals.inc"
 
 
 bits 32

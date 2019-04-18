@@ -38,13 +38,13 @@
 
 
 
-
+extern ConvertWordToHexString16
 
 section .data
 ; globals
 cursorX											db 0x01
 cursorY											db 0x01
-textColor										db 0x07
+global textColor										db 0x07
 backColor										db 0x00
 kMaxLines										db 25
 kBytesPerScreen									dw 4000
@@ -60,6 +60,7 @@ bits 16
 
 
 section .text
+global Print16
 Print16:
 	; Prints an ASCIIZ string directly to the screen.
 	; Note: Uses text mode (assumed already set) not VESA.
@@ -178,7 +179,7 @@ ret 2
 
 
 
-section .text
+global PrintIfConfigBits16
 PrintIfConfigBits16:
 	; Prints an ASCIIZ string directly to the screen only if the configbits option is set
 	;
@@ -205,10 +206,6 @@ PrintIfConfigBits16:
 ret 2
 
 
-
-
-
-section .text
 PrintRegs16:
 	; Quick register dump routine for real mode
 	;

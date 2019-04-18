@@ -35,6 +35,7 @@ bits 32
 
 
 section .text
+global LMElementAddressGet
 LMElementAddressGet:
 	; Returns the address of the specified element in the list specified
 	;
@@ -89,9 +90,7 @@ ret
 
 
 
-
-
-section .text
+global LMElementCountGet
 LMElementCountGet:
 	; Returns the total number of elements in the list specified
 	;
@@ -174,6 +173,7 @@ ret 4
 
 
 section .text
+global LMElementDelete
 LMElementDelete:
 	; Deletes the element specified from the list specified
 	;
@@ -440,8 +440,7 @@ ret 4
 
 
 
-
-section .text
+global LMListInit
 LMListInit:
 	; Creates a new list from the parameters specified at the address specified
 	;

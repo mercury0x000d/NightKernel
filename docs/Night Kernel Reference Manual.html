@@ -725,11 +725,11 @@
 				<li>Kernel: A20 - Moved A20 handling out of <i>hardware.asm</i> and into <i>memory.asm</i> since that just makes sense.</li>
 				<li>Kernel: CPU - Split CPUID code from <i>misc.asm</i> into its own file, <i>cpu.asm</i></li>
 				<li>Kernel: <i>debug.asm</i> - Added mouse coordinates to the Debug Menu</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.century</code> since it's not supported by all RTC chips and isn't super necessary anyway</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.delayValue</code> as it's no longer neccessary since CPU cycle-based delay loops have been eliminated</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.keyboardType</code> and <code>tSystem.mouseID</code> in favor of the more versatile <code>tSystem.PS2ControllerDeviceID1</code> and <code>tSystem.PS2ControllerDeviceID2</code></li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.lastError</code> since functions now return error codes</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.ticks</code> (and modified <i>TimerWait()</i> to do its job without it) since it's unnecessary to track both how many ticks have passed in a second as well as how many have passed since boot</li>
+				<li>Kernel: <i>includes/globals.inc</i> - Removed <code>tSystem.century</code> since it's not supported by all RTC chips and isn't super necessary anyway</li>
+				<li>Kernel: <i>includes/globals.inc</i> - Removed <code>tSystem.delayValue</code> as it's no longer neccessary since CPU cycle-based delay loops have been eliminated</li>
+				<li>Kernel: <i>includes/globals.inc</i> - Removed <code>tSystem.keyboardType</code> and <code>tSystem.mouseID</code> in favor of the more versatile <code>tSystem.PS2ControllerDeviceID1</code> and <code>tSystem.PS2ControllerDeviceID2</code></li>
+				<li>Kernel: <i>includes/globals.inc</i> - Removed <code>tSystem.lastError</code> since functions now return error codes</li>
+				<li>Kernel: <i>includes/globals.inc</i> - Removed <code>tSystem.ticks</code> (and modified <i>TimerWait()</i> to do its job without it) since it's unnecessary to track both how many ticks have passed in a second as well as how many have passed since boot</li>
 				<li>Kernel: <i>hardware.asm</i> - Removed <code>CPUSpeedDetect()</code></li>
 				<li>Kernel: <i>interrupts.asm</i> - Added <code>InterruptHandlerGetAddress()</code>, <code>InterruptHandlerGetFlags()</code>, and <code>InterruptHandlerGetSelector()</code></li>
 				<li>Kernel: <i>interrupts.asm</i> - Streamlined <code>InterruptHandlerSet()</code></li>
@@ -877,7 +877,7 @@
 			<br>
 			Changed<br>
 			<ul>
-				<li>Kernel: Moved <i>globals.asm</i> to the beginning of includes so that all other files can take advantage of the things defined there</li>
+				<li>Kernel: Moved <i>includes/globals.inc</i> to the beginning of includes so that all other files can take advantage of the things defined there</li>
 				<li>Kernel: PCIDriverSearch now looks specifically for PCI drivers <i>only</i></li>
 				<li>Kernel: Some minor code cleanups and fixes</li>
 				<li>Manual: <i>Major</i> structure overhaul</li>
@@ -993,7 +993,7 @@
 			6/4/2018, 0.10 Update - Stupid little fixes<br>
 			<br>
 			<ul>
-				<li>Changed major and minor version numbers to byte size in globals.asm</li>
+				<li>Changed major and minor version numbers to byte size in includes/globals.inc</li>
 				<li>Fixed a bug in the newly optimized PCI device name table where the data being written to screen wasn't coming from the right place. And also saved around 300 bytes!</li>
 			</ul>
 			<br>
@@ -1067,7 +1067,7 @@
 				<li>Changed text printing routines to work identically in both 16 and 32 bit mode</li>
 				<li>Changed the formatting of the GPL text in the beginning of every. Single. File.</li>
 				<li>Fixed a read after end of string bug in <code>BuildString()</code> which gave weird results with tokens</li>
-				<li>Moved some data out of globals.asm and into the respective files with related routines and removed some unused data to tidy up the globals</li>
+				<li>Moved some data out of includes/globals.inc and into the respective files with related routines and removed some unused data to tidy up the globals</li>
 			</ul>
 			<br>
 			<br>
@@ -1110,7 +1110,7 @@
 			<ul>
 				<li>Modified <code>Random()</code> to return numbers within a requested limit</li>
 				<li>Added a starfield to the boot screen (Makes a nice test for <code>Random()</code>'s new feature! :) )</li>
-				<li>Made boot screen selectable by <code>ConfigBits</code> (Also made it disabled by default for now. See the notes at the bottom of globals.asm for details on what ConfigBits can control.)</li>
+				<li>Made boot screen selectable by <code>ConfigBits</code> (Also made it disabled by default for now. See the notes at the bottom of includes/globals.inc for details on what ConfigBits can control.)</li>
 				<li>Identified (and thus far did nothing about) a bug where the kernel throws an Invalid Opcode exception at 0008:0000001F when started with insufficient video RAM</li>
 				<li>Cleaned up kernel.asm and moved some IDT setup code that used to be there to idt.asm</li>
 				<li>Added a crosshair cursor (and a couple other surprises) to the Mouse Tracking Test</li>

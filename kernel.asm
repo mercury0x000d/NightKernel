@@ -15,10 +15,16 @@
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
 
+extern Print32, PrintIfConfigBits16, PrintIfConfigBits32, PrintRegs32, LMListInit,\
+	   PCILoadDrivers, DriverLegacyLoad, PCIInitBus, PCILoadDrivers,SetSystemAPM,\
+	   APMEnable, GDTStart, MemInit, ScreenClear32, DebugMenu, MemAllocateAligned
+
+extern kMaxLines, kBytesPerScreen, textColor, backColor, MemProbe, A20Enable,\
+	   PCIProbe, IDTInit, ISRInitAll, PICInit, PICIRQDisableAll, PICIRQEnableAll,\
+	   PITInit, RTCInit, SetSystemCPUID, MemAllocate, PartitionEnumerate, TaskInit, TimerWait
 
 
-
-[map all kernel.map]
+; [map all kernel.map]
 bits 16
 
 
@@ -28,7 +34,7 @@ bits 16
 section .text
 
 ; set origin point to where the FreeDOS bootloader loads this code
-org 0x0600
+# org 0x0600
 
 
 ; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
@@ -560,8 +566,7 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 
 section .text
 ; includes for system routines
-<<<<<<< HEAD
-;%include "system/globals.asm"
+%include "include/globals.inc"
 ;%include "api/misc.asm"
 ;%include "api/lists.asm"
 ;%include "api/strings.asm"
@@ -576,36 +581,18 @@ section .text
 ;%include "system/pci.asm"
 ;%include "system/pic.asm"
 ;%include "system/power.asm"
-=======
-%include "system/globals.asm"
-%include "api/misc.asm"
-%include "api/lists.asm"
-%include "api/strings.asm"
-%include "io/serial.asm"
-%include "system/cmos.asm"
-%include "system/cpu.asm"
-%include "system/gdt.asm"
-%include "system/hardware.asm"
-%include "system/interrupts.asm"
-%include "system/memory.asm"
-%include "system/partitions.asm"
-%include "system/pci.asm"
-%include "system/pic.asm"
-%include "system/power.asm"
-%include "system/rtc.asm"
-%include "system/tasks.asm"
->>>>>>> Development
-%include "video/screen.asm"
-%include "system/debug.asm"
+;%include "video/screen.asm"
+;%include "system/debug.asm"
 
 
 
 ; includes for drivers
 section .text
+global DriverSpaceStart
 DriverSpaceStart:
-%include "drivers/ATA Controller.asm"
-%include "drivers/FAT12.asm"
-%include "drivers/PS2 Controller.asm"
+;%include "drivers/ATA Controller.asm"
+;#%include "drivers/FAT12.asm"
+;#%include "drivers/PS2 Controller.asm"
 ;%include "drivers/FAT16Small.asm"
 ;%include "drivers/FAT16Large.asm"
 ;%include "drivers/FAT32.asm"

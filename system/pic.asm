@@ -124,10 +124,6 @@ PICInit:
 ret
 
 
-
-
-
-section .text
 PICIntComplete:
 	; Tells both PICs the pending interrupt has been handled
 	;
@@ -158,10 +154,6 @@ PICIntComplete:
 ret
 
 
-
-
-
-section .text
 PICIRQDisable:
 	; Disables the IRQ specified
 	;
@@ -218,10 +210,6 @@ PICIRQDisable:
 ret 4
 
 
-
-
-
-section .text
 PICIRQDisableAll:
 	; Disables all IRQ lines across both PICs
 	;
@@ -252,10 +240,6 @@ PICIRQDisableAll:
 ret
 
 
-
-
-
-section .text
 PICIRQEnable:
 	; Enables the IRQ specified
 	;
@@ -311,11 +295,6 @@ PICIRQEnable:
 	pop ebp
 ret 4
 
-
-
-
-
-section .text
 PICIRQEnableAll:
 	; Enables all IRQ lines across both PICs
 	;

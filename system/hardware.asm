@@ -27,147 +27,94 @@
 
 
 
-<<<<<<< HEAD
-bits 32
 
 
-section text:
+
+section data:
 align 4
-
-A20Enable:
-	; Enables the A20 line of the processor's address bus using the "Fast A20 enable" method
-	; Since A20 support is critical, this code will print an error then intentionally hang if unsuccessful
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
-
-	push ebp
-	mov ebp, esp
-
-	in al, 0x92
-	or al, 00000010b
-	out 0x92, al
-
-	; verify it worked
-	mov al, 0x00
-	in al, 0x92
-	and al, 0x02
-
-	cmp al, 0
-	jnz .success
-		; it failed, so we have to say so and make sure we hang here
-		push .fastA20Fail$
-		call Print32
-		call PrintRegs32
-		;jmp $
-	.success:
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-
-CPUSpeedDetect:
-	; Determines how many iterations of random activities the CPU is capable of in one second
-	;
-	;  input:
-	;   dummy value
-	;
-	;  output:
-	;   number of iterations
-=======
-
->>>>>>> Development
+.fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
+.randomSeed										dd 0x92D68CA2
 
 bits 32
-
-
-
-
 
 section .text
 DriverLegacyLoad:
-	; Scans all drivers in the kernel and runs each legacy driver found
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
+    ; Scans all drivers in the kernel and runs each legacy driver found
 
-	push ebp
-	mov ebp, esp
+    ; input:
+    ; n/a
 
-	; start a loop here which will cycle until the driver signature is no longer found
-	mov esi, DriverSpaceStart
+    ; output:
+    ; n/a
 
-	.DriverDiscoveryLoop:
-		; preserve the search address
-		push esi
+    push ebp
+    mov ebp, esp
 
-		; search for the signature of the first driver
-		push kDriverSignature$
-		push dword 16
-		push esi
-		call MemSearchString
-		pop edi
+    ; start a loop here which will cycle until the driver signature is no longer found
+    mov esi, DriverSpaceStart
 
-; corrects for a bug where MemSearchString returns the match address-1
+    .DriverDiscoveryLoop:
+        ; preserve the search address
+        push esi
+
+        ; search for the signature of the first driver
+        push kDriverSignature$
+        push dword 16
+        push esi
+        call MemSearchString
+        pop edi
+
+        ; corrects for a bug where MemSearchString returns the match address-1
 inc edi
 
-		; test the result
-		cmp edi, 0
-		jne .CheckLegacy
-			; if we get here, we got a zero back... so no driver was found
-			jmp .NextDriverIteration
-		.CheckLegacy:
+        ; test the result
+        cmp edi, 0
+        jne .CheckLegacy
+            ; if we get here, we got a zero back... so no driver was found
+            jmp .NextDriverIteration
+        .CheckLegacy:
 
-		; well, ok, we found some random driver... let's see if it's a legacy one
-		
-		; get edi pointing to the driver flags
-		add edi, 16
+        ; well, ok, we found some random driver... let's see if it's a legacy one
 
-		; see if we have a legacy driver
-		mov eax, [edi]
-		and eax, 10000000000000000000000000000000b
-		cmp eax, 10000000000000000000000000000000b
-		je .DriverIsLegacy
-			; if we get here, it's not a legacy driver
-			jmp .NextDriverIteration
-		.DriverIsLegacy:
+        ; get edi pointing to the driver flags
+        add edi, 16
 
-		; this driver should do the trick!
-		; point edi to the start of the driver's init code
-		add edi, 4
+        ; see if we have a legacy driver
+        mov eax, [edi]
+        and eax, 10000000000000000000000000000000b
+        cmp eax, 10000000000000000000000000000000b
+        je .DriverIsLegacy
+            ; if we get here, it's not a legacy driver
+            jmp .NextDriverIteration
+        .DriverIsLegacy:
 
-		; run the driver
-		call edi
+        ; this driver should do the trick!
+        ; point edi to the start of the driver's init code
+        add edi, 4
 
-		.NextDriverIteration:
-		; go back and scan again for another driver
-		pop esi
-		inc esi
+        ; run the driver
+        call edi
 
-		; exit if we're at the end of driver space
-		cmp esi, DriverSpaceEnd
-		je .DriverScanDone
+        .NextDriverIteration:
+        ; go back and scan again for another driver
+        pop esi
+        inc esi
 
-	jmp .DriverDiscoveryLoop
-	.DriverScanDone:
-	; get rid of that extra copy of esi we saved earlier...
-	pop esi
+        ; exit if we're at the end of driver space
+        cmp esi, DriverSpaceEnd
+        je .DriverScanDone
 
-	; push the return value on the stack and exit
-	mov dword [ebp + 16], edi
+    jmp .DriverDiscoveryLoop
+    .DriverScanDone:
+    ; get rid of that extra copy of esi we saved earlier...
+    pop esi
+
+    ; push the return value on the stack and exit
+    mov dword [ebp + 16], edi
 
 
-	mov esp, ebp
-	pop ebp
+    mov esp, ebp
+    pop ebp
 ret
 
 
@@ -176,30 +123,30 @@ ret
 
 section .text
 PITInit:
-	; Init the PIT for our timing purposes (256 ticks per second)
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
+    ; Init the PIT for our timing purposes (256 ticks per second)
 
-	push ebp
-	mov ebp, esp
+    ; input:
+    ; n/a
 
+    ; output:
+    ; n/a
 
-	mov ax, 1193180 / 256
-
-	mov al, 00110110b
-	out 0x43, al
-
-	out 0x40, al
-	xchg ah, al
-	out 0x40, al
+    push ebp
+    mov ebp, esp
 
 
-	mov esp, ebp
-	pop ebp
+    mov ax, 1193180 / 256
+
+    mov al, 00110110b
+    out 0x43, al
+
+    out 0x40, al
+    xchg ah, al
+    out 0x40, al
+
+
+    mov esp, ebp
+    pop ebp
 ret
 
 
@@ -208,86 +155,77 @@ ret
 
 section .text
 Random:
-	; Returns a random number using the XORShift method
-	;
-	;  input:
-	;   number limit
-	;
-	;  output:
-	;   32-bit random number between 0 and the number limit
+    ; Returns a random number using the XORShift method
 
-	push ebp
-	mov ebp, esp
+    ; input:
+    ; number limit
 
-	mov ebx, [ebp + 8]
+    ; output:
+    ; 32-bit random number between 0 and the number limit
 
-	; use good ol' XORShift to get a random
-	mov eax, [.randomSeed]
-	mov edx, eax
-	shl eax, 13
-	xor eax, edx
-	mov edx, eax
-	shr eax, 17
-	xor eax, edx
-	mov edx, eax
-	shl eax, 5
-	xor eax, edx
-	mov [.randomSeed], eax
+    push ebp
+    mov ebp, esp
 
-	; use some modulo to make sure the random is below the requested number
-	mov edx, 0x00000000
-	div ebx
-	mov eax, edx
+    mov ebx, [ebp + 8]
 
-	; throw the numbers on the stack and get going!
-	mov dword [ebp + 8], eax
+    ; use good ol' XORShift to get a random
+    mov eax, [.randomSeed]
+    mov edx, eax
+    shl eax, 13
+    xor eax, edx
+    mov edx, eax
+    shr eax, 17
+    xor eax, edx
+    mov edx, eax
+    shl eax, 5
+    xor eax, edx
+    mov [.randomSeed], eax
 
-	mov esp, ebp
-	pop ebp
+    ; use some modulo to make sure the random is below the requested number
+    mov edx, 0x00000000
+    div ebx
+    mov eax, edx
+
+    ; throw the numbers on the stack and get going!
+    mov dword [ebp + 8], eax
+
+    mov esp, ebp
+    pop ebp
 ret
 
-<<<<<<< HEAD
-=======
-section .data
-.randomSeed										dd 0x92D68CA2
->>>>>>> Development
 
 
 
 
 
-section .text
+global Reboot
 Reboot:
-	; Performs a warm reboot of the PC
-	;
-	;  input:
-	;   n/a
-	;
-	;  output:
-	;   n/a
+    ; Performs a warm reboot of the PC
 
-	push ebp
-	mov ebp, esp
+    ; input:
+    ; n/a
 
-	; try the keyboard controller method for reboot
-	mov dx, 0x92
-	in al, dx
-	or al, 00000001b
-	out dx, al
+    ; output:
+    ; n/a
 
-	; if we get here, that didn't work
-	; now we try the fast port write method
-	mov al, 0xFF
-	out 0xEF, al
+    push ebp
+    mov ebp, esp
 
-	; hopefully never reach this, but if the reboots failed we can at least do a hard lockup...
-	jmp $
+    ; try the keyboard controller method for reboot
+    mov dx, 0x92
+    in al, dx
+    or al, 00000001b
+    out dx, al
 
-	mov esp, ebp
-	pop ebp
+    ; if we get here, that didn't work
+    ; now we try the fast port write method
+    mov al, 0xFF
+    out 0xEF, al
+
+    ; hopefully never reach this, but if the reboots failed we can at least do a hard lockup...
+    jmp $
+
+    mov esp, ebp
+    pop ebp
 ret
 
-section data:
-align 4
-.fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
-.randomSeed										dd 0x92D68CA2
