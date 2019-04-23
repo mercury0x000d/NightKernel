@@ -104,4 +104,5 @@ os.vm: $(TARGET)
 clean:
 	-$(RM) $(wildcard $(OBJFILES) kernel.o kernel.bin kernel.sys)
 	-$(RM) -r $(OBJDIR)
+	-$(RM) -r $(OUTPUTDIR)
 	
