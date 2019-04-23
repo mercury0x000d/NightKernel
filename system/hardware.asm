@@ -14,7 +14,9 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
+%include "include/globals.inc"
 
+extern DriverSpaceStart, MemSearchString, DriverSpaceEnd
 
 
 
@@ -26,14 +28,14 @@
 ; Reboot						Performs a warm reboot of the PC
 
 
-
+global DriverLegacyLoad, PartitionEnumerate, PITInit, Random, Reboot
 
 
 
 section data:
 align 4
-.fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
-.randomSeed										dd 0x92D68CA2
+fastA20Fail$									db 'Cannot start. Attempt to use Fast A20 Enable failed.', 0x00
+randomSeed										dd 0x92D68CA2
 
 bits 32
 
@@ -169,7 +171,7 @@ Random:
     mov ebx, [ebp + 8]
 
     ; use good ol' XORShift to get a random
-    mov eax, [.randomSeed]
+    mov eax, [randomSeed]
     mov edx, eax
     shl eax, 13
     xor eax, edx
@@ -179,7 +181,7 @@ Random:
     mov edx, eax
     shl eax, 5
     xor eax, edx
-    mov [.randomSeed], eax
+    mov [randomSeed], eax
 
     ; use some modulo to make sure the random is below the requested number
     mov edx, 0x00000000

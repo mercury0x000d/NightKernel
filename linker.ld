@@ -1,18 +1,19 @@
 ENTRY(main)			/* name of entry label */
+OUTPUT_FORMAT(binary)
 
 SECTIONS {
 
 	. = 0x600;		/* start at 0x600 */			
 	
-	.text ALIGN (0x1000) :	/* align at 4K */
+	.text  :	/* align at 4K */
 	{
 	    *(.text)		/* all text (code) sections from all files */
 	}
 
-	.rodata ALIGN (0x1000) :/* align at 4K */
+	/*.rodata ALIGN (0x1000) : //* align at 4K //*
 	{
-	    *(.rodata*)		/* all read-only sections from all files */
-	}
+	    *(.rodata*)		/* all read-only sections from all files //*
+	} */
 
 	.data ALIGN (0x1000) :  /* align at 4K */
 	{

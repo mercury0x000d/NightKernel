@@ -31,7 +31,7 @@
 ; GDTSetSizeFlags 				Sets the size flags to the GDT entry specifed
 
 
-
+global GDTStart
 
 
 bits 32
@@ -437,6 +437,14 @@ db 11001111b									; granularity
 db 0x00											; base high
 
 ; User Space data (Offset 0x20)
+dw 0xffff										; limit low
+dw 0x0000										; base low
+db 0x00											; base middle
+db 11110010b									; access
+db 11001111b									; granularity
+db 0x00											; base high
+
+; TSS (Offset 0x28)
 dw 0xffff										; limit low
 dw 0x0000										; base low
 db 0x00											; base middle

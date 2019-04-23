@@ -14,6 +14,7 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
+global DriverSpaceStart, DriverSpaceEnd
 
 extern Print32, PrintIfConfigBits16, PrintIfConfigBits32, PrintRegs32, LMListInit,\
 	   PCILoadDrivers, DriverLegacyLoad, PCIInitBus, PCILoadDrivers,SetSystemAPM,\
@@ -23,6 +24,8 @@ extern kMaxLines, kBytesPerScreen, textColor, backColor, MemProbe, A20Enable,\
 	   PCIProbe, IDTInit, ISRInitAll, PICInit, PICIRQDisableAll, PICIRQEnableAll,\
 	   PITInit, RTCInit, SetSystemCPUID, MemAllocate, PartitionEnumerate, TaskInit, TimerWait
 
+extern gTextColor, gBackColor, TaskNew, MemCopy, StringTokenHexadecimal, StringTokenDecimal,\
+	   StringTokenBinary
 
 ; [map all kernel.map]
 bits 16
@@ -34,13 +37,14 @@ bits 16
 section .text
 
 ; set origin point to where the FreeDOS bootloader loads this code
-# org 0x0600
+; the origin is set in the linker script, so this line is not needed
+; org 0x0600
 
 
 ; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
 cld
 
-
+global main
 main:
 ; init the stack segment
 mov ax, 0x0000
@@ -82,8 +86,8 @@ mov cx, 0x2707
 int 0x10
 
 ; set kernel cursor location
-mov byte [textColor], 7
-mov byte [backColor], 0
+mov byte [gTextColor], 7
+mov byte [gBackColor], 0
 
 
 
@@ -283,7 +287,7 @@ je .NoPCI
 
 .NoPCI:
 push PCIFailed$
-call Print32
+call PrintIfConfigBits32
 
 .PCIComplete:
 
@@ -311,13 +315,20 @@ call TaskInit
 
 
 
+
+
+
+
+
+
+
+
+
 ; skip this for now, it's just an experiment
 ; comment out the jmp to run this code
 jmp PagingDone
 ; experimental paging setup
 cli
-PDAddr									dd 0x00000000
-PTAddr									dd 0x00000000
 
 push 0
 call PageDirCreate
@@ -329,6 +340,7 @@ pop dword [PTAddr]
 
 
 ; insert page table into page directory while leaving the flags alone which we just set earlier
+; set up the first 4 MiB
 mov ecx, dword [PDAddr]
 mov eax, [ecx]
 and eax, 3
@@ -338,6 +350,16 @@ or ebx, 1			; set the "present" bit
 mov eax, dword [PDAddr]
 mov [eax], ebx
 
+; and now point the second 4 MiB to the first
+mov ecx, dword [PDAddr]
+mov eax, [ecx]
+and eax, 3
+mov ebx, dword [PTAddr]
+or ebx, eax
+or ebx, 1			; set the "present" bit
+mov eax, dword [PDAddr]
+add eax, 4			; this advances to the second entry
+mov [eax], ebx
 
 
 
@@ -346,17 +368,29 @@ mov [eax], ebx
 push dword [PDAddr]
 call PageDirLoad
 
-call PagingEnable
+; enable paging
+mov eax, cr0
+or eax, 0x80000000
+mov cr0, eax
 
-mov eax, 0xcafebeef
 
-; at this point, the first 
+
+; that's it! paging is active
+
+; Here we will do a test write at 0x400000 - the 4 MiB mark.
+; If all went well, a dump of RAM in the VirtualBox debugger should show the same data
+; at both address 0x000000 and 0x400000, even though we only wrote it at 0x400000.
+; How is this possible? THE MAGIC OF PAGING IS AMONG US!
+mov eax, 0x00400000
+mov dword [eax], 0xCAFEBEEF
+
+
 
 ; hang here so we can survey our success!
 jmp $
 
-
-jmp PagingDone
+PDAddr									dd 0x00000000
+PTAddr									dd 0x00000000
 
 
 
@@ -464,9 +498,6 @@ PagingDone:
 
 
 
-
-
-
 mov eax, dword [tSystem.configBits]
 and eax, 000000000000000000000000000000001b
 cmp eax, 000000000000000000000000000000001b
@@ -480,64 +511,176 @@ jne .SkipStartDelay
 
 
 ; clear the screen and start!
+push 0x00000000
 call ScreenClear32
 
 
-;ScanCodeTestLoop:
-;	push 0
-;	call KeyWait
-;	pop eax
-;
-;	inc byte [cursorY]
-;	call PrintRegs32
-;
-;jmp ScanCodeTestLoop
+
+; set up tasks
+push Task1
+call TaskNew
+pop eax
+
+push Task2
+call TaskNew
+pop eax
+
+push DebugMenu
+call TaskNew
+pop eax
 
 
+mov byte [tSystem.taskingEnable], 1
 
-;push Task1
-;call TaskNew
-;pop eax
-;mov ebx, 0xBEEFCA1F
-;mov ecx, 0xBEEFCA1F
-;mov edx, 0xBEEFCA1F
-;call PrintRegs32
-;
-;
-;push Task2
-;call TaskNew
-;pop eax
-;mov ebx, 0xBEEFCA1F
-;mov ecx, 0xBEEFCA1F
-;mov edx, 0xBEEFCA1F
-;call PrintRegs32
-;
-;jmp $
+
 
 ; enter the infinite loop which runs the kernel
 InfiniteLoop:
-	; do stuff here, i guess... :)
-
-	; enter the Debug Menu if appropriate
-	mov eax, [tSystem.configBits]
-	and eax, 000000000000000000000000000000001b
-	cmp eax, 000000000000000000000000000000001b
-	jne .SkipDebugMenu
-		call DebugMenu
-	.SkipDebugMenu:
-
+	hlt
 jmp InfiniteLoop
 
 
 
+section .text
 Task1:
-	inc dword [0x200000]
-jmp Task1
+	.Task1Loop:
+
+		; init our print string
+		push 80
+		push .scratch1$
+		push .mouseFormat$
+		call MemCopy
 
 
+		; build mouse location string
+		push dword 2
+		mov eax, 0
+		mov ax, word [tSystem.PS2ControllerDeviceID2]
+		push eax
+		push .scratch1$
+		call StringTokenHexadecimal
+
+		push dword 4
+		mov eax, 0
+		mov ax, word [tSystem.mouseX]
+		push eax
+		push .scratch1$
+		call StringTokenDecimal
+
+		push dword 4
+		mov eax, 0
+		mov ax, word [tSystem.mouseY]
+		push eax
+		push .scratch1$
+		call StringTokenDecimal
+
+		push dword 5
+		mov eax, 0
+		mov ax, word [tSystem.mouseZ]
+		push eax
+		push .scratch1$
+		call StringTokenDecimal
+
+		push dword 8
+		mov eax, 0
+		mov al, byte [tSystem.mouseButtons]
+		push eax
+		push .scratch1$
+		call StringTokenBinary
+
+
+		; print the string
+		push dword 0x00000000
+		push dword 0x00000007
+		mov eax, 0
+		mov al, byte [kMaxLines]
+		push eax
+		push dword 1
+		push .scratch1$
+		call Print32
+		pop eax
+		pop eax
+	jmp .Task1Loop
+
+section .data
+.mouseFormat$									db 'Mouse type: ^   X: ^   Y: ^   Z: ^   Buttons: ^   ', 0x00
+
+section .bss
+.scratch1$										resb 80
+
+
+
+section .text
 Task2:
-	inc dword [0x200010]
-jmp Task1
+	; clear our print string
+	push 20
+	push .scratch2$
+	push .dateTimeFormat$
+	call MemCopy
+
+
+	; build the date and time info string
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.month]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.day]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.year]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.hours]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.minutes]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.seconds]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+
+	; print the string
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 1
+	push dword 64
+	push .scratch2$
+	call Print32
+	pop eax
+	pop eax
+jmp Task2
+
+section .data
+.dateTimeFormat$								db '^/^/^ ^:^:^', 0x00
+
+section .bss
+.scratch2$										resb 20
+
+
 
 section .data
 progressText01$									db 'Probing BIOS memory map', 0x00

@@ -19,23 +19,26 @@
 
 
 ; tListInfo struct, the header used to manage lists
-%define tListInfo.signature						(esi + 00)
-%define tListInfo.elementSize					(esi + 04)
-%define tListInfo.elementCount					(esi + 08)
-%define tListInfo.listSize						(esi + 12)
+%define tListInfo.signature						dword (esi + 00)
+%define tListInfo.elementSize					dword (esi + 04)
+%define tListInfo.elementCount					dword (esi + 08)
+%define tListInfo.listSize						dword (esi + 12)
 
+%include "include/globals.inc"
 
 
 
 
 bits 32
 
+global LMElementAddressGet, LMElementDuplicate, LMElementSizeGet,\
+	   LM_Internal_ElementAddressGet, LMSlotFindFirstFree
 
-
+extern MemCopy
 
 
 section .text
-global LMElementAddressGet
+
 LMElementAddressGet:
 	; Returns the address of the specified element in the list specified
 	;
@@ -361,6 +364,7 @@ ret 4
 
 
 section .text
+global LMItemAddAtSlot
 LMItemAddAtSlot:
 	; Adds an item to the list specified at the list slot specified
 	;
@@ -455,31 +459,40 @@ LMListInit:
 	push ebp
 	mov ebp, esp
 
-	mov esi, [ebp + 8]
+	; allocate local variables
+	sub esp, 4
+	%define listSize							dword [ebp - 4]
+
+
+	; calculate the total size of the memory this list will occupy
 	mov eax, [ebp + 12]
 	mov ebx, [ebp + 16]
+	mov edx, 0x00000000
+	mul ebx
+	add eax, 16
+	mov listSize, eax
+	; might want to add code here later to check for edx being non-zero to indicate the list size is over 4 GB
+
+
+	; get the list ready for writing
+	mov esi, [ebp + 8]
+
 
 	; write the data to the start of the list area, starting with the signature
 	mov dword [tListInfo.signature], 'list'
-	add edi, 4
 
 	; write the size of each element next
+	mov ebx, [ebp + 16]
 	mov dword [tListInfo.elementSize], ebx
-	add edi, 4
 
 	; write the total number of elements
+	mov eax, [ebp + 12]
 	mov dword [tListInfo.elementCount], eax
 
-	; calculate size of memory block needed to hold the actual list data into eax (may overwrite edx)
-	; might want to add code here to check for edx being non-zero to indicate the list size is over 4 GB
-	mul ebx
-
-	; add bytes for the control block on the beginning of the list data
-	add eax, 16
-
-	; total size of list gets written first after being retrieved from the stack
+	; write total size of list
+	mov eax, listSize
 	mov dword [tListInfo.listSize], eax
-	add edi, 4
+
 
 	mov esp, ebp
 	pop ebp
@@ -1108,7 +1121,7 @@ LM_Internal_SlotFindFirstFree:
 		; test this element
 		push edx
 		push dword [ebp + 8]
-		call LMSlotFreeTest
+		call LM_Internal_SlotFreeTest
 		pop eax
 
 		; restore the counter

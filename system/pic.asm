@@ -15,7 +15,8 @@
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
 
-
+global PICInit, PICIntComplete, PICIRQDisable, PICIRQDisableAll,\
+	   PICIRQEnable, PICIRQEnableAll
 
 
 ; 32-bit function listing:

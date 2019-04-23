@@ -14,19 +14,25 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
+global MemInit, MemCopy, MemProbe, MemAllocateAligned, MemAllocate
 
-%include "includes/globals.inc"
+%include "include/globals.inc"
+%include "include/memory.inc"
+
+extern LMElementDelete, PrintIfConfigBits16, Print16, StringLength,\
+	   textColor, backColor, ConvertByteToHexString16, LMElementCountGet, LMElementAddressGet,\
+	   LMElementSizeGet, LMListInit, LMElementDuplicate, gTextColor, gBackColor
 
 
 ; tMemoryInfo, for the physical memory allocator to track blocks
-%define tMemInfo.address						(esi + 00)
-%define tMemInfo.size							(esi + 04)
-%define tMemInfo.task							(esi + 08)
+; 
+; moving these to an include file (memory.inc)
+
+; %define tMemInfo.address						(esi + 00)
+; %define tMemInfo.size							(esi + 04)
+; %define tMemInfo.task							(esi + 08)
 
 
-extern LMElementDelete, PrintIfConfigBits16, Print16, StringLength
-extern textColor, backColor, ConvertByteToHexString16, LMElementCountGet, LMElementAddressGet
-extern LMElementSizeGet, LMListInit, LMElementDuplicate
 
 bits 16
 
@@ -447,8 +453,8 @@ MemProbe:
 	mov byte [bp - 1], 0
 
 	; print the labels string if appropriate
-	mov byte [textColor], 7
-	mov byte [backColor], 0
+	mov byte [gTextColor], 7
+	mov byte [gBackColor], 0
 	push .memoryMapLabels$
 	call PrintIfConfigBits16
 
@@ -811,12 +817,20 @@ MemAllocate:
 	mov dword [tMemInfo.size], eax
 
 	; set the requesting task field
-	mov eax, [ebp + 8]
-	mov dword [tMemInfo.task], eax
+	mov ebx, [ebp + 8]
+	mov dword [tMemInfo.task], ebx
 
 	; prepare to return address of this block
 	mov dword [ebp + 12], ecx
+
+	; we don't want to hand out blocks that are all dirtied up with old data
+	push 0x00000000
+	push eax
+	push ecx
+	call MemFill
+
 	jmp .Exit
+
 
 	.Fail:
 	; If we get here, we had a problem, Houston. Fail. Fail fail. The failiest fail in Failtown fail.
@@ -1022,6 +1036,7 @@ ret 8
 
 
 section .text
+
 MemCopy:
 	; Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest)
 	;

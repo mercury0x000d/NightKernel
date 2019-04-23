@@ -114,6 +114,8 @@
 			<br>
 			<a href="#MemoryManagement">Section 8 - Memory Management in Night</a><br>
 			<br>
+			<a href="#Multitasking">Section 9 - Multitasking, Night Style</a><br>
+			<br>
 			<br>
 			<br>
 			<a href="#Changelog">Appendix 0 - Version History</a><br>
@@ -339,7 +341,7 @@
 					<br>
 				</p>
 			</code>
-			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can use local variables in the function and it also provides a handy way to reference the various parameters passed from the caller. This is the standard entry procedure for nearly every Night function.<br>
+			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can use local variables in the function and it also provides a handy way to reference the various parameters passed from the caller. This is the standard entry procedure for every Night function which accepts input parameters or uses internal variables.<br>
 			<br>
 			<br>
 			<br>
@@ -648,7 +650,7 @@
 						<td>Total size of this list (header and data) in bytes</td>
 					</tr>
 					<tr>
-						<td>0x14</td>
+						<td>0x10</td>
 						<td colspan="2"><i>List data</i></td>
 					</tr>
 				</table>
@@ -705,9 +707,65 @@
 		<br>
 
 		<hr>
+		<h2><a name="Multitasking">Section 9 - Multitasking, Night Style</a></h2>
+		<p>
+			One of the main benefits brought by Night to the DOS experience is multitasking. Some older operating systems common in the DOS era, used a technique called Cooperative Multitasking, which relied on programs to yield their control of the CPU back to the operating system before another program could get time to do its job. This is not the way Night does things. <br>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<hr>
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			4/17/2019, 0.1A Update - Preemptive Multitasking!<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>interrupts.asm</i> - Added a call to <code>TaskSwitch()</code> to PIT interrupt 0x20</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>ConvertStringBinaryToNumber()</code>, <code>ConvertStringDecimalToNumber()</code>, <code>ConvertStringHexToNumber()</code>, and <code>ConvertStringOctalToNumber()</code> to convert numbers contained in strings to be extracted to actual numeric values</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringSearchChar()</code> to quickly find the first occurrance of a character in a string</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringTokenBinary()</code>, <code>StringTokenDecimal()</code>, <code>StringTokenHexadecimal()</code>, <code>StringTokenOctal()</code> and <code>StringTokenString()</code> as replacements for <code>StringBuild()</code></li>
+				<li>Kernel: <i>tasks.asm</i> - Preemptive multitasking for supervisor code is functional</li>
+			</ul>
+			<br>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Added an interactive RAM browser</li>
+				<li>Kernel: <i>debug.asm</i> - Separated the code for each debugging feature out into individual functions.</li>
+				<li>Kernel: <i>debug.asm</i> - Separated the date and time and mouse output displays into their own tasks</li>
+				<li>Kernel: <i>gdt.asm</i> - Added a TSS descriptor slot to the GDT</li>
+				<li>Kernel: <i>globals.asm</i> - Removed the global kernel print string, <i>kPrintText$</i>. There's 0.25 KiB saved!</li>
+				<li>Kernel: <i>interrupts.asm</i> - Moved the RTC interrupt handler to rtc.asm</li>
+				<li>Kernel: <i>interrupts.asm</i> - Removed spurious <code>pushf</code> and <code>popf</code> instructions from some interrupt handlers which aren't necessary since the interrupt already automatically saves and restores the flags register itself.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Revamped the critical error handler to show task information as well</li>
+				<li>Kernel: <i>interrupts.asm</i> - Trimmed some fat from all exception handlers</li>
+				<li>Kernel: <i>memory.asm</i> - Modified <code>MemAllocate()</code> to zero memory blocks out at allocate time. Geez, memory is dirty on some real hardware!</li>
+				<li>Kernel: <i>screen.asm</i> - Changed text printing routines to take text color and position as parameters instead of relying on system-level globals</li>
+				<li>Kernel: <i>screen.asm</i> - Modified algorithm used in <code>PrintRAM32()</code></li>
+				<li>Kernel: <i>strings.asm</i> - Improved efficiency and readability in some existing string routines</li>
+				<li>Kernel: <i>strings.asm</i> - Moved function listings into the NKRM</li>
+				<li>Kernel: <i>strings.asm</i> - Removed a couple comments with references to VESA since we don't deal with that anymore.</li>
+				<li>Kernel: <i>strings.asm</i> - Removed the clumsy and potentially stack-abusing <code>StringBuild()</code> and migrated all code which used it over to the new, more stable routines</li>
+				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringCharInsert()</code> to <code>StringInsert()</code> since it isn't limited to just characters, but can handle entire strings</li>
+				<li>Toolchain: <i>makefile</i> - Added directive for list file generation</li>
+			</ul>
+			<br>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>ATA Controller.asm</i> - Partially fixed a bug concerning passing a dummy value to <code>LMSlotFindFirstFree()</code> as described by Maarten <a href="https://groups.google.com/d/msg/night-dos-kernel/lJaCvR_s2_I/RN5BjrRxCQAJ">here</a></li>
+				<li>Kernel: <i>partitions.asm</i> - Fixed another dummy value bug concerning <code>LMSlotFindFirstFree()</code></li>
+				<li>Manual: Fixed a typo in the List Manager header format table</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			4/5/2019, 0.19 Update - Fixes for A20, PS/2, RTC, and PIC<br>
 			<br>
 			New<br>
@@ -1264,6 +1322,7 @@
 			<br>
 			<br>
 			<br>
+
 			<b>List Manager Functions - <i>lists.asm</i></b><br>
 			<br>
 			32-bit Public Function Listing:<br>
@@ -2363,8 +2422,485 @@
 			<br>
 			<br>
 
+			<b>List Manager Functions - <i>strings.asm</i></b><br>
+			<br>
+			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.8 - Function return codes</caption>
+				<caption>Table A1.8 - strings.asm 16-bit public functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>ConvertByteToHexString16</td>
+					<td>
+						<ol>
+							<li>Numeric byte value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode</td>
+				</tr>
+				<tr>
+					<td>ConvertWordToHexString16</td>
+					<td>
+						<ol>
+							<li>Numeric word value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.9 - strings.asm 32-bit public functions</caption>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 20%>
+				<col width = 40%>
+				<tr>
+					<th>Name</th>
+					<th>Input</th>
+					<th>Output</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>ConvertNumberBinaryToString</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>
+						Translates the value specified to a binary number in a zero-padded 32 byte string<br>
+						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						Note: No terminating null is put on the end of the string - do that yourself.
+					</td>
+				</tr>
+				<tr>
+					<td>ConvertNumberDecimalToString</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>
+						Translates the value specified to a decimal number in a zero-padded 10 byte string<br>
+						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						Note: No terminating null is put on the end of the string - do that yourself.
+					</td>
+				</tr>
+				<tr>
+					<td>ConvertNumberHexToString</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>
+						Translates the value specified to a hexadecimal number in a zero-padded 8 byte string<br>
+						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						Note: No terminating null is put on the end of the string - do that yourself.
+					</td>
+				</tr>
+				<tr>
+					<td>ConvertNumberOctalToString</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>
+						Translates the value specified to an octal number in a zero-padded 11 byte string<br>
+						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						Note: No terminating null is put on the end of the string - do that yourself.
+					</td>
+				</tr>
+				<tr>
+					<td>ConvertStringBinaryToNumber</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+						</ol>
+					</td>
+					<td>Returns the numeric value from the binary string specified</td>
+				</tr>
+				<tr>
+					<td>ConvertStringDecimalToNumber</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+						</ol>
+					</td>
+					<td>Returns the numeric value from the decimalstring specified</td>
+				</tr>
+				<tr>
+					<td>ConvertStringHexToNumber</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+						</ol>
+					</td>
+					<td>Returns the numeric value from the hexadecimal string specified</td>
+				</tr>
+				<tr>
+					<td>ConvertStringOctalToNumber</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+						</ol>
+					</td>
+					<td>Returns the numeric value from the octal string specified</td>
+				</tr>
+				<tr>
+					<td>StringCaseLower</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Converts a string to lower case</td>
+				</tr>
+				<tr>
+					<td>StringCaseUpper</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Converts a string to upper case</td>
+				</tr>
+				<tr>
+					<td>StringCharAppend</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>ASCII code of character to add</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Appends a character onto the end of the string specified</td>
+				</tr>
+				<tr>
+					<td>StringCharDelete</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Character position to remove</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Deletes the character at the location specified from the string</td>
+				</tr>
+				<tr>
+					<td>StringCharPrepend</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>ASCII code of character to add</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Prepends a character onto the beginning of the string specified</td>
+				</tr>
+				<tr>
+					<td>StringFill</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Fill character</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Fills the entire string specified with the character specified</td>
+				</tr>
+				<tr>
+					<td>StringInsert</td>
+					<td>
+						<ol>
+							<li>Address of main string</li>
+							<li>Address of string to be inserted</li>
+							<li>Position after which to insert the string</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Inserts a string into another string at the location specified</td>
+				</tr>
+				<tr>
+					<td>StringLength</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>String length</li>
+						</ol>
+					</td>
+					<td>Returns the length of the string specified</td>
+				</tr>
+				<tr>
+					<td>StringPadLeft</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Padding character</li>
+							<li>Length to which the string will be extended</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Pads the left side of the string specified with the character specified until it is the length specified</td>
+				</tr>
+				<tr>
+					<td>StringPadRight</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Padding character</li>
+							<li>Length to which the string will be extended</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Pads the right side of the string specified with the character specified until it is the length specified</td>
+				</tr>
+				<tr>
+					<td>StringReplaceChars</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Character to be replaced</li>
+							<li>Replacement character</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Replaces all occurrances of the specified character with another character specified</td>
+				</tr>
+				<tr>
+					<td>StringReplaceCharsInRange</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Start of ASCII range</li>
+							<li>End of ASCII range</li>
+							<li>Replacement character</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Replaces any character within the range of ASCII codes specified with the specified character</td>
+				</tr>
+				<tr>
+					<td>StringSearchChar</td>
+					<td>
+						<ol>
+							<li>Address of string to be scanned</li>
+							<li>ASCII value of byte for which to search</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Position of match, or zero if no match</li>
+						</ol>
+					</td>
+					<td>Returns the position in the string specified of the character code specified</td>
+				</tr>
+				<tr>
+					<td>StringSearchCharList</td>
+					<td>
+						<ol>
+							<li>Address of string to be scanned</li>
+							<li>Address of character list string</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>Position of match, or zero if no match</li>
+						</ol>
+					</td>
+					<td>Returns the position in the string specified of the first match from a list of characters</td>
+				</tr>
+				<tr>
+					<td>StringTokenBinary</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Dword value to be added to the string</li>
+							<li>Number trim value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Finds the first occurrance of the ^ character and replaces it with a binary number, truncated to the length specified</td>
+				</tr>
+				<tr>
+					<td>StringTokenDecimal</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Dword value to be added to the string</li>
+							<li>Number trim value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Finds the first occurrance of the ^ character and replaces it with a decimal number, truncated to the length specified</td>
+				</tr>
+				<tr>
+					<td>StringTokenHexadecimal</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Dword value to be added to the string</li>
+							<li>Number trim value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Finds the first occurrance of the ^ character and replaces it with a hexadecimal number, truncated to the length specified</td>
+				</tr>
+				<tr>
+					<td>StringTokenOctal</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Dword value to be added to the string</li>
+							<li>Number trim value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified</td>
+				</tr>
+				<tr>
+					<td>StringTokenString</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Address of string to be added</li>
+							<li>String trim value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified</td>
+				</tr>
+				<tr>
+					<td>StringTrimLeft</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>ASCII code of the character to be trimmed</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Trims any occurrances of the character specified off the left side of the string</td>
+				</tr>
+				<tr>
+					<td>StringTrimRight</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>ASCII code of the character to be trimmed</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Trims any occurrances of the character specified off the right side of the string</td>
+				</tr>
+				<tr>
+					<td>StringTruncateLeft</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Length to which the string will be shortened</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Truncates the string to the length specified by trimming characters off the beginning</td>
+				</tr>
+				<tr>
+					<td>StringTruncateRight</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Length to which the string will be shortened</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Truncates the string to the length specified by trimming characters off the end</td>
+				</tr>
+				<tr>
+					<td>StringWordCount</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>List of characters to be used as separators (cannot include nulls)</li>
+						</ol>
+					</td>
+					<td>
+						<ol>
+							<li>word count</li>
+						</ol>
+					</td>
+					<td>Counts the words in the string specified when viewed as a sentence separated by the byte specified</td>
+				</tr>
+				<tr>
+					<td>StringWordGet</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>List of characters to be used as separators (cannot include nulls)</li>
+							<li>Word number which to return</li>
+							<li>Address of string to hold the word requested</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+					<td>Returns the word specified from the string specified when separated by the byte specified</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<table style="width:100%">
+				<caption>Table A1.10 - Function return codes</caption>
 				<col width = 10%>
 				<col width = 90%>
 				<tr>

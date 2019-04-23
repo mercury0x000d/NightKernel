@@ -21,13 +21,16 @@
 ; 32-bit function listing:
 ; PartitionEnumerate			Scans the partition tables of all drives in the drive list and loads their data into the partitions list
 
+global PartitionEnumerate
 
-
+extern MemAllocate, LMElementCountGet, LMElementAddressGet, LMSlotFindFirstFree,\
+	   DriverSpaceStart, DriverSpaceEnd, MemSearchString, StringTokenHexadecimal,\
+	   PrintIfConfigBits32
 
 
 bits 32
 
-%include "../include/globals.inc"
+%include "include/globals.inc"
 
 
 
@@ -183,9 +186,11 @@ ret
 
 .BuildPartitionEntry:
 	; get first free slot in the partition list
+	push dword 0
 	push dword [tSystem.listPartitions]
 	call LMSlotFindFirstFree
 	pop eax
+	pop ebx
 	mov partitionListCurrentElement, eax
 
 	; get the starting address of that specific slot into esi and save it for later
@@ -313,23 +318,17 @@ ret
 	.DriverScanDone:
 	; if we get here, we found no drivers to handle the file system type of this partition...
 	; so to be friendly, let's print a message saying so, if ConfigBits allows us to be verbose, that is :)
-	; first get the address of this drive list element into eax
-	mov eax, driveListCurrentElementAddr
 
-	; add 24 to point eax to the model string and push it for the StringBuild call
-	add eax, 24
-	push eax
-
-	; now calculate the size of the partition
+	push dword 2
 	mov esi, partitionListCurrentElementAddr
 	mov eax, [tPartitionInfo.systemID]
 	push eax
-
-	push kPrintText$
+	push .scratch$
 	push .NoFSDriver$
-	call StringBuild
+	call StringTokenHexadecimal
 
-	push kPrintText$
+
+	push .scratch$
 	call PrintIfConfigBits32
 
 	; push the return value on the stack and exit
@@ -338,4 +337,7 @@ ret
 ret
 
 section .data
-.NoFSDriver$									db 'No handler present for type ^p20x^h partition found on ^s', 0x00
+.NoFSDriver$									db 'No handler present for type 0x^ partition', 0x00
+
+section .bss
+.scratch$										resb 80

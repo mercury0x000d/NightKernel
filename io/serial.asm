@@ -35,7 +35,7 @@
 ; SerialSetWordSize				Returns the current number of data word bits for the specified serial port
 
 
-
+%include "include/globals.inc"
 
 
 bits 32

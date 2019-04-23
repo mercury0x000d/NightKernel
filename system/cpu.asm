@@ -22,7 +22,9 @@
 ; SetSystemCPUID				Probes the CPU using CPUID instruction and saves results to the tSystem structure
 
 
-%include "../include/globals.inc"
+global SetSystemCPUID
+
+%include "include/globals.inc"
 
 
 bits 32

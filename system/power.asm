@@ -22,7 +22,7 @@
 ; APMEnable						Activates the APM interface for all devices managed by the APM BIOS
 ; APMDisable					Disables the APM interface for all devices managed by the APM BIOS
 
-
+global APMEnable, APMDisable
 
 ; 32-bit function listing:
 ; APMShutdown					Shuts down the PC via the APM intereface

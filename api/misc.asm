@@ -15,7 +15,7 @@
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
 
-
+global SetSystemAPM, BCDToDecimal, TimerWait
 
 
 ; 16-bit function listing:
@@ -76,7 +76,7 @@ bits 32
 
 
 
-global BCDToDecimal
+
 BCDToDecimal:
 	; Converts a 32-bit BCD number to decimal
 	;
@@ -161,4 +161,4 @@ TimerWait:
 	pop ebp
 ret 4
 
-%include "includes/globals.inc"
+%include "include/globals.inc"
