@@ -14,7 +14,12 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
+; Config BITs defines
 
+	DEBUGENABLE									equ 1
+	VERBOSEBOOT									equ 2
+	LINES50										equ 4
+	ENABLEVM									equ 8
 
 
 

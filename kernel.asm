@@ -30,7 +30,15 @@ extern gTextColor, gBackColor, TaskNew, MemCopy, StringTokenHexadecimal, StringT
 ; [map all kernel.map]
 bits 16
 
+section .bss
+align 16
+stack_bottom:
+	resb 16384 		; Reserve 16Kb 
+stack_top:
 
+kernstck_bottom:
+	resb 8192		; Reserve 8Kb
+kernstack_top:
 
 
 
@@ -49,7 +57,7 @@ main:
 ; init the stack segment
 mov ax, 0x0000
 mov ss, ax
-mov sp, 0x0600
+mov sp, stack_top
 mov bp, 0x0000
 
 mov ax, 0x0000
@@ -65,7 +73,7 @@ mov al, 0x03
 int 0x10
 
 ; check the configbits to see if we should use 50 lines
-test dword [tSystem.configBits], 000000000000000000000000000000100b
+test dword [tSystem.configBits], LINES50
 jz .stickWith25
 
 	; if we get here, we should shift to 50-line mode
