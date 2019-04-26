@@ -21,6 +21,7 @@ FRMT			:= elf
 OBJDIR			:= obj
 OUTPUTDIR		:= output
 BUILDDIR		:= builds
+ASMINCLUDEPATH	:= ./include/
 TARGET			:= $(OUTPUTDIR)/kernel.sys
 
 # Compilers
@@ -29,7 +30,7 @@ TARGET			:= $(OUTPUTDIR)/kernel.sys
 LD				:= ld
 ASM				:= nasm
 RM				:= rm
-ASMFLAGS 		:= -f elf 
+ASMFLAGS 		:= -f elf -I$(ASMINCLUDEPATH)
 LDOPTIONS		:= -m elf_i386
 COPTIONS		:= -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 				   -nostartfiles -nodefaultlibs

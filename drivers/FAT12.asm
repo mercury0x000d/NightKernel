@@ -30,7 +30,7 @@
 
 
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 extern LMElementAddressGet, MemCopy, StringTokenDecimal, StringTokenString, PrintIfConfigBits32
 

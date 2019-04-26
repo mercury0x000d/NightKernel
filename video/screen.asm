@@ -43,7 +43,7 @@ global Print16, PrintIfConfigBits16, PrintRegs16, ScreenClear16, ScreenScroll16,
 extern ConvertWordToHexString16, StringTokenString, MemCopy, MemFill, ConvertNumberHexToString, StringTokenHexadecimal
 
 global gTextColor, gBackColor, kMaxLines, kBytesPerScreen,gCursorY
-%include "include/globals.inc"
+%include "globals.inc"
 
 section .data
 ; globals

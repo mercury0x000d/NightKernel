@@ -18,6 +18,8 @@
 global SetSystemAPM, BCDToDecimal, TimerWait
 
 
+%include "globals.inc"
+
 ; 16-bit function listing:
 ; SetSystemAPM					Gets the APM interface version and saves results to the tSystem structure
 
@@ -160,5 +162,3 @@ TimerWait:
 	mov esp, ebp
 	pop ebp
 ret 4
-
-%include "include/globals.inc"

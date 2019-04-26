@@ -30,7 +30,7 @@ extern MemAllocate, LMElementCountGet, LMElementAddressGet, LMSlotFindFirstFree,
 
 bits 32
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 
 

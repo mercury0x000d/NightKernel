@@ -41,7 +41,7 @@ exceptionAddress								dd 0x00000000
 exceptionFlags									dd 0x00000000
 kIDTPtr											dd 0x00000000
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 
 

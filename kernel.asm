@@ -709,7 +709,7 @@ PCIFailed$										db 'PCI Controller not detected', 0x00
 
 section .text
 ; includes for system routines
-%include "include/globals.inc"
+%include "globals.inc"
 ;%include "api/misc.asm"
 ;%include "api/lists.asm"
 ;%include "api/strings.asm"

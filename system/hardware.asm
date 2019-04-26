@@ -14,7 +14,7 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 extern DriverSpaceStart, MemSearchString, DriverSpaceEnd
 

@@ -16,8 +16,8 @@
 
 global MemInit, MemCopy, MemProbe, MemAllocateAligned, MemAllocate
 
-%include "include/globals.inc"
-%include "include/memory.inc"
+%include "globals.inc"
+%include "memory.inc"
 
 extern LMElementDelete, PrintIfConfigBits16, Print16, StringLength,\
 	   textColor, backColor, ConvertByteToHexString16, LMElementCountGet, LMElementAddressGet,\

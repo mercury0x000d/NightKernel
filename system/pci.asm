@@ -27,7 +27,7 @@ extern DriverSpaceEnd, MemCopy, StringTokenDecimal, StringTokenHexadecimal, gCur
 %define kPCIAddressPort							0x0CF8
 %define kPCIDataPort							0x0CFC
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 
 

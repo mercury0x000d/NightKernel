@@ -25,7 +25,7 @@
 
 
 global TaskDetermineNext, TaskInit, TaskNew, TaskSwitch, TaskKill
-%include "include/globals.inc"
+%include "globals.inc"
 
 extern MemAllocate, LMListInit, LMElementAddressGet, MemFill, LMSlotFindFirstFree,\
 	   MemAllocateAligned, LM_Internal_ElementAddressGet

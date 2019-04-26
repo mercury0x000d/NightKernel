@@ -24,7 +24,7 @@
 
 global SetSystemCPUID
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 
 bits 32

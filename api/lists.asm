@@ -24,7 +24,7 @@
 %define tListInfo.elementCount					dword (esi + 08)
 %define tListInfo.listSize						dword (esi + 12)
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 
 

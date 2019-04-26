@@ -40,8 +40,8 @@ extern MemCopy, Print32, PrintRAM32, StringTokenHexadecimal, LMElementAddressGet
 	   LMListInit, PCIReadAll, PCICalculateNext, StringTokenDecimal, KeyWait, kMaxLines,\
 	   ConvertStringHexToNumber, StringLength, LMElementCountGet
 
-%include "include/globals.inc"
-%include "include/memory.inc"
+%include "globals.inc"
+%include "memory.inc"
 section .data
 .flag											db 0x00
 .debugMenu$										db 'Kernel Debug Menu', 0x00

@@ -31,7 +31,7 @@
 ; InternalDriveFoundPrint		Prints data about the drive discovered by C01DriveIdentify()
 
 
-%include "include/globals.inc"
+%include "globals.inc"
 
 extern PCIReadDWord, InterruptHandlerSet, PICIntComplete, MemAllocate, LMElementAddressGet,\
 		MemCopy, LMSlotFindFirstFree, StringTokenString, StringTokenDecimal, StringTokenHexadecimal, StringTrimRight
