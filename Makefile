@@ -103,7 +103,7 @@ os.vm: $(TARGET)
 	sudo losetup -d /dev/loop0
 
 clean:
-	-$(RM) $(wildcard $(OBJFILES) kernel.o kernel.bin kernel.sys)
+	-$(RM) $(wildcard $(OBJFILES) kernel.o kernel.bin kernel.sys night.lst kernel.map)
 	-$(RM) -r $(OBJDIR)
 	-$(RM) -r $(OUTPUTDIR)
 	
