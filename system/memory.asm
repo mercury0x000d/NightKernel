@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; memory.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -22,6 +22,18 @@
 %define tMemInfo.address						(esi + 00)
 %define tMemInfo.size							(esi + 04)
 %define tMemInfo.task							(esi + 08)
+
+
+
+
+
+; external functions
+;extern ConvertByteToHexString16, LMElementAddressGet, LMElementCountGet, LMElementDelete, LMElementDuplicate, LMElementSizeGet, LMListInit
+;extern Print16, PrintIfConfigBits16, StringLength
+
+; external variables
+;extern gBackColor, gTextColor, kFalse, kTrue, tSystem.configBits, tSystem.listMemory, tSystem.memoryInitialAvailableBytes
+;extern tSystem.memoryInstalledBytes, tSystem.memoryListReservedSpace
 
 
 

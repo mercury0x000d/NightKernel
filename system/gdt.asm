@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; gdt.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -449,51 +449,63 @@ ret 8
 
 
 section .data
-GDTStart:
+gdt:
 ; Null descriptor (Offset 0x00)
 ; this is normally all zeros, but it's also a great place to tuck away the GDT header info
-dw GDTEnd - GDTStart - 1						; size of GDT
-dd GDTStart										; base of GDT
+dw gdt.end - gdt - 1							; size of GDT
+dd gdt											; base of GDT
 dw 0x0000										; filler
 
+
 ; Kernel space code (Offset 0x08)
-dw 0xffff										; limit low
+.gdt1:
+dw 0xFFFF										; limit low
 dw 0x0000										; base low
 db 0x00											; base middle
-db 10011010b									; access
-db 11001111b									; granularity
+db 10011010b									; access byte
+db 11001111b									; limit high, flags
 db 0x00											; base high
+
 
 ; Kernel space data (Offset 0x10)
-dw 0xffff										; limit low
+.gdt2:
+dw 0xFFFF										; limit low
 dw 0x0000										; base low
 db 0x00											; base middle
-db 10010010b									; access
-db 11001111b									; granularity
+db 10010010b									; access byte
+db 11001111b									; limit high, flags
 db 0x00											; base high
+
 
 ; User Space code (Offset 0x18)
-dw 0xffff										; limit low
+.gdt3:
+dw 0xFFFF										; limit low
 dw 0x0000										; base low
 db 0x00											; base middle
-db 11111010b									; access
-db 11001111b									; granularity
+db 11111010b									; access byte
+db 11001111b									; limit high, flags
 db 0x00											; base high
+
 
 ; User Space data (Offset 0x20)
-dw 0xffff										; limit low
+.gdt4:
+dw 0xFFFF										; limit low
 dw 0x0000										; base low
 db 0x00											; base middle
-db 11110010b									; access
-db 11001111b									; granularity
+db 11110010b									; access byte
+db 11001111b									; limit high, flags
 db 0x00											; base high
 
-; TSS (Offset 0x28)
-dw 0xffff										; limit low
-dw 0x0000										; base low
+
+; Task State Segment (Offset 0x28)
+; Note: the way this is set up assumes the location of the TSS is within the first 64 KiB of RAM and that it is also
+; quite small. Neither of these things should pose a problem in the future, but it's worth noting here for sanity.
+.gdt5:
+dw (tss.end - tss) & 0x0000FFFF					; limit low
+dw tss											; base low
 db 0x00											; base middle
-db 11110010b									; access
-db 11001111b									; granularity
+db 11101001b									; access byte
+db 00000000b									; limit high, flags
 db 0x00											; base high
 
-GDTEnd:
+.end:

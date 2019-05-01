@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; misc.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -26,6 +26,13 @@
 ; 32-bit function listing:
 ; BCDToDecimal					Converts a 32-bit BCD number to decimal
 ; TimerWait						Waits the specified number of ticks
+
+
+
+
+
+; external variables
+;extern tSystem.APMFeatures, tSystem.APMVersionMajor, tSystem.APMVersionMinor, tSystem.ticksSinceBoot
 
 
 

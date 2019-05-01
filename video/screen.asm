@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; screen.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -48,6 +48,16 @@ gTextColor										db 0x07
 gBackColor										db 0x00
 kMaxLines										db 25
 kBytesPerScreen									dw 4000
+
+
+
+
+
+; external functions
+;extern ConvertNumberHexToString, ConvertWordToHexString16, MemCopy, MemFill, StringTokenHexadecimal, StringTokenString
+
+; external variables
+;extern tSystem.configBits
 
 
 
@@ -366,7 +376,7 @@ ScreenClear16:
 	mov cx, word [kBytesPerScreen]
 
 	; divide by 2 since we're writing words
-	shl ecx, 1
+	shr ecx, 1
 
 	.aloop:
 		mov word [gs:si], ax
@@ -1005,7 +1015,7 @@ ScreenClear32:
 	mov esi, 0xB8000
 
 	; divide by 2 since we're writing words
-	shl ecx, 1
+	shr ecx, 1
 
 	; set up the word we're writing
 	mov ebx, dword [ebp + 8]

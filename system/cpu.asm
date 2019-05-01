@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; cpu.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -20,6 +20,13 @@
 
 ; 32-bit function listing:
 ; SetSystemCPUID				Probes the CPU using CPUID instruction and saves results to the tSystem structure
+
+
+
+
+
+; external variables
+;extern tSystem.CPUIDBrand$, tSystem.CPUIDLargestBasicQuery, tSystem.CPUIDLargestExtendedQuery, tSystem.CPUIDVendor$
 
 
 

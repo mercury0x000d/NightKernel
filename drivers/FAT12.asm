@@ -1,5 +1,5 @@
 ; Night Kernel;
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; FAT12.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -27,6 +27,13 @@
 ; FAT12FileSizeGet				Gets the size of the file specified
 ; FAT12FileSizeSet				Sets the size of the file specified
 ; FAT12FileWrite				Writes data from memory to the file structure on disk
+
+
+
+
+
+; external functions
+;extern LMElementAddressGet, MemCopy, PrintIfConfigBits32, StringTokenDecimal, StringTokenString
 
 
 

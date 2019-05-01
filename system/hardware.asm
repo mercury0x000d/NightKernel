@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; hardware.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -24,6 +24,16 @@
 ; PITInit						Init the PIT for our timing purposes
 ; Random						Returns a random number using the XORShift method
 ; Reboot						Performs a warm reboot of the PC
+
+
+
+
+
+; external functions
+;extern MemSearchString
+
+; external variables
+;extern DriverSpaceStart, kDriverSignature$, DriverSpaceEnd
 
 
 

@@ -14,6 +14,16 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
+
+
+
+
+bits 16
+
+
+
+
+
 apmversion          dw  -1      ; version storage
 
 connectAPM:
@@ -29,13 +39,13 @@ connectAPM:
                     int 0x15
 
                     pop cx
-                    jc noAPM1
+                    jc NoAPM1
                     cmp bx, 0x504d      ; PM
                     jz gotAPM
 NoAPM1:             xor ax, ax          ; NO APM
-                    jmp noAPM2
+                    jmp NoAPM2
 gotAPM:             cmp ah, 1           ; Require v1
-                    jb noAPM1
+                    jb NoAPM1
                     jz v1APM
 v12APM:             mov ax, 0x102       ; APM 2.x or newer as APM 1.2
 v1APM:              cmp al,2 

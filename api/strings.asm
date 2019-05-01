@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; strings.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -21,6 +21,13 @@
 ; globals
 section .data
 kHexDigits										db '0123456789ABCDEF'
+
+
+
+
+
+; external functions
+;extern MemFill, MemCopy
 
 
 
@@ -1664,6 +1671,17 @@ StringTokenBinary:
 		push dword 0x00000030
 		push bufferAddress
 		call StringTrimLeft
+
+		; see if the string length is zero and add a single zero back if so
+		mov eax, bufferAddress
+		mov bl, [eax]
+		cmp bl, 0
+		jne .SkipAddZero
+			mov eax, bufferAddress
+			mov byte [eax], 0x30
+			inc eax
+			mov byte [eax], 0x00
+		.SkipAddZero:
 		jmp .NoTruncate
 	.NoTrimLeading:
 
@@ -1768,6 +1786,17 @@ StringTokenDecimal:
 		push dword 0x00000030
 		push bufferAddress
 		call StringTrimLeft
+
+		; see if the string length is zero and add a single zero back if so
+		mov eax, bufferAddress
+		mov bl, [eax]
+		cmp bl, 0
+		jne .SkipAddZero
+			mov eax, bufferAddress
+			mov byte [eax], 0x30
+			inc eax
+			mov byte [eax], 0x00
+		.SkipAddZero:
 		jmp .NoTruncate
 	.NoTrimLeading:
 
@@ -1872,6 +1901,17 @@ StringTokenHexadecimal:
 		push dword 0x00000030
 		push bufferAddress
 		call StringTrimLeft
+
+		; see if the string length is zero and add a single zero back if so
+		mov eax, bufferAddress
+		mov bl, [eax]
+		cmp bl, 0
+		jne .SkipAddZero
+			mov eax, bufferAddress
+			mov byte [eax], 0x30
+			inc eax
+			mov byte [eax], 0x00
+		.SkipAddZero:
 		jmp .NoTruncate
 	.NoTrimLeading:
 
@@ -1976,6 +2016,17 @@ StringTokenOctal:
 		push dword 0x00000030
 		push bufferAddress
 		call StringTrimLeft
+
+		; see if the string length is zero and add a single zero back if so
+		mov eax, bufferAddress
+		mov bl, [eax]
+		cmp bl, 0
+		jne .SkipAddZero
+			mov eax, bufferAddress
+			mov byte [eax], 0x30
+			inc eax
+			mov byte [eax], 0x00
+		.SkipAddZero:
 		jmp .NoTruncate
 	.NoTrimLeading:
 

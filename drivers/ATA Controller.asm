@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; ATA Controller.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -103,6 +103,14 @@
 %define kATAStatusDriveWriteFault				0x20
 %define kATAStatusDriveReady					0x40
 %define kATAStatusBusy							0x80
+
+
+
+
+
+; external functions
+;extern InterruptHandlerSet, LMElementAddressGet, LMSlotFindFirstFree, MemAllocate, MemCopy, MemSwapWordBytes, PCIReadDWord, PICIntComplete
+;extern PrintIfConfigBits32, StringTokenDecimal, StringTokenHexadecimal, StringTokenString, StringTrimRight
 
 
 

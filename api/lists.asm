@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; lists.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -23,6 +23,16 @@
 %define tListInfo.elementSize					dword (esi + 04)
 %define tListInfo.elementCount					dword (esi + 08)
 %define tListInfo.listSize						dword (esi + 12)
+
+
+
+
+
+; external functions
+;extern MemCopy
+
+; external variables
+;extern kFalse, kTrue
 
 
 

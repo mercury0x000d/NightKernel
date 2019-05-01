@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; globals.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -35,11 +35,13 @@ tSystem:
 	.configBits									dd 00000000000000000000000000000111b
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x1A
+	.versionMinor								db 0x1B
 	.ticksSinceBoot								dd 0x00000000
 	.currentTask								dd 0x00
 	.currentTaskSlotAddress						dd 0x00
 	.taskingEnable								db 0x00
+	.taskStackSize								dd 1024		; a 1 KiB stack is almost guaranteed to be too small in the future
+	.taskKernelStackSize						dd 1024
 	.multicoreAvailable							db 0x00
 	.CPUIDVendor$								times 16 db 0x00
 	.CPUIDBrand$								times 64 db 0x00
@@ -48,6 +50,20 @@ tSystem:
 	.APMVersionMajor							db 0x00
 	.APMVersionMinor							db 0x00
 	.APMFeatures								dw 0x0000
+	.mouseButtonCount							db 0x00
+	.mouseButtons								db 0x00
+	.mousePacketByteSize						db 0x00
+	.mousePacketByteCount						db 0x00
+	.mousePacketByte0							db 0x00
+	.mousePacketByte1							db 0x00
+	.mousePacketByte2							db 0x00
+	.mousePacketByte3							db 0x00
+	.mouseWheelPresent							db 0x00
+	.mouseX										dw 0x0000
+	.mouseXLimit								dw 0x0000
+	.mouseY										dw 0x0000
+	.mouseYLimit								dw 0x0000
+	.mouseZ										dw 0x0000
 
 section .bss
 	.listDrives									resd 1
@@ -66,20 +82,6 @@ section .bss
 	.PS2ControllerPort2Status					resb 1
 	.PS2ControllerDeviceID1						resw 1
 	.PS2ControllerDeviceID2						resw 1
-	.mouseButtonCount							resb 1
-	.mouseButtons								resb 1
-	.mousePacketByteSize						resb 1
-	.mousePacketByteCount						resb 1
-	.mousePacketByte0							resb 1
-	.mousePacketByte1							resb 1
-	.mousePacketByte2							resb 1
-	.mousePacketByte3							resb 1
-	.mouseWheelPresent							resb 1
-	.mouseX										resw 1
-	.mouseXLimit								resw 1
-	.mouseY										resw 1
-	.mouseYLimit								resw 1
-	.mouseZ										resw 1
 	.RTCUpdateHandlerAddress					resd 1
 	.RTCStatusRegisterB							resb 1
 	.hours										resb 1
@@ -126,18 +128,23 @@ section .bss
 
 
 
-; tTaskInfo struct, used to... *GASP* manage tasks (64 bytes)
-%define tTaskInfo.cr3							(esi + 00)
+; tTaskInfo struct, used to... *GASP* manage tasks (96 bytes)
+%define tTaskInfo.pageDirAddress				(esi + 00)
 %define tTaskInfo.entryPoint					(esi + 04)
 %define tTaskInfo.esp							(esi + 08)
 %define tTaskInfo.esp0							(esi + 12)
 %define tTaskInfo.stackAddress					(esi + 16)
 %define tTaskInfo.kernelStackAddress			(esi + 20)
-%define tTaskInfo.CPULoad						(esi + 24)
-%define tTaskInfo.priority						(esi + 28)
-%define tTaskInfo.name							(esi + 32)		; name field is 16 bytes (for now, may need to expand)
-
-
+%define tTaskInfo.priority						(esi + 24)
+%define tTaskInfo.turnsRemaining				(esi + 25)
+%define tTaskInfo.taskFlags						(esi + 26)
+%define tTaskInfo.unused						(esi + 27)
+%define tTaskInfo.switchInLow					(esi + 28)
+%define tTaskInfo.switchInHigh					(esi + 32)
+%define tTaskInfo.cycleCountLow					(esi + 36)
+%define tTaskInfo.cycleCountHigh				(esi + 40)
+%define tTaskInfo.spawnedBy						(esi + 44)
+%define tTaskInfo.name							(esi + 64)		; name field is 16 bytes (for now, may need to expand)
 
 
 

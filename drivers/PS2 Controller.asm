@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; PS2 Controller.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -47,6 +47,14 @@ kKeyBufferAddress								resd 1
 section .data
 kKeyBufferWrite									db 0x00
 kKeyBufferRead									db 0x00
+
+
+
+
+
+; external functions
+;extern InterruptHandlerSet, MemAllocate, PICIRQDisable, PICIRQDisableAll, PICIRQEnable, PICIRQEnableAll, PICIntComplete, PrintIfConfigBits32
+;extern PrintRegs32, TimerWait
 
 
 
@@ -447,8 +455,8 @@ KeyGet:
 	mov edx, 0x00000000
 
 	; load the buffer positions
-	mov cl, [kKeyBufferRead]
-	mov dl, [kKeyBufferWrite]
+	mov cl, byte [kKeyBufferRead]
+	mov dl, byte [kKeyBufferWrite]
 
 	; if the read position is the same as the write position, the buffer is empty and we can exit
 	cmp dl, cl
@@ -1870,6 +1878,9 @@ PS2Port1InterruptHandler:
 
 	pusha
 	pushf
+	push ds
+	push 0x10
+	pop ds
 
 
 	mov eax, 0x00000000
@@ -1907,6 +1918,7 @@ PS2Port1InterruptHandler:
 
 	.Done:
 	call PICIntComplete
+	pop ds
 	popf
 	popa
 
@@ -1937,6 +1949,9 @@ PS2Port2InterruptHandler:
 
 	pusha
 	pushf
+	push ds
+	push 0x10
+	pop ds
 
 
 	mov eax, 0x00000000
@@ -1975,6 +1990,7 @@ PS2Port2InterruptHandler:
 	.Done:
 	call PICIntComplete
 
+	pop ds
 	popf
 	popa
 

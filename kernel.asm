@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; kernel.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,7 +18,26 @@
 
 
 
+; external functions
+;extern A20Enable, APMEnable, DebugMenu, DriverLegacyLoad, GDTStart, IDTInit, ISRInitAll, LMListInit, MemAllocate, MemAllocateAligned, MemCopy
+;extern MemInit, MemProbe, PCIInitBus, PCILoadDrivers, PCIProbe, PICIRQDisableAll, PICIRQEnableAll, PICInit, PITInit, PartitionEnumerate
+;extern Print32, PrintIfConfigBits16, PrintIfConfigBits32, PrintRegs32, RTCInit, ScreenClear32, SetSystemAPM, SetSystemCPUID, StringTokenBinary
+;extern StringTokenDecimal, StringTokenHexadecimal, TaskInit, TaskNew, TimerWait
+
+; external variables
+;extern gBackColor, gTextColor, kBytesPerScreen, kMaxLines
+
+
+
+
+
 [map all kernel.map]
+org 0x00000600
+
+
+
+
+
 bits 16
 
 
@@ -26,16 +45,13 @@ bits 16
 
 
 section .text
-
-; set origin point to where the FreeDOS bootloader loads this code
-org 0x0600
+main:
 
 
 ; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
 cld
 
 
-main:
 ; init the stack segment
 mov ax, 0x0000
 mov ss, ax
@@ -119,7 +135,7 @@ call PCIProbe
 ; load that GDT!
 push progressText06$
 call PrintIfConfigBits16
-lgdt [GDTStart]
+lgdt [gdt]
 
 
 
@@ -158,8 +174,15 @@ mov esp, 0x0009FB00
 
 
 
-; memory list init
+; turn on CPU cebug extensions
 push progressText08$
+call PrintIfConfigBits32
+call DebugCPUFeaturesEnable
+
+
+
+; memory list init
+push progressText09$
 call PrintIfConfigBits32
 call MemInit
 
@@ -167,7 +190,7 @@ call MemInit
 
 ; now that we have a temporary stack and access to all the memory addresses,
 ; let's allocate some RAM for the real stack
-push progressText09$
+push progressText0A$
 call PrintIfConfigBits32
 
 push dword [kKernelStack]
@@ -184,7 +207,7 @@ push 0x00000000
 
 
 ; set up our interrupt handlers and IDT
-push progressText0A$
+push progressText0B$
 call PrintIfConfigBits32
 call IDTInit
 call ISRInitAll
@@ -192,7 +215,7 @@ call ISRInitAll
 
 
 ; setup and remap both PICs
-push progressText0B$
+push progressText0C$
 call PrintIfConfigBits32
 call PICInit
 call PICIRQDisableAll
@@ -202,28 +225,28 @@ call PITInit
 
 
 ; init the RTC
-push progressText0C$
+push progressText0D$
 call PrintIfConfigBits32
 call RTCInit
 
 
 
 ; let's get some interrupts firing!
-push progressText0D$
+push progressText0E$
 call PrintIfConfigBits32
 sti
 
 
 
 ; load system data into the info struct
-push progressText0E$
+push progressText0F$
 call PrintIfConfigBits32
 call SetSystemCPUID
 
 
 
 ; allocate the system lists
-push progressText0F$
+push progressText10$
 call PrintIfConfigBits32
 
 ; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element) plus header
@@ -265,12 +288,12 @@ je .NoPCI
 
 	; if we get here, we have PCI
 	; so let's init things!
-	push progressText10$
+	push progressText11$
 	call PrintIfConfigBits32
 	call PCIInitBus
 
 	; now load drivers for PCI devices
-	push progressText11$
+	push progressText12$
 	call PrintIfConfigBits32
 	call PCILoadDrivers
 	jmp .PCIComplete
@@ -284,23 +307,30 @@ call PrintIfConfigBits32
 
 
 ; load drivers for legacy devices
-push progressText12$
+push progressText13$
 call PrintIfConfigBits32
 call DriverLegacyLoad
 
 
 
 ; enumerate partitions
-push progressText13$
+push progressText14$
 call PrintIfConfigBits32
 call PartitionEnumerate
 
 
 
 ; init Task Manager
-push progressText14$
+push progressText15$
 call PrintIfConfigBits32
 call TaskInit
+
+
+
+
+
+
+
 
 
 
@@ -353,7 +383,6 @@ mov [eax], ebx
 
 
 
-
 ; turn it all on!
 push dword [PDAddr]
 call PageDirLoad
@@ -371,7 +400,7 @@ mov cr0, eax
 ; If all went well, a dump of RAM in the VirtualBox debugger should show the same data
 ; at both address 0x000000 and 0x400000, even though we only wrote it at 0x400000.
 ; How is this possible? THE MAGIC OF PAGING IS AMONG US!
-mov eax, 0x00400000
+mov eax, 0x00600000
 mov dword [eax], 0xCAFEBEEF
 
 
@@ -423,7 +452,7 @@ PageTableCreate:
 	sub esp, 4
 	%define PTAddress							dword [ebp - 4]
 
-	; get a chunk of RAM as before
+	; get a chunk of RAM that's 4KiB in size and aligned on a 4096-byte boundary
 	push 4096
 	push 4096
 	push 0x01
@@ -488,6 +517,23 @@ PagingDone:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 mov eax, dword [tSystem.configBits]
 and eax, 000000000000000000000000000000001b
 cmp eax, 000000000000000000000000000000001b
@@ -507,149 +553,164 @@ call ScreenClear32
 
 
 ; set up tasks
+push dword 0x3202
 push Task1
 call TaskNew
 pop eax
 
+push Task1.name$
+push eax
+call TaskNameSet
+
+
+push dword 0x3202
 push Task2
 call TaskNew
 pop eax
 
+push Task2.name$
+push eax
+call TaskNameSet
+
+
+push dword 0x23202
+push Task5
+call TaskNew
+pop eax
+
+push Task5.name$
+push eax
+call TaskNameSet
+
+
+push dword 0x3202
 push DebugMenu
 call TaskNew
 pop eax
 
+push name$
+push eax
+call TaskNameSet
 
+
+push dword 0x3202
+push Task3
+call TaskNew
+pop eax
+
+push Task3.name$
+push eax
+call TaskNameSet
+
+
+
+
+
+; Got time for a story? Cool. So, turns out there's a funny particularity about the x86 CPU... under normal circumstances, for the sake of
+; efficiency, it will only pop off EIP, CS, and EFLAGS upon returning from an ISR. However, for user mode to work right, we need it to also
+; pop off new values for SS and ESP. How does we do dis? We have to enter userland temporarily here so that when an interrupt happens, the
+; CPU will know to get all five values instead of just three. Is that a kludge? It sure is. But thus is the 86 ISA. And so, without further ado...
+
+; WELCOME TO USERLAND! Please enjoy your stay.
+
+
+
+cli
+
+; set the segment registers to the user data selector, with the bottom two bits set to indicate privilege level 3
+; 0x20 or 0x03 = 0x23
+mov ax, 0x23
+mov ds, ax
+mov es, ax 
+mov fs, ax 
+mov gs, ax
+
+
+; set up just enough to get into user mode
+; none of this gets saved once multitasking starts since we can't easily return to kernel mode anyway
+push 0x23
+push esp
+push dword 0x00000202
+push 0x1B
+push UserModeEntry
+mov dword [tss.esp0], esp
+iretd
+
+
+UserModeEntry:
+; ye olde obilatory stack fixup
+add esp, 4
+
+
+
+; and finally, enable multitasking
 mov byte [tSystem.taskingEnable], 1
 
 
-
-; enter the infinite loop which runs the kernel
+; enter an infinite loop to burn up time until the first PIT interrupt launches the first task
 InfiniteLoop:
-	hlt
 jmp InfiniteLoop
 
 
 
 section .text
 Task1:
-	.Task1Loop:
+	; see if a second has passed
+	mov al, byte [tSystem.seconds]
+	cmp byte [.lastSecond], al
+	mov byte [.lastSecond], al
+	jne .PrintStuff
+	hlt
+	jmp Task1
 
-		; init our print string
-		push 80
-		push .scratch1$
-		push .mouseFormat$
-		call MemCopy
-
-
-		; build mouse location string
-		push dword 2
-		mov eax, 0
-		mov ax, word [tSystem.PS2ControllerDeviceID2]
-		push eax
-		push .scratch1$
-		call StringTokenHexadecimal
-
-		push dword 4
-		mov eax, 0
-		mov ax, word [tSystem.mouseX]
-		push eax
-		push .scratch1$
-		call StringTokenDecimal
-
-		push dword 4
-		mov eax, 0
-		mov ax, word [tSystem.mouseY]
-		push eax
-		push .scratch1$
-		call StringTokenDecimal
-
-		push dword 5
-		mov eax, 0
-		mov ax, word [tSystem.mouseZ]
-		push eax
-		push .scratch1$
-		call StringTokenDecimal
-
-		push dword 8
-		mov eax, 0
-		mov al, byte [tSystem.mouseButtons]
-		push eax
-		push .scratch1$
-		call StringTokenBinary
-
-
-		; print the string
-		push dword 0x00000000
-		push dword 0x00000007
-		mov eax, 0
-		mov al, byte [kMaxLines]
-		push eax
-		push dword 1
-		push .scratch1$
-		call Print32
-		pop eax
-		pop eax
-	jmp .Task1Loop
-
-section .data
-.mouseFormat$									db 'Mouse type: ^   X: ^   Y: ^   Z: ^   Buttons: ^   ', 0x00
-
-section .bss
-.scratch1$										resb 80
-
-
-
-section .text
-Task2:
+	.PrintStuff:
 	; clear our print string
 	push 20
-	push .scratch2$
+	push .scratch1$
 	push .dateTimeFormat$
 	call MemCopy
-
 
 	; build the date and time info string
 	push dword 2
 	mov eax, 0x00000000
 	mov al, byte [tSystem.month]
 	push eax
-	push .scratch2$
+	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
 	mov al, byte [tSystem.day]
 	push eax
-	push .scratch2$
+	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
 	mov al, byte [tSystem.year]
 	push eax
-	push .scratch2$
+	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
 	mov al, byte [tSystem.hours]
 	push eax
-	push .scratch2$
+	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
 	mov al, byte [tSystem.minutes]
 	push eax
-	push .scratch2$
+	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
 	mov al, byte [tSystem.seconds]
 	push eax
-	push .scratch2$
+	push .scratch1$
 	call StringTokenDecimal
 
 
@@ -658,6 +719,74 @@ Task2:
 	push dword 0x00000007
 	push dword 1
 	push dword 64
+	push .scratch1$
+	call Print32
+	pop eax
+	pop eax
+jmp Task1
+
+section .data
+.name$											db 'Date & Time', 0x00
+.dateTimeFormat$								db '^/^/^ ^:^:^', 0x00
+
+section .bss
+.lastSecond										resb 1
+.scratch1$										resb 20
+
+
+
+section .text
+Task2:
+	; init our print string
+	push 80
+	push .scratch2$
+	push .mouseFormat$
+	call MemCopy
+
+
+	; build mouse location string
+	push dword 2
+	mov eax, 0
+	mov ax, word [tSystem.PS2ControllerDeviceID2]
+	push eax
+	push .scratch2$
+	call StringTokenHexadecimal
+
+	push dword 4
+	mov eax, 0
+	mov ax, word [tSystem.mouseX]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 4
+	mov eax, 0
+	mov ax, word [tSystem.mouseY]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 5
+	mov eax, 0
+	mov ax, word [tSystem.mouseZ]
+	push eax
+	push .scratch2$
+	call StringTokenDecimal
+
+	push dword 8
+	mov eax, 0
+	mov al, byte [tSystem.mouseButtons]
+	push eax
+	push .scratch2$
+	call StringTokenBinary
+
+	; print the string
+	push dword 0x00000000
+	push dword 0x00000007
+	mov eax, 0
+	mov al, byte [kMaxLines]
+	push eax
+	push dword 1
 	push .scratch2$
 	call Print32
 	pop eax
@@ -665,10 +794,152 @@ Task2:
 jmp Task2
 
 section .data
-.dateTimeFormat$								db '^/^/^ ^:^:^', 0x00
+.name$											db 'Mouse Tracker', 0x00
+.mouseFormat$									db 'Mouse type: ^   X: ^   Y: ^   Z: ^   Buttons: ^   ', 0x00
 
 section .bss
-.scratch2$										resb 20
+.scratch2$										resb 80
+
+
+
+section .text
+Task3:
+		inc dword [.counter]
+		cmp dword [.counter], 0
+		jne .NoOverflow
+			inc dword [.counter2]
+		.NoOverflow:
+
+		; see if a second has passed
+		mov al, byte [tSystem.seconds]
+		cmp byte [.lastSecond], al
+		mov byte [.lastSecond], al
+	je Task3
+
+	; if we get here, the second just changed
+	; clear our print string
+	push 80
+	push .scratch3$
+	push .performanceFormat$
+	call MemCopy
+
+
+	; build the performance string
+	push dword 10
+	push dword [.counter]
+	push .scratch3$
+	call StringTokenDecimal
+
+	push dword 10
+	push dword [.counter2]
+	push .scratch3$
+	call StringTokenDecimal
+
+	push dword 10
+	push dword [.counterHighest]
+	push .scratch3$
+	call StringTokenDecimal
+
+	; calculate CPU load
+	mov ecx, 100
+	mov eax, dword [.counterHighest]
+	cmp eax, dword [.counter]
+	jb .SkipLoad
+
+	mov eax, dword [.counterHighest]
+	mov edx, 0
+	mov ebx, 100
+	div ebx
+	cmp eax, 0
+	je .SkipLoad
+
+	mov ebx, eax
+	mov eax, dword [.counter]
+	mov edx, 0
+	div ebx
+
+	mov ecx, 100
+	sub ecx, eax
+
+	.SkipLoad:
+	push dword 3
+	push ecx
+	push .scratch3$
+	call StringTokenDecimal
+
+	; print the string
+	push dword 0x00000000
+	push dword 0x00000007
+	mov eax, 0x00000000
+	mov al, [kMaxLines]
+	dec eax
+	push eax
+	push dword 1
+	push .scratch3$
+	call Print32
+	pop eax
+	pop eax
+
+	; see if we have a new record holder
+	mov eax, dword [.counter]
+	cmp eax, dword [.counterHighest]
+	jb .NotHighest
+		mov dword [.counterHighest], eax
+	.NotHighest:
+	mov dword [.counter], 0
+	mov dword [.counter2], 0
+jmp Task3
+
+section .data
+.name$											db 'Kernel Performance Monitor', 0x00
+.performanceFormat$								db 'Performance: ^  Overflow: ^  Highest: ^  Load: ^%', 0x00
+.counter										dd 0x00000000
+.counter2										dd 0x00000000
+.counterHighest									dd 0x00000000
+
+section .bss
+.lastSecond										resb 1
+.scratch3$										resb 80
+
+
+
+section .text
+Task4:
+	; let's get spawn happy!
+	push dword 0x3202
+	push Task4
+	call TaskNew
+	pop eax
+
+	push eax
+	call TaskKill
+
+jmp Task4
+
+section .data
+.name$											db 'Spawny McSpawnface', 0x00
+
+
+
+bits 16
+section .text
+Task5:
+	; v86 testing
+	inc ax
+	mov bx, cx
+	inc cx
+	inc dx
+	cmp dx, 0xFFFF
+	jne .SkipBadInstruction
+		mov ax, 88
+		mov ds, ax
+	.SkipBadInstruction:
+jmp Task5
+
+section .data
+.name$											db 'V86 Tester', 0x00
+
+
 
 
 
@@ -680,28 +951,33 @@ progressText04$									db 'APMEnable', 0x00
 progressText05$									db 'LoadGDT', 0x00
 progressText06$									db 'Probing PCI controller', 0x00
 progressText07$									db 'Entering Protected Mode', 0x00
-progressText08$									db 'Memory list init', 0x00
-progressText09$									db 'Stack setup', 0x00
-progressText0A$									db 'IDTInit', 0x00
-progressText0B$									db 'Remaping PICs', 0x00
-progressText0C$									db 'Initializing RTC', 0x00
-progressText0D$									db 'Enabling interrupts', 0x00
-progressText0E$									db 'Load system data to the info struct', 0x00
-progressText0F$									db 'Allocating list space', 0x00
-progressText10$									db 'Initializing PCI bus', 0x00
-progressText11$									db 'Loading PCI drivers', 0x00
-progressText12$									db 'Loading legacy device drivers', 0x00
-progressText13$									db 'Enumerating partitions', 0x00
-progressText14$									db 'Initializing Task Manager', 0x00
+progressText08$									db 'Enabling CPU debug featurtes', 0x00
+progressText09$									db 'Memory list init', 0x00
+progressText0A$									db 'Stack setup', 0x00
+progressText0B$									db 'IDTInit', 0x00
+progressText0C$									db 'Remaping PICs', 0x00
+progressText0D$									db 'Initializing RTC', 0x00
+progressText0E$									db 'Enabling interrupts', 0x00
+progressText0F$									db 'Load system data to the info struct', 0x00
+progressText10$									db 'Allocating list space', 0x00
+progressText11$									db 'Initializing PCI bus', 0x00
+progressText12$									db 'Loading PCI drivers', 0x00
+progressText13$									db 'Loading legacy device drivers', 0x00
+progressText14$									db 'Enumerating partitions', 0x00
+progressText15$									db 'Initializing Task Manager', 0x00
 memE820Unsupported$								db 'Could not detect memory, function unsupported', 0x00
 PCIFailed$										db 'PCI Controller not detected', 0x00
+name$											db 'Kernel Debug Menu', 0x00
+
+
+
 
 
 section .text
 ; includes for system routines
 %include "system/globals.asm"
-%include "api/misc.asm"
 %include "api/lists.asm"
+%include "api/misc.asm"
 %include "api/strings.asm"
 %include "io/serial.asm"
 %include "system/cmos.asm"

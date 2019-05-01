@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; debug.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,6 +19,10 @@
 
 
 ; 32-bit function listing:
+; DebugCPUFeaturesEnable		Enables debugging facilities of the CPU, if supported
+; DebugTraceDisable				Disables the single-step feature of the CPU
+; DebugTraceEnable				Enables the single-step feature of the CPU
+; Debugger						The kernel's built-in debugger
 ; DebugInstacrash				Causes an instant crash
 ; DebugMemoryDetails			Displays memory allocation
 ; DebugMenu						Implements the in-kernel debugging menu
@@ -26,6 +30,7 @@
 ; DebugRAMBrowser				An interactive memory broswer
 ; DebugStackTrace				Traces the stack and prints a list of return addresses
 ; DebugSystemInfo				Displays information about the system on which Night is running
+; DebugTaskBrowser				Browse information on all loaded tasks
 ; DebugVBOXLogWrite				Writes a string specidfied to the VirtualBOX guest log
 ; DebugWaitForEscape			Waits for the Escape key to be pressed, then returns
 
@@ -33,7 +38,520 @@
 
 
 
+; external functions
+;extern ConvertStringHexToNumber, KeyGet, KeyWait, LMElementAddressGet, LMElementCountGet, LMItemAddAtSlot, LMListInit, MemAllocate, MemCopy
+;extern PCICalculateNext, PCIGetNextFunction, PCIReadAll, Print32, PrintRAM32, Reboot, ScreenClear32, StringCharAppend, StringLength
+;extern StringTokenDecimal, StringTokenHexadecimal, StringTokenString, StringTruncateLeft
+
+; external variables
+;extern kMaxLines, tMemInfo.address, tMemInfo.size, tMemInfo.task, tSystem.CPUIDBrand$, tSystem.PCIDeviceCount, tSystem.copyright$
+;extern tSystem.listDrives, tSystem.listMemory, tSystem.listPCIDevices, tSystem.listPartitions, tSystem.listTasks, tSystem.versionMajor
+;extern tSystem.versionMinor
+
+
+
+
+
 bits 32
+
+
+
+
+
+section .text
+DebugCPUFeaturesEnable:
+	; Enables debugging facilities of the CPU, if supported
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; turn on the Debugging Extensions
+	mov eax, cr4
+	or eax, 00001000b
+	mov cr4, eax
+
+	; enable global breakpoints 1 through 4
+	mov eax, 00000000000000000000000010101010b
+	mov dr7, eax
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+DebugTraceDisable:
+	; Disables the single-step feature of the CPU
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; clear the trap bit of EFLAGS
+	pushf
+	and dword [ebp - 4], 11111111111111111111111011111111b
+	popf
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+DebugTraceEnable:
+	; Enables the single-step feature of the CPU
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; set the trap bit of EFLAGS
+	pushf
+	or dword [ebp - 4], 00000000000000000000000100000000b
+	popf
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+Debugger:
+	; The kernel's built-in debugger
+	;
+	;  input:
+	;  input:
+	;	task number of erroneous instruction	[ebp + 8]
+	;	EDI register at time of trap			[ebp + 12]
+	;	ESI register at time of trap			[ebp + 16]
+	;	EBP register at time of trap			[ebp + 20]
+	;	ESP register at time of trap			[ebp + 24]
+	;	EBX register at time of trap			[ebp + 28]
+	;	EDX register at time of trap			[ebp + 32]
+	;	ECX register at time of trap			[ebp + 36]
+	;	EAX register at time of trap			[ebp + 40]
+	;	address of return point					[ebp + 44]
+	;	selector of return point				[ebp + 48]
+	;	eflags register at time of trap			[ebp + 52]
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; allocate local variables
+	sub esp, 12
+	%define textColor							dword [ebp - 4]
+	%define backColor							dword [ebp - 8]
+	%define cursorY								dword [ebp - 12]
+
+
+	; init values
+	mov textColor, 0
+	mov backColor, 2
+	mov cursorY, 5
+
+
+	; clear the screen to the background color if necessary
+	cmp byte [.debuggerFlag], 0
+	jne .SkipScreenClear
+		push backColor
+		call ScreenClear32
+		mov byte [.debuggerFlag], 1
+	.SkipScreenClear:
+
+
+	; adjust the ESP we were given to its real location
+	mov eax, dword [ebp + 24]
+	add eax, 12
+	mov dword [ebp + 24], eax
+
+
+	; prep the print string
+	push 80
+	push .scratch$
+	push .debuggerStart$
+	call MemCopy
+
+
+	; build the task number, selector, and address into the error string, then print
+	push dword 2
+	push dword [ebp + 8]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 4
+	push dword [ebp + 48]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 8
+	push dword [ebp + 44]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword backColor
+	push dword textColor
+	push dword 1
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	; prep the print string
+	push 80
+	push .scratch$
+	push .eflagsFormat$
+	call MemCopy
+
+
+	; print eflags
+	push dword 8
+	push dword [ebp + 52]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 32
+	push dword [ebp + 52]
+	push .scratch$
+	call StringTokenBinary
+
+
+	push dword backColor
+	push dword textColor
+	push dword 3
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	; print register dumps
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .EAXText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 40]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .EBXText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 28]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .ECXText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 36]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .EDXText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 32]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .ESIText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 16]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .EDIText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 12]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .EBPText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 20]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .ESPText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 24]
+	call PrintRAM32
+
+	call .CursorAdjust
+
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push .EIPText$
+	call Print32
+	pop eax
+	pop eax
+
+	inc cursorY
+
+	push dword backColor
+	push dword textColor
+	push cursorY
+	push dword 1
+	push dword 1
+	push dword [ebp + 44]
+	call PrintRAM32
+
+	; print exit text
+	push dword backColor
+	push dword textColor
+	mov eax, 0
+	mov al, byte [kMaxLines]
+	push eax
+	push dword 9
+	push .exitText$
+	call Print32
+	pop eax
+	pop eax
+
+
+	; get the current tasking state into BL and save it for later
+	mov bl, byte [tSystem.taskingEnable]
+	push ebx
+
+
+	; pause tasking and turn interrupts back on so we can get keypresses again
+	mov byte [tSystem.taskingEnable], 0
+	sti
+
+
+	; wait for a key to be pressed
+	push dword 0
+	call KeyWait
+	pop eax
+
+
+	; disable interrupts again and re-enable tasking
+	cli
+	pop ebx
+	mov byte [tSystem.taskingEnable], bl
+
+
+	; see if the user decided to exit the Debugger
+	cmp al, 0x76
+	jne .NoExit
+		; disable single step mode
+		call DebugTraceDisable
+
+		; we also need to clear the trap bit of the copy of EFLAGS we have on the stack
+		mov eax, dword [ebp + 52]
+		and eax, 11111111111111111111111011111111b
+		mov dword [ebp + 52], eax
+
+		; clear screen to black
+		push 0x00000000
+		call ScreenClear32
+
+		; clear the flag that tells us we need to clear the screen to green next time
+		mov byte [.debuggerFlag], 0
+	.NoExit:
+
+
+	; restore registers the way they were at entry
+	mov edi, [ebp + 12]
+	mov	esi, [ebp + 16]
+	mov ebx, [ebp + 28]
+	mov edx, [ebp + 32]
+	mov ecx, [ebp + 36]
+	mov eax, [ebp + 40]
+
+
+	mov esp, ebp
+	pop ebp
+ret 36
+
+.CursorAdjust:
+	inc cursorY
+	cmp byte [kMaxLines], 25
+	je .CursorAdjustSkip
+		; if we get here, we're using 50-line mode, so lets skip an extra line to make things prettier
+		inc cursorY
+	.CursorAdjustSkip:
+ret
+
+section .data
+.debuggerStart$									db 'Debugger entered during task 0x^ with return point ^:^', 0x00
+.eflagsFormat$									db 'Flags: 0x^ (^)', 0x00
+.EAXText$										db 'Bytes at EAX:',0x00
+.EBXText$										db 'Bytes at EBX:',0x00
+.ECXText$										db 'Bytes at ECX:',0x00
+.EDXText$										db 'Bytes at EDX:',0x00
+.EBPText$										db 'Bytes at EBP:',0x00
+.ESPText$										db 'Bytes at ESP:',0x00
+.ESIText$										db 'Bytes at ESI:',0x00
+.EDIText$										db 'Bytes at EDI:',0x00
+.EIPText$										db 'Bytes at EIP:',0x00
+.exitText$										db 'Press any key to single-step. Press Escape to exit the Debugger.', 0x00
+.debuggerFlag									db 0x00
+
+section .bss
+.scratch$										resb 80
 
 
 
@@ -49,12 +567,19 @@ DebugInstacrash:
 	;  output:
 	;	n/a
 
+	push ebp
+	mov ebp, esp
+
 
  	; invalid opcode exception
 	db 0xF0, 0xFF, 0xFF
 
 	; GPF
 	db 0xFF, 0xFF
+
+
+	mov esp, ebp
+	pop ebp
 ret
 
 
@@ -347,64 +872,66 @@ DebugMenu:
 		pop eax
 
 		cmp al, 0x45							; choice 0
-		jne .TestFor1
-		call Reboot
-		jmp .DrawMenu
+		jne .Not0
+			call Reboot
+			jmp .DrawMenu
+		.Not0:
 
-		.TestFor1:
 		cmp al, 0x16							; choice 1
-		jne .TestFor2
-		call DebugSystemInfo
-		jmp .DrawMenu
+		jne .Not1
+			call DebugSystemInfo
+			jmp .DrawMenu
+		.Not1:
 
-		.TestFor2:
 		cmp al, 0x1E							; choice 2
-		jne .TestFor3
-		call DebugPCIDevices
-		jmp .DrawMenu
+		jne .Not2
+			call DebugPCIDevices
+			jmp .DrawMenu
+		.Not2:
 
-		.TestFor3:
 		cmp al, 0x26							; choice 3
-		jne .TestFor4
-		call DebugMemoryDetails
-		jmp .DrawMenu
+		jne .Not3
+			call DebugMemoryDetails
+			jmp .DrawMenu
+		.Not3:
 
-		.TestFor4:
 		cmp al, 0x25							; choice 4
-		jne .TestFor5
-		call DebugRAMBrowser
-		jmp .DrawMenu
+		jne .Not4
+			call DebugRAMBrowser
+			jmp .DrawMenu
+		.Not4:
 
-		.TestFor5:
 		cmp al, 0x2E							; choice 5
-		jne .TestFor6
-		; put something here to jump to!
-		jmp .DrawMenu
+		jne .Not5
+			call DebugTaskBrowser
+			jmp .DrawMenu
+		.Not5:
 
-		.TestFor6:
 		cmp al, 0x36							; choice 6
-		jne .TestFor7
-		; put something here to jump to!
-		jmp .DrawMenu
+		jne .Not6
+			; put something here to jump to!
+			jmp .DrawMenu
+		.Not6:
 
-		.TestFor7:
 		cmp al, 0x3D							; choice 7
-		jne .TestFor8
-		; put something here to jump to!
-		jmp .DrawMenu
+		jne .Not7
+			; put something here to jump to!
+			jmp .DrawMenu
+		.Not7:
 
-		.TestFor8:
 		cmp al, 0x3E							; choice 8
-		jne .TestFor9
-		; put something here to jump to!
-		jmp .DrawMenu
+		jne .Not8
+			; put something here to jump to!
+			jmp .DrawMenu
+		.Not8:
 
-		.TestFor9:
 		cmp al, 0x46							; choice 9
-		jne .DebugLoop
-		call DebugInstacrash
-		jmp .DrawMenu
+		jne .Not9
+			call DebugInstacrash
+			jmp .DrawMenu
+		.Not9:
 
+		hlt
 	jmp .DebugLoop
 	.Exit:
 
@@ -418,7 +945,7 @@ section .data
 .debugText2$									db '2 - PCI Devices', 0x00
 .debugText3$									db '3 - Memory Details', 0x00
 .debugText4$									db '4 - RAM Browser', 0x00
-.debugText5$									db '5 - ', 0x00
+.debugText5$									db '5 - Task Browser', 0x00
 .debugText6$									db '6 - ', 0x00
 .debugText7$									db '7 - ', 0x00
 .debugText8$									db '8 - ', 0x00
@@ -1319,6 +1846,10 @@ DebugSystemInfo:
 	;  output:
 	;	n/a
 
+	push ebp
+	mov ebp, esp
+
+
 	; clear the screen first
 	push 0x00000000
 	call ScreenClear32
@@ -1497,6 +2028,10 @@ DebugSystemInfo:
 	; clear the screen and exit!
 	push 0x00000000
 	call ScreenClear32
+
+
+	mov esp, ebp
+	pop ebp
 ret
 
 section .data
@@ -1516,14 +2051,398 @@ section .bss
 
 
 section .text
+DebugTaskBrowser:
+	; Browse information on all loaded tasks
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; allocate local variables
+	sub esp, 5
+	%define currentTaskSlotAddress				dword [ebp - 4]
+	%define currentTask							byte [ebp - 5]
+
+
+	; init variables
+	mov currentTaskSlotAddress, 0
+	mov currentTask, 0
+
+	.PrintTaskInfo:
+	push 0x00000000
+	call ScreenClear32
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 1
+	push dword 1
+	push .IntroText$
+	call Print32
+	pop eax
+	pop eax
+
+
+	; print the instructions
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 25
+	push dword 1
+	push .Instructions$
+	call Print32
+	pop eax
+	pop eax
+
+
+	; get the starting address of this task's slot in the task list
+	mov eax, 0x00000000
+	mov al, currentTask
+	push eax
+	push dword [tSystem.listTasks]
+	call LMElementAddressGet
+	pop esi
+	pop eax
+	mov currentTaskSlotAddress, esi
+
+
+	push 80
+	push .scratch$
+	push .taskNumberFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 2
+	mov eax, 0x00000000
+	mov al, currentTask
+	push eax
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 5
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	; print the task's name (if not null)
+	; load the task's slot into eax, then adjust it to point to the name field
+	mov eax, currentTaskSlotAddress
+	add eax, 64
+	cmp byte [eax], 0
+	je .SkipName
+		push dword 0x00000000
+		push dword 0x00000007
+		push dword 5
+		push dword 33
+		push eax
+		call Print32
+		pop eax
+		pop eax
+	.SkipName:
+
+
+	push 80
+	push .scratch$
+	push .spawnedByFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 2
+	push dword [tTaskInfo.spawnedBy]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 7
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	push 80
+	push .scratch$
+	push .taskSlotAddress$
+	call MemCopy
+
+	push dword 8
+	push currentTaskSlotAddress
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 9
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	push 80
+	push .scratch$
+	push .entryPointFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 8
+	push dword [tTaskInfo.entryPoint]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 11
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	push 80
+	push .scratch$
+	push .kernelStackAddressFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 8
+	push dword [tTaskInfo.kernelStackAddress]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	mov esi, currentTaskSlotAddress
+	push dword 8
+	mov eax, dword [tTaskInfo.kernelStackAddress]
+	add eax, dword [tSystem.taskKernelStackSize]
+	dec eax
+	push eax
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 13
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	push 80
+	push .scratch$
+	push .stackAddressFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 8
+	push dword [tTaskInfo.stackAddress]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	mov esi, currentTaskSlotAddress
+	push dword 8
+	mov eax, dword [tTaskInfo.stackAddress]
+	add eax, dword [tSystem.taskStackSize]
+	dec eax
+	push eax
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 15
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	push 80
+	push .scratch$
+	push .priorityFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 2
+	push dword [tTaskInfo.priority]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 17
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	push 80
+	push .scratch$
+	push .taskFlagsFormat$
+	call MemCopy
+
+	mov esi, currentTaskSlotAddress
+	push dword 8
+	push dword [tTaskInfo.taskFlags]
+	push .scratch$
+	call StringTokenBinary
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 19
+	push dword 1
+	push .scratch$
+	call Print32
+	pop eax
+	pop eax
+
+
+	.GetInputLoop:
+		; display timeslice usage, since this should be updated live
+		push 80
+		push .scratch$
+		push .CPULoadFormat$
+		call MemCopy
+
+		mov esi, currentTaskSlotAddress
+		push dword 10
+		push dword [tTaskInfo.cycleCountHigh]
+		push .scratch$
+		call StringTokenDecimal
+
+		mov esi, currentTaskSlotAddress
+		push dword 10
+		push dword [tTaskInfo.cycleCountLow]
+		push .scratch$
+		call StringTokenDecimal
+
+		push dword 0x00000000
+		push dword 0x00000007
+		push dword 21
+		push dword 1
+		push .scratch$
+		call Print32
+		pop eax
+		pop eax
+
+
+		; now get and handle input
+		push 0
+		call KeyGet
+		pop eax
+
+		; see what was pressed
+		cmp eax, 0x7D							; Page Up
+		jne .NotPageUp
+			dec currentTask
+			jmp .PrintTaskInfo
+		.NotPageUp:
+
+		cmp eax, 0x7A							; Page Down
+		jne .NotPageDown
+			inc currentTask
+			jmp .PrintTaskInfo
+		.NotPageDown:
+
+		cmp eax, 0x76							; Escape
+		jne .NotEscape
+			jmp .End
+		.NotEscape:
+
+		cmp eax, 0x29							; Spacebar
+		jne .NotSpacebar
+			mov esi, currentTaskSlotAddress
+			mov al, byte [tTaskInfo.taskFlags]
+			btc ax, 1
+			mov byte [tTaskInfo.taskFlags], al
+			jmp .PrintTaskInfo
+		.NotSpacebar:
+
+		cmp eax, 0x5A							; Enter
+		jne .NotEnter
+			mov eax, 0x00000000
+			mov al, currentTask
+			push eax
+			call TaskKill
+			jmp .PrintTaskInfo
+		.NotEnter:
+
+		cmp al, 0x7B							; -
+		jne .NotMinus
+			mov esi, currentTaskSlotAddress
+			dec byte [tTaskInfo.priority]
+			jmp .PrintTaskInfo
+		.NotMinus:
+		
+		cmp al, 0x79							; +
+		jne .NotPlus
+			mov esi, currentTaskSlotAddress
+			inc byte [tTaskInfo.priority]
+			jmp .PrintTaskInfo
+		.NotPlus:
+
+	jmp .GetInputLoop
+
+
+	.End:
+	; clear the screen and exit
+	push 0x00000000
+	call ScreenClear32
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+section .bss
+.scratch$										resb 80
+
+section .data
+.IntroText$										db 'Task Browser', 0x00
+.Instructions$									db 'Browse: Pg Up/Pg Dn, Suspend: Spacebar, Kill: Enter, Adjust priority: +/-', 0x00
+.taskNumberFormat$								db 'Task number                0x^', 0x00
+.spawnedByFormat$								db 'Spawned by                 0x^', 0x00
+.taskSlotAddress$								db 'Task list slot address     0x^', 0x00
+.entryPointFormat$								db 'Entry point                0x^', 0x00
+.kernelStackAddressFormat$						db 'Kernel stack area          0x^ - 0x^', 0x00
+.stackAddressFormat$							db 'Task stack area            0x^ - 0x^', 0x00
+.priorityFormat$								db 'Priority                   0x^', 0x00
+.taskFlagsFormat$								db 'Flags                      0x^', 0x00
+.CPULoadFormat$									db 'Timeslice utilization      ^ ^', 0x00
+.pageDirAddressFormat$							db 'Page directory address     0x^', 0x00
+.name$			db 'Kernel Debug Menu -------------', 0x00
+
+
+
+
+section .text
 DebugVBoxLogWrite:
 	; Writes the string specidfied to the VirtualBox guest log
 	;
 	;  input:
-	;   string address
+	;	string address
 	;
 	;  output:
-	;   n/a
+	;	n/a
+
+	push ebp
+	mov ebp, esp
 
 
 	; get the address of the string
@@ -1551,6 +2470,9 @@ DebugVBoxLogWrite:
 		out dx, al
 	loop .logWriteLoop
 
+
+	mov esp, ebp
+	pop ebp
 ret 4
 
 
@@ -1567,11 +2489,23 @@ DebugWaitForEscape:
 	;  output:
 	;	n/a
 
+	push ebp
+	mov ebp, esp
 
-	push 0
-	call KeyWait
-	pop eax
-	cmp al, 0x76
-	jne DebugWaitForEscape
 
+	.KeyLoop:
+
+		; get a key
+		push 0
+		call KeyWait
+		pop eax
+
+		; see if it was Escape
+		cmp al, 0x76
+
+	jne .KeyLoop
+
+
+	mov esp, ebp
+	pop ebp
 ret

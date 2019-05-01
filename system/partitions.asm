@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; partitions.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -20,6 +20,19 @@
 
 ; 32-bit function listing:
 ; PartitionEnumerate			Scans the partition tables of all drives in the drive list and loads their data into the partitions list
+
+
+
+
+
+; external functions
+;extern DriverSpaceEnd, DriverSpaceStart, LMElementAddressGet, LMElementCountGet, LMSlotFindFirstFree, MemAllocate, MemSearchString
+;extern PrintIfConfigBits32, StringTokenHexadecimal
+
+; external variables
+;extern kDriverSignature$, tDriveInfo.ATABasePort, tDriveInfo.ATADeviceNumber, tDriveInfo.deviceFlags, tDriveInfo.readSector
+;extern tPartitionInfo.ATAbasePort, tPartitionInfo.ATAdevice, tPartitionInfo.attributes, tPartitionInfo.driveListNumber
+;extern tPartitionInfo.sectorCount, tPartitionInfo.startingLBA, tPartitionInfo.systemID, tSystem.listDrives, tSystem.listPartitions
 
 
 

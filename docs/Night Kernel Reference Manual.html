@@ -120,9 +120,11 @@
 			<br>
 			<a href="#Changelog">Appendix 0 - Version History</a><br>
 			<br>
-			<a href="#FunctionReference">Appendix 1 - Internal Function Reference</a><br>
+			<a href="#NightFunctionReference">Appendix 1 - Internal Function Reference</a><br>
 			<br>
-			<a href="#License">Appendix 2 - GNU General Public License</a><br>
+			<a href="#DOSFunctionReference">Appendix 2 - DOS Functions Reference</a><br>
+			<br>
+			<a href="#License">Appendix 3 - GNU General Public License</a><br>
 			<br>
 		</p>
 		<br>
@@ -144,7 +146,13 @@
 			<br>
 			<b>Days before the Night:</b><br>
 			<br>
-			Although the Night project itself began in June of 2015, its roots go back much further. The original idea to build a custom operating system from scratch was inspired in the mid 1990s by the lackluster release of Microsoft's Windows 95. This idea manifest itself as a simple shell initially, which featured character graphics and was coded in IBM BASICA on a PC XT running an early version of MS-DOS. After a subsequent upgrade to a 80486 machine, the shell evolved as well. The next version of the project began life as a QBASIC application, quickly migrated to Visual BASIC, and soon became the first to have color graphics, a rudimentary UI and windowing toolkit, and mouse control. As the project continued, it naturally became desirable to employ true multitasking but the problem with that, of course, is that running multiple simultaneous DOS programs at once, reliably, under a BASIC shell would be much too complex to be feasible. In response, the code base was updated to Power BASIC, making possible the incorporation of a virtual machine of sorts which would allow applications compiled for it to run concurrently. In time, the project grew to have its own assembler and BASIC-to-assembly-bytecode converter as well, breathing new life into the project, which had by now taken on the name <i>Exelyx</i>. It was evolved to one last form - a DPMI-powered rewrite in Watcom C - before being retired permanently in August of 2016. Though Exelyx is dead, some key sections of code developed during its lifespan have now been adapted, in part, for use in a new and refined platform; one which will rely on no underlying operating system or drivers, but shall supply the facilities to manage every aspect of the user's machine completely on its own.<br>
+			Although the Night project itself began in June of 2015, its roots go back much further. Its creator originally got the idea to build a custom operating system from scratch after the lackluster release of Microsoft's Windows 95. Initially, this idea manifest as a simple shell with the goal of bringing multitasking and other modern features to older hardware... and &quotolder hardware&quot is no joke - the original project featured character graphics and was coded in IBM BASICA on a PC XT!<br>
+			<br>
+			After a subsequent upgrade to a 80486 machine, the project - then known simply as &quotPCOS&quot - evolved as well. The next version was the first to feature color graphics (albeit in only 16 shades), a rudimentary UI and windowing toolkit, and mouse control. It was initially coded with QBASIC but quickly migrated to Visual BASIC as it outgrew the former language. As the project continued, it naturally became desirable to add true preemptive multitasking. Alas, the problem with that is that running multiple simultaneous DOS programs at once, reliably, under a mere shell would be much too complex to be feasible.<br>
+			<br>
+			After a series of code refinements which pressed the limits of the current development rig, , the main development rig was upgraded once again, this time to a 667 MHz Celeron machine. The project's source code was migrated to PowerBASIC, and the added processing power of the new PC made possible the incorporation of a virtual machine of sorts which would allow applications compiled for it to run concurrently. The result was a tech demo featuring multiple applications coded in an Assembly language designed especially for the virtual machine, all running under a preemptive scheduler. In time, the project - which had by now taken on the name <i>Exelyx</i> - grew to have not only its own assembler, but a BASIC-to-assembly-bytecode converter as well.<br>
+			<br>
+			Exelyx was evolved to one last form before being retired permanently in August of 2016; a DPMI-powered MS-DOS program with a code base rewritten in Watcom C. Though Exelyx is dead, some key sections of code developed during its lifespan have now been adapted, in part, for use in a new and refined platform; one which will rely on no underlying operating system or drivers, but shall supply the facilities to manage every aspect of the user's machine completely on its own.<br>
 			<br>
 			That project is <i>Night</i>.<br>
 			<br>
@@ -219,11 +227,9 @@
 		<hr>
 		<h2><a name="DebugMenu">Section 2 - The Kernel Debug Menu</a></h2>
 		<p>
-			After booting into the kernel the Kernel Debug Menu will appear. In the completed kernel this menu will only be accessible after being enabled via ConfigBits, but as the kernel currently does not run applications, it makes sense to have this menu display by default.<br>
+			After booting into the kernel, the Kernel Debug Menu will appear along with a few other tasks designed to demonstrate the kernel's multitasking abilities. In the completed product, this menu will only be accessible after being enabled via ConfigBits, but as the kernel in its current form does not yet run applications, it makes sense to have this menu display by default.<br>
 			<br>
-			The Debug Menu displays the current date and time as well as the number of ticks since boot, an indication that the kernel's internal timer tick interrupt is functioning normally.<br>
-			<br>
-			The menu also provides the following options:<br>
+			The menu provides the following options:<br>
 			<br>
 			<table style="width:100%">
 				<caption>Table 2.1 - Debug Menu selection summary</caption>
@@ -235,7 +241,7 @@
 				</tr>
 				<tr>
 					<td>System Info</td>
-					<td>Provides details about the host system, including the kernel version, CPU description, and the addresses of various data lists the kernel maintains.</td>
+					<td>Provides details about the system, including the kernel version, CPU description, and the addresses of various data lists the kernel maintains.</td>
 				</tr>
 				<tr>
 					<td>PCI Devices</td>
@@ -246,12 +252,18 @@
 					<td>Provides a dump of the memory list used to track both free and allocated physical RAM.</td>
 				</tr>
 				<tr>
+					<td>RAM Browser</td>
+					<td>An interactive memory browser. Use the Plus and Minus keys on the number pad to scroll through memory addresses or use Page Up or Page down to jump by larger chunks. Typing a hexadecimal address and pressing enter will jump instantly to that memory location. Keep in mind that some modern systems have protected ranges of RAM used by UEFI or SMM/TPM software which are not permitted to be read. Accessing these with the RAM Browser can cause a triple-fault and reset the system.</td>
+				</tr>
+				<tr>
+					<td>Task Browser</td>
+					<td>Allows browsing of all slots in the Task List. Use Page Up and Page Down to change the task number, the Plus and Minus keys on the number pad to adjust the priority of running tasks, Spacebar to toggle a task's suspended state, or Enter to kill the task entirely. Keep in mind there is nothing preventing the Debug Menu itself from being suspended or killed, leaving no way to interact with the kernel until the system is restarted.</td>
+				</tr>
+				<tr>
 					<td>Reboot</td>
 					<td>Reboots the machine.</td>
 				</tr>
 			</table>
-			<br>
-			There is also a register dump of the mouse coordinates below the time and date information which should update as you move your mouse and click its buttons.<br>
 		</p>
 		<br>
 		<br>
@@ -280,7 +292,15 @@
 				</tr>
 				<tr>
 					<td>r</td>
-					<td>Display registers</td>
+					<td>Display active register set. Usually the active register set is the guest's set (e.g. Night's set), but if VirtualBox hits a Guru Meditation, the active set will be the hypervisor's registers. In this situation, use <code>rg</code> instead.</td>
+				</tr>
+				<tr>
+					<td>rg</td>
+					<td>Display guest register set</td>
+				</tr>
+				<tr>
+					<td>t</td>
+					<td>Trace (single-step) through code one instruction at a time.</td>
 				</tr>
 				<tr>
 					<td>u16 (address)</td>
@@ -647,7 +667,7 @@
 					<tr>
 						<td>0x0C</td>
 						<td>listSize</td>
-						<td>Total size of this list (header and data) in bytes</td>
+						<td>Total size of this list (header and data space) in bytes</td>
 					</tr>
 					<tr>
 						<td>0x10</td>
@@ -709,7 +729,186 @@
 		<hr>
 		<h2><a name="Multitasking">Section 9 - Multitasking, Night Style</a></h2>
 		<p>
-			One of the main benefits brought by Night to the DOS experience is multitasking. Some older operating systems common in the DOS era, used a technique called Cooperative Multitasking, which relied on programs to yield their control of the CPU back to the operating system before another program could get time to do its job. This is not the way Night does things. <br>
+			One of the main benefits Night brings to the DOS experience is multitasking. Some older operating systems common to the DOS era would use a technique called <a href="https://infogalactic.com/info/Computer_multitasking#Cooperative_multitasking">Cooperative Multitasking</a>, which relied on programs to yield their control of the CPU back to the operating system before another program could get time to do its job. This is not the way Night does things.<br>
+			<br>
+			<a href="https://infogalactic.com/info/Computer_multitasking#Preemptive_multitasking">Preemptive Multitasking</a> is a system by which task switches are initiated by an outside source, usually a hardware interrupt provided to the CPU, which means applications cannot monopolize the processor. This is the technique used by Night.<br>
+			<br>
+			<br>
+			<br>
+			<b>An Overview of Tasking on Night</b><br>
+			<br>
+			The Programmable Interval Timer is set to fire 256 times per second, and its interrupt handler simply adds one to the <code>tSystem.ticksSinceBoot</code> value, then checks if the global multitasking switch, <code>tSystem.taskingEnable</code>, is non-zero. If it is, task-switching logic is performed to determine the next valid task to be run in a round-robin manner.<br>
+			<br>
+			In computing, as in life, certain tasks are sometimes more crucial to complete than others. Extending this principle to the digital workspace, Night's task management structure contains a <code>priority</code> value which dictates how many turns at the CPU the task will have in a row before being switched out for the next waiting task. Currently the priority levels supported range from 0 (one turn before switch) to 255 (an over-the-top value which is mainly there simply for future-proofing. One caveat exists: since the PIT interrupts fire 256 times per second, maxing out the priority value to 255 can cause near-total lockup of other running tasks. Therefore, it is not recommended to use a priority value over 3 so that other tasks do not visibly suffer from lost CPU time. A future version will incorporate a global execution cap, preventing tasks from being set to too high of a priority.<br>
+			<br>
+			When a task is switched in, Night reads the CPU's Time Stamp Counter and stores the result in <code>switchInLow</code> and <code>switchInHigh</code>. When it is switched back out, the TSC is read once again and the original switch-in values are subtracted from this reading. The resulting value is stored in <code>cycleCountLow</code> and <code>cycleCountHigh</code> and can be used as an estimated number of cycles the task spent doing work during its turn at the CPU. This information can be used by Task Manager-type programs to easily calculate how well tasks are utilizing the timeslices they are allocated.<br>
+			<br>
+			Although the x86 architecture does provide a method of performing multitasking in hardware, Night - like many other operating systems - does not use it. Instead, the faster method of performing all task switching in software is used via a single Task State Segment which is updated at every task switch.<br>
+			<br>
+			Night tracks task data using a list of <code>tTaskInfo</code> structures, each of which is 96 bytes in length.<br>
+			<br>
+			<br>
+			<br>
+			<code>
+				<table style="width:100%">
+					<caption>Table 9.1 - The tTaskInfo structure</caption>
+					<col width = 10%>
+					<col width = 20%>
+					<col width = 10%>
+					<col width = 60%>
+					<tr>
+						<th><i>Offset</i></th>
+						<th><i>Name</i></th>
+						<th><i>Size</i></th>
+						<th><i>Description</i></th>
+					</tr>
+					<tr>
+						<td>0x00</td>
+						<td>pageDirAddress</td>
+						<td>dword</td>
+						<td>The page directory address for this task. This is copied to CR3 upon task switch.</td>
+					</tr>
+					<tr>
+						<td>0x04</td>
+						<td>entryPoint</td>
+						<td>dword</td>
+						<td>The initial starting value of EIP for this task.</td>
+					</tr>
+					<tr>
+						<td>0x08</td>
+						<td>esp</td>
+						<td>dword</td>
+						<td>The user-level stack pointer.</td>
+					</tr>
+					<tr>
+						<td>0x0C</td>
+						<td>esp0</td>
+						<td>dword</td>
+						<td>The kernel stack pointer.</td>
+					</tr>
+					<tr>
+						<td>0x10</td>
+						<td>stackAddress</td>
+						<td>dword</td>
+					<td>The memory address of the user stack as returned by <code>MemAllocate()</code>.</td>
+					</tr>
+					<tr>
+						<td>0x14</td>
+						<td>kernelStackAddress</td>
+						<td>dword</td>
+						<td>The memory address of the kernel stack as returned by <code>MemAllocate()</code>.</td>
+					</tr>
+					<tr>
+						<td>0x18</td>
+						<td>priority</td>
+						<td>byte</td>
+						<td>The priority value for this task. May be 0 - 255, but values over 3 can cause noticible lag in other tasks.</td>
+					</tr>
+					<tr>
+						<td>0x19</td>
+						<td>turnsRemaining</td>
+						<td>byte</td>
+						<td>A temporary value used by the task switching code to track how many turns at the CPU this task has left before a task switch will occur. The value of <code>priority</code> is copied into this location initially and then subsequently decremented each pass through the task switching code, at which point <code>priority</code> is copied into this value again for the next time this task is swapped in.</td>
+					</tr>
+					<tr>
+						<td>0x1A</td>
+						<td>taskFlags</td>
+						<td>byte</td>
+						<td>Flags indicating certain aspects of the task. See table 9.2 for definitions.</td>
+					</tr>
+					<tr>
+						<td>0x1B</td>
+						<td>unused</td>
+						<td>byte</td>
+						<td>Free for future allocation</td>
+					</tr>
+					<tr>
+						<td>0x1C</td>
+						<td>switchInLow</td>
+						<td>dword</td>
+						<td>The low DWord of the TSC value when this task is switched to.</td>
+					</tr>
+					<tr>
+						<td>0x20</td>
+						<td>switchInHigh</td>
+						<td>dword</td>
+						<td>The high DWord of the TSC value when this task is switched to.</td>
+					</tr>
+					<tr>
+						<td>0x24</td>
+						<td>cycleCountLow</td>
+						<td>dword</td>
+						<td>The low DWord of the total cycles this task used during its most recent turn at the CPU.</td>
+					</tr>
+					<tr>
+						<td>0x28</td>
+						<td>cycleCountHigh</td>
+						<td>dword</td>
+						<td>The high DWord of the total cycles this task used during its most recent turn at the CPU</td>
+					</tr>
+					<tr>
+						<td>0x2C</td>
+						<td>spawnedBy</td>
+						<td>dword</td>
+						<td>The task number of the task which spawned this task.</td>
+					</tr>
+					<tr>
+						<td>0x30 - 0x3F</td>
+						<td>Reserved</td>
+						<td>16 bytes</td>
+						<td>Free for future allocation</td>
+					</tr>
+					<tr>
+						<td>0x40</td>
+						<td>name</td>
+						<td>32 bytes</td>
+						<td>The task's name; 31 characters with an added null byte at the end.</td>
+					</tr>
+				</table>
+			</code>
+			<br>
+			<br>
+			<br>
+			<code>
+				<table style="width:100%">
+					<caption>Table 9.2 - Task flags definitions</caption>
+					<col width = 10%>
+					<col width = 15%>
+					<col width = 75%>
+					<tr>
+						<th><i>Bit</i></th>
+						<th><i>Name</i></th>
+						<th><i>Description</i></th>
+					</tr>
+
+					<tr>
+						<td>0</td>
+						<td>Interrupts</td>
+						<td>Holds the state of this task's interrupt preference, since tasks can't actually disable interrupts</td>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>Suspend</td>
+						<td>Suspends the task from executing when set</td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>V86 Task</td>
+						<td>Specifies this task is a Virtual 8086 task (e.g. a "DOS" application)</td>
+					</tr>
+					<tr>
+						<td>3 - 7</td>
+						<td>Reserved</td>
+						<td></td>
+					</tr>
+				</table>
+			</code>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
 		</p>
 		<br>
 		<br>
@@ -721,6 +920,44 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Added a task browser.</li>
+				<li>Kernel: <i>debug.asm</i> - Added <code>DebugCPUFeaturesEnable()</code> to enable the debugging features of the x86 CPU; any addresses loaded into DR0 through DR3 will be set as global breakpoints and be trapped upon execution.</li>
+				<li>Kernel: <i>debug.asm</i> - Added <code>DebugTraceEnable()</code> and <code>DebugTraceDisable()</code>.</li>
+				<li>Kernel: <i>debug.asm</i> - Added <code>Debugger()</code> to support kernel-level single stepping of instructions</li>
+				<li>Kernel: <i>kernel.asm</i> - Added a simple performance counter task which displays how many times the CPU was able to add to a memory location in a single second along with a bare-bones load calculation.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Added contingencies to the critical error handler so that it can attempt to handle some situations without automatically insta-killing every task which crosses its path.</li>
+				<li>Kernel: <i>tasks.asm</i> - Added a priority system to running tasks. Every task is started at 0 priority, but if this value is raised that task will get more turns at the CPU than others.</li>
+				<li>Kernel: <i>tasks.asm</i> - Implemented task flags so that tasks can now be independently suspended and resumed.</li>
+				<li>Kernel: <i>tasks.asm</i> - <code>TaskNew()</code> now respects the setting of the <code>VM</code> bit in the <code>EFLAGS</code> register to specify that the task is to use Virtual-8086 mode, and extra stack handling logic has been added to accomodate the segment registers pushed by the CPU for V86 tasks.</li>
+				<li>Kernel: <i>tasks.asm</i> - Tasks now include a performance value based on the <code>RDTSC</code> instruction which is updated by the kernel at each task switch.</li>
+				<li>Manual: Added DOS function reference appendix.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>globals.asm</i> - Increased the size of the <code>tTaskInfo</code> struct to 96 bytes to allow more room to keep track of task-y things.</li>
+				<li>Kernel: <i>globals.asm</i> - Moved the mouse-related globals to the <code>.data</code> section to ensure they are null if the mouse cannot be initialized.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Removed globals <code>exceptionSelector</code>, <code>exceptionAddress</code>, and <code>exceptionFlags</code> since this information is now all passed on the stack.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Tidied up the critical error handler.</li>
+				<li>Kernel: <i>tasks.asm</i> - Changed <code>TaskNew()</code> to now create tasks at user-level.</li>
+				<li>Manual: Fleshed out the section on multitasking.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Fixed a <i>stupid</i> bug in <code>DebugWaitForEscape()</code> which caused stack corruption.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Remedied a mismatched parameter in the critical error handler.</li>
+				<li>Kernel: <i>screen.asm</i> - An incorrect shift in <code>ScreenClear16()</code> and <code>ScreenClear32()</code> resulted in a multiply instead of a divide, causing too much memory to be cleared.</li>
+				<li>Kernel: <i>strings.asm</i> - Fixed a bug in <code>StringTokenBinary()</code>, <code>StringTokenDecimal()</code>, <code>StringTokenHexadecimal()</code>, and <code>StringTokenOctal()</code> which trimmed <i>all</i> leading zeroes instead of leaving one.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			4/17/2019, 0.1A Update - Preemptive Multitasking!<br>
 			<br>
 			New<br>
@@ -1313,7 +1550,7 @@
 		<br>
 
 		<hr>
-		<h2><a name="FunctionReference">Appendix 1 - Internal Function Reference</a></h2>
+		<h2><a name="NightFunctionReference">Appendix 1 - Night Function Reference</a></h2>
 		<p>
 			<ul>
 				<li>Public functions are intended for calling from any other routines.</li>
@@ -2948,7 +3185,1435 @@
 		<br>
 
 		<hr>
-		<h2><a name="License">Appendix 2 - GNU General Public License</a></h2>
+		<h2><a name="DOSFunctionReference">Appendix 2 - DOS Function Reference</a></h2>
+		<p>
+			All interrupt vectors after 0x77 are null.<br>
+			<br>
+			<table style="width:100%">
+				<caption>Table A2.1 - DOS Interrupt Handler Address Table</caption>
+				<col width = 5%>
+				<col width = 15%>
+				<col width = 15%>
+				<col width = 15%>
+				<col width = 50%>
+				<tr>
+					<th><i>Interrupt Vector</i></th>
+					<th><i>Handler Address - VirtualBox BIOS</i></th>
+					<th><i>Handler Address - FreeDOS Kernel Build 2042</i></th>
+					<th><i>Handler Address - FreeDOS Kernel Build 2042 with COMMAND.COM</i></th>
+					<th><i>Description</i></th>
+				</tr>
+				<tr>
+					<td>00</td>
+					<td>F000:FF53</td>
+					<td>00D8:11BF</td>
+					<td>101F:015C</td>
+					<td>Divide by zero</td>
+				</tr>
+				<tr>
+					<td>01</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Single step</td>
+				</tr>
+				<tr>
+					<td>02</td>
+					<td>F000:FF53</td>
+					<td>0070:0008</td>
+					<td>0070:0008</td>
+					<td>NMI</td>
+				</tr>
+				<tr>
+					<td>03</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Breakpoint</td>
+				</tr>
+				<tr>
+					<td>04</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>05</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>06</td>
+					<td>F000:E9CC</td>
+					<td>00D8:11C7</td>
+					<td>00D8:11C7</td>
+					<td>Invalid opcode</td>
+				</tr>
+				<tr>
+					<td>07</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>08</td>
+					<td>F000:FEA5</td>
+					<td>0070:000F</td>
+					<td>0070:000F</td>
+					<td>Timer</td>
+				</tr>
+				<tr>
+					<td>09</td>
+					<td>F000:E987</td>
+					<td>0070:0016</td>
+					<td>0070:0016</td>
+					<td>IRQ 1 - Keyboard</td>
+				</tr>
+				<tr>
+					<td>0A</td>
+					<td>F000:FF53</td>
+					<td>0070:002C</td>
+					<td>0070:002C</td>
+					<td>LPT2</td>
+				</tr>
+				<tr>
+					<td>0B</td>
+					<td>F000:E746</td>
+					<td>0070:0041</td>
+					<td>0070:0041</td>
+					<td>COM2</td>
+				</tr>
+				<tr>
+					<td>0C</td>
+					<td>F000:E746</td>
+					<td>0070:0056</td>
+					<td>0070:0056</td>
+					<td>COM1</td>
+				</tr>
+				<tr>
+					<td>0D</td>
+					<td>F000:E746</td>
+					<td>0070:006B</td>
+					<td>0070:006B</td>
+					<td>ATA</td>
+				</tr>
+				<tr>
+					<td>0E</td>
+					<td>F000:EF57</td>
+					<td>0070:0080</td>
+					<td>0070:0080</td>
+					<td>Floppy</td>
+				</tr>
+				<tr>
+					<td>0F</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>10</td>
+					<td>C000:0022</td>
+					<td>C000:0022</td>
+					<td>C000:0022</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>11</td>
+					<td>F000:F84D</td>
+					<td>F000:F84D</td>
+					<td>F000:F84D</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>12</td>
+					<td>F000:F841</td>
+					<td>F000:F841</td>
+					<td>F000:F841</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>13</td>
+					<td>F000:E3FE</td>
+					<td>F000:E3FE</td>
+					<td>F000:E3FE</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>14</td>
+					<td>F000:E739</td>
+					<td>F000:E739</td>
+					<td>F000:E739</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>15</td>
+					<td>F000:F859</td>
+					<td>F000:F859</td>
+					<td>F000:F859</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>16</td>
+					<td>F000:E82E</td>
+					<td>F000:E82E</td>
+					<td>F000:E82E</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>17</td>
+					<td>F000:EFD4</td>
+					<td>F000:EFD4</td>
+					<td>F000:EFD4</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>18</td>
+					<td>F000:F0A4</td>
+					<td>F000:F0A4</td>
+					<td>F000:F0A4</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>19</td>
+					<td>F000:E6F2</td>
+					<td>00D8:11CF</td>
+					<td>00D8:11CF</td>
+					<td>Bootstrap loader</td>
+				</tr>
+				<tr>
+					<td>1A</td>
+					<td>F000:FE6E</td>
+					<td>F000:FE6E</td>
+					<td>F000:FE6E</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>1B</td>
+					<td>F000:FF53</td>
+					<td>0070:01FA</td>
+					<td>0070:01FA</td>
+					<td>Keyboard CTRL + Break</td>
+				</tr>
+				<tr>
+					<td>1C</td>
+					<td>F000:EFED</td>
+					<td>F000:EFED</td>
+					<td>F000:EFED</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>1D</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>1E</td>
+					<td>F000:EFC7</td>
+					<td>0070:0119</td>
+					<td>0070:0119</td>
+					<td>Diskette parameter table</td>
+				</tr>
+				<tr>
+					<td>1F</td>
+					<td>C000:57ED</td>
+					<td>C000:57ED</td>
+					<td>C000:57ED</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>20</td>
+					<td>F000:FF53</td>
+					<td>00D8:1197</td>
+					<td>00D8:1197</td>
+					<td>Used by DOS 1.00 and up - Terminate program</td>
+				</tr>
+				<tr>
+					<td>21</td>
+					<td>F000:FF53</td>
+					<td>00D8:119F</td>
+					<td>00D8:119F</td>
+					<td>Used by DOS 1.00 and up - Main DOS API</td>
+				</tr>
+				<tr>
+					<td>22</td>
+					<td>F000:FF53</td>
+					<td>05E4:1789</td>
+					<td>101F:A7B4</td>
+					<td>Used by DOS 1.00 and up - Program terminate address</td>
+				</tr>
+				<tr>
+					<td>23</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>100F:07C6</td>
+					<td>Used by DOS 1.00 and up - Control-C handler address</td>
+				</tr>
+				<tr>
+					<td>24</td>
+					<td>F000:FF53</td>
+					<td>00D8:1271</td>
+					<td>101F:0247</td>
+					<td>Used by DOS 1.00 and up - Critical error handler address</td>
+				</tr>
+				<tr>
+					<td>25</td>
+					<td>F000:FF53</td>
+					<td>00D8:11A7</td>
+					<td>00D8:11A7</td>
+					<td>Used by DOS 1.00 and up - Absolute disk read</td>
+				</tr>
+				<tr>
+					<td>26</td>
+					<td>F000:FF53</td>
+					<td>00D8:11AF</td>
+					<td>00D8:11AF</td>
+					<td>Used by DOS 1.00 and up - Absolute disk write</td>
+				</tr>
+				<tr>
+					<td>27</td>
+					<td>F000:FF53</td>
+					<td>00D8:11B7</td>
+					<td>00D8:11B7</td>
+					<td>Used by DOS 1.00 and up - Terminate and stay resident</td>
+				</tr>
+				<tr>
+					<td>28</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Used by DOS 2.00 and up - Idle callout</td>
+				</tr>
+				<tr>
+					<td>29</td>
+					<td>F000:FF53</td>
+					<td>0070:01E8</td>
+					<td>0070:01E8</td>
+					<td>Used by DOS 2.00 and up - Fast console output</td>
+				</tr>
+				<tr>
+					<td>2A</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Used by DOS 3.00 and up - Networking and critical section</td>
+				</tr>
+				<tr>
+					<td>2B</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Used by DOS 6.22 and up - Reserved (points to IRET)</td>
+				</tr>
+				<tr>
+					<td>2C</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Used by DOS 6.00 and up - Reserved (points to IRET)</td>
+				</tr>
+				<tr>
+					<td>2D</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Used by DOS 6.00 and up - Reserved (points to IRET)</td>
+				</tr>
+				<tr>
+					<td>2E</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>100F:07C8</td>
+					<td>Used by DOS 2.00 and up - Reload Transient</td>
+				</tr>
+				<tr>
+					<td>2F</td>
+					<td>F000:FF53</td>
+					<td>00D8:118F</td>
+					<td>00D8:118F</td>
+					<td>Used by DOS 3.00 and up - Multiplex</td>
+				</tr>
+				<tr>
+					<td>30</td>
+					<td>F000:FF53</td>
+					<td>D811:D7EA</td>
+					<td>D811:D7EA</td>
+					<td>Used by DOS 1.00 and up - FAR JMP instruction for CP/M compatibility</td>
+				</tr>
+				<tr>
+					<td>31</td>
+					<td>F000:FF53</td>
+					<td>00D8:1100</td>
+					<td>00D8:1100</td>
+					<td>Partially overwritten by above</td>
+				</tr>
+				<tr>
+					<td>32</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>No commonly known use pertaining to DOS, but revectored by FreeDOS anyway</td>
+				</tr>
+				<tr>
+					<td>33</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>A whole bunch o' mice!</td>
+				</tr>
+				<tr>
+					<td>34</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode D8</td>
+				</tr>
+				<tr>
+					<td>35</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode D9</td>
+				</tr>
+				<tr>
+					<td>36</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode DA</td>
+				</tr>
+				<tr>
+					<td>37</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode DB</td>
+				</tr>
+				<tr>
+					<td>38</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode DC</td>
+				</tr>
+				<tr>
+					<td>39</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode DD</td>
+				</tr>
+				<tr>
+					<td>3A</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode DE</td>
+				</tr>
+				<tr>
+					<td>3B</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Opcode DF</td>
+				</tr>
+				<tr>
+					<td>3C</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Instructions w/ segment override</td>
+				</tr>
+				<tr>
+					<td>3D</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - Standalone FWAIT</td>
+				</tr>
+				<tr>
+					<td>3E</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>FPU emulation - "Shortcut" call</td>
+				</tr>
+				<tr>
+					<td>3F</td>
+					<td>F000:FF53</td>
+					<td>00D8:118A</td>
+					<td>00D8:118A</td>
+					<td>Overlay Manager - MS LINK.EXE, Borland TLINK VROOM</td>
+				</tr>
+				<tr>
+					<td>40</td>
+					<td>F000:EC59</td>
+					<td>F000:EC59</td>
+					<td>F000:EC59</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>41</td>
+					<td>9FC0:003D</td>
+					<td>9FC0:003D</td>
+					<td>9FC0:003D</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>42</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>43</td>
+					<td>C000:69ED</td>
+					<td>C000:69ED</td>
+					<td>C000:69ED</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>44</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>45</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>46</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>47</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>48</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>49</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4A</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4B</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4C</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4D</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4E</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4F</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>50</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>51</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>52</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>54</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>55</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>56</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>57</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>58</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>59</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5A</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5B</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5C</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5D</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5E</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5F</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>60</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>61</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>62</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>63</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>64</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>65</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>66</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>67</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td>0000:0000</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>68</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>69</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6A</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6B</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6C</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6D</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6E</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6F</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>70</td>
+					<td>F000:F8FE</td>
+					<td>0070:001D</td>
+					<td>0070:001D</td>
+					<td>RTC</td>
+				</tr>
+				<tr>
+					<td>71</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td>F000:FF53</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>72</td>
+					<td>F000:E746</td>
+					<td>0070:0095</td>
+					<td>0070:0095</td>
+					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
+				</tr>
+				<tr>
+					<td>73</td>
+					<td>F000:E746</td>
+					<td>0070:00AA</td>
+					<td>0070:00AA</td>
+					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
+				</tr>
+				<tr>
+					<td>74</td>
+					<td>F000:F8C1</td>
+					<td>0070:00BF</td>
+					<td>0070:00BF</td>
+					<td>PS/2 Port 2</td>
+				</tr>
+				<tr>
+					<td>75</td>
+					<td>F000:E2CA</td>
+					<td>0070:0024</td>
+					<td>0070:0024</td>
+					<td>FPU Exception</td>
+				</tr>
+				<tr>
+					<td>76</td>
+					<td>F000:F8EC</td>
+					<td>0070:00D4</td>
+					<td>0070:00D4</td>
+					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
+				</tr>
+				<tr>
+					<td>77</td>
+					<td>F000:E746</td>
+					<td>0070:00E9</td>
+					<td>0070:00E9</td>
+					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<table style="width:100%">
+				<caption>Table A2.2 - DOS API</caption>
+				<col width = 10%>
+				<col width = 75%>
+				<col width = 15%>
+				<tr>
+					<th><i>AH Register</i></th>
+					<th><i>Name</i></th>
+					<th><i>Supporting DOS Versions</i></th>
+				</tr>
+				<tr>
+					<td>00</td>
+					<td>Program terminate</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>01</td>
+					<td>Character input</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>02</td>
+					<td>Character output</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>03</td>
+					<td>Auxiliary input</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>04</td>
+					<td>Auxiliary output</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>05</td>
+					<td>Printer output</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>06</td>
+					<td>Direct console I/O</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>07</td>
+					<td>Direct console input without echo</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>08</td>
+					<td>Console input without echo</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>09</td>
+					<td>Display string</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>0A</td>
+					<td>Buffered keyboard input</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>0B</td>
+					<td>Get input status</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>0C</td>
+					<td>Flush input buffer and input</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>0D</td>
+					<td>Disk reset</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>0E</td>
+					<td>Set default drive</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>0F</td>
+					<td>Open file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>10</td>
+					<td>Close file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>11</td>
+					<td>Find first file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>12</td>
+					<td>Find next file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>13</td>
+					<td>Delete file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>14</td>
+					<td>Sequential read</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>15</td>
+					<td>Sequential write</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>16</td>
+					<td>Create or truncate file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>17</td>
+					<td>Rename file</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>18</td>
+					<td>Reserved</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>19</td>
+					<td>Get default drive</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>1A</td>
+					<td>Set disk transfer address</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>1B</td>
+					<td>Get allocation info for default drive</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>1C</td>
+					<td>Get allocation info for specified drive</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>1D</td>
+					<td>Reserved</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>1E</td>
+					<td>Reserved</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>1F</td>
+					<td>Get disk parameter block for default drive</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>20</td>
+					<td>Reserved</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>21</td>
+					<td>Random read</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>22</td>
+					<td>Random write</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>23</td>
+					<td>Get file size in records</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>24</td>
+					<td>Set random record number</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>25</td>
+					<td>Set interrupt vector</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>26</td>
+					<td>Create PSP</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>27</td>
+					<td>Random block read</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>28</td>
+					<td>Random block write</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>29</td>
+					<td>Parse filename</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>2A</td>
+					<td>Get date</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>2B</td>
+					<td>Set date</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>2C</td>
+					<td>Get time</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>2D</td>
+					<td>Set time</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>2E</td>
+					<td>Set verify flag</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td>2F</td>
+					<td>Get disk transfer address</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>30</td>
+					<td>Get DOS version</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>31</td>
+					<td>Terminate and stay resident</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>32</td>
+					<td>Get disk parameter block for specified drive</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>33</td>
+					<td>Get or set Ctrl-Break</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>34</td>
+					<td>Get InDOS flag pointer</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>35</td>
+					<td>Get interrupt vector</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>36</td>
+					<td>Get free disk space</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>37</td>
+					<td>Get or set switch character</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>38</td>
+					<td>Get or set country info</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>39</td>
+					<td>Create subdirectory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>3A</td>
+					<td>Remove subdirectory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>3B</td>
+					<td>Change current directory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>3C</td>
+					<td>Create or truncate file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>3D</td>
+					<td>Open file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>3E</td>
+					<td>Close file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>3F</td>
+					<td>Read file or device</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>40</td>
+					<td>Write file or device</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>41</td>
+					<td>Delete file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>42</td>
+					<td>Move file pointer</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>43</td>
+					<td>Get or set file attributes</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>44</td>
+					<td>I/O control for devices</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>45</td>
+					<td>Duplicate handle</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>46</td>
+					<td>Redirect handle</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>47</td>
+					<td>Get current directory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>48</td>
+					<td>Allocate memory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>49</td>
+					<td>Release memory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>4A</td>
+					<td>Reallocate memory</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>4B</td>
+					<td>Execute program</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>4C</td>
+					<td>Terminate with return code</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>4D</td>
+					<td>Get program return code</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>4E</td>
+					<td>Find first file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>4F</td>
+					<td>Find next file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>50</td>
+					<td>Set current PSP</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>51</td>
+					<td>Get current PSP</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>52</td>
+					<td>Get DOS internal pointers (SYSVARS</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>53</td>
+					<td>Create disk parameter block</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>54</td>
+					<td>Get verify flag</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>55</td>
+					<td>Create program PSP</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>56</td>
+					<td>Rename file</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>57</td>
+					<td>Get or set file date and time</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>58</td>
+					<td>Get or set allocation strategy</td>
+					<td>2.11+</td>
+				</tr>
+				<tr>
+					<td>59</td>
+					<td>Get extended error info</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>5A</td>
+					<td>Create unique file</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>5B</td>
+					<td>Create new file</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>5C</td>
+					<td>Lock or unlock file</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>5D</td>
+					<td>File sharing functions</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>5E</td>
+					<td>Network functions</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>5F</td>
+					<td>Network redirection functions</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>60</td>
+					<td>Qualify filename</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>61</td>
+					<td>Reserved</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>62</td>
+					<td>Get current PSP</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>63</td>
+					<td>Get DBCS lead byte table pointer</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td>64</td>
+					<td>Set wait for external event flag</td>
+					<td>3.20+</td>
+				</tr>
+				<tr>
+					<td>65</td>
+					<td>Get extended country info</td>
+					<td>3.30+</td>
+				</tr>
+				<tr>
+					<td>66</td>
+					<td>Get or set code page</td>
+					<td>3.30+</td>
+				</tr>
+				<tr>
+					<td>67</td>
+					<td>Set handle count</td>
+					<td>3.30+</td>
+				</tr>
+				<tr>
+					<td>68</td>
+					<td>Commit file</td>
+					<td>3.30+</td>
+				</tr>
+				<tr>
+					<td>69</td>
+					<td>Get or set media id</td>
+					<td>4.00+</td>
+				</tr>
+				<tr>
+					<td>6A</td>
+					<td>Commit file</td>
+					<td>4.00+</td>
+				</tr>
+				<tr>
+					<td>6B</td>
+					<td>Reserved</td>
+					<td>4.00+</td>
+				</tr>
+				<tr>
+					<td>6C</td>
+					<td>Extended open/create file</td>
+					<td>4.00+</td>
+				</tr>
+			</table>
+
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<hr>
+		<h2><a name="License">Appendix 3 - GNU General Public License</a></h2>
 		<p>
 			The Night Kernel is free software (in both senses of the word) and is released under the terms of the GPL. The complete text of that license follows.<br>
 			<br>

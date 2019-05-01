@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; rtc.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -22,6 +22,16 @@
 ; RTCAdjustBCD					Adjusts the time values in the tSystem struct from BCD to decimal
 ; RTCInit						Initializes the RTC
 ; RTCInterruptHandler			Handles RTC interrupts
+
+
+
+
+
+; external functions
+;extern BCDToDecimal, PrintIfConfigBits32
+
+; external variables
+;extern tSystem.RTCStatusRegisterB, tSystem.day, tSystem.hours, tSystem.minutes, tSystem.month, tSystem.seconds, tSystem.year
 
 
 

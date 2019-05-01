@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; serial.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -33,6 +33,13 @@
 ; SerialSetParity				Sets the parity of the specified serial port
 ; SerialSetStopBits				Returns the current number of stop bits for the specified serial port
 ; SerialSetWordSize				Returns the current number of data word bits for the specified serial port
+
+
+
+
+
+; external variables
+;extern tSystem.ticksSinceBoot
 
 
 

@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; interrupts.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -31,11 +31,18 @@
 
 
 
-kUnsupportedInt$								db 'An unsupported interrupt has been called', 0x00
-exceptionSelector								dd 0x00000000
-exceptionAddress								dd 0x00000000
-exceptionFlags									dd 0x00000000
 kIDTPtr											dd 0x00000000
+
+
+
+
+
+; external functions
+;extern KeyWait, MemAllocate, MemCopy, PICIntComplete, Print32, PrintRAM32, PrintRegs32, RTCInterruptHandler, ScreenClear32, StringTokenBinary
+;extern StringTokenHexadecimal, StringTokenString, TaskKill, TaskSwitch
+
+; external variables
+;extern kMaxLines, tSystem.currentTask, tSystem.currentTaskSlotAddress, tSystem.taskingEnable, tSystem.ticksSinceBoot
 
 
 
@@ -57,7 +64,7 @@ CriticalError:
 	;	EDI register at time of trap			[ebp + 16]
 	;	ESI register at time of trap			[ebp + 20]
 	;	EBP register at time of trap			[ebp + 24]
-	;	ESP register at time of trap			[ebp + 28]
+	;	ESP (bad) register at time of trap		[ebp + 28]
 	;	EBX register at time of trap			[ebp + 32]
 	;	EDX register at time of trap			[ebp + 36]
 	;	ECX register at time of trap			[ebp + 40]
@@ -65,19 +72,68 @@ CriticalError:
 	;	address of offending instruction		[ebp + 48]
 	;	selector of offending instruction		[ebp + 52]
 	;	eflags register at time of trap			[ebp + 56]
+	;	ESP register at time of trap			[ebp + 60]
+	;	SS register at time of trap				[ebp + 64]
 	;
 	;  output:
 	;	n/a
-
 
 	push ebp
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 8
+	sub esp, 12
 	%define textColor							dword [ebp - 4]
 	%define backColor							dword [ebp - 8]
+	%define bytesAtEIP							dword [ebp - 12]
 
+
+	; before we do anything, let's see if this is a situation we can actually resolve without killing the task
+	mov eax, dword [ebp + 48]
+	mov ebx, dword [eax]
+	mov bytesAtEIP, ebx
+
+	; check for hlt
+	cmp bl, 0xF4
+	jne .NotHLT
+		; Handle the hlt by modifying the eip value passed to the instruction just past the hlt.
+		; The net effect here is that the task's turn at the CPU will prematurely end.
+		mov eax, dword [ebp + 48]
+		inc eax
+		mov dword [ebp + 48], eax
+		jmp .Done
+	.NotHLT:
+
+	cmp bl, 0xFA
+	jne .NotCLI
+		; Handle the cli by clearing the interrupt flag in the task structure
+		mov esi, [tSystem.currentTaskSlotAddress]
+		and byte [tTaskInfo.taskFlags], 11111110b
+
+		; point EIP to the next instruction and return
+		mov eax, dword [ebp + 48]
+		inc eax
+		mov dword [ebp + 48], eax
+		jmp .Done
+	.NotCLI:
+
+	cmp bl, 0xFB
+	jne .NotSTI
+		; Handle the sti by setting the interrupt flag in the task structure
+		mov esi, [tSystem.currentTaskSlotAddress]
+		or byte [tTaskInfo.taskFlags], 00000001b
+
+
+		; point EIP to the next instruction and return
+		mov eax, dword [ebp + 48]
+		inc eax
+		mov dword [ebp + 48], eax
+		jmp .Done
+	.NotSTI:
+
+
+
+	; If we get here, it seems there's simply nothing we can do for this poor task. Off with its head!
 
 	; init color values
 	mov textColor, 7
@@ -113,11 +169,6 @@ CriticalError:
 	push .scratch$
 	call StringTokenHexadecimal
 
-	push dword 2
-	push dword [ebp + 12]
-	push .scratch$
-	call StringTokenHexadecimal
-
 	push dword backColor
 	push dword textColor
 	push dword 1
@@ -140,7 +191,7 @@ CriticalError:
 	call StringTokenHexadecimal
 
 	mov esi, dword [tSystem.currentTaskSlotAddress]
-	add esi, 32
+	add esi, 64
 	push dword 0
 	push esi
 	push .scratch$
@@ -213,7 +264,7 @@ CriticalError:
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 28]
+	push dword [ebp + 60]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -286,12 +337,12 @@ CriticalError:
 	call PrintRAM32
 
 
-	; print stack dump
+	; print user stack dump
 	push dword backColor
 	push dword textColor
 	push dword 14
 	push dword 1
-	push .stackDumpText$
+	push .userStackDumpText$
 	call Print32
 	pop eax
 	pop eax
@@ -300,11 +351,30 @@ CriticalError:
 	push dword textColor
 	push dword 15
 	push dword 1
-	mov eax, 0
-	mov al, byte [kMaxLines]
-	sub eax, 16
+	push 4
+	push dword [ebp + 60]
+	call PrintRAM32
+
+	; print kernel stack dump
+	push dword backColor
+	push dword textColor
+	push dword 20
+	push dword 1
+	push .kernelStackDumpText$
+	call Print32
+	pop eax
+	pop eax
+	
+	; get the location of the stack prior to this error
+	mov eax, esp
+	add eax, 80
+
+	push dword backColor
+	push dword textColor
+	push dword 21
+	push dword 1
+	push 4
 	push eax
-	push dword [ebp + 28]
 	call PrintRAM32
 
 
@@ -329,7 +399,8 @@ CriticalError:
 	sti
 
 
-	; wait for a ket to be pressed
+	; wait for a key to be pressed
+	push dword 0
 	call KeyWait
 	pop eax
 
@@ -349,6 +420,7 @@ CriticalError:
 	call ScreenClear32
 
 
+	.Done:
 	mov esp, ebp
 	pop ebp
 ret 40
@@ -360,7 +432,8 @@ section .data
 .registerFormat1$								db 'EAX: 0x^    EBX: 0x^    ECX: 0x^    EDX: 0x^', 0x00
 .registerFormat2$								db 'EBP: 0x^    ESP: 0x^    ESI: 0x^    EDI: 0x^', 0x00
 .EIPText$										db 'Bytes at EIP:',0x00
-.stackDumpText$									db 'Bytes on stack:',0x00
+.userStackDumpText$								db 'Bytes on user stack:',0x00
+.kernelStackDumpText$							db 'Bytes on kernel stack prior to error:',0x00
 .exitText$										db 0x27, 'Tis a sad thing that your process has ended here!', 0x00
 
 section .bss
@@ -632,6 +705,9 @@ jmp $ ; for debugging, makes sure the system hangs for now
 	mov esp, ebp
 	pop ebp
 iretd
+
+section .data
+kUnsupportedInt$								db 'An unsupported interrupt has been called', 0x00
 
 
 
@@ -950,7 +1026,7 @@ section .text
 ISR00:
 	; Divide by Zero Exception
 	pusha
-	push dword [tSystem.currentTask]
+	
 	push .error$
 	call CriticalError
 
@@ -968,17 +1044,25 @@ section .data
 section .text
 ISR01:
 	; Debug Exception
+
+	; preserve the important stuff
+	push ds
+	push 0x10
+	pop ds
 	pusha
+
+	; call the debugger
 	push dword [tSystem.currentTask]
-	push .error$
-	call CriticalError
+	call Debugger
 
 	; acknowledge the PIC
+	pusha
 	call PICIntComplete
-jmp TaskSwitch
+	popa
 
-section .data
-.error$											db 'Debug trap at ^:^', 0x00
+	; restore DS
+	pop ds
+iret
 
 
 
@@ -1006,17 +1090,22 @@ section .data
 section .text
 ISR03:
 	; Breakpoint Exception
+	; preserve the important stuff
+	push ds
+	push 0x10
+	pop ds
 	pusha
+
+	; call the debugger
 	push dword [tSystem.currentTask]
-	push .error$
-	call CriticalError
+	call Debugger
 
 	; acknowledge the PIC
 	call PICIntComplete
-jmp TaskSwitch
 
-section .data
-.error$											db 'Breakpoint trap at ^:^', 0x00
+	; restore DS
+	pop ds
+iret
 
 
 
@@ -1217,6 +1306,10 @@ ISR0D:
 
 	; get the error code off the stack
 	pop edx
+
+	; preserving DS isn't necessary, but we do make sure we're on the kernel's data selector
+	push 0x10
+	pop ds
 
 	pusha
 	push dword [tSystem.currentTask]
@@ -1594,7 +1687,12 @@ section .data
 
 section .text
 ISR20:
-	; Programmable Interrupt Timer (PIT)
+	; Programmable Interval Timer (PIT)
+
+	; we don't need to preserve DS here, since the task switching code will set it straight in a moment anyway
+	; however, we DO need to make sure we're on the kernel's data selector
+	push 0x10
+	pop ds
 
 	inc dword [tSystem.ticksSinceBoot]
 
@@ -1611,8 +1709,6 @@ jmp TaskSwitch
 section .text
 ISR21:
 	; PS/2 Port 1
-	push ebp
-	mov ebp, esp
 
 	pusha
 	mov edx, 0x00000021
@@ -1620,8 +1716,6 @@ ISR21:
 	call PICIntComplete
 	popa
 
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1731,7 +1825,7 @@ iretd
 
 section .text
 ISR27:
-	; Parallel port 1 - prone to misfire
+	; Parallel port 1 - Supposedly prone to misfire?
 	push ebp
 	mov ebp, esp
 
@@ -1752,7 +1846,9 @@ iretd
 section .text
 ISR28:
 	; CMOS real time clock
-
+	push ds
+	push 0x10
+	pop ds
 	pusha
 
 	call RTCInterruptHandler
@@ -1761,7 +1857,7 @@ ISR28:
 	call PICIntComplete
 
 	popa
-
+	pop ds
 iretd
 
 
@@ -1831,8 +1927,6 @@ iretd
 section .text
 ISR2C:
 	; PS/2 Port 2
-	push ebp
-	mov ebp, esp
 
 	pusha
 	mov edx, 0x0000002C
@@ -1840,8 +1934,6 @@ ISR2C:
 	call PICIntComplete
 	popa
 
-	mov esp, ebp
-	pop ebp
 iretd
 
 

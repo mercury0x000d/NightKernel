@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2019 by mercury0x0d
+; Copyright 2015 - 2019 by Mercury 0x0D
 ; pci.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -21,6 +21,17 @@
 ; defines
 %define kPCIAddressPort							0x0CF8
 %define kPCIDataPort							0x0CFC
+
+
+
+
+
+; external functions
+;extern DriverSpaceEnd, DriverSpaceStart, LMElementAddressGet, LMElementCountGet, LMListInit, MemAllocate, MemCopy, MemSearchString
+;extern PrintIfConfigBits32, StringTokenDecimal, StringTokenHexadecimal
+
+; external variables
+;extern gCursorY, kDriverSignature$, kFalse, kTrue, tSystem.PCICapabilities, tSystem.PCIDeviceCount, tSystem.PCIVersion, tSystem.listPCIDevices
 
 
 
