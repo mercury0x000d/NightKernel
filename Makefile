@@ -79,7 +79,7 @@ all : $(TARGET)
 $(TARGET): $(OBJFILES) 
 	mkdir -p $(@D)
 	$(info Makes the final output kernel file from $(OBJFILES))
-	$(LD) -T linker.ld $(LDOPTIONS) -o $@ $(OBJFILES)
+	$(LD) -T linker.ld $(LDOPTIONS) -o $@ $(OBJFILES) --cref --print-map > $(OUTPUTDIR)/nk.map
 
 $(OBJDIR)/%.o : %.asm
 	@mkdir -p $(@D)
@@ -103,7 +103,7 @@ os.vm: $(TARGET)
 	sudo losetup -d /dev/loop0
 
 clean:
-	-$(RM) $(wildcard $(OBJFILES) kernel.o kernel.bin kernel.sys night.lst kernel.map)
+	-$(RM) $(wildcard $(OBJFILES) kernel.o kernel.bin kernel.sys night.lst nk.map)
 	-$(RM) -r $(OBJDIR)
 	-$(RM) -r $(OUTPUTDIR)
 	
