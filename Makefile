@@ -31,7 +31,7 @@ LD				:= ld
 ASM				:= nasm
 RM				:= rm
 ASMFLAGS 		:= -f elf -I$(ASMINCLUDEPATH)
-LDOPTIONS		:= -m elf_i386
+LDOPTIONS		:= -T linker.ld -m elf_i386
 COPTIONS		:= -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 				   -nostartfiles -nodefaultlibs
 
@@ -45,11 +45,12 @@ PROJDIRS			:= api drivers include io system video
 
 # Get the folders together
 ASMSRCFILES		:= kernel.asm $(shell find $(PROJDIRS) -type f -name "*.asm")
+SRCFILES		:=  kernel.asm $(foreach DIR, $(PROJDIRS), $(wildcard $(DIR)/*.asm $(DIR)/*.c))
 # ASMSRCFILES		:= $(foreach DIR, $(PROJDIRS), $(wildcard $(DIR/*.asm)))
 ASMINCFILES		:= $(shell find $(PROJDIRS) -type f -name "*.inc")
 
 # OBJFILES		:= $(patsubst %.asm, %.o, $(ASMSRCFILES))
-OBJFILES		:= $(foreach OBJECT, $(patsubst %.asm, %.o, $(ASMSRCFILES)), $(OBJDIR)/$(OBJECT))
+OBJFILES		:= $(foreach OBJECT, $(patsubst %.asm, %.o, $(patsubst %.c, %.o, $(SRCFILES))), $(OBJDIR)/$(OBJECT))
 
 # Misc stuff
 LOOPDEVICE		:= /dev/loop0
@@ -60,6 +61,7 @@ print-% : ; @echo $* = $($*)
 # target: help - Display callable targets.
 help:
 	@egrep "^# target:" [Mm]akefile
+	$(info SRCFILES = $(SRCFILES))
 	$(info ASMSRCFILES = $(ASMSRCFILES))
 	$(info ASMINCFILES = $(ASMINCFILES))
 	$(info OBJFILES = $(OBJFILES))
@@ -79,7 +81,7 @@ all : $(TARGET)
 $(TARGET): $(OBJFILES) 
 	mkdir -p $(@D)
 	$(info Makes the final output kernel file from $(OBJFILES))
-	$(LD) -T linker.ld $(LDOPTIONS) -o $@ $(OBJFILES) --cref --print-map > $(OUTPUTDIR)/nk.map
+	$(LD)  $(LDOPTIONS) -o $@ $(OBJFILES) --cref --print-map > $(OUTPUTDIR)/nk.map
 
 $(OBJDIR)/%.o : %.asm
 	@mkdir -p $(@D)
