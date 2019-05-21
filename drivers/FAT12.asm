@@ -84,18 +84,14 @@ FSType01Init:
 	push esi
 	push dword [tSystem.listPartitions]
 	call LMElementAddressGet
-	pop dword [ebp - 8]
-	; ignore error code
-	pop ecx
+	mov dword [ebp - 8], esi
 
 
 	; announce ourselves! (if appropriate... we don't wanna be that one guy at the dinner table yelling over everyone's otherwise pleasant meal)
 
 	; set address of the thing to print info on what we found, 
-	mov eax, [tSystem.configBits]
-	and eax, 000000000000000000000000000000010b
-	cmp eax, 000000000000000000000000000000010b
-	jne .NoPrint
+	bt dword [tSystem.configBits], 1
+	jnc .NoPrint
 
 		; we got here, so it's print time!
 
@@ -123,18 +119,15 @@ FSType01Init:
 		push eax
 		push dword [tSystem.listDrives]
 		call LMElementAddressGet
-		pop eax
-		; ignore error code
-		pop ecx
 
 
-		; add 24 to point eax to the model string and push it for the StringBuild call
-		add eax, 24
-		push eax
+		; add 24 to point esi to the model string and push it for the StringBuild call
+		add esi, 24
+		push esi
 
 
 		push dword 0
-		push eax
+		push esi
 		push .scratch$
 		call StringTokenString
 

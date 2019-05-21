@@ -94,7 +94,7 @@
 			<br>
 			<br>
 			<br>
-			<b>Contents</b><br>
+			<b>Index</b><br>
 			<br>
 			<a href="#About">Section 0 - About the Night Kernel</a><br>
 			<br>
@@ -116,15 +116,34 @@
 			<br>
 			<a href="#Multitasking">Section 9 - Multitasking, Night Style</a><br>
 			<br>
-			<br>
+			________________________________<br>
 			<br>
 			<a href="#Changelog">Appendix 0 - Version History</a><br>
 			<br>
-			<a href="#NightFunctionReference">Appendix 1 - Internal Function Reference</a><br>
+			<a href="#NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a><br>
+			<a href="#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a><br>
+			<a href="#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a><br>
+			<a href="#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
+			<a href="#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
+			<a href="#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
+			<a href="#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
+			<a href="#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
+			<a href="#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
+			<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
+			<a href="#NightFunctionReference_partitions.asm" style="font-size: 14px">Partition Handling Functions - partitions.asm</a><br>
+			<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
+			<a href="#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
+			<a href="#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
+			<a href="#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
+			<a href="#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
+			<a href="#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
+			<a href="#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
+			<a href="#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
+			<a href="#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
 			<br>
 			<a href="#DOSFunctionReference">Appendix 2 - DOS Functions Reference</a><br>
 			<br>
-			<a href="#License">Appendix 3 - GNU General Public License</a><br>
+			<a href="#License">GNU General Public License</a><br>
 			<br>
 		</p>
 		<br>
@@ -171,7 +190,7 @@
 		<hr>
 		<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 		<p>
-			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt these directions to whatever other compatible environment you like. Also, there are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch without any additional modules.<br>
+			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt these directions to whatever other compatible environment you like. The sole applications needed are an assembler, NASM, and a small utility called <a href="https://github.com/m44rtn/xenops">Xenops</a> (included in the Night repo) which makes it easy to update build numbers automatically. If you'd rather not use Xenops, Night can be built without its convenience, but you will need to modify the makefile. There are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch without the need to download additional modules.<br>
 			<br>
 			<br>
 			<br>
@@ -280,8 +299,8 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 3.1 - Useful VirtualBox Debugger commands</caption>
-				<col width = 10%>
-				<col width = 90%>
+				<col width = 30%>
+				<col width = 70%>
 				<tr>
 					<th><i>Command</i></th>
 					<th><i>Description</i></th>
@@ -297,6 +316,10 @@
 				<tr>
 					<td>rg</td>
 					<td>Display guest register set</td>
+				</tr>
+				<tr>
+					<td>sa (address) "string"</td>
+					<td>Search for an ASCII string.</td>
 				</tr>
 				<tr>
 					<td>t</td>
@@ -332,23 +355,24 @@
 			<code>
 				<p style="background-color: DimGray">
 					<br>
-					<span style="color: Chartreuse">&nbsp; MemAllocateAligned:</span>
-					<br>
+					<span style="color: Turquoise">&nbsp; section</span> <span style="color: Chartreuse">.text</span><br>
+					<span style="color: Chartreuse">&nbsp; MemAllocateAligned:</span><br>
 					<span style="color: LightGray">
 						&nbsp;&nbsp;&nbsp;&nbsp; ; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ;<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ; input:<br>
-						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;requesting task number<br>
-						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;requested memory size in bytes<br>
-						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;alignment necessary<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;Requesting task number<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;Requested memory size in bytes<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;Alignment necessary<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ;<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ; output:<br>
-						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;address of requested block, or zero if call fails<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;EAX - Address of requested block, or zero if call fails<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;EDX - Result code<br>
 					</span>
 					<br>
 				</p>
 			</code>
-			Every function in Night begins with the function label; in this case it's <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, what it expects for input, and what it returns as output. <br>
+			Every function in Night begins by stating it is part of the <i>.text</i> section of the final binary image, so that the assembler knows to group this function in with the rest of the runnable code. Following this designation is the function label, which in this case is <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, and what it expects for input. Since the return results of all Night funtions are passed back to the caller in registers, the registers used by the function and what information they will contain can be found here as well.<br>
 			<br>
 			<br>
 			<br>
@@ -385,7 +409,7 @@
 					<br>
 				</p>
 			</code>
-			Now that EBP has been set, offsets from it may be defined to represent any local variables needed in this function. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need, then the individual variables can be defined. Note that defining the variables with labels is <i>not</i> technically required (using bare references like <code>dword [ebp - 4]</code> in the code directly is perfectly valid) but using the <i>% define</i> directive essentially tells NASM something to the effect of, "Every time you see <i>blockTrailingSize</i> in the code below, go ahead and substitute it with <i><code>dword [ebp - 16]</code></i>" which makes the code much easier for us humans to read.<br>
+			Now that EBP has been preserved and set, offsets from it may be defined to represent any local variables needed in this function. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined. Note that defining the variables with labels is not <i>technically</i> required (using bare references like <code>dword [ebp - 4]</code> in the code directly is perfectly valid) but using the <i>% define</i> directive essentially tells NASM something to the effect of, "Every time you see <i>blockTrailingSize</i> in the code below, go ahead and substitute it with <i><code>dword [ebp - 16]</code></i>" which makes the code much easier for us humans to read.<br>
 			<br>
 			<br>
 			<br>
@@ -414,23 +438,41 @@
 			<code>
 				<p style="background-color: DimGray">
 					<br>
+					<span style="color: White">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</span><br>
+					<br>
+					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; set the return values and exit</span><br>
+			
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">edx</span><span style="color: White">,</span> <span style="color: Fuchsia">0</span><br>
+
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">eax</span><span style="color: White">,</span> <span style="color: Chartreuse">blockAddress</span><br>
+					<br>
+				</p>
+			</code>
+			And now, skipping ahead to the end, the work of this function is complete. Remember those registers mentioned above in the function descrption? This is where they get set prior to exiting the function.<br>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<p style="background-color: DimGray">
+					<br>
 					<span style="color: Chartreuse">&nbsp;&nbsp;&nbsp;&nbsp; .Exit:</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">esp</span><span style="color: White">,</span> <span style="color: Orange">ebp</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; pop</span> <span style="color: Orange">ebp</span><br>
 
-					<span style="color: DeepPink">&nbsp; ret</span> <span style="color: Fuchsia">8</span><br>
+					<span style="color: DeepPink">&nbsp; ret</span> <span style="color: Fuchsia">12</span><br>
 					<br>
 				</p>
 			</code>
-			And now, skipping ahead to the end, the <code>mov</code> and <code>pop</code> lines comprise the standard exit procedure for nearly all functions in the Night kernel. In short, they undo the entry procedure performed at the start of this function and restore the stack to the state it was prior.<br>
+			And finally, it's time to exit! The <code>mov</code> and <code>pop</code> lines comprise the standard exit procedure for nearly all functions in the Night kernel. In short, they undo the entry procedure performed at the start of this function and restore the stack to the state it was prior.<br>
 			<br>
-			The <code>ret 8</code> instruction will not only return to the caller, but also takes an additional eight bytes off the stack. Why eight bytes? The answer lies in the difference in the number of input parameters versus output parameters. In this example, the function takes in three parameters (12 bytes) as input and returns one parameter (4 bytes) as output. The eight byte difference is balanced out by specifying that value at the end of the <code>ret</code> instruction. By the same token, if the function instead took one parameter for input and returned one parameter for output, a simple <code>ret</code> could be used since there would be no difference in the number of bytes in and out on the stack.<br>
+			The <code>ret 12</code> instruction will not only return to the caller, but also takes an additional twelve bytes off the stack. Why twelve bytes? The answer lies in the number of input parameters passed to this function. <code>MemAllocateAligned</code> takes three double-word parameters as input, and we can clear out the space they use (in essence popping them all back off the stack in one fell swoop) by specifying the total size at the end of the <code>ret</code> instruction. By the same token, if a function instead takes no parameters, a simple <code>ret</code> could be used since there would be no parameter space on the stack of which to be rid.<br>
 			<br>
 			<br>
 			<br>
-			P.S.: Install Nessphoro's NASM x86 Assembly package to get Sublime Text to use the fancy color coding shown above. :)<br>
+			P.S.: If you're using <i>Sublime Text</i> as your code editor of choice, install Nessphoro's NASM x86 Assembly package to get the fancy color coding shown above. :)<br>
 		</p>
 		<br>
 		<br>
@@ -743,7 +785,7 @@
 			<br>
 			When a task is switched in, Night reads the CPU's Time Stamp Counter and stores the result in <code>switchInLow</code> and <code>switchInHigh</code>. When it is switched back out, the TSC is read once again and the original switch-in values are subtracted from this reading. The resulting value is stored in <code>cycleCountLow</code> and <code>cycleCountHigh</code> and can be used as an estimated number of cycles the task spent doing work during its turn at the CPU. This information can be used by Task Manager-type programs to easily calculate how well tasks are utilizing the timeslices they are allocated.<br>
 			<br>
-			Although the x86 architecture does provide a method of performing multitasking in hardware, Night - like many other operating systems - does not use it. Instead, the faster method of performing all task switching in software is used via a single Task State Segment which is updated at every task switch.<br>
+			Although the x86 architecture does provide a method of performing multitasking in hardware, Night - like many other operating systems - does not use it. Instead, the faster software method is used via a single Task State Segment which is updated at every task switch.<br>
 			<br>
 			Night tracks task data using a list of <code>tTaskInfo</code> structures, each of which is 96 bytes in length.<br>
 			<br>
@@ -812,14 +854,8 @@
 					</tr>
 					<tr>
 						<td>0x1A</td>
-						<td>taskFlags</td>
-						<td>byte</td>
-						<td>Flags indicating certain aspects of the task. See table 9.2 for definitions.</td>
-					</tr>
-					<tr>
-						<td>0x1B</td>
 						<td>unused</td>
-						<td>byte</td>
+						<td>word</td>
 						<td>Free for future allocation</td>
 					</tr>
 					<tr>
@@ -853,9 +889,15 @@
 						<td>The task number of the task which spawned this task.</td>
 					</tr>
 					<tr>
-						<td>0x30 - 0x3F</td>
+						<td>0x30</td>
+						<td>taskFlags</td>
+						<td>byte</td>
+						<td>Flags indicating certain aspects of the task. See table 9.2 for definitions.</td>
+					</tr>
+					<tr>
+						<td>0x34 - 0x3F</td>
 						<td>Reserved</td>
-						<td>16 bytes</td>
+						<td>12 bytes</td>
 						<td>Free for future allocation</td>
 					</tr>
 					<tr>
@@ -897,7 +939,7 @@
 						<td>Specifies this task is a Virtual 8086 task (e.g. a "DOS" application)</td>
 					</tr>
 					<tr>
-						<td>3 - 7</td>
+						<td>3 - 31</td>
 						<td>Reserved</td>
 						<td></td>
 					</tr>
@@ -920,6 +962,38 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: Added a <i>build</i> value to the <code>tSystem</code> struct.</li>
+				<li>Manual: Added function listings for all remaining files.</li>
+				<li>Manual: Added Sub-section links in the index to the various sections of the Night Kernel Function Reference.</li>
+				<li>Toolchain: Integrated Maarten's awesome <a href="https://github.com/m44rtn/xenops">Xenops</a> tool to allow autoincrementing of the build value in <i>globals.asm</i>. I seriously can't overstate how cool this little utility is.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT12.asm</i> - Optimized bit tests in <code>FSType01Init()</code>.</li>
+				<li>Kernel: <i>globals.asm</i> - <code>tTaskInfo.taskFlags</code> is now a 32-bit value instead of an 8-bit one.</li>
+				<li>Kernel: <i>globals.asm</i> - Used <code>%define</code> for <code>true</code> and <code>false</code> instead of constants to save a couple doublewords of space.</li>
+				<li>Kernel: <i>screen.asm</i> - Optimized bit tests in <code>PrintIfConfigBits16()</code> and <code>PrintIfConfigBits32()</code>.</li>
+				<li>Kernel: <i>tasks.asm</i> - Majorly optimized task switching logic in <code>TaskSwitch()</code> resulting in a significant speed increase.</li>
+				<li>Kernel: Functions now return parameters in registers as opposed to on the stack.</li>
+				<li>Manual: Updated <i>Section 4 - Coding Conventions Used in Night</i>.</li>
+				<li>Manual: Updated List Manager Functions section to show new parameter return conventions.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Fixed bugs in <code>LMElementValidate()</code> and <code>LMListValidate()</code> which made them always return True.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a stack leak in <code>MemDispose()</code>.</li>
+				<li>Kernel: <i>memory.asm</i> - <code>MemAddressAlign()</code> now checks input to prevent possible division by zero errors.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D<br>
 			<br>
 			New<br>
@@ -974,9 +1048,9 @@
 				<li>Kernel: <i>debug.asm</i> - Added an interactive RAM browser</li>
 				<li>Kernel: <i>debug.asm</i> - Separated the code for each debugging feature out into individual functions.</li>
 				<li>Kernel: <i>debug.asm</i> - Separated the date and time and mouse output displays into their own tasks</li>
-				<li>Kernel: <i>gdt.asm</i> - Added a TSS descriptor slot to the GDT</li>
+				<li>Kernel: <i>GDT.asm</i> - Added a TSS descriptor slot to the GDT</li>
 				<li>Kernel: <i>globals.asm</i> - Removed the global kernel print string, <i>kPrintText$</i>. There's 0.25 KiB saved!</li>
-				<li>Kernel: <i>interrupts.asm</i> - Moved the RTC interrupt handler to rtc.asm</li>
+				<li>Kernel: <i>interrupts.asm</i> - Moved the RTC interrupt handler to RTC.asm</li>
 				<li>Kernel: <i>interrupts.asm</i> - Removed spurious <code>pushf</code> and <code>popf</code> instructions from some interrupt handlers which aren't necessary since the interrupt already automatically saves and restores the flags register itself.</li>
 				<li>Kernel: <i>interrupts.asm</i> - Revamped the critical error handler to show task information as well</li>
 				<li>Kernel: <i>interrupts.asm</i> - Trimmed some fat from all exception handlers</li>
@@ -1018,7 +1092,7 @@
 			<ul>
 				<li>Kernel: All files - added proper <code>section</code> directives to all files. Something that probably should've been done long ago... 8-)</li>
 				<li>Kernel: A20 - Moved A20 handling out of <i>hardware.asm</i> and into <i>memory.asm</i> since that just makes sense.</li>
-				<li>Kernel: CPU - Split CPUID code from <i>misc.asm</i> into its own file, <i>cpu.asm</i></li>
+				<li>Kernel: CPU - Split CPUID code from <i>misc.asm</i> into its own file, <i>CPU.asm</i></li>
 				<li>Kernel: <i>debug.asm</i> - Added mouse coordinates to the Debug Menu</li>
 				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.century</code> since it's not supported by all RTC chips and isn't super necessary anyway</li>
 				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.delayValue</code> as it's no longer neccessary since CPU cycle-based delay loops have been eliminated</li>
@@ -1029,7 +1103,7 @@
 				<li>Kernel: <i>interrupts.asm</i> - Added <code>InterruptHandlerGetAddress()</code>, <code>InterruptHandlerGetFlags()</code>, and <code>InterruptHandlerGetSelector()</code></li>
 				<li>Kernel: <i>interrupts.asm</i> - Streamlined <code>InterruptHandlerSet()</code></li>
 				<li>Kernel: <i>misc.asm</i> - Removed <code>SetSystemCPUSpeed()</code></li>
-				<li>Kernel: <i>pic.asm</i> - Completed functions <code>PICIRQEnable()</code> and <code>PICIRQDisable()</code> for enabling individual IRQs, renamed other fuctions as needed for consistency</li>
+				<li>Kernel: <i>PIC.asm</i> - Completed functions <code>PICIRQEnable()</code> and <code>PICIRQDisable()</code> for enabling individual IRQs, renamed other fuctions as needed for consistency</li>
 				<li>Kernel: PS/2 Controller - Changed timeout to use interrupt-based tick counters as opposed to the CPU-cycle based ones used before</li>
 				<li>Kernel: PS/2 Controller - Code set 2 is still used but hardware translation is now disabled, allowing the driver to handle a mouse on port 1 or a keyboard on port 2 without freaking out, in case the user accidentally gets the ports reversed</li>
 				<li>Kernel: PS/2 Controller - Moved existing PS/2 Controller code into its own legacy driver, <i>PS2 Controller.asm</i>, and made it <i>much</i> more robust with proper timeout and device response checking added</li>
@@ -1037,7 +1111,7 @@
 				<li>Kernel: PS/2 Controller - Removed the <code>kKeyTable</code> array until we get a proper event queue in place which can handle keystrokes and such</li>
 				<li>Kernel: PS/2 Controller - The 256-byte keystroke buffer is now dynamically allocated with a call to <code>MemAllocate()</code> and is referred to by the name <code>kKeyBufferAddress</code> instead of the old name, <code>kKeyBuffer</code>. There's 0.25 KiB saved!</li>
 				<li>Kernel: RTC - Enabled interrupts on the RTC and moved time handling code to the interrupt 0x28 RTC handler instead of letting PIT interrupt 0x20 do the job. This means the time updating code is now only called once per second instead of every. Single. Tick. Big wins for efficiency!</li>
-				<li>Kernel: RTC - Split RTC code off into its own file, <i>rtc.asm</i></li>
+				<li>Kernel: RTC - Split RTC code off into its own file, <i>RTC.asm</i></li>
 				<li>Manual: Reformatted <i>Version History</i> with HTML lists</li>
 				<li>Manual: Removed <i>Known Issues</i> section. There aren't any more, anyway!</li>
 			</ul>
@@ -1048,7 +1122,7 @@
 				<li>Kernel: <i>hardware.asm</i> - Fixed bug where the entry point of legacy drivers was not being calculated correctly</li>
 				<li>Kernel: <i>kernel.asm</i> - Fixed a Bad Thing Waiting To Happen where calls to BIOS services made prior to entering Protected Mode were enabling interrupts even when they were disabled prior to the call. Come <i>on</i> guys, that's just lazy BIOS programming. Always leave things the way you found them!</li>
 				<li>Kernel: PS/2 Controller - Fixed a few errors in PS/2 Controller handling which caused some unnecessary I/O timeouts, causing the boot procedure to be roughly one second faster</li>
-				<li>Kernel: <i>rtc.asm</i> - Fixed RTC format handling. Instead of attempting to modify the RTC to work the way we want (since apparently not all RTC chips are cool with that), Night now reads how the RTC is already set and adapts accordingly. Tested working on real hardware, QEMU, and VirtualBox with the RTC in either binary or BCD mode and in either 12-hour or 24-hour format. Woohoo!</li>
+				<li>Kernel: <i>RTC.asm</i> - Fixed RTC format handling. Instead of attempting to modify the RTC to work the way we want (since apparently not all RTC chips are cool with that), Night now reads how the RTC is already set and adapts accordingly. Tested working on real hardware, QEMU, and VirtualBox with the RTC in either binary or BCD mode and in either 12-hour or 24-hour format. Woohoo!</li>
 				<li>Kernel: <i>screen.asm</i> - Fixed bug in scrolling algorithm where text was getting printed before the screen was scrolled, meaning you couldn't write text to the bottom line of the screen</li>
 			</ul>
 			<br>
@@ -1235,7 +1309,7 @@
 			<ul>
 				<li>All interrupt service routines now preserve the flags register when appropriate</li>
 				<li>Both <code>ScreenClear16()</code> and <code>ScreenClear32()</code> now honor the kBytesPerScreen value</li>
-				<li>Cleaned up pci.asm and pic.asm with some %defines</li>
+				<li>Cleaned up pci.asm and PIC.asm with some %defines</li>
 				<li>Debug menu now shows the time/date/ticks info (previously on System Info screen) and updates the info in real time while waiting for you to make a choice</li>
 				<li>Local variables in all kernel routines are now allocated on the stack, making the kernel fully reentrant. Except for the StringBuild routine. Oh, well. Maybe next version.</li>
 				<li>Optimized List Manager code slightly</li>
@@ -1455,7 +1529,7 @@
 			10/21/2017, 0.08 Cleanup<br>
 			<br>
 			<ul>
-				<li>Split some code from hardware.asm into pic.asm, ps2.asm and screen.asm</li>
+				<li>Split some code from hardware.asm into PIC.asm, ps2.asm and screen.asm</li>
 				<li>Split some code from kernel.asm into api.asm and hardware.asm</li>
 				<li>Updated all copyright dates and copyright message</li>
 				<li>Merged build.sh and debug.sh into one script</li>
@@ -1550,7 +1624,7 @@
 		<br>
 
 		<hr>
-		<h2><a name="NightFunctionReference">Appendix 1 - Night Function Reference</a></h2>
+		<h2><a name="NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a></h2>
 		<p>
 			<ul>
 				<li>Public functions are intended for calling from any other routines.</li>
@@ -1560,23 +1634,612 @@
 			<br>
 			<br>
 
-			<b>List Manager Functions - <i>lists.asm</i></b><br>
+			<a name="NightFunctionReference_CMOS.asm"><b>CMOS Functions - <i>CMOS.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.1 - List Manager 32-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.1 - CMOS.asm 32-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>LMElementAddressGet</td>
+					<td>
+						<code>CMOSRead</code><br>
+						<br>
+						Reads the value of a CMOS register while maintaining proper setting of the NMI bit
+					</td>
+					<td>
+						<ol>
+							<li>Register number (8 bits)</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Register value (8 bits)
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>CMOSWrite</code><br>
+						<br>
+						Writes the value of a CMOS register while maintaining proper setting of the NMI bit
+					</td>
+					<td>
+						<ol>
+							<li>Register number (8 bits)</li>
+							<li>Value to write (8 bits)</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_CPU.asm"><b>CPU Functions - <i>CPU.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.2 - CPU.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>SetSystemCPUID</code><br>
+						<br>
+						Probes the CPU using CPUID instruction and saves results to the tSystem structure
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_debug.asm"><b>Debug Functions - <i>debug.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.3 - CPU.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						DebugCPUFeaturesEnable<br>
+						<br>
+						Enables debugging facilities of the CPU, if supported
+					</td>
+					<td>
+						<ol>
+							<li>Task number of erroneous instruction</li>
+							<li>EDI register at time of trap</li>
+							<li>ESI register at time of trap</li>
+							<li>EBP register at time of trap</li>
+							<li>ESP (original) register at time of trap</li>
+							<li>EBX register at time of trap</li>
+							<li>EDX register at time of trap</li>
+							<li>ECX register at time of trap</li>
+							<li>EAX register at time of trap</li>
+							<li>Address of return point</li>
+							<li>Selector of return point</li>
+							<li>EFlags register at time of trap</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugTraceDisable<br>
+						<br>
+						Disables the single-step feature of the CPU
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugTraceEnable<br>
+						<br>
+						Enables the single-step feature of the CPU
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						Debugger<br>
+						<br>
+						The kernel's built-in debugger
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugInstacrash<br>
+						<br>
+						Causes an instant crash
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugMemoryDetails<br>
+						<br>
+						Displays memory allocation
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugMenu<br>
+						<br>
+						Implements the in-kernel debugging menu
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugPCIDevices<br>
+						<br>
+						Displays all PCI devices in the system
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugRAMBrowser<br>
+						<br>
+						An interactive memory broswer
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugStackTrace<br>
+						<br>
+						Traces the stack and prints a list of return addresses
+					</td>
+					<td>
+						<ol>
+							<li>Stack address (ESP)</li>
+							<li>X position</li>
+							<li>Y position</li>
+							<li>Text color</li>
+							<li>Back color</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugSystemInfo<br>
+						<br>
+						Displays information about the system on which Night is running
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugTaskBrowser<br>
+						<br>
+						Browse information on all loaded tasks
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugVBOXLogWrite<br>
+						<br>
+						Writes a string specified to the VirtualBOX guest log
+					</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						DebugWaitForEscape<br>
+						<br>
+						Waits for the Escape key to be pressed, then returns
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_GDT.asm"><b>GDT Functions - <i>GDT.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.4 - GDT.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTBuild</code><br>
+						<br>
+						Encodes the values passed into the format recognized by the CPU and stores the result at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Address at which to write encoded GDT element</li>
+							<li>Base address</li>
+							<li>Limit address</li>
+							<li>Access</li>
+							<li>Flags</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTGetAccessFlags</code><br>
+						<br>
+						Returns the access flags from the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address of GDT element to decode</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Access flags
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTGetBaseAddress</code><br>
+						<br>
+						Returns the base address from the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address of GDT element to decode</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Base address
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTGetLimitAddress</code><br>
+						<br>
+						Returns the limit address from the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address of GDT element to decode</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Limit address
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTGetSizeFlags</code><br>
+						<br>
+						Returns the size flags from the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address of GDT element to decode</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Size flags
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTSetAccessFlags</code><br>
+						<br>
+						Sets the access flags to the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address at which to write encoded GDT element</li>
+							<li>Access flags</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTSetBaseAddress</code><br>
+						<br>
+						Sets the base address to the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address at which to write encoded GDT element</li>
+							<li>Base address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTSetLimitAddress</code><br>
+						<br>
+						Sets the limit address to the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address at which to write encoded GDT element</li>
+							<li>Limit address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>GDTSetSizeFlags</code><br>
+						<br>
+						Sets the size flags to the GDT entry specifed
+					</td>
+					<td>
+						<ol>
+							<li>Address at which to write encoded GDT element</li>
+							<li>Size flags</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_hardware.asm"><b>Hardware Functions - <i>hardware.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.5 - hardware.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>DriverLegacyLoad</code><br>
+						<br>
+						Scans all drivers in the kernel's driver space and runs each legacy driver found
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PITInit</code><br>
+						<br>
+						Init the PIT for 256 ticks per second
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>Random</code><br>
+						<br>
+						Returns a random number using the XORShift method
+					</td>
+					<td>
+						<ol>
+							<li>Number limit</li>
+						</ol>
+					</td>
+					<td>EAX - 32-bit random number between 0 and the number limit</td>
+				</tr>
+				<tr>
+					<td>
+						<code>Reboot</code><br>
+						<br>
+						Performs a warm reboot of the PC
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_interrupts.asm"><b>Interrupt Functions - <i>interrupts.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.6 - interrupts.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>CriticalError</code><br>
+						<br>
+						Handles the UI portion of traps and exceptions
+					</td>
+					<td>
+						<ol>
+							<li>Address of error description string</li>
+							<li>Task number of erroneous instruction</li>
+							<li>EDI register at time of trap</li>
+							<li>ESI register at time of trap</li>
+							<li>EBP register at time of trap</li>
+							<li>ESP (original) register at time of trap</li>
+							<li>EBX register at time of trap</li>
+							<li>EDX register at time of trap</li>
+							<li>ECX register at time of trap</li>
+							<li>EAX register at time of trap</li>
+							<li>Address of offending instruction</li>
+							<li>Selector of offending instruction</li>
+							<li>EFlags register at time of trap</li>
+							<li>ESP (adjusted) register at time of trap</li>
+							<li>SS register at time of trap</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDTInit</code><br>
+						<br>
+						Initializes the kernel IDT
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>InterruptHandlerGetAddress</code><br>
+						<br>
+						Returns the handler address for the specified interrupt number
+					</td>
+					<td>
+						<ol>
+							<li>IDT index</li>
+						</ol>
+					</td>
+					<td>
+						EAX - ISR address
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>InterruptHandlerGetFlags</code><br>
+						<br>
+						Returns the flags for the specified interrupt number
+					</td>
+					<td>
+						<ol>
+							<li>IDT index</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Flags
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>InterruptHandlerGetSelector</code><br>
+						<br>
+						Returns the selector for the specified interrupt number
+					</td>
+					<td>
+						<ol>
+							<li>IDT index</li>
+						</ol>
+					</td>
+					<td>
+						EAX - ISR selector
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>InterruptHandlerSet</code><br>
+						<br>
+						Formats the passed data and writes it to the IDT in the slot specified
+					</td>
+					<td>
+						<ol>
+							<li>IDT index</li>
+							<li>ISR selector</li>
+							<li>ISR base address</li>
+							<li>Flags</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>InterruptUnimplemented</code><br>
+						<br>
+						A generic handler to run when an unimplemented interrupt is called
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>ISRInitAll</code><br>
+						<br>
+						Sets the interrupt handler addresses into the IDT
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_lists.asm"><b>List Manager Functions - <i>lists.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.7 - List Manager 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>LMElementAddressGet</code><br>
+						<br>
+						Returns the address of the specified element in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1584,46 +2247,48 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Element address</li>
-							<li>Result code</li>
-						</ol>
+						ESI - Element address<br>
+						EDX - Result code<br>
 					</td>
-					<td>Returns the address of the specified element in the list specified</td>
 				</tr>
 				<tr>
-					<td>LMElementCountGet</td>
+					<td>
+						<code>LMElementCountGet</code><br>
+						<br>
+						Returns the number of elements in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
-							<li>Dummy value</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Number of total element slots in this list</li>
-							<li>Result code</li>
-						</ol>
+						ECX - Number of total element slots in this list<br>
+						EDX - Result code<br>
 					</td>
-					<td>Returns the number of elements in the list specified</td>
 				</tr>
 				<tr>
-					<td>LMElementCountSet</td>
-					<td>	
+					<td>
+						<code>LMElementCountSet</code><br>
+						<br>
+						Sets the total number of elements in the list specified
+					</td>
+					<td>
 						<ol>
 							<li>List address</li>
 							<li>New number of total element slots in this list</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result code</li>
-						</ol>
+						EDX - Result code
 					</td>
-					<td>Sets the total number of elements in the list specified</td>
 				</tr>
 				<tr>
-					<td>LMElementDelete</td>
+					<td>
+						<code>LMElementDelete</code><br>
+						<br>
+						Deletes the element at the slot number specified from the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1631,14 +2296,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result code</li>
-						</ol>
+						EDX - Result code
 					</td>
-					<td>Deletes the element at the slot number specified from the list specified</td>
 				</tr>
 				<tr>
-					<td>LMElementDuplicate</td>
+					<td>
+						<code>LMElementDuplicate</code><br>
+						<br>
+						Duplicates the element at the slot number specified in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1646,30 +2312,31 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result code</li>
-						</ol>
+						EDX - Result code
 					</td>
-					<td>Duplicates the element at the slot number specified in the list specified</td>
 				</tr>
 				<tr>
-					<td>LMElementSizeGet</td>
+					<td>
+						<code>LMElementSizeGet</code><br>
+						<br>
+						Returns the size of elements in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
-							<li>Dummy value</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>List element size</li>
-							<li>Result code</li>
-						</ol>
+						EAX - List element size<br>
+						EDX - Result code<br>
 					</td>
-					<td>Returns the size of elements in the list specified</td>
 				</tr>
 				<tr>
-					<td>LMElementValidate</td>
+					<td>
+						<code>LMElementValidate</code><br>
+						<br>
+						Tests the element specified to be sure it not outside the bounds of the list
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1677,18 +2344,17 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>
-								Result<br>
-								True - The element is in range<br>
-								False - The element is not in range
-							</li>
-						</ol>
+						EDX - Result<br>
+						&emsp;True - The element is in range<br>
+						&emsp;False - The element is not in range
 					</td>
-					<td>Tests the element specified to be sure it not outside the bounds of the list</td>
 				</tr>
 				<tr>
-					<td>LMItemAddAtSlot</td>
+					<td>
+						<code>LMItemAddAtSlot</code><br>
+						<br>
+						Adds an item to the list specified at the list slot specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1698,14 +2364,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result code</li>
-						</ol>
+						EDX - Result code
 					</td>
-					<td>Adds an item to the list specified at the list slot specified</td>
 				</tr>
 				<tr>
-					<td>LMListCompact</td>
+					<td>
+						<code>LMListCompact</code><br>
+						<br>
+						Compacts the list specified (eliminates empty slots to make list contiguous)
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1714,10 +2381,13 @@
 					<td>
 						n/a
 					</td>
-					<td>Compacts the list specified (eliminates empty slots to make list contiguous)</td>
 				</tr>
 				<tr>
-					<td>LMListInit</td>
+					<td>
+						<code>LMListInit</code><br>
+						<br>
+						Creates a new list from the parameters specified at the address specified
+					</td>
 					<td>
 						<ol>
 							<li>Address</li>
@@ -1728,70 +2398,68 @@
 					<td>
 						n/a
 					</td>
-					<td>Creates a new list from the parameters specified at the address specified</td>
 				</tr>
 				<tr>
-					<td>LMListSearch</td>
+					<td>
+						<code>LMListSearch</code><br>
+						<br>
+						Searches the list specified for the element specified
+					</td>
 					<td>
 
 					</td>
 					<td>
 
 					</td>
-					<td>Searches the list specified for the element specified</td>
 				</tr>
 				<tr>
-					<td>LMListValidate</td>
+					<td>
+						<code>LMListValidate</code><br>
+						<br>
+						Tests the list specified for the 'list' signature at the beginning
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>
-								Result<br>
-								True - The regions are identical<br>
-								False - The regions are different
-							</li>
-						</ol>
+						EDX - Result<br>
+						&emsp;True - The list header contains a valid signature<br>
+						&emsp;False - The list header does not contain a valid signature
 					</td>
-					<td>Tests the list specified for the 'list' signature at the beginning</td>
 				</tr>
 				<tr>
-					<td>LMSlotFindFirstFree</td>
+					<td>
+						<code>LMSlotFindFirstFree</code><br>
+						<br>
+						Finds the first free slot available in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
-							<li>Dummy value</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Element number of first free slot</li>
-							<li>Result code</li>
-						</ol>
+						EAX - Element number of first free slot<br>
+						EDX - Result code<br>
 					</td>
-					<td>Finds the first free slot available in the list specified</td>
 				</tr>
 				<tr>
-					<td>LMSlotFreeTest</td>
 					<td>
-						<ol>
-							<li>List address</li>
-							<li>Element number</li>
-						</ol>
+						<code>LMSlotFreeTest</code><br>
+						<br>
+						Tests the element specified in the list specified to see if it is free
 					</td>
 					<td>
-						<ol>
-							<li>
-								Result<br>
-								True - Element empty<br>
-								False - Element not empty
-							</li>
-						</ol>
+						List address<br>
+						Element number<br>
 					</td>
-					<td>Tests the element specified in the list specified to see if it is free</td>
+					<td>
+						EDX - Result<br>
+						&emsp;True - Element empty<br>
+						&emsp;False - Element not empty
+					</td>
 				</tr>
 			</table>
 			<br>
@@ -1799,19 +2467,21 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.2 - List Manager 32-bit internal functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.8 - List Manager 32-bit internal functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>LM_Internal_ElementAddressGet</td>
+					<td>
+						<code>LM_Internal_ElementAddressGet</code><br>
+						<br>
+						Returns the address of the specified element in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1819,28 +2489,30 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Element address</li>
-						</ol>
+						ESI - Element address
 					</td>
-					<td>Returns the address of the specified element in the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ElementCountGet</td>
+					<td>
+						<code>LM_Internal_ElementCountGet</code><br>
+						<br>
+						Returns the number of elements in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Number of total element slots in this list</li>
-						</ol>
+						ECX - Number of total element slots in this list
 					</td>
-					<td>Returns the number of elements in the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ElementCountSet</td>
+					<td>
+						<code>LM_Internal_ElementCountSet</code><br>
+						<br>
+						Sets the total number of elements in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1850,10 +2522,13 @@
 					<td>
 						n/a
 					</td>
-					<td>Sets the total number of elements in the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ElementDelete</td>
+					<td>
+						<code>LM_Internal_ElementDelete</code><br>
+						<br>
+						Deletes the element at the slot number specified from the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1863,10 +2538,13 @@
 					<td>
 						n/a
 					</td>
-					<td>Deletes the element at the slot number specified from the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ElementDuplicate</td>
+					<td>
+						<code>LM_Internal_ElementDuplicate</code><br>
+						<br>
+						Duplicates the element at the slot number specified in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1876,24 +2554,28 @@
 					<td>
 						n/a
 					</td>
-					<td>Duplicates the element at the slot number specified in the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ElementSizeGet</td>
+					<td>
+						<code>LM_Internal_ElementSizeGet</code><br>
+						<br>
+						Returns the size of elements in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>List element size</li>
-						</ol>
+						EAX - List element size
 					</td>
-					<td>Returns the size of elements in the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ItemAddAtSlot</td>
+					<td>
+						<code>LM_Internal_ItemAddAtSlot</code><br>
+						<br>
+						Adds an item to the list specified at the list slot specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1905,40 +2587,50 @@
 					<td>
 						n/a
 					</td>
-					<td>Adds an item to the list specified at the list slot specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ListCompact</td>
 					<td>
+						<code>LM_Internal_ListCompact</code><br>
+						<br>
+						Compacts the list specified (eliminates empty slots to make list contiguous)
 					</td>
 					<td>
 					</td>
-					<td>Compacts the list specified (eliminates empty slots to make list contiguous)</td>
+					<td>
+					</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_ListSearch</td>
 					<td>
+						<code>LM_Internal_ListSearch</code><br>
+						<br>
+						Searches the list specified for the element specified
 					</td>
 					<td>
 					</td>
-					<td>Searches the list specified for the element specified</td>
+					<td>
+					</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_SlotFindFirstFree</td>
+					<td>
+						<code>LM_Internal_SlotFindFirstFree</code><br>
+						<br>
+						Finds the first free slot available in the list specified
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Element number of first free slot</li>
-						</ol>
+						EAX - Element number of first free slot
 					</td>
-					<td>Finds the first free slot available in the list specified</td>
 				</tr>
 				<tr>
-					<td>LM_Internal_SlotFreeTest</td>
+					<td>
+						<code>LM_Internal_SlotFreeTest</code><br>
+						<br>
+						Tests the element specified in the list specified to see if it is free
+					</td>
 					<td>
 						<ol>
 							<li>List address</li>
@@ -1946,89 +2638,99 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result<br>
-								True - Element empty<br>
-								False - Element not empty
-							</li>
-						</ol>
+						Result<br>
+						&emsp;True - Element empty<br>
+						&emsp;False - Element not empty
 					</td>
-					<td>Tests the element specified in the list specified to see if it is free</td>
 				</tr>
 			</table>
 			<br>
 			<br>
 			<br>
 
-			<b>Memory Manager Functions - <i>memory.asm</i></b><br>
+			<a name="NightFunctionReference_memory.asm"><b>Memory Manager Functions - <i>memory.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.3 - Memory Manager 16-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.9 - Memory Manager 16-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>MemProbe</td>
-					<td>n/a</td>
-					<td>n/a</td>
-					<td>Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM, and fills in the appropriate system data structures for later use by the memory manager</td>
-				</tr>
-				<tr>
-
-					<td>A20Check</td>
 					<td>
-						<ol>
-							<li>Dummy value</li>
-						</ol>
+						<code>A20Check</code><br>
+						<br>
+						Checks status of the A20 line
 					</td>
 					<td>
 						<ol>
-							<li>
-								Function result<br>
-								High byte = 0 on success, non zero = fail<br>
-								Low byte = 0 if disabled, 1 if enabled
-							</li>
+							<li>n/a</li>
 						</ol>
 					</td>
-					<td>Checks status of the A20 line</td>
+					<td>
+						DX - Result code<br>
+						&emsp;High byte = 0 on success, non zero = fail<br>
+						&emsp;Low byte = 0 if disabled, 1 if enabled
+					</td>
 				</tr>
 				<tr>
-					<td>A20Enable</td>
+					<td>
+						<code>A20Enable</code><br>
+						<br>
+						Enables the A20 line using all methods in the preferred order
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Enables the A20 line using all methods in the preferred order</td>
 				</tr>
 				<tr>
-					<td>A20EnableBIOS</td>
+					<td>
+						<code>A20EnableBIOS</code><br>
+						<br>
+						Enables the A20 line using BIOS interrrupt 0x15
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Enables the A20 line using BIOS interrrupt 0x15</td>
 				</tr>
 				<tr>
-					<td>A20EnableFastA20</td>
+					<td>
+						<code>A20EnableFastA20</code><br>
+						<br>
+						Enables the A20 line using the Fast A20 method
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Enables the A20 line using the Fast A20 method</td>
 				</tr>
 				<tr>
-					<td>A20EnableKeyboardController</td>
+					<td>
+						<code>A20EnableKeyboardController</code><br>
+						<br>
+						Attempts to enables the A20 line using the keyboard controller method
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Attempts to enables the A20 line using the keyboard controller method</td>
 				</tr>
 				<tr>
-					<td>A20EnablePortEE</td>
+					<td>
+						<code>A20EnablePortEE</code><br>
+						<br>
+						Enables the A20 line using the Port 0xEE method
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Enables the A20 line using the Port 0xEE method</td>
+				</tr>
+				<tr>
+					<td>
+						<code>MemProbe</code><br>
+						<br>
+						Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM, and fills in the appropriate system data structures for later use by the memory manager
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
 				</tr>
 			</table>
 			<br>
@@ -2037,19 +2739,21 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.4 - Memory Manager 32-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.10 - Memory Manager 32-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>MemAddressAlign</td>
+					<td>
+						<code>MemAddressAlign</code><br>
+						<br>
+						Returns the aligned version of the address specified, aligned as specified
+					</td>
 					<td>
 						<ol>
 							<li>Address to align</li>
@@ -2057,33 +2761,33 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Aligned address</li>
-						</ol>
+						EAX - Aligned address
 					</td>
-					<td>Returns the aligned version of the address specified, aligned as specified</td>
 				</tr>
 				<tr>
-					<td>MemAddressToBlock</td>
+					<td>
+						<code>MemAddressToBlock</code><br>
+						<br>
+						Returns the block number referenced by the address specified
+					</td>
 					<td>
 						<ol>
 							<li>Block address</li>
-							<li>Dummy value</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Element number of block</li>
-							<li>Result<br>
-								True - Block was matched<br>
-								False - Block was not matched
-							</li>
-						</ol>
+						EAX - Element number of block<br>
+						EDX - Result<br>
+						&emsp;True - Block was matched<br>
+						&emsp;False - Block was not matched
 					</td>
-					<td>Returns the block number referenced by the address specified</td>
 				</tr>
 				<tr>
-					<td>MemAllocate</td>
+					<td>
+						<code>MemAllocate</code><br>
+						<br>
+						Returns the address of a memory block of the requested size, or zero if unavailble
+					</td>
 					<td>
 						<ol>
 							<li>Requesting task number</li>
@@ -2091,14 +2795,16 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Address of requested block, or zero if call fails</li>
-						</ol>
+						EAX - Address of requested block, or zero if call fails<br>
+						EDX - Result code
 					</td>
-					<td>Returns the address of a memory block of the requested size, or zero if unavailble</td>
 				</tr>
 				<tr>
-					<td>MemAllocateAligned</td>
+					<td>
+						<code>MemAllocateAligned</code><br>
+						<br>
+						Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble
+					</td>
 					<td>
 						<ol>
 							<li>Requesting task number</li>
@@ -2107,15 +2813,16 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Address of requested block, or zero if call fails</li>
-							<li>Result code</li>
-						</ol>
+						EAX - Address of requested block, or zero if call fails<br>
+						EDX - Result code
 					</td>
-					<td>Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble</td>
 				</tr>
 				<tr>
-					<td>MemCompare</td>
+					<td>
+						<code>MemCompare</code><br>
+						<br>
+						Compares two regions in memory of a specified length for equality
+					</td>
 					<td>
 						<ol>
 							<li>Region 1 address</li>
@@ -2124,17 +2831,17 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result<br>
-								True - The regions are identical<br>
-								False - The regions are different
-							</li>
-						</ol>
+						EDX - Result<br>
+						&emsp;True - The regions are identical<br>
+						&emsp;False - The regions are different
 					</td>
-					<td>Compares two regions in memory of a specified length for equality</td>
 				</tr>
 				<tr>
-					<td>MemCopy</td>
+					<td>
+						<code>MemCopy</code><br>
+						<br>
+						Copies the specified number of bytes from one address to another
+					</td>
 					<td>
 						<ol>
 							<li>Source address</li>
@@ -2145,10 +2852,13 @@
 					<td>
 						n/a
 					</td>
-					<td>Copies the specified number of bytes from one address to another</td>
 				</tr>
 				<tr>
-					<td>MemDispose</td>
+					<td>
+						<code>MemDispose</code><br>
+						<br>
+						Notifies the memory manager that the block specified by the address given is now free for reuse
+					</td>
 					<td>
 						<ol>
 							<li>Address of block (as provided by MemAllocate())</li>
@@ -2157,10 +2867,13 @@
 					<td>
 						n/a
 					</td>
-					<td>Notifies the memory manager that the block specified by the address given is now free for reuse</td>
 				</tr>
 				<tr>
-					<td>MemFill</td>
+					<td>
+						<code>MemFill</code><br>
+						<br>
+						Fills the range of memory given with the byte value specified
+					</td>
 					<td>
 						<ol>
 							<li>Address</li>
@@ -2171,39 +2884,44 @@
 					<td>
 						n/a
 					</td>
-					<td>Fills the range of memory given with the byte value specified</td>
 				</tr>
 				<tr>
-					<td>MemFindMostSuitable</td>
+					<td>
+						<code>MemFindMostSuitable</code><br>
+						<br>
+						Returns the element number of the most suitable free block for handling a request of the size specified
+					</td>
 					<td>
 						<ol>
 							<li>Size requested</li>
-							<li>Dummy value</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Most suitable element</li>
-							<li>Result<br>
-								True - A suitable block was found<br>
-								False - A suitable block was not found
-							</li>
-						</ol>
+						EAX - Most suitable element<br>
+						EDX - Result<br>
+						&emsp;True - A suitable block was found<br>
+						&emsp;False - A suitable block was not found
 					</td>
-					<td>Returns the element number of the most suitable free block for handling a request of the size specified</td>
 				</tr>
 				<tr>
-					<td>MemInit</td>
+					<td>
+						<code>MemInit</code><br>
+						<br>
+						Inititlizes the Memory Manager
+					</td>
 					<td>
 						n/a
 					</td>
 					<td>
 						n/a
 					</td>
-					<td>Inititlizes the Memory Manager</td>
 				</tr>
 				<tr>
-					<td>MemMergeBlocks</td>
+					<td>
+						<code>MemMergeBlocks</code><br>
+						<br>
+						Merges any neighboring free memory list elements into the one specified
+					</td>
 					<td>
 						<ol>
 							<li>Memory list element number</li>
@@ -2212,10 +2930,13 @@
 					<td>
 						n/a
 					</td>
-					<td>Merges any neighboring free memory list elements into the one specified</td>
 				</tr>
 				<tr>
-					<td>MemSearchWord</td>
+					<td>
+						<code>MemSearchWord</code><br>
+						<br>
+						Searches the memory range specified for the given word value
+					</td>
 					<td>
 						<ol>
 							<li>Search range start</li>
@@ -2224,14 +2945,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Address of match (zero if not found)</li>
-						</ol>
+						EAX - Address of match (zero if not found)
 					</td>
-					<td>Searches the memory range specified for the given word value</td>
 				</tr>
 				<tr>
-					<td>MemSearchDWord</td>
+					<td>
+						<code>MemSearchDWord</code><br>
+						<br>
+						Searches the memory range specified for the given dword value
+					</td>
 					<td>
 						<ol>
 							<li>Search range start</li>
@@ -2240,14 +2962,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Address of match (zero if not found)</li>
-						</ol>
+						EAX - Address of match (zero if not found)
 					</td>
-					<td>Searches the memory range specified for the given dword value</td>
 				</tr>
 				<tr>
-					<td>MemSearchString</td>
+					<td>
+						<code>MemSearchString</code><br>
+						<br>
+						Searches the memory range specified for the given string
+					</td>
 					<td>
 						<ol>
 							<li>Search range start</li>
@@ -2256,14 +2979,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Address of match (zero if not found)</li>
-						</ol>
+						EAX - Address of match (zero if not found)
 					</td>
-					<td>Searches the memory range specified for the given string</td>
 				</tr>
 				<tr>
-					<td>MemShrinkFromBeginning</td>
+					<td>
+						<code>MemShrinkFromBeginning</code><br>
+						<br>
+						Shrinks the block of memory specified to the size specified by trimming space off the beginning
+					</td>
 					<td>
 						<ol>
 							<li>Block address</li>
@@ -2271,14 +2995,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result code</li>
-						</ol>
+						EDX - Result code
 					</td>
-					<td>Shrinks the block of memory specified to the size specified by trimming space off the beginning</td>
 				</tr>
 				<tr>
-					<td>MemShrinkFromEnd</td>
+					<td>
+						<code>MemShrinkFromEnd</code><br>
+						<br>
+						Shrinks the block of memory specified to the size specified by trimming space off the end
+					</td>
 					<td>
 						<ol>
 							<li>Block address</li>
@@ -2286,28 +3011,31 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Result code</li>
-						</ol>
+						EDX - Result code
 					</td>
-					<td>Shrinks the block of memory specified to the size specified by trimming space off the end</td>
 				</tr>
 				<tr>
-					<td>MemSwapWordBytes</td>
+					<td>
+						<code>MemSwapWordBytes</code><br>
+						<br>
+						Swaps the bytes in a series of words starting at the address specified
+					</td>
 					<td>
 						<ol>
 							<li>Source address</li>
 							<li>Number of words to process</li>
-							
 						</ol>
 					</td>
 					<td>
 						n/a
 					</td>
-					<td>Swaps the bytes in a series of words starting at the address specified</td>
 				</tr>
 				<tr>
-					<td>MemSwapDWordWord</td>
+					<td>
+						<code>MemSwapDWordWord</code><br>
+						<br>
+						Swaps the words in a series of dwords starting at the address specified
+					</td>
 					<td>
 						<ol>
 							<li>Source address</li>
@@ -2317,7 +3045,6 @@
 					<td>
 						n/a
 					</td>
-					<td>Swaps the words in a series of dwords starting at the address specified</td>
 				</tr>
 			</table>
 			<br>
@@ -2326,79 +3053,76 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.5 - Memory Manager 32-bit internal functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.11 - Memory Manager 32-bit internal functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>Mem_Internal_MemListGrow</td>
+					<td>
+						<code>Mem_Internal_MemListGrow</code><br>
+						<br>
+						Adds an element to the list itself and duplicates the element specified
+					</td>
 					<td>
 						<ol>
 							<li>Element to duplicate during grow</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>
-								Result<br>
-								True - Grow was successful<br>
-								False - Grow was unsuccessful
-							</li>
-						</ol>
+						EDX - Result<br>
+						&emsp;True - Grow was successful<br>
+						&emsp;False - Grow was unsuccessful
 					</td>
-					<td>Adds an element to the list itself and duplicates the element specified</td>
 				</tr>
 
 				<tr>
-					<td>Mem_Internal_MemListShrink</td>
+					<td>
+						<code>Mem_Internal_MemListShrink</code><br>
+						<br>
+						Subtracts an element from the list itself and deletes that element
+					</td>
 					<td>
 						<ol>
 							<li>Element to duplicate during shrink</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>
-								Result<br>
-								True - Shrink was successful<br>
-								False - Shrink was unsuccessful
-							</li>
-						</ol>
+						EDX - Result<br>
+						&emsp;True - Shrink was successful<br>
+						&emsp;False - Shrink was unsuccessful
 					</td>
-					<td>Subtracts an element from the list itself and deletes that element</td>
 				</tr>
 			</table>
 			<br>
 			<br>
 			<br>
 
-			<b><i>pci.asm</i></b><br>
+			<a name="NightFunctionReference_misc.asm"><b>Miscellaneous Functions - <i>misc.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.6 - pci.asm 16-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.12 - misc.asm 16-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>PCIProbe</td>
+					<td>
+						<code>SetSystemAPM</code><br>
+						<br>
+						Gets the APM interface version and saves results to the tSystem structure
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct</td>
 				</tr>
 			</table>
 			<br>
@@ -2407,19 +3131,113 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.7 - pci.asm 32-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.13 - misc.asm 32-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>PCICalculateNext</td>
+					<td>
+						<code>BCDToDecimal</code><br>
+						<br>
+						Converts a 32-bit BCD number to decimal
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>TimerWait</code><br>
+						<br>
+						Waits the specified number of ticks
+					</td>
+					<td>
+						<ol>
+							<li>Tick count</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_partitions.asm"><b>Partition Handling Functions - <i>partitions.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.14 - partitions.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>PartitionEnumerate</code><br>
+						<br>
+						Scans the partition tables of all drives in the drive list and loads their data into the partitions list
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_PCI.asm"><b>PCI Functions - <i>PCI.asm</i></b></a><br>
+			<br>
+			16-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.15 - PCI Functions 16-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIProbe</code><br>
+						<br>
+						Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.16 - PCI Functions 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>PCICalculateNext</code><br>
+						<br>
+						Calculates the proper value of the next spot on the PCI bus
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2428,16 +3246,17 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>next PCI Bus</li>
-							<li>next PCI Device</li>
-							<li>next PCI Function</li>
-						</ol>
+						EAX - Next PCI Bus<br>
+						EBX - Next PCI Device<br>
+						ECX - Next PCI Function
 					</td>
-					<td>Calculates the proper value of the next spot on the PCI bus</td>
 				</tr>
 				<tr>
-					<td>PCICheckForFunction</td>
+					<td>
+						<code>PCICheckForFunction</code><br>
+						<br>
+						Checks the bus/device/function specified to see if there's something there
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2446,18 +3265,17 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>
-								Result<br>
-								True - Function was found<br>
-								False - Function was not found
-							</li>
-						</ol>
+						EDX - Result<br>
+						&emsp;True - Function was found<br>
+						&emsp;False - Function was not found
 					</td>
-					<td>Checks the bus/device/function specified to see if there's something there</td>
 				</tr>
 				<tr>
-					<td>PCIDriverSearch</td>
+					<td>
+						<code>PCIDriverSearch</code><br>
+						<br>
+						Scans all the drivers in the kernel to see if any match the class/subclass/progif given
+					</td>
 					<td>
 						<ol>
 							<li>PCI Class value</li>
@@ -2466,29 +3284,31 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Driver init function address<br>
-							(or zero if no appropriate driver found)</li>
-						</ol>
+						EAX - Driver init function address<br>
+						(or zero if no appropriate driver found)
 					</td>
-					<td>Scans all the drivers in the kernel to see if any match the class/subclass/progif given</td>
 				</tr>
 				<tr>
-					<td>PCIGetFunctionCount</td>
 					<td>
-						<ol>
-							<li>Dummy value</li>
-						</ol>
+						<code>PCIGetFunctionCount</code><br>
+						<br>
+						Returns the total number of functions across all PCI busses in the system
 					</td>
 					<td>
 						<ol>
-							<li>PCI device count</li>
+							<li>n/a</li>
 						</ol>
 					</td>
-					<td>Returns the total number of functions across all PCI busses in the system</td>
+					<td>
+						EAX - PCI device count
+					</td>
 				</tr>
 				<tr>
-					<td>PCIGetNextFunction</td>
+					<td>
+						<code>PCIGetNextFunction</code><br>
+						<br>
+						Starts a scan at the bus/device/function specified to find the next function in order
+					</td>
 					<td>
 						<ol>
 							<li>Starting PCI Bus</li>
@@ -2497,22 +3317,26 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Next occupied PCI Bus</li>
-							<li>Next occupied PCI Device</li>
-							<li>Next occupied PCI Function</li>
-						</ol>
+						EAX - Next occupied PCI Bus<br>
+						EBX - Next occupied PCI Device<br>
+						ECX - Next occupied PCI Function
 					</td>
-					<td>Starts a scans at the bus/device/function specified to find the next function in order</td>
 				</tr>
 				<tr>
-					<td>PCIInitBus</td>
+					<td>
+						<code>PCIInitBus</code><br>
+						<br>
+						Scans all PCI busses and shadows all data to a List Manager list
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Scans all PCI busses and shadows all data to a List Manager list</td>
 				</tr>
 				<tr>
-					<td>PCILiveRead</td>
+					<td>
+						<code>PCILiveRead</code><br>
+						<br>
+						Reads a 32-bit register value from the PCI target specified
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2522,14 +3346,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Register value</li>
-						</ol>
+						EAX - Register value
 					</td>
-					<td>Reads a 32-bit register value from the PCI target specified</td>
 				</tr>
 				<tr>
-					<td>PCILiveWrite</td>
+					<td>
+						<code>PCILiveWrite</code><br>
+						<br>
+						Writes a 32-bit value to the target PCI register specified
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2540,16 +3365,22 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Writes a 32-bit value to the target PCI register specified</td>
 				</tr>
 				<tr>
-					<td>PCILoadDrivers</td>
+					<td>
+						<code>PCILoadDrivers</code><br>
+						<br>
+						Cycles through all functions in the PCI list and loads drivers for each
+					</td>
 					<td>n/a</td>
 					<td>n/a</td>
-					<td>Cycles through all functions in the PCI list and loads drivers for each</td>
 				</tr>
 				<tr>
-					<td>PCIReadAll</td>
+					<td>
+						<code>PCIReadAll</code><br>
+						<br>
+						Gets all info for the specified PCI device and fills it into the struct at the given address
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2559,10 +3390,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Gets all info for the specified PCI device and fills it into the struct at the given address</td>
 				</tr>
 				<tr>
-					<td>PCIReadByte</td>
+					<td>
+						<code>PCIReadByte</code><br>
+						<br>
+						Reads a byte register from the PCI target specified
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2572,14 +3406,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Register value</li>
-						</ol>
+						EAX - Register value
 					</td>
-					<td>Reads a byte register from the PCI target specified</td>
 				</tr>
 				<tr>
-					<td>PCIReadWord</td>
+					<td>
+						<code>PCIReadWord</code><br>
+						<br>
+						Reads a word register from the PCI target specified
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2589,14 +3424,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Register value</li>
-						</ol>
+						EAX - Register value
 					</td>
-					<td>Reads a word register from the PCI target specified</td>
 				</tr>
 				<tr>
-					<td>PCIReadDWord</td>
+					<td>
+						<code>PCIReadDWord</code><br>
+						<br>
+						Reads a dword register from the PCI target specified
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2606,28 +3442,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Register value</li>
-						</ol>
+						EAX - Register value
 					</td>
-					<td>Reads a dword register from the PCI target specified</td>
 				</tr>
 				<tr>
-					<td>PCIWriteByte</td>
 					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-							<li>Register value</li>
-						</ol>
+						<code>PCIWriteByte</code><br>
+						<br>
+						Writes a byte value to the PCI target specified
 					</td>
-					<td>n/a</td>
-					<td>Writes a byte value to the PCI target specified</td>
-				</tr>
-				<tr>
-					<td>PCIWriteWord</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2638,10 +3461,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Writes a word value to the PCI target specified</td>
 				</tr>
 				<tr>
-					<td>PCIWriteDword</td>
+					<td>
+						<code>PCIWriteWord</code><br>
+						<br>
+						Writes a word value to the PCI target specified
+					</td>
 					<td>
 						<ol>
 							<li>PCI Bus</li>
@@ -2652,49 +3478,268 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Writes a dword value to the PCI target specified</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIWriteDword</code><br>
+						<br>
+						Writes a dword value to the PCI target specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>PCI Register</li>
+							<li>Register value</li>
+						</ol>
+					</td>
+					<td>n/a</td>
 				</tr>
 			</table>
 			<br>
 			<br>
 			<br>
 
-			<b>List Manager Functions - <i>strings.asm</i></b><br>
+			<a name="NightFunctionReference_PIC.asm"><b>PIC Functions - <i>PIC.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.17 - PIC.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>PICInit</code><br>
+						<br>
+						Initializes & remaps both PICs
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PICIntComplete</code><br>
+						<br>
+						Tells both PICs the pending interrupt has been handled
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PICIRQDisable</code><br>
+						<br>
+						Disables the IRQ specified
+					</td>
+					<td>
+						<ol>
+							<li>IRQ number</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PICIRQDisableAll</code><br>
+						<br>
+						Disables all IRQ lines across both PICs
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PICIRQEnable</code><br>
+						<br>
+						Enables the IRQ specified
+					</td>
+					<td>
+						<ol>
+							<li>IRQ number</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PICIRQEnableAll</code><br>
+						<br>
+						Enables all IRQ lines across both PICs
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_power.asm"><b>Power Functions - <i>power.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.8 - strings.asm 16-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.18 - power.asm 16-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>ConvertByteToHexString16</td>
+					<td>
+						<code>APMEnable</code><br>
+						<br>
+						Activates the APM interface for all devices managed by the APM BIOS
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>APMDisable</code><br>
+						<br>
+						Disables the APM interface for all devices managed by the APM BIOS
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>APMShutdown</code><br>
+						<br>
+						Shuts down the PC via the APM intereface
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_RTC.asm"><b>RTC Functions - <i>RTC.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.19 - RTC.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>RTCAdjustBCD</code><br>
+						<br>
+						Adjusts the time values in the tSystem struct from BCD to decimal
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>RTCInit</code><br>
+						<br>
+						Initializes the RTC
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>RTCInterruptHandler</code><br>
+						<br>
+						Handles RTC interrupts
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_screen.asm"><b>Screen Functions - <i>screen.asm</i></b></a><br>
+			<br>
+			16-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.20 - screen.asm 16-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>Print16</code><br>
+						<br>
+						Prints an ASCIIZ string directly to the screen
+					</td>
 					<td>
 						<ol>
-							<li>Numeric byte value</li>
-							<li>String address</li>
+							<li>Address of string to print</li>
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode</td>
 				</tr>
 				<tr>
-					<td>ConvertWordToHexString16</td>
+					<td>
+						<code>PrintIfConfigBits16</code><br>
+						<br>
+						Prints an ASCIIZ string directly to the screen only if the configbits option is set
+					</td>
 					<td>
 						<ol>
-							<li>Numeric word value</li>
-							<li>String address</li>
+							<li>Address of string to print</li>
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PrintRegs16</code><br>
+						<br>
+						Quick register dump routine for real mode
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>ScreenClear16</code><br>
+						<br>
+						Clears the text mode screen
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>ScreenScroll16</code><br>
+						<br>
+						Scrolls the text mode screen by the specified number of lines
+					</td>
+					<td>
+						<ol>
+							<li>Number of lines to scroll</li>
+						</ol>
+					</td>
+					<td>n/a</td>
 				</tr>
 			</table>
 			<br>
@@ -2703,34 +3748,423 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.9 - strings.asm 32-bit public functions</caption>
-				<col width = 20%>
-				<col width = 20%>
-				<col width = 20%>
+				<caption>Table A1.21 - screen.asm 32-bit public functions</caption>
 				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
 				<tr>
-					<th>Name</th>
-					<th>Input</th>
-					<th>Output</th>
-					<th>Description</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
 				<tr>
-					<td>ConvertNumberBinaryToString</td>
+					<td>
+						<code>CursorHome</code><br>
+						<br>
+						Returns the text mode cursor to the "home" (upper left) position
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>Print32</code><br>
+						<br>
+						Prints an ASCIIZ string directly to the screen
+					</td>
 					<td>
 						<ol>
-							<li>Numeric value</li>
+							<li>Address of string to print</li>
+							<li>X position</li>
+							<li>Y position</li>
+							<li>Foreground color</li>
+							<li>Background color</li>
+						</ol>
+					</td>
+					<td>
+						AL - Updated X position<br>
+						AH - Updated Y position
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PrintIfConfigBits32</code><br>
+						<br>
+						Prints an ASCIIZ string directly to the screen only if the configbits option is set
+					</td>
+					<td>
+						<ol>
+							<li>Address of string to print</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PrintRAM32</code><br>
+						<br>
+						Prints a range of RAM bytes to the screen
+					</td>
+					<td>
+						<ol>
+							<li>Starting address</li>
+							<li>Number of lines</li>
+							<li>X position</li>
+							<li>Y position</li>
+							<li>Text color</li>
+							<li>Background color</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PrintRegs32</code><br>
+						<br>
+						Quick register dump routine for protected mode
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>ScreenClear32</code><br>
+						<br>
+						Clears the text mode screen
+					</td>
+					<td>
+						<ol>
+							<li>Color to which the screen will be cleared</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>ScreenScroll32</code><br>
+						<br>
+						Scrolls the text mode screen by the specified number of lines
+					</td>
+					<td>
+						<ol>
+							<li>Number of lines to scroll</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_serial.asm"><b>Serial Communications Functions - <i>serial.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.22 - serial.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetBaud</code><br>
+						<br>
+						Returns the current baud rate of the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Baud rate
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetIER</code><br>
+						<br>
+						Returns the Interrupt Enable Register for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - IER
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetIIR</code><br>
+						<br>
+						Returns the Interrupt Identification Register for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - IIR
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetLSR</code><br>
+						<br>
+						Returns the Line Status Register for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - LSR
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetMSR</code><br>
+						<br>
+						Returns the Modem Status Register for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - MSR
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetParity</code><br>
+						<br>
+						Returns the current parity setting of the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Parity code<br>
+						&emsp;0 - No parity<br>
+						&emsp;1 - Odd parity<br>
+						&emsp;3 - Even parity<br>
+						&emsp;5 - Mark parity<br>
+						&emsp;7 - Space parity<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetStopBits</code><br>
+						<br>
+						Returns the current number of stop bits for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Number of stop bits (1 or 2)
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialGetWordSize</code><br>
+						<br>
+						Returns the current number of data word bits for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Number of data word bits (5 - 8)
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialPrintString</code><br>
+						<br>
+						Prints an ASCIIZ string as a series of characters to serial port 1
+					</td>
+					<td>
+						<ol>
+							<li>Address of string to print</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialSetBaud</code><br>
+						<br>
+						Sets the baud rate of the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+							<li>Baud rate</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialSetIER</code><br>
+						<br>
+						Sets the Interrupt Enable Register for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+							<li>IER</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialSetParity</code><br>
+						<br>
+						Sets the parity of the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+							<li>
+								Parity code<br>
+								&emsp;0 - No parity<br>
+								&emsp;1 - Odd parity<br>
+								&emsp;3 - Even parity<br>
+								&emsp;5 - Mark parity<br>
+								&emsp;7 - Space parity<br>
+							</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialSetStopBits</code><br>
+						<br>
+						Sets the number of stop bits for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+							<li>Number of stop bits (1 or 2)</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SerialSetWordSize</code><br>
+						<br>
+						Sets the number of data word bits for the specified serial port
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+							<li>Number of data word bits</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_strings.asm"><b>String Functions - <i>strings.asm</i></b></a><br>
+			<br>
+			16-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.23 - strings.asm 16-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>ConvertByteToHexString16</code><br>
+						<br>
+						Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode
+					</td>
+					<td>
+						<ol>
+							<li>Numeric byte value</li>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>n/a</td>
+				</tr>
+				<tr>
 					<td>
+						<code>ConvertWordToHexString16</code><br>
+						<br>
+						Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
+					</td>
+					<td>
+						<ol>
+							<li>Numeric word value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.24 - strings.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>ConvertNumberBinaryToString</code><br>
+						<br>
 						Translates the value specified to a binary number in a zero-padded 32 byte string<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 					</td>
-				</tr>
-				<tr>
-					<td>ConvertNumberDecimalToString</td>
 					<td>
 						<ol>
 							<li>Numeric value</li>
@@ -2738,14 +4172,15 @@
 						</ol>
 					</td>
 					<td>n/a</td>
+				</tr>
+				<tr>
 					<td>
+						<code>ConvertNumberDecimalToString</code><br>
+						<br>
 						Translates the value specified to a decimal number in a zero-padded 10 byte string<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 					</td>
-				</tr>
-				<tr>
-					<td>ConvertNumberHexToString</td>
 					<td>
 						<ol>
 							<li>Numeric value</li>
@@ -2753,14 +4188,15 @@
 						</ol>
 					</td>
 					<td>n/a</td>
+				</tr>
+				<tr>
 					<td>
+						<code>ConvertNumberHexToString</code><br>
+						<br>
 						Translates the value specified to a hexadecimal number in a zero-padded 8 byte string<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 					</td>
-				</tr>
-				<tr>
-					<td>ConvertNumberOctalToString</td>
 					<td>
 						<ol>
 							<li>Numeric value</li>
@@ -2768,90 +4204,116 @@
 						</ol>
 					</td>
 					<td>n/a</td>
+				</tr>
+				<tr>
 					<td>
+						<code>ConvertNumberOctalToString</code><br>
+						<br>
 						Translates the value specified to an octal number in a zero-padded 11 byte string<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
+
 					</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>n/a</td>
 				</tr>
 				<tr>
-					<td>ConvertStringBinaryToNumber</td>
+					<td>
+						<code>ConvertStringBinaryToNumber</code><br>
+						<br>
+						Returns the numeric value from the binary string specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Numeric value</li>
-						</ol>
+						EAX - Numeric value
 					</td>
-					<td>Returns the numeric value from the binary string specified</td>
 				</tr>
 				<tr>
-					<td>ConvertStringDecimalToNumber</td>
+					<td>
+						<code>ConvertStringDecimalToNumber</code><br>
+						<br>
+						Returns the numeric value from the decimalstring specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Numeric value</li>
-						</ol>
+						EAX - Numeric value
 					</td>
-					<td>Returns the numeric value from the decimalstring specified</td>
 				</tr>
 				<tr>
-					<td>ConvertStringHexToNumber</td>
+					<td>
+						<code>ConvertStringHexToNumber</code><br>
+						<br>
+						Returns the numeric value from the hexadecimal string specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Numeric value</li>
-						</ol>
+						EAX - Numeric value
 					</td>
-					<td>Returns the numeric value from the hexadecimal string specified</td>
 				</tr>
 				<tr>
-					<td>ConvertStringOctalToNumber</td>
+					<td>
+						<code>ConvertStringOctalToNumber</code><br>
+						<br>
+						Returns the numeric value from the octal string specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Numeric value</li>
-						</ol>
+						EAX - Numeric value
 					</td>
-					<td>Returns the numeric value from the octal string specified</td>
 				</tr>
 				<tr>
-					<td>StringCaseLower</td>
+					<td>
+						<code>StringCaseLower</code><br>
+						<br>
+						Converts a string to lower case
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Converts a string to lower case</td>
 				</tr>
 				<tr>
-					<td>StringCaseUpper</td>
+					<td>
+						<code>StringCaseUpper</code><br>
+						<br>
+						Converts a string to upper case
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Converts a string to upper case</td>
 				</tr>
 				<tr>
-					<td>StringCharAppend</td>
+					<td>
+						<code>StringCharAppend</code><br>
+						<br>
+						Appends a character onto the end of the string specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2859,10 +4321,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Appends a character onto the end of the string specified</td>
 				</tr>
 				<tr>
-					<td>StringCharDelete</td>
+					<td>
+						<code>StringCharDelete</code><br>
+						<br>
+						Deletes the character at the location specified from the string
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2870,10 +4335,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Deletes the character at the location specified from the string</td>
 				</tr>
 				<tr>
-					<td>StringCharPrepend</td>
+					<td>
+						<code>StringCharPrepend</code><br>
+						<br>
+						Prepends a character onto the beginning of the string specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2881,10 +4349,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Prepends a character onto the beginning of the string specified</td>
 				</tr>
 				<tr>
-					<td>StringFill</td>
+					<td>
+						<code>StringFill</code><br>
+						<br>
+						Fills the entire string specified with the character specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2892,10 +4363,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Fills the entire string specified with the character specified</td>
 				</tr>
 				<tr>
-					<td>StringInsert</td>
+					<td>
+						<code>StringInsert</code><br>
+						<br>
+						Inserts a string into another string at the location specified
+					</td>
 					<td>
 						<ol>
 							<li>Address of main string</li>
@@ -2904,36 +4378,28 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Inserts a string into another string at the location specified</td>
 				</tr>
 				<tr>
-					<td>StringLength</td>
+					<td>
+						<code>StringLength</code><br>
+						<br>
+						Returns the length of the string specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>String length</li>
-						</ol>
+						EAX - String length
 					</td>
-					<td>Returns the length of the string specified</td>
 				</tr>
 				<tr>
-					<td>StringPadLeft</td>
 					<td>
-						<ol>
-							<li>String address</li>
-							<li>Padding character</li>
-							<li>Length to which the string will be extended</li>
-						</ol>
+						<code>StringPadLeft</code><br>
+						<br>
+						Pads the left side of the string specified with the character specified until it is the length specified
 					</td>
-					<td>n/a</td>
-					<td>Pads the left side of the string specified with the character specified until it is the length specified</td>
-				</tr>
-				<tr>
-					<td>StringPadRight</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2942,10 +4408,28 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Pads the right side of the string specified with the character specified until it is the length specified</td>
 				</tr>
 				<tr>
-					<td>StringReplaceChars</td>
+					<td>
+						<code>StringPadRight</code><br>
+						<br>
+						Pads the right side of the string specified with the character specified until it is the length specified
+					</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Padding character</li>
+							<li>Length to which the string will be extended</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>StringReplaceChars</code><br>
+						<br>
+						Replaces all occurrances of the specified character with another character specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2954,10 +4438,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Replaces all occurrances of the specified character with another character specified</td>
 				</tr>
 				<tr>
-					<td>StringReplaceCharsInRange</td>
+					<td>
+						<code>StringReplaceCharsInRange</code><br>
+						<br>
+						Replaces any character within the range of ASCII codes specified with the specified character
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -2967,10 +4454,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Replaces any character within the range of ASCII codes specified with the specified character</td>
 				</tr>
 				<tr>
-					<td>StringSearchChar</td>
+					<td>
+						<code>StringSearchChar</code><br>
+						<br>
+						Returns the position in the string specified of the character code specified
+					</td>
 					<td>
 						<ol>
 							<li>Address of string to be scanned</li>
@@ -2978,14 +4468,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Position of match, or zero if no match</li>
-						</ol>
+						EAX - Position of match, or zero if no match
 					</td>
-					<td>Returns the position in the string specified of the character code specified</td>
 				</tr>
 				<tr>
-					<td>StringSearchCharList</td>
+					<td>
+						<code>StringSearchCharList</code><br>
+						<br>
+						Returns the position in the string specified of the first match from a list of characters
+					</td>
 					<td>
 						<ol>
 							<li>Address of string to be scanned</li>
@@ -2993,14 +4484,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>Position of match, or zero if no match</li>
-						</ol>
+						EAX - Position of match, or zero if no match
 					</td>
-					<td>Returns the position in the string specified of the first match from a list of characters</td>
 				</tr>
 				<tr>
-					<td>StringTokenBinary</td>
+					<td>
+						<code>StringTokenBinary</code><br>
+						<br>
+						Finds the first occurrance of the ^ character and replaces it with a binary number, truncated to the length specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3009,10 +4501,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Finds the first occurrance of the ^ character and replaces it with a binary number, truncated to the length specified</td>
 				</tr>
 				<tr>
-					<td>StringTokenDecimal</td>
+					<td>
+						<code>StringTokenDecimal</code><br>
+						<br>
+						Finds the first occurrance of the ^ character and replaces it with a decimal number, truncated to the length specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3021,10 +4516,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Finds the first occurrance of the ^ character and replaces it with a decimal number, truncated to the length specified</td>
 				</tr>
 				<tr>
-					<td>StringTokenHexadecimal</td>
+					<td>
+						<code>StringTokenHexadecimal</code><br>
+						<br>
+						Finds the first occurrance of the ^ character and replaces it with a hexadecimal number, truncated to the length specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3033,10 +4531,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Finds the first occurrance of the ^ character and replaces it with a hexadecimal number, truncated to the length specified</td>
 				</tr>
 				<tr>
-					<td>StringTokenOctal</td>
+					<td>
+						<code>StringTokenOctal</code><br>
+						<br>
+						Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3045,10 +4546,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified</td>
 				</tr>
 				<tr>
-					<td>StringTokenString</td>
+					<td>
+						<code>StringTokenString</code><br>
+						<br>
+						Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3057,10 +4561,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified</td>
 				</tr>
 				<tr>
-					<td>StringTrimLeft</td>
+					<td>
+						<code>StringTrimLeft</code><br>
+						<br>
+						Trims any occurrances of the character specified off the left side of the string
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3068,10 +4575,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Trims any occurrances of the character specified off the left side of the string</td>
 				</tr>
 				<tr>
-					<td>StringTrimRight</td>
+					<td>
+						<code>StringTrimRight</code><br>
+						<br>
+						Trims any occurrances of the character specified off the right side of the string
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3079,10 +4589,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Trims any occurrances of the character specified off the right side of the string</td>
 				</tr>
 				<tr>
-					<td>StringTruncateLeft</td>
+					<td>
+						<code>StringTruncateLeft</code><br>
+						<br>
+						Truncates the string to the length specified by trimming characters off the beginning
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3090,10 +4603,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Truncates the string to the length specified by trimming characters off the beginning</td>
 				</tr>
 				<tr>
-					<td>StringTruncateRight</td>
+					<td>
+						<code>StringTruncateRight</code><br>
+						<br>
+						Truncates the string to the length specified by trimming characters off the end
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3101,10 +4617,13 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Truncates the string to the length specified by trimming characters off the end</td>
 				</tr>
 				<tr>
-					<td>StringWordCount</td>
+					<td>
+						<code>StringWordCount</code><br>
+						<br>
+						Counts the words in the string specified when viewed as a sentence separated by the byte specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3112,14 +4631,15 @@
 						</ol>
 					</td>
 					<td>
-						<ol>
-							<li>word count</li>
-						</ol>
+						EAX - Word count
 					</td>
-					<td>Counts the words in the string specified when viewed as a sentence separated by the byte specified</td>
 				</tr>
 				<tr>
-					<td>StringWordGet</td>
+					<td>
+						<code>StringWordGet</code><br>
+						<br>
+						Returns the word specified from the string specified when separated by the byte specified
+					</td>
 					<td>
 						<ol>
 							<li>String address</li>
@@ -3129,15 +4649,107 @@
 						</ol>
 					</td>
 					<td>n/a</td>
-					<td>Returns the word specified from the string specified when separated by the byte specified</td>
 				</tr>
 			</table>
 			<br>
 			<br>
 			<br>
 
+			<a name="NightFunctionReference_tasks.asm"><b>Task Management Functions - <i>tasks.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.10 - Function return codes</caption>
+				<caption>Table A1.25 - tasks.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>TaskInit</code><br>
+						<br>
+						Initializes the Task Manager and its required data structure
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>TaskKill</code><br>
+						<br>
+						Kills the specified task
+					</td>
+					<td>
+						<ol>
+							<li>Task number</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>TaskMemDisposeAll</code><br>
+						<br>
+						Disposes of all memory allocated by the task number specified
+					</td>
+					<td>
+						<ol>
+							<li>Task number</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>TaskNameSet</code><br>
+						<br>
+						Sets the name field of the specified task
+					</td>
+					<td>
+						<ol>
+							<li>Task number</li>
+							<li>Pointer to name string</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>TaskNew</code><br>
+						<br>
+						Sets up a new task for running
+					</td>
+					<td>
+						<ol>
+							<li>Entry point of new task</li>
+							<li>EFlags register for this task</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Task number
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>TaskSwitch</code><br>
+						<br>
+						Performs a context switch to the next task
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_StandardFunctionReturnCodes"><b>Standard Function Return Codes</b></a><br>
+			<table style="width:100%">
+				<caption>Table A1.26 - Standard function return codes</caption>
 				<col width = 10%>
 				<col width = 90%>
 				<tr>
@@ -3200,7 +4812,7 @@
 					<th><i>Interrupt Vector</i></th>
 					<th><i>Handler Address - VirtualBox BIOS</i></th>
 					<th><i>Handler Address - FreeDOS Kernel Build 2042</i></th>
-					<th><i>Handler Address - FreeDOS Kernel Build 2042 with COMMAND.COM</i></th>
+					<th><i>Handler Address - FreeDOS Kernel Build 2042 & COMMAND.COM</i></th>
 					<th><i>Description</i></th>
 				</tr>
 				<tr>
@@ -4613,7 +6225,7 @@
 		<br>
 
 		<hr>
-		<h2><a name="License">Appendix 3 - GNU General Public License</a></h2>
+		<h2><a name="License">GNU General Public License</a></h2>
 		<p>
 			The Night Kernel is free software (in both senses of the word) and is released under the terms of the GPL. The complete text of that license follows.<br>
 			<br>

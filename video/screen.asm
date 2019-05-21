@@ -18,28 +18,6 @@
 
 
 
-; 16-bit function listing:
-; Print16						Prints an ASCIIZ string directly to the screen
-; PrintIfConfigBits16			Prints an ASCIIZ string directly to the screen only if the configbits option is set
-; PrintRegs16					Quick register dump routine for real mode
-; ScreenClear16					Clears the text mode screen
-; ScreenScroll16				Scrolls the text mode screen by the specified number of lines
-
-
-
-; 32-bit function listing:
-; CursorHome					Returns the text mode cursor to the "home" (upper left) position
-; Print32						Prints an ASCIIZ string directly to the screen
-; PrintIfConfigBits32			Prints an ASCIIZ string directly to the screen only if the configbits option is set
-; PrintRAM32					Prints a range of RAM bytes to the screen
-; PrintRegs32					Quick register dump routine for protected mode
-; ScreenClear32					Clears the text mode screen
-; ScreenScroll32				Scrolls the text mode screen by the specified number of lines
-
-
-
-
-
 section .data
 ; globals
 gCursorX										db 0x01
@@ -79,10 +57,10 @@ Print16:
 	; Note: Yes, another, and another! Until you come to your senses!
 	;
 	;  input:
-	;   address of string to print
+	;	Address of string to print
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push bp
 	mov bp, sp
@@ -196,18 +174,16 @@ PrintIfConfigBits16:
 	; Prints an ASCIIZ string directly to the screen only if the configbits option is set
 	;
 	;  input:
-	;   address of string to print (bp + 4)
+	;	Address of string to print
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push bp
 	mov bp, sp
 
-	mov eax, dword [tSystem.configBits]
-	and eax, 000000000000000000000000000000010b
-	cmp eax, 000000000000000000000000000000010b
-	jne .NoPrint
+	bt dword [tSystem.configBits], 1
+	jnc .NoPrint
 
 	push word [bp + 4]
 	call Print16
@@ -226,10 +202,10 @@ PrintRegs16:
 	; Quick register dump routine for real mode
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push bp
 	mov bp, sp
@@ -355,10 +331,10 @@ ScreenClear16:
 	; Note: For use in Protected Mode only
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push bp
 	mov bp, sp
@@ -400,10 +376,10 @@ ScreenScroll16:
 	; Scrolls the text mode screen by the specified number of lines
 	;
 	;  input:
-	;   Number of lines to scroll
+	;	Number of lines to scroll
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push bp
 	mov bp, sp
@@ -470,10 +446,10 @@ CursorHome:
 	; Returns the text mode cursor to the "home" (upper left) position
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -494,15 +470,15 @@ Print32:
 	; Prints an ASCIIZ string directly to the screen.
 	;
 	;  input:
-	;	address of string to print
+	;	Address of string to print
 	;	X position
 	;	Y position
 	;	Foreground color
 	;	Background color
 	;
 	;  output:
-	;	Updated X position
-	;	Updated Y position
+	;	AL - Updated X position
+	;	AH - Updated Y position
 
 	push ebp
 	mov ebp, esp
@@ -618,16 +594,13 @@ Print32:
 
 
 	; return the resulting cursor values to the caller
-	mov eax, 0
 	mov al, cursorX
-	mov dword [ebp + 20], eax
-	mov al, cursorY
-	mov dword [ebp + 24], eax
+	mov ah, cursorY
 
 
 	mov esp, ebp
 	pop ebp
-ret 12
+ret 20
 
 
 
@@ -638,19 +611,17 @@ PrintIfConfigBits32:
 	; Prints an ASCIIZ string directly to the screen only if the configbits option is set
 	;
 	;  input:
-	;   address of string to print
+	;	Address of string to print
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
 
 
-	mov eax, [tSystem.configBits]
-	and eax, 00000000000000000000000000000010b
-	cmp eax, 00000000000000000000000000000010b
-	jne .NoPrint
+	bt dword [tSystem.configBits], 1
+	jnc .NoPrint
 
 		; if we get here, we need to print
 		mov eax, 0x00000000
@@ -667,11 +638,8 @@ PrintIfConfigBits32:
 		push dword [ebp + 8]
 		call Print32
 
-		pop eax
 		mov byte [gCursorX], al
-
-		pop eax
-		mov byte [gCursorY], al
+		mov byte [gCursorY], ah
 
 	.NoPrint:
 	mov esp, ebp
@@ -687,15 +655,15 @@ PrintRAM32:
 	; Prints a range of RAM bytes to the screen
 	;
 	;  input:
-	;   starting address
-	;	number of lines
+	;	Starting address
+	;	Number of lines
 	;	X position
 	;	Y position
-	;	text color
-	;	background color
+	;	Text color
+	;	Background color
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -804,9 +772,10 @@ PrintRAM32:
 		push dword 1
 		push .scratch$
 		call Print32
-		pop eax
-		pop cursorY
 
+		xor ebx, ebx
+		mov bl, ah
+		mov cursorY, ebx
 
 		mov ecx, lineCounter
 	dec ecx
@@ -833,10 +802,10 @@ PrintRegs32:
 	; Quick register dump routine for protected mode
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -951,11 +920,8 @@ PrintRegs32:
 	push .output1$
 	call Print32
 
-	pop eax
 	mov byte [gCursorX], al
-
-	pop eax
-	mov byte [gCursorY], al
+	mov byte [gCursorY], ah
 
 
 	mov eax, 0x00000000
@@ -972,11 +938,8 @@ PrintRegs32:
 	push .output2$
 	call Print32
 
-	pop eax
 	mov byte [gCursorX], al
-
-	pop eax
-	mov byte [gCursorY], al
+	mov byte [gCursorY], ah
 
 
 	popf
@@ -997,13 +960,12 @@ section .data
 section .text
 ScreenClear32:
 	; Clears the text mode screen
-	; Note: For use in Protected Mode only
 	;
 	;  input:
-	;   color to which the screen will be cleared
+	;	Color to which the screen will be cleared
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -1044,10 +1006,10 @@ ScreenScroll32:
 	; Scrolls the text mode screen by the specified number of lines
 	;
 	;  input:
-	;   Number of lines to scroll
+	;	Number of lines to scroll
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp

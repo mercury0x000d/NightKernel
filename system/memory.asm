@@ -32,7 +32,7 @@
 ;extern Print16, PrintIfConfigBits16, StringLength
 
 ; external variables
-;extern gBackColor, gTextColor, kFalse, kTrue, tSystem.configBits, tSystem.listMemory, tSystem.memoryInitialAvailableBytes
+;extern gBackColor, gTextColor, false, true, tSystem.configBits, tSystem.listMemory, tSystem.memoryInitialAvailableBytes
 ;extern tSystem.memoryInstalledBytes, tSystem.memoryListReservedSpace
 
 
@@ -50,12 +50,12 @@ A20Check:
 	; Checks status of the A20 line
 	;
 	;  input:
-	;   Dummy value
+	;   n/a
 	;
 	;  output:
-	;	function result
-	;		0 - Disabled
-	;		1 - Enabled
+	;	DX - Result code
+	;		High byte = 0 on success, non zero = fail
+	;		Low byte = 0 if disabled, 1 if enabled
 
 	push bp
 	mov bp, sp
@@ -69,10 +69,11 @@ A20Check:
 
 	; if ah = 0, the call succeeded and we can exit now
 	cmp ah, 0
-	je .Exit
-
-
+	jne .ManualCheck
+		mov dx, ax
+		jmp .Exit
 	.ManualCheck:
+
 	; the BIOS function isn't available, so we need to probe it manually
 	xor ax, ax ; ax = 0
 	mov es, ax
@@ -100,19 +101,16 @@ A20Check:
 	pop ax
 	mov byte [es:di], al
  
-	mov ax, 0
+	mov dx, false
 	je .Exit
  
-	mov ax, 1
+	mov dx, true
  
 
 	.Exit:
-
 	; restore the segment registers we saved in the beginning to avoid a freak out
 	pop es
 	pop ds
-
-	mov word [bp + 4], ax
 
 	mov sp, bp
 	pop bp
@@ -140,9 +138,8 @@ A20Enable:
 	; check if already enabled
 	push word 0
 	call A20Check
-	pop ax
 
-	cmp ax, 0x0001
+	cmp dx, true
 	jne .NotPreenabled
 		; if we get here, the A20 line is already enabled by... someone... or... something. Spooky! O.O
 		push .A20AlreadyEnabled$
@@ -157,9 +154,8 @@ A20Enable:
 	; check if it worked
 	push word 0
 	call A20Check
-	pop ax
 
-	cmp ax, 0x0001
+	cmp dx, true
 	jne .BIOSFailed
 		; if we get here, the Port 0xEE method succeeded
 		push .BIOSSuccess$
@@ -178,9 +174,8 @@ A20Enable:
 	; check if it worked
 	push word 0
 	call A20Check
-	pop ax
 
-	cmp ax, 0x0001
+	cmp dx, true
 	jne .PortEEFailed
 		; if we get here, the Port 0xEE method succeeded
 		push .portEESuccess$
@@ -199,9 +194,8 @@ A20Enable:
 	; check if it worked
 	push word 0
 	call A20Check
-	pop ax
 
-	cmp ax, 0x0001
+	cmp dx, true
 	jne .FastA20Failed
 		; if we get here, the FastA20 method succeeded
 		push .fastA20Success$
@@ -220,9 +214,8 @@ A20Enable:
 	; check if it worked
 	push word 0
 	call A20Check
-	pop ax
 
-	cmp ax, 0x0001
+	cmp dx, true
 	jne .KeyboardControllerFailed
 		; if we get here, the Port 0xEE method succeeded
 		push .keyboardControllerSuccess$
@@ -602,35 +595,36 @@ MemAddressAlign:
 	; Returns the aligned version of the address specified, aligned as specified
 	;
 	;  input:
-	;	address to align
-	;	alignment value
+	;	Address to align
+	;	Alignment value
 	;
 	;  output:
-	;	aligned address
+	;	EAX - Aligned address
 
 	push ebp
 	mov ebp, esp
+
 
 	; calculate the aligned version of the address we just got
 	; blockAddressAligned = (int(address / alignment) + 1) * alignment
 	mov eax, dword [ebp + 8]
 	mov edx, 0
 	div dword [ebp + 12]
+
 	; if there is a fractional part, we can add 1
 	cmp edx, 0
 	je .SkipAdd
-	inc eax
+		inc eax
 	.SkipAdd:
+
 	mov edx, 0
 	mul dword [ebp + 12]
 
-	; set the return value
-	mov dword [ebp + 12], eax
 
 	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -641,14 +635,13 @@ MemAddressToBlock:
 	; Returns the block number referenced by the address specified
 	;
 	;  input:
-	;	block address
-	;	dummy value
+	;	Block address
 	;
 	;  output:
-	;	element number of block
-	;	result
-	;		kTrue = block was matched
-	;		kFalse = block was not matched
+	;	EAX - Element number of block
+	;	EDX - Result
+	;		true - Block was matched
+	;		false - Block was not matched
 
 	push ebp
 	mov ebp, esp
@@ -657,12 +650,10 @@ MemAddressToBlock:
 	sub esp, 4
 	%define loopCounter							dword [ebp - 4]
 
+
 	; set up a loop to step through all elements in the memory list for printing
-	push dword 0
 	push dword [tSystem.listMemory]
 	call LMElementCountGet
-	pop ecx
-	pop eax
 	dec ecx
 
 	.MemorySearchLoop:
@@ -674,11 +665,9 @@ MemAddressToBlock:
 		push ecx
 		push dword [tSystem.listMemory]
 		call LMElementAddressGet
-		pop esi
 		
 		; if there was an error, we can exit now
-		pop eax
-		cmp eax, 0
+		cmp edx, 0
 		jne .FailedToMatch
 
 		; see if the address of this block matches the one we're trying to release
@@ -688,10 +677,8 @@ MemAddressToBlock:
 		jne .NextIteration
 
 		; if we get here, the addresses match! let's report back to the caller
-		mov ecx, loopCounter
-		mov dword [ebp + 8], ecx
-		mov eax, [kTrue]
-		mov dword [ebp + 12], eax
+		mov eax, loopCounter
+		mov edx, true
 		jmp .Exit
 
 		.NextIteration:
@@ -699,12 +686,13 @@ MemAddressToBlock:
 		mov ecx, loopCounter
 	loop .MemorySearchLoop
 
+
 	.FailedToMatch:
 	; if we get here, there was no match
 	; time to go home with our tail between our legs
-	mov dword [ebp + 8], 0
-	mov ecx, [kFalse]
-	mov dword [ebp + 12], ecx
+	mov eax, 0
+	mov edx, false
+
 
 	.Exit:
 	mov esp, ebp
@@ -720,11 +708,12 @@ MemAllocate:
 	; Returns the address of a memory block of the requested size, or zero if unavailble
 	;
 	;  input:
-	;	requesting task number
-	;	requested memory size in bytes
+	;	Requesting task number
+	;	Requested memory size in bytes
 	;
 	;  output:
-	;	address of requested block, or zero if call fails
+	;	EAX - Address of requested block, or zero if call fails
+	;	EDX - Result code
 
 	; This function implements a best-fit algorithm to fulfill memory requests. Why best-fit? Because it's better at keeping larger
 	; contiguous free blocks available and the additional overhead to implement it is no big deal to modern processors.
@@ -744,14 +733,12 @@ MemAllocate:
 	cmp dword [ebp + 8], 0
 	je .Exit
 
-	push dword 0
 	push dword [ebp + 12]
 	call MemFindMostSuitable
-	pop currentBestCandidate
-	pop eax
+	mov currentBestCandidate, eax
 
 	; see if we actually got anything
-	cmp eax, [kTrue]
+	cmp edx, true
 	jne .Fail
 
 	; Below we do the heavy-lifting of handling this request. This is done by cloning the "best candidate" element we just found,
@@ -762,19 +749,15 @@ MemAllocate:
 	; grow the memory list
 	push currentBestCandidate
 	call Mem_Internal_MemListGrow
-	pop eax
 
 	; test for error
-	cmp eax, [kTrue]
+	cmp edx, true
 	jne .Fail
 
 	; get the address of the "best candidate" element (the "original")
 	push currentBestCandidate
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
-	; ignore error code
-	pop eax
 
 	; save the address and size of this block for later
 	push dword [tMemInfo.address]
@@ -792,7 +775,6 @@ MemAllocate:
 		push currentBestCandidate
 		push dword [tSystem.listMemory]
 		call LMElementDelete
-		pop eax
 		dec currentBestCandidate
 	.BlockSizeNotZero:
 
@@ -802,9 +784,6 @@ MemAllocate:
 	push eax
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
-	; ignore error code
-	pop eax
 
 	; calculate the address using the values we saved earlier
 	pop ebx
@@ -824,7 +803,7 @@ MemAllocate:
 	mov dword [tMemInfo.task], ebx
 
 	; prepare to return address of this block
-	mov dword [ebp + 12], ecx
+	push ecx
 
 	; we don't want to hand out blocks that are all dirtied up with old data
 	push 0x00000000
@@ -832,17 +811,22 @@ MemAllocate:
 	push ecx
 	call MemFill
 
+	; reload the address and exit
+	pop eax
+	mov edx, 0
 	jmp .Exit
 
 
 	.Fail:
 	; If we get here, we had a problem, Houston. Fail. Fail fail. The failiest fail in Failtown fail.
-	mov dword [ebp + 12], 0
+	mov eax, 0
+	mov edx, 0	; this should obviously be an error code later on
+
 
 	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -853,13 +837,13 @@ MemAllocateAligned:
 	; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble
 	;
 	;  input:
-	;	requesting task number
-	;	requested memory size in bytes
-	;	alignment necessary
+	;	Requesting task number
+	;	Requested memory size in bytes
+	;	Alignment necessary
 	;
 	;  output:
-	;	address of requested block, or zero if call fails
-	;	result code
+	;	EAX - Address of requested block, or zero if call fails
+	;	EDX - Result code
 
 	push ebp
 	mov ebp, esp
@@ -880,14 +864,14 @@ MemAllocateAligned:
 	push dword [ebp + 12]
 	push dword [ebp + 8]
 	call MemAllocate
-	pop blockAddress
+	mov blockAddress, eax
 
 	; make sure we didn't get a bad block
 	cmp blockAddress, 0
 	jne .BlockValid1
 		; if we get here, the block was invalid, e.g. out of memory
-		mov dword [ebp + 16], 0xFE00
-		mov dword [ebp + 12], 0
+		mov edx, 0xFE00
+		mov eax, 0
 		jmp .Exit
 	.BlockValid1:
 
@@ -895,15 +879,13 @@ MemAllocateAligned:
 	push dword [ebp + 16]
 	push blockAddress
 	call MemAddressAlign
-	pop eax
 
 	; check the result; if the two addresses match, we're good to exit now!
 	cmp eax, blockAddress
 	jne .NotAligned
 		; if we get here, we happened to be aligned!
-		mov dword [ebp + 16], 0
+		mov edx, 0
 		mov eax, blockAddress
-		mov dword [ebp + 12], eax
 		jmp .Exit
 	.NotAligned:
 
@@ -921,14 +903,14 @@ MemAllocateAligned:
 	push eax
 	push dword [ebp + 8]
 	call MemAllocate
-	pop blockAddress
+	mov blockAddress, eax
 
 	; make sure we didn't get a bad block
 	cmp blockAddress, 0
 	jne .BlockValid2
 		; if we get here, the block was invalid so we report an out of memory fail
-		mov dword [ebp + 16], 0xFE00
-		mov dword [ebp + 12], 0
+		mov edx, 0xFE00
+		mov eax, 0
 		jmp .Exit
 	.BlockValid2:
 
@@ -936,7 +918,6 @@ MemAllocateAligned:
 	push dword [ebp + 16]
 	push blockAddress
 	call MemAddressAlign
-	pop eax
 	mov blockAddressAligned, eax
 
 
@@ -965,7 +946,7 @@ MemAllocateAligned:
 	push dword eax
 	push dword blockAddress
 	call MemShrinkFromBeginning
-	pop eax
+
 	mov eax, blockAddress
 	add eax, blockLeadingSize
 	mov blockAddress, eax
@@ -978,18 +959,16 @@ MemAllocateAligned:
 	push dword eax
 	push dword blockAddress
 	call MemShrinkFromEnd
-	pop eax
 
-	; write the exit values and exit
-	mov dword [ebp + 16], 0
+	; set the return values and exit
+	mov edx, 0
 	mov eax, blockAddress
-	mov dword [ebp + 12], eax
 
 
 	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 12
 
 
 
@@ -1000,24 +979,25 @@ MemCompare:
 	; Compares two regions in memory of a specified length for equality
 	;
 	;  input:
-	;	region 1 address
-	;	region 2 address
-	;	comparison length
+	;	Region 1 address
+	;	Region 2 address
+	;	Comparison length
 	;
 	;  output:
-	;	result
-	;		kTrue - the regions are identical
-	;		kFalse - the regions are different
+	;	EDX - Result
+	;		true - the regions are identical
+	;		false - the regions are different
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov edi, [ebp + 12]
 	mov ecx, [ebp + 16]
 
 	; set the result to possibly be changed if necessary later
-	mov edx, dword [kFalse]
+	mov edx, false
 
 	cmp ecx, 0
 	je .Exit
@@ -1025,14 +1005,13 @@ MemCompare:
 	repe cmpsb
 	jnz .Exit
 
-	mov edx, dword [kTrue]
+	mov edx, true
+
 
 	.Exit:
-	mov dword [ebp + 16], edx
-
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 12
 
 
 
@@ -1043,15 +1022,16 @@ MemCopy:
 	; Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest)
 	;
 	;  input:
-	;	source address
-	;	destination address
-	;	transfer length
+	;	Source address
+	;	Destination address
+	;	Transfer length
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov edi, [ebp + 12]
@@ -1085,13 +1065,12 @@ MemCopy:
 
 	; now restore the transfer amount
 	mov ecx, [ebp + 16]
-
 	; see how many bytes we have remaining
 	and ecx, 0x00000007
 
 	; make sure the loop doesn't get executed if the counter is zero
 	cmp ecx, 0
-	je .ByteLoopDone
+	je .Exit
 
 	; and do the copy
 	.ByteLoop:
@@ -1099,8 +1078,9 @@ MemCopy:
 		mov byte [edi], al
 		inc edi	
 	loop .ByteLoop
-	.ByteLoopDone:
 
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1114,7 +1094,7 @@ MemDispose:
 	; Notifies the memory manager that the block specified by the address given is now free for reuse
 	;
 	;  input:
-	;	address of block (as provided by MemAllocate())
+	;	Address of block (as provided by MemAllocate())
 	;
 	;  output:
 	;	n/a
@@ -1126,22 +1106,20 @@ MemDispose:
 	sub esp, 4
 	%define elementNum							dword [ebp - 4]
 
+
 	; find which block number begins with this address
-	push dword 0
 	push dword [ebp + 8]
 	call MemAddressToBlock
-	pop elementNum
-	pop eax
+	mov elementNum, eax
 
 	; test for success
-	cmp eax, [kTrue]
+	cmp eax, true
 	jne .Exit
 
 	; get the address of this element
 	push ecx
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
 
 	; mark the block free
 	mov dword [tMemInfo.task], 0
@@ -1150,10 +1128,11 @@ MemDispose:
 	push dword elementNum
 	call MemMergeBlocks
 
+
 	.Exit:
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -1164,15 +1143,16 @@ MemFill:
 	; Fills the range of memory given with the byte value specified
 	;
 	;  input:
-	;	address
-	;	length
-	;	byte value
+	;	Address
+	;	Length
+	;	Byte value
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov ecx, [ebp + 12]
@@ -1181,14 +1161,15 @@ MemFill:
 	mov edi, esi
 	add edi, ecx
 
-	.Loop:
+	.FillLoop:
 		cmp esi, edi
-		je .LoopDone
+		je .Exit
 		mov byte [esi], bl
 		inc esi
-	jmp .Loop
-	.LoopDone:
+	jmp .FillLoop
 
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1202,38 +1183,35 @@ MemFindMostSuitable:
 	; Returns the element number of the most suitable free block for handling a request of the size specified
 	;
 	;  input:
-	;	size requested
-	;	dummy value
+	;	Size requested
 	;
 	;  output:
-	;	most suitable element
-	;	result
-	;		kTrue = A suitable block was found
-	;		kFalse = A suitable block was not found
+	;	EAX - Most suitable element
+	;	EDX - Result
+	;		true = A suitable block was found
+	;		false = A suitable block was not found
 
 	push ebp
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 12
+	sub esp, 16
 	%define listIndexCounter					dword [ebp - 4]
 	%define bestCandidateSlot					dword [ebp - 8]
 	%define bestCandidateSize					dword [ebp - 12]
+	%define exitCode							dword [ebp - 16]
+
 
 	; clear the best candidate variable
 	mov bestCandidateSlot, 0
 
 	; default to false
-	mov eax, [kFalse]
-	mov dword [ebp + 12], eax
+	mov exitCode, false
 
 	; set up a loop to step through all elements in the memory list
 	; get number of elements in memory list and save it to our loop index counter
-	push dword 0
 	push dword [tSystem.listMemory]
 	call LMElementCountGet
-	pop ecx
-	pop eax
 
 	.MemoryListLoop:
 		; store ecx to the loop counter variable
@@ -1245,9 +1223,6 @@ MemFindMostSuitable:
 		push eax
 		push dword [tSystem.listMemory]
 		call LMElementAddressGet
-		pop esi
-		; ignore error code
-		pop eax
 
 		; see if this block is free, 
 		; if not, we go to the next block in the loop
@@ -1264,8 +1239,7 @@ MemFindMostSuitable:
 
 			; it was adequate! ONLY if we've already found a block should we check the sizing of this block
 			; if we haven't found a block yet, it doesn't matter if we have a candidate yet or not
-			mov ebx, [kTrue]
-			cmp dword [ebp + 12], ebx
+			mov exitCode, true
 			jne .SkipSizeCheck
 				; let's see if it's larger than the current best candidate and jump to the next iteration if so
 				cmp eax, bestCandidateSize
@@ -1284,21 +1258,20 @@ MemFindMostSuitable:
 			mov bestCandidateSize, eax
 
 			; set the flag that we did find something
-			mov eax, [kTrue]
-			mov dword [ebp + 12], eax
+			mov exitCode, true
 
-		.NextIteration:
-	
+	.NextIteration:
 	mov ecx, listIndexCounter
 	loop .MemoryListLoop
 
 	; return what we found
 	mov eax, bestCandidateSlot
-	mov dword [ebp + 8], eax
+	mov edx, exitCode
+
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -1317,6 +1290,7 @@ MemInit:
 	push ebp
 	mov ebp, esp
 
+
 	; load up the address of our big block o' RAM
 	mov esi, [tSystem.listMemory]
 
@@ -1328,11 +1302,8 @@ MemInit:
 
 	; now calculate the value of the memoryListReservedSpace global (memory list max slots * size per slot + list header size)
 	; get the element size of the memory list
-	push dword 0
 	push dword [tSystem.listMemory]
 	call LMElementSizeGet
-	pop eax
-	pop ebx
 
 	; multiply that value by how many list slots for which we're reserving space
 	mov ebx, 8192
@@ -1344,7 +1315,6 @@ MemInit:
 
 	; save this value
 	mov dword [tSystem.memoryListReservedSpace], eax
-
 
 
 	; start of free memory = address of free memory block + memoryListReservedSpace
@@ -1364,6 +1334,7 @@ MemInit:
 
 	; and we set the task ID, which is 0 because it's free space
 	mov dword [tMemInfo.task], 0
+
 
 	; and exit!
 	mov esp, ebp
@@ -1394,13 +1365,12 @@ MemMergeBlocks:
 	%define lowerBlockAddress					dword [ebp - 12]
 	%define higherBlockAddress					dword [ebp - 16]
 
+
 	; make sure the block passed is free and valid
 	push dword [ebp + 8]
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
-	pop eax
-	cmp eax, 0
+	cmp edx, 0
 	jne .Exit
 
 	mov eax, [tMemInfo.task]
@@ -1413,11 +1383,9 @@ MemMergeBlocks:
 	push ecx
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
-	pop eax
 
 	; check if there was an error, like maybe the element isn't valid
-	cmp eax, 0
+	cmp edx, 0
 	jne .CheckLowerBlock
 
 		; if we get here the block existed, so let's see if it is free
@@ -1439,11 +1407,9 @@ MemMergeBlocks:
 	push ecx
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
-	pop eax
 
 	; check if there was an error, like maybe the element isn't valid
-	cmp eax, 0
+	cmp edx, 0
 	jne .CheckLowerBlock
 
 		; if we get here the block existed, so let's see if it is free
@@ -1479,8 +1445,6 @@ MemMergeBlocks:
 		push esi
 		push dword [tSystem.listMemory]
 		call LMElementAddressGet
-		pop esi
-		pop eax
 		mov lowerBlockAddress, esi
 
 		; get and save the address of the higher block
@@ -1488,8 +1452,6 @@ MemMergeBlocks:
 		push esi
 		push dword [tSystem.listMemory]
 		call LMElementAddressGet
-		pop esi
-		pop eax
 		mov higherBlockAddress, esi
 
 		; get size of higher block
@@ -1506,10 +1468,9 @@ MemMergeBlocks:
 		; delete the higher block
 		push higherBlockElementNum
 		call Mem_Internal_MemListShrink
-		pop eax
 
 		; check for failure
-		cmp eax, [kTrue]
+		cmp edx, true
 		je .AllGood
 
 			; there was a failure, add code to handle it here
@@ -1518,8 +1479,8 @@ MemMergeBlocks:
 		.AllGood:
 	ret
 
-	.Exit:
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1533,27 +1494,28 @@ MemSearchWord:
 	; Searches the memory range specified for the given word value
 	;
 	;  input:
-	;	search range start
-	;	search region length
-	;	word for which to search
+	;	Search range start
+	;	Search region length
+	;	Word for which to search
 	;
 	;  output:
-	;	address of match (zero if not found)
+	;	EAX - Address of match (zero if not found)
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov ecx, [ebp + 12]
 	mov ebx, [ebp + 16]
 
 	; preload the result
-	mov edx, 0x00000000
+	mov eax, 0x00000000
 
 	.MemorySearchLoop:
-		; check if the dword we just loaded is a match
-		mov ax, [esi]
-		cmp ax, bx
+		; check if the word we just loaded is a match
+		mov dx, [esi]
+		cmp dx, bx
 		je .MemorySearchLoopDone
 
 		inc esi
@@ -1561,14 +1523,13 @@ MemSearchWord:
 	jmp .Exit
 
 	.MemorySearchLoopDone:
-	mov edx, esi
+	mov eax, esi
+
 
 	.Exit:
-	mov dword [ebp + 16], edx
-
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 12
 
 
 
@@ -1579,27 +1540,28 @@ MemSearchDWord:
 	; Searches the memory range specified for the given dword value
 	;
 	;  input:
-	;	search range start
-	;	search region length
-	;	dword for which to search
+	;	Search range start
+	;	Search region length
+	;	Dword for which to search
 	;
 	;  output:
-	;	address of match (zero if not found)
+	;	EAX - Address of match (zero if not found)
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov ecx, [ebp + 12]
 	mov ebx, [ebp + 16]
 
 	; preload the result
-	mov edx, 0x00000000
+	mov eax, 0x00000000
 
 	.MemorySearchLoop:
 		; check if the dword we just loaded is a match
-		mov eax, [esi]
-		cmp eax, ebx
+		mov edx, [esi]
+		cmp edx, ebx
 		je .MemorySearchLoopDone
 
 		inc esi
@@ -1607,14 +1569,13 @@ MemSearchDWord:
 	jmp .Exit
 
 	.MemorySearchLoopDone:
-	mov edx, esi
+	mov eax, esi
+
 
 	.Exit:
-	mov dword [ebp + 16], edx
-
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 12
 
 
 
@@ -1625,18 +1586,19 @@ MemSearchString:
 	; Searches the memory range specified for the given string
 	;
 	;  input:
-	;	search range start
-	;	search region length
-	;	address of string for which to search
+	;	Search range start
+	;	Search region length
+	;	Address of string for which to search
 	;
 	;  output:
-	;	address of match (zero if not found)
+	;	EAX - Address of match (zero if not found)
 
 	; this code is SUCH a kludge
 	; do everyone a favor and REWRITE THIS
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov ecx, [ebp + 12]
@@ -1645,10 +1607,10 @@ MemSearchString:
 	; get string length
 	push edi
 	call StringLength
-	pop ebx
+	mov ebx, eax
 
-	; exit if the string lenght is zero
-	cmp ebx, 0
+	; exit if the string length is zero
+	cmp eax, 0
 	je .Exit
 
 	; restore crucial stuff
@@ -1668,15 +1630,14 @@ MemSearchString:
 		mov ecx, ebx
 
 		; set the result to possibly be changed if necessary later
-		mov eax, dword [kFalse]
+		mov eax, false
 
 		repe cmpsb
-		jnz .Exit2
+		jnz .LoopPhase2
 
-		mov eax, dword [kTrue]
+		mov eax, true
 
-		.Exit2:
-
+		.LoopPhase2:
 		; restore stuff again
 		mov edi, [ebp + 16]
 		mov esi, [ebp + 8]
@@ -1684,7 +1645,7 @@ MemSearchString:
 		pop ebx
 
 		; decide if we have a match or not
-		cmp eax, [kTrue]
+		cmp eax, true
 		mov eax, 0x00000000
 		jne .NoMatch
 
@@ -1697,12 +1658,11 @@ MemSearchString:
 
 	loop .MemorySearchLoop
 
-	.Exit:
-	mov dword [ebp + 16], eax
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 12
 
 
 
@@ -1713,11 +1673,11 @@ MemShrinkFromBeginning:
 	; Shrinks the block of memory specified to the size specified by trimming space off the beginning
 	;
 	;  input:
-	;	block address
-	;	new size
+	;	Block address
+	;	New size
 	;
 	;  output:
-	;	result code
+	;	EDX - Result code
 
 	push ebp
 	mov ebp, esp
@@ -1729,18 +1689,17 @@ MemShrinkFromBeginning:
 	%define newBlockAddress						dword [ebp - 12]
 	%define newBlockSize						dword [ebp - 16]
 
+
 	; locate the element which corresponds to this address
-	push dword 0
 	push dword [ebp + 8]
 	call MemAddressToBlock
-	pop elementNum
-	pop eax
+	mov elementNum, eax
 
 	; test for success
-	cmp eax, [kTrue]
+	cmp edx, true
 	je .ElementFound
 		; if we get here, the element could not be found, so we fail
-		mov dword [ebp + 12], 0xF000
+		mov edx, 0xF000
 		jmp .Exit
 	.ElementFound:
 
@@ -1748,7 +1707,6 @@ MemShrinkFromBeginning:
 	push elementNum
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
 	mov elementAddress, esi
 
 	; check that the caller didn't specify a size larger than the original block (e.g. a grow instead of a shrink)
@@ -1757,7 +1715,7 @@ MemShrinkFromBeginning:
 	cmp eax, ebx
 	jb .SizeIsValid
 		; if we get here, the size was invalid
-		mov dword [ebp + 12], 0xF002
+		mov edx, 0xF002
 		jmp .Exit
 	.SizeIsValid:
 
@@ -1765,13 +1723,12 @@ MemShrinkFromBeginning:
 	push elementNum
 	push dword [tSystem.listMemory]
 	call LMElementDuplicate
-	pop eax
 
 	; test for errors
-	cmp eax, 0
+	cmp edx, 0
 	je .DuplicateSuccessful
 		; if we get here, the duplicate operation failed
-		mov dword [ebp + 12], 0xFE00
+		mov edx, 0xFE00
 		jmp .Exit
 	.DuplicateSuccessful:
 
@@ -1801,7 +1758,6 @@ MemShrinkFromBeginning:
 	push elementNum
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
 
 	; set the size
 	mov eax, dword [ebp + 12]
@@ -1819,12 +1775,13 @@ MemShrinkFromBeginning:
 
 	; if we get here, everything was successful!
 	; set the return code and exit
-	mov dword [ebp + 12], 0
+	mov edx, 0
+
 
 	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -1835,11 +1792,11 @@ MemShrinkFromEnd:
 	; Shrinks the block of memory specified to the size specified by trimming space off the end
 	;
 	;  input:
-	;	block address
-	;	new size
+	;	Block address
+	;	New size
 	;
 	;  output:
-	;	result code
+	;	EDX - Result code
 
 	push ebp
 	mov ebp, esp
@@ -1851,18 +1808,18 @@ MemShrinkFromEnd:
 	%define newBlockAddress						dword [ebp - 12]
 	%define newBlockSize						dword [ebp - 16]
 
+
 	; locate the element which corresponds to this address
 	push dword 0
 	push dword [ebp + 8]
 	call MemAddressToBlock
-	pop elementNum
-	pop eax
+	mov elementNum, eax
 
 	; test for success
-	cmp eax, [kTrue]
+	cmp edx, true
 	je .ElementFound
 		; if we get here, the element could not be found, so we fail
-		mov dword [ebp + 12], 0xF000
+		mov edx, 0xF000
 		jmp .Exit
 	.ElementFound:
 
@@ -1870,7 +1827,6 @@ MemShrinkFromEnd:
 	push elementNum
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
 	mov elementAddress, esi
 
 	; check that the caller didn't specify a size larger than the original block (e.g. a grow instead of a shrink)
@@ -1879,7 +1835,7 @@ MemShrinkFromEnd:
 	cmp eax, ebx
 	jb .SizeIsValid
 		; if we get here, the size was invalid
-		mov dword [ebp + 12], 0xF002
+		mov edx, 0xF002
 		jmp .Exit
 	.SizeIsValid:
 
@@ -1903,13 +1859,12 @@ MemShrinkFromEnd:
 	push elementNum
 	push dword [tSystem.listMemory]
 	call LMElementDuplicate
-	pop eax
 
 	; test for errors
-	cmp eax, 0
+	cmp edx, 0
 	je .DuplicateSuccessful
 		; if we get here, the duplicate operation failed
-		mov dword [ebp + 12], 0xFE00
+		mov edx, 0xFE00
 		jmp .Exit
 	.DuplicateSuccessful:
 
@@ -1918,7 +1873,6 @@ MemShrinkFromEnd:
 	push elementNum
 	push dword [tSystem.listMemory]
 	call LMElementAddressGet
-	pop esi
 
 	; set the size of the cloned block
 	mov eax, newBlockSize
@@ -1936,12 +1890,13 @@ MemShrinkFromEnd:
 	call MemMergeBlocks
 
 	; if we get here, everything was successful!
-	mov dword [ebp + 12], 0
+	mov edx, 0
+
 
 	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -1952,14 +1907,15 @@ MemSwapWordBytes:
 	; Swaps the bytes in a series of words starting at the address specified
 	;
 	;  input:
-	;	source address
-	;	number of words to process
+	;	Source address
+	;	Number of words to process
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov ecx, [ebp + 12]
@@ -1970,6 +1926,7 @@ MemSwapWordBytes:
 		mov [esi], ax
 		add esi, 2
 	loop .SwapLoop
+
 
 	mov esp, ebp
 	pop ebp
@@ -1984,14 +1941,15 @@ MemSwapDwordWords:
 	; Swaps the words in a series of dwords starting at the address specified
 	;
 	;  input:
-	;	source address
-	;	number of dwords to process
+	;	Source address
+	;	Number of dwords to process
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
+
 
 	mov esi, [ebp + 8]
 	mov ecx, [ebp + 12]
@@ -2002,6 +1960,7 @@ MemSwapDwordWords:
 		mov [esi], eax
 		add esi, 4
 	loop .SwapLoop
+
 
 	mov esp, ebp
 	pop ebp
@@ -2016,48 +1975,43 @@ Mem_Internal_MemListGrow:
 	; Adds an element to the list itself and duplicates the element specified
 	;
 	;  input:
-	;	element to duplicate during grow
+	;	Element to duplicate during grow
 	;
 	;  output:
-	;	result
-	;		kTrue - Grow was successful
-	;		kFalse - Grow was unsuccessful
+	;	EDX - Result
+	;		true - Grow was successful
+	;		false - Grow was unsuccessful
 
 	push ebp
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 8
+	sub esp, 4
 	%define blockAddress						dword [ebp - 4]
-	%define exitCode							dword [ebp - 8]
 
-	; set the exit code now to assume success
-	mov eax, dword [kTrue]
-	mov exitCode, eax
 
 	; clone the block we were given
 	push dword [ebp + 8]
 	push dword [tSystem.listMemory]
 	call LMElementDuplicate
-	pop eax
 
 	; see if there was an error, although there shouldn't be
-	cmp eax, 0
+	cmp edx, 0
 	jne .Fail
 
+	; if we get here, all was good!
+	mov edx, true
 	jmp .Exit
 
+
 	.Fail:
-	mov eax, dword [kFalse]
-	mov exitCode, eax
+	mov edx, false
+
 
 	.Exit:
-	mov eax, exitCode
-	mov dword [ebp + 8], eax
-
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -2068,44 +2022,103 @@ Mem_Internal_MemListShrink:
 	; Subtracts an element from the list itself and deletes that element
 	;
 	;  input:
-	;	element to remove during shrink
+	;	Element to remove during shrink
 	;
 	;  output:
-	;	result
-	;		kTrue - Shrink was successful
-	;		kFalse - Shrink was unsuccessful
+	;	EDX - Result
+	;		true - Shrink was successful
+	;		false - Shrink was unsuccessful
 
 	push ebp
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 8
+ 	sub esp, 4
 	%define blockAddress						dword [ebp - 4]
-	%define exitCode							dword [ebp - 8]
 
-	; set the exit code now to assume success
-	mov eax, dword [kTrue]
-	mov exitCode, eax
 
 	; next step, let's delete the block the caller specified
 	push dword [ebp + 8]
 	push dword [tSystem.listMemory]
 	call LMElementDelete
-	pop eax
 
 	; see if there was an error, although there shouldn't be
-	cmp eax, 0
+	cmp edx, 0
 	jne .Fail
 
+	; if we get here, all was good!
+	mov edx, true
 	jmp .Exit
 
+
 	.Fail:
-	mov eax, dword [kFalse]
-	mov exitCode, eax
+	mov edx, false
+
 
 	.Exit:
-	mov eax, exitCode
-	mov dword [ebp + 8], eax
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+
+
+
+
+
+
+
+PageDirInit:
+	; 
+	;
+	;  input:
+	;	
+	;
+	;  output:
+	;	
+
+	push ebp
+	mov ebp, esp
+
+	; allocate local variables
+	sub esp, 4
+	%define something							dword [ebp - 4]
+
+
+
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+PageDirBuildTo:
+	; Builds up an existing page directory to the amount of memory specified
+	;
+	;  input:
+	;	Page directory address
+	;	Amount of memory to which the directory will be built
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; allocate local variables
+	sub esp, 4
+	%define something							dword [ebp - 4]
+
+
+
+
 
 	mov esp, ebp
 	pop ebp

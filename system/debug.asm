@@ -18,26 +18,6 @@
 
 
 
-; 32-bit function listing:
-; DebugCPUFeaturesEnable		Enables debugging facilities of the CPU, if supported
-; DebugTraceDisable				Disables the single-step feature of the CPU
-; DebugTraceEnable				Enables the single-step feature of the CPU
-; Debugger						The kernel's built-in debugger
-; DebugInstacrash				Causes an instant crash
-; DebugMemoryDetails			Displays memory allocation
-; DebugMenu						Implements the in-kernel debugging menu
-; DebugPCIDevices				Displays all PCI devices in the system
-; DebugRAMBrowser				An interactive memory broswer
-; DebugStackTrace				Traces the stack and prints a list of return addresses
-; DebugSystemInfo				Displays information about the system on which Night is running
-; DebugTaskBrowser				Browse information on all loaded tasks
-; DebugVBOXLogWrite				Writes a string specidfied to the VirtualBOX guest log
-; DebugWaitForEscape			Waits for the Escape key to be pressed, then returns
-
-
-
-
-
 ; external functions
 ;extern ConvertStringHexToNumber, KeyGet, KeyWait, LMElementAddressGet, LMElementCountGet, LMItemAddAtSlot, LMListInit, MemAllocate, MemCopy
 ;extern PCICalculateNext, PCIGetNextFunction, PCIReadAll, Print32, PrintRAM32, Reboot, ScreenClear32, StringCharAppend, StringLength
@@ -152,7 +132,7 @@ Debugger:
 	;
 	;  input:
 	;  input:
-	;	task number of erroneous instruction	[ebp + 8]
+	;	Task number of erroneous instruction	[ebp + 8]
 	;	EDI register at time of trap			[ebp + 12]
 	;	ESI register at time of trap			[ebp + 16]
 	;	EBP register at time of trap			[ebp + 20]
@@ -161,9 +141,9 @@ Debugger:
 	;	EDX register at time of trap			[ebp + 32]
 	;	ECX register at time of trap			[ebp + 36]
 	;	EAX register at time of trap			[ebp + 40]
-	;	address of return point					[ebp + 44]
-	;	selector of return point				[ebp + 48]
-	;	eflags register at time of trap			[ebp + 52]
+	;	Address of return point					[ebp + 44]
+	;	Selector of return point				[ebp + 48]
+	;	EFlags register at time of trap			[ebp + 52]
 	;
 	;  output:
 	;	n/a
@@ -229,8 +209,6 @@ Debugger:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; prep the print string
@@ -258,8 +236,6 @@ Debugger:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; print register dumps
@@ -269,8 +245,6 @@ Debugger:
 	push dword 1
 	push .EAXText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -291,8 +265,6 @@ Debugger:
 	push dword 1
 	push .EBXText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -313,8 +285,6 @@ Debugger:
 	push dword 1
 	push .ECXText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -335,8 +305,6 @@ Debugger:
 	push dword 1
 	push .EDXText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -357,8 +325,6 @@ Debugger:
 	push dword 1
 	push .ESIText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -379,8 +345,6 @@ Debugger:
 	push dword 1
 	push .EDIText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -401,8 +365,6 @@ Debugger:
 	push dword 1
 	push .EBPText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -423,8 +385,6 @@ Debugger:
 	push dword 1
 	push .ESPText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -445,8 +405,6 @@ Debugger:
 	push dword 1
 	push .EIPText$
 	call Print32
-	pop eax
-	pop eax
 
 	inc cursorY
 
@@ -467,8 +425,6 @@ Debugger:
 	push dword 9
 	push .exitText$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; get the current tasking state into BL and save it for later
@@ -619,8 +575,6 @@ DebugMemoryDetails:
 	push dword 1
 	push .memoryDetailsText$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -628,16 +582,11 @@ DebugMemoryDetails:
 	push dword 1
 	push .memoryDetailsHeader$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; set up a loop to step through all elements in the memory list for printing
-	push dword 0
 	push dword [tSystem.listMemory]
 	call LMElementCountGet
-	pop ecx
-	pop edx
 	mov edx, ecx
 
 	mov cursorY, 4
@@ -655,10 +604,6 @@ DebugMemoryDetails:
 		push eax
 		push dword [tSystem.listMemory]
 		call LMElementAddressGet
-		pop esi
-		; ignore error code
-		pop ecx
-
 
 		; save esi
 		push esi
@@ -702,8 +647,10 @@ DebugMemoryDetails:
 		push dword 1
 		push .scratch$
 		call Print32
-		pop eax
-		pop cursorY
+		
+		xor ebx, ebx
+		mov bl, ah
+		mov cursorY, ebx
 
 		; restore the important stuff
 		pop edx
@@ -764,8 +711,6 @@ DebugMenu:
 	push dword 1
 	push .debugMenu$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -773,8 +718,6 @@ DebugMenu:
 	push dword 1
 	push .debugText1$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -782,8 +725,6 @@ DebugMenu:
 	push dword 1
 	push .debugText2$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -791,8 +732,6 @@ DebugMenu:
 	push dword 1
 	push .debugText3$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -800,8 +739,6 @@ DebugMenu:
 	push dword 1
 	push .debugText4$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -809,8 +746,6 @@ DebugMenu:
 	push dword 1
 	push .debugText5$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -818,8 +753,6 @@ DebugMenu:
 	push dword 1
 	push .debugText6$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -827,8 +760,6 @@ DebugMenu:
 	push dword 1
 	push .debugText7$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -836,8 +767,6 @@ DebugMenu:
 	push dword 1
 	push .debugText8$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -845,8 +774,6 @@ DebugMenu:
 	push dword 1
 	push .debugText9$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -854,8 +781,6 @@ DebugMenu:
 	push dword 1
 	push .debugText0$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword 0x00000000
 	push dword 0x00000007
@@ -863,8 +788,6 @@ DebugMenu:
 	push dword 1
 	push .escMessage$
 	call Print32
-	pop eax
-	pop eax
 
 	.DebugLoop:
 		push 0
@@ -983,14 +906,13 @@ DebugPCIDevices:
 		push 9232
 		push dword 1
 		call MemAllocate
-		pop edi
 
-		mov [PCIDeviceInfo.PCIClassTable], edi
+		mov [PCIDeviceInfo.PCIClassTable], eax
 
 		; set up the list header
 		push 36
 		push 256
-		push edi
+		push eax
 		call LMListInit
 
 
@@ -1000,154 +922,132 @@ DebugPCIDevices:
 		push dword 0
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 24
 		push PCIDeviceInfo.PCI01$
 		push dword 1
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 19
 		push PCIDeviceInfo.PCI02$
 		push dword 2
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 19
 		push PCIDeviceInfo.PCI03$
 		push dword 3
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 22
 		push PCIDeviceInfo.PCI04$
 		push dword 4
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 18
 		push PCIDeviceInfo.PCI05$
 		push dword 5
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 14
 		push PCIDeviceInfo.PCI06$
 		push dword 6
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 32
 		push PCIDeviceInfo.PCI07$
 		push dword 7
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 26
 		push PCIDeviceInfo.PCI08$
 		push dword 8
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 13
 		push PCIDeviceInfo.PCI09$
 		push dword 9
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 16
 		push PCIDeviceInfo.PCI0A$
 		push dword 10
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 10
 		push PCIDeviceInfo.PCI0B$
 		push dword 11
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 15
 		push PCIDeviceInfo.PCI0C$
 		push dword 12
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 20
 		push PCIDeviceInfo.PCI0D$
 		push dword 13
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 27
 		push PCIDeviceInfo.PCI0E$
 		push dword 14
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 36
 		push PCIDeviceInfo.PCI0F$
 		push dword 15
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 22
 		push PCIDeviceInfo.PCI10$
 		push dword 16
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 29
 		push PCIDeviceInfo.PCI11$
 		push dword 17
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 23
 		push PCIDeviceInfo.PCI12$
 		push dword 18
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 30
 		push PCIDeviceInfo.PCI13$
 		push dword 19
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 12
 		push PCIDeviceInfo.PCI40$
 		push dword 64
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 
 		push dword 17
 		push PCIDeviceInfo.PCIFF$
 		push dword 255
 		push dword [PCIDeviceInfo.PCIClassTable]
 		call LMItemAddAtSlot
-		pop eax
 		mov byte [.flag], 1
 
 	.PCIInitSkip:
@@ -1160,8 +1060,6 @@ DebugPCIDevices:
 	push dword 1
 	push .PCIInfoText$
 	call Print32
-	pop eax
-	pop eax
 
 	; see if we have to print data on all devices of on a specific device
 	cmp dword [.currentDevice], 0
@@ -1186,8 +1084,6 @@ DebugPCIDevices:
 		push dword 13
 		push .scratch$
 		call Print32
-		pop eax
-		pop eax
 
 
 		; print the device description header
@@ -1197,8 +1093,6 @@ DebugPCIDevices:
 		push dword 1
 		push .PCIDeviceDescriptionText1$
 		call Print32
-		pop eax
-		pop eax
 
 
 		; init the values
@@ -1212,9 +1106,9 @@ DebugPCIDevices:
 			push dword [.PCIDevice]
 			push dword [.PCIBus]
 			call PCIGetNextFunction
-			pop dword [.PCIFunction]
-			pop dword [.PCIDevice]
-			pop dword [.PCIBus]
+			mov dword [.PCIBus], eax
+			mov dword [.PCIDevice], ebx
+			mov dword [.PCIFunction], ecx
 
 			; see if we're done yet
 			mov eax, dword [.PCIBus]
@@ -1236,12 +1130,9 @@ DebugPCIDevices:
 			push eax
 			push dword [PCIDeviceInfo.PCIClassTable]
 			call LMElementAddressGet
-			pop edx
-			; ignore error code
-			pop ecx
 
 			; save the address for later
-			push edx
+			push esi
 
 			; build the rest of the PCI data into line 1 for this device
 			push 80
@@ -1319,17 +1210,18 @@ DebugPCIDevices:
 			push dword 1
 			push .scratch$
 			call Print32
-			pop eax
-			pop cursorY
+			xor ebx, ebx
+			mov bl, ah
+			mov cursorY, ebx
 
 			; advance to the next slot
 			push dword [.PCIFunction]
 			push dword [.PCIDevice]
 			push dword [.PCIBus]
 			call PCICalculateNext
-			pop dword [.PCIFunction]
-			pop dword [.PCIDevice]
-			pop dword [.PCIBus]
+			mov dword [.PCIBus], eax
+			mov dword [.PCIDevice], ebx
+			mov dword [.PCIFunction], ecx
 
 		jmp .PCIListAllLoop
 
@@ -1357,8 +1249,6 @@ DebugPCIDevices:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	mov eax, dword [.currentDevice]
@@ -1366,13 +1256,9 @@ DebugPCIDevices:
 	push eax
 	push dword [tSystem.listPCIDevices]
 	call LMElementAddressGet
-	pop eax
-	; ignore error code
-	pop ecx
-
 
 	; adjust the address to skip the pci bus/device/function data
-	add eax, 12
+	add esi, 12
 
 	; dump the memory space
 	push dword 0x00000000
@@ -1380,7 +1266,7 @@ DebugPCIDevices:
 	push dword 3
 	push dword 1
 	push dword 16
-	push eax
+	push esi
 	call PrintRAM32
 			
 	.GetInputLoop:
@@ -1528,8 +1414,6 @@ DebugRAMBrowser:
 	push dword 1
 	push .RAMBrowserText$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; set the default values
@@ -1567,8 +1451,6 @@ DebugRAMBrowser:
 		push dword 13
 		push .JumpText$
 		call Print32
-		pop eax
-		pop eax
 
 		mov eax, numLines
 		add eax, 5
@@ -1578,8 +1460,6 @@ DebugRAMBrowser:
 		push dword 37
 		push .JumpString$
 		call Print32
-		pop eax
-		pop eax
 
 
 		; get a keypress and handle it
@@ -1688,7 +1568,6 @@ DebugRAMBrowser:
 		jne .NotEnter
 			push .JumpString$
 			call ConvertStringHexToNumber
-			pop eax
 			mov dword [.startAddress], eax
 		.NotEnter:
 	
@@ -1814,9 +1693,6 @@ DebugStackTrace:
 		push dword [ebp + 12]
 		push .scratch$
 		call Print32
-		pop eax
-		pop eax
-
 
 		popa
 	jmp	.TraceLoop
@@ -1861,8 +1737,6 @@ DebugSystemInfo:
 	push dword 1
 	push .systemInfoText$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; print the kernel string
@@ -1872,8 +1746,6 @@ DebugSystemInfo:
 	push dword 1
 	push tSystem.copyright$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the version string
@@ -1896,14 +1768,19 @@ DebugSystemInfo:
 	push .scratch$
 	call StringTokenHexadecimal
 
+	push dword 0
+	mov eax, 0x00000000
+	mov ax, word [tSystem.versionBuild]
+	push eax
+	push .scratch$
+	call StringTokenDecimal
+
 	push dword 0x00000000
 	push dword 0x00000007
 	push dword 7
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; print the CPU string
@@ -1913,8 +1790,6 @@ DebugSystemInfo:
 	push dword 1
 	push tSystem.CPUIDBrand$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the Drive List string
@@ -1934,8 +1809,6 @@ DebugSystemInfo:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the Memory List string
@@ -1955,8 +1828,6 @@ DebugSystemInfo:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the Partition List string
@@ -1976,8 +1847,6 @@ DebugSystemInfo:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the PCI Devices List string
@@ -1997,8 +1866,6 @@ DebugSystemInfo:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build the Tasks List string
@@ -2018,8 +1885,6 @@ DebugSystemInfo:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; ESC lets us leave, kids
@@ -2036,7 +1901,7 @@ ret
 
 section .data
 .systemInfoText$								db 'System Information', 0x00
-.versionFormat$									db 'Kernel version ^.^', 0x00
+.versionFormat$									db 'Kernel version ^.^ build ^', 0x00
 .listDriveFormat$								db 'Drive List                0x^', 0x00
 .listPartitionFormat$							db 'Partition List            0x^', 0x00
 .listPCIDevicesFormat$							db 'PCI Devices List          0x^', 0x00
@@ -2083,8 +1948,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .IntroText$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; print the instructions
@@ -2094,8 +1957,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .Instructions$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; get the starting address of this task's slot in the task list
@@ -2104,8 +1965,6 @@ DebugTaskBrowser:
 	push eax
 	push dword [tSystem.listTasks]
 	call LMElementAddressGet
-	pop esi
-	pop eax
 	mov currentTaskSlotAddress, esi
 
 
@@ -2128,8 +1987,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; print the task's name (if not null)
@@ -2144,8 +2001,6 @@ DebugTaskBrowser:
 		push dword 33
 		push eax
 		call Print32
-		pop eax
-		pop eax
 	.SkipName:
 
 
@@ -2166,8 +2021,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push 80
@@ -2186,8 +2039,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push 80
@@ -2207,8 +2058,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push 80
@@ -2237,8 +2086,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push 80
@@ -2267,8 +2114,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push 80
@@ -2288,8 +2133,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push 80
@@ -2309,8 +2152,6 @@ DebugTaskBrowser:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	.GetInputLoop:
@@ -2338,8 +2179,6 @@ DebugTaskBrowser:
 		push dword 1
 		push .scratch$
 		call Print32
-		pop eax
-		pop eax
 
 
 		; now get and handle input
@@ -2426,7 +2265,7 @@ section .data
 .taskFlagsFormat$								db 'Flags                      0x^', 0x00
 .CPULoadFormat$									db 'Timeslice utilization      ^ ^', 0x00
 .pageDirAddressFormat$							db 'Page directory address     0x^', 0x00
-.name$			db 'Kernel Debug Menu -------------', 0x00
+.name$											db 'Kernel Debug Menu -------------', 0x00
 
 
 
@@ -2436,7 +2275,7 @@ DebugVBoxLogWrite:
 	; Writes the string specidfied to the VirtualBox guest log
 	;
 	;  input:
-	;	string address
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -2451,7 +2290,7 @@ DebugVBoxLogWrite:
 	; get the string's length
 	push esi
 	call StringLength
-	pop ecx
+	mov ecx, eax
 
 	; save the length for later
 	mov ebx, ecx

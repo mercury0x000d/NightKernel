@@ -7,6 +7,7 @@ asflags = -f bin -F null -g -l night.lst
 build:
 	$(info Assembling the Night Kernel...)
 	@nasm $(asflags) -o builds/kernel.sys kernel.asm
+	@./xenops --file system/globals.asm
 
 
 
@@ -45,6 +46,7 @@ run:
 all:
 	$(info Assembling the Night Kernel...)
 	@nasm $(asflags) -o builds/kernel.sys kernel.asm
+	@./xenops --file system/globals.asm
 
 	$(info Making a folder to which we will mount the vdi image...)
 	@mkdir VBoxDisk -p

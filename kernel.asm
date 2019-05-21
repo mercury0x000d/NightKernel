@@ -174,7 +174,7 @@ mov esp, 0x0009FB00
 
 
 
-; turn on CPU cebug extensions
+; turn on CPU debug extensions
 push progressText08$
 call PrintIfConfigBits32
 call DebugCPUFeaturesEnable
@@ -196,7 +196,6 @@ call PrintIfConfigBits32
 push dword [kKernelStack]
 push dword 1
 call MemAllocate
-pop eax
 
 mov ebx, [kKernelStack]
 add eax, ebx
@@ -255,13 +254,12 @@ call PrintIfConfigBits32
 push 30736
 push dword 1
 call MemAllocate
-pop edi
-mov [tSystem.listDrives], edi
+mov [tSystem.listDrives], eax
 
 ; set up the list header
 push 120
 push 256
-push edi
+push eax
 call LMListInit
 
 
@@ -271,13 +269,12 @@ call LMListInit
 push 19472
 push dword 1
 call MemAllocate
-pop edi
-mov [tSystem.listPartitions], edi
+mov [tSystem.listPartitions], eax
 
 ; set up the list header
 push 76
 push 256
-push edi
+push eax
 call LMListInit
 
 
@@ -400,7 +397,7 @@ mov cr0, eax
 ; If all went well, a dump of RAM in the VirtualBox debugger should show the same data
 ; at both address 0x000000 and 0x400000, even though we only wrote it at 0x400000.
 ; How is this possible? THE MAGIC OF PAGING IS AMONG US!
-mov eax, 0x00600000
+mov eax, 0x00400000
 mov dword [eax], 0xCAFEBEEF
 
 
@@ -425,7 +422,7 @@ PageDirCreate:
 	push 4096
 	push 0x01
 	call MemAllocateAligned
-	pop PDAddress
+	mov PDAddress, eax
 
 	mov ecx, 1024
 	.zeroLoop:
@@ -457,7 +454,7 @@ PageTableCreate:
 	push 4096
 	push 0x01
 	call MemAllocateAligned
-	pop PTAddress
+	mov PTAddress, eax
 
 	mov ecx, 1024
 	.zeroLoop:
@@ -556,7 +553,6 @@ call ScreenClear32
 push dword 0x3202
 push Task1
 call TaskNew
-pop eax
 
 push Task1.name$
 push eax
@@ -566,7 +562,6 @@ call TaskNameSet
 push dword 0x3202
 push Task2
 call TaskNew
-pop eax
 
 push Task2.name$
 push eax
@@ -576,7 +571,6 @@ call TaskNameSet
 push dword 0x23202
 push Task5
 call TaskNew
-pop eax
 
 push Task5.name$
 push eax
@@ -586,7 +580,6 @@ call TaskNameSet
 push dword 0x3202
 push DebugMenu
 call TaskNew
-pop eax
 
 push name$
 push eax
@@ -596,7 +589,6 @@ call TaskNameSet
 push dword 0x3202
 push Task3
 call TaskNew
-pop eax
 
 push Task3.name$
 push eax
@@ -638,7 +630,7 @@ iretd
 
 
 UserModeEntry:
-; ye olde obilatory stack fixup
+; ye olde obligatory stack fixup
 add esp, 4
 
 
@@ -721,8 +713,6 @@ Task1:
 	push dword 64
 	push .scratch1$
 	call Print32
-	pop eax
-	pop eax
 jmp Task1
 
 section .data
@@ -789,8 +779,6 @@ Task2:
 	push dword 1
 	push .scratch2$
 	call Print32
-	pop eax
-	pop eax
 jmp Task2
 
 section .data
@@ -877,8 +865,6 @@ Task3:
 	push dword 1
 	push .scratch3$
 	call Print32
-	pop eax
-	pop eax
 
 	; see if we have a new record holder
 	mov eax, dword [.counter]
@@ -909,7 +895,6 @@ Task4:
 	push dword 0x3202
 	push Task4
 	call TaskNew
-	pop eax
 
 	push eax
 	call TaskKill
@@ -980,17 +965,17 @@ section .text
 %include "api/misc.asm"
 %include "api/strings.asm"
 %include "io/serial.asm"
-%include "system/cmos.asm"
-%include "system/cpu.asm"
-%include "system/gdt.asm"
+%include "system/CMOS.asm"
+%include "system/CPU.asm"
+%include "system/GDT.asm"
 %include "system/hardware.asm"
 %include "system/interrupts.asm"
 %include "system/memory.asm"
 %include "system/partitions.asm"
-%include "system/pci.asm"
-%include "system/pic.asm"
+%include "system/PCI.asm"
+%include "system/PIC.asm"
 %include "system/power.asm"
-%include "system/rtc.asm"
+%include "system/RTC.asm"
 %include "system/tasks.asm"
 %include "video/screen.asm"
 %include "system/debug.asm"

@@ -18,19 +18,7 @@
 
 
 
-; 32-bit function listing:
-; CriticalError					Handles the UI portion of traps and exceptions
-; IDTInit						Initializes the kernel IDT
-; InterruptHandlerGet			Formats the passed data and writes it to the IDT in the slot specified
-; InterruptHandlerSet			Formats the passed data and writes it to the IDT in the slot specified
-; InterruptUnimplemented		A generic handler to run when an unimplemented interrupt is called
-; ISRInitAll					Sets the interrupt handler addresses into the IDT
-; TaskSwitch					Performs a context switch to the next task
-
-
-
-
-
+; constants
 kIDTPtr											dd 0x00000000
 
 
@@ -59,20 +47,20 @@ CriticalError:
 	; Handles the UI portion of traps and exceptions
 	;
 	;  input:
-	;	address of error description string		[ebp + 8]
-	;	task number of erroneous instruction	[ebp + 12]
+	;	Address of error description string		[ebp + 8]
+	;	Task number of erroneous instruction	[ebp + 12]
 	;	EDI register at time of trap			[ebp + 16]
 	;	ESI register at time of trap			[ebp + 20]
 	;	EBP register at time of trap			[ebp + 24]
-	;	ESP (bad) register at time of trap		[ebp + 28]
+	;	ESP (original) register at time of trap	[ebp + 28]
 	;	EBX register at time of trap			[ebp + 32]
 	;	EDX register at time of trap			[ebp + 36]
 	;	ECX register at time of trap			[ebp + 40]
 	;	EAX register at time of trap			[ebp + 44]
-	;	address of offending instruction		[ebp + 48]
-	;	selector of offending instruction		[ebp + 52]
-	;	eflags register at time of trap			[ebp + 56]
-	;	ESP register at time of trap			[ebp + 60]
+	;	Address of offending instruction		[ebp + 48]
+	;	Selector of offending instruction		[ebp + 52]
+	;	EFlags register at time of trap			[ebp + 56]
+	;	ESP (adjusted) register at time of trap	[ebp + 60]
 	;	SS register at time of trap				[ebp + 64]
 	;
 	;  output:
@@ -175,8 +163,6 @@ CriticalError:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the task number, and name if available
@@ -203,8 +189,6 @@ CriticalError:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print the register dumps
@@ -214,8 +198,6 @@ CriticalError:
 	push dword 1
 	push .registerText$
 	call Print32
-	pop eax
-	pop eax
 
 	; prep the print string
 	push 80
@@ -249,8 +231,7 @@ CriticalError:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
+
 
 	; prep the print string
 	push 80
@@ -284,8 +265,6 @@ CriticalError:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; prep the print string
@@ -313,8 +292,6 @@ CriticalError:
 	push dword 1
 	push .scratch$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; build and print bytes at cs:eip
@@ -324,8 +301,6 @@ CriticalError:
 	push dword 1
 	push .EIPText$
 	call Print32
-	pop eax
-	pop eax
 
 
 	push dword backColor
@@ -344,8 +319,6 @@ CriticalError:
 	push dword 1
 	push .userStackDumpText$
 	call Print32
-	pop eax
-	pop eax
 
 	push dword backColor
 	push dword textColor
@@ -362,8 +335,6 @@ CriticalError:
 	push dword 1
 	push .kernelStackDumpText$
 	call Print32
-	pop eax
-	pop eax
 	
 	; get the location of the stack prior to this error
 	mov eax, esp
@@ -387,8 +358,6 @@ CriticalError:
 	push dword 16
 	push .exitText$
 	call Print32
-	pop eax
-	pop eax
 
 
 	; pause tasking and turn interrupts back on so we can get keypresses again
@@ -448,10 +417,10 @@ IDTInit:
 	; Initializes the kernel IDT
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -460,7 +429,6 @@ IDTInit:
 	push dword 65536
 	push dword 1
 	call MemAllocate
-	pop eax
 	mov dword [kIDTPtr], eax
 
 	; set the proper value into the IDT struct
@@ -500,13 +468,13 @@ tIDT:
 
 section .text
 InterruptHandlerGetAddress:
-	; Returns the selector, handler address, and flags for the specified interrupt number
+	; Returns the handler address for the specified interrupt number
 	;
 	;  input:
 	;	IDT index
 	;
 	;  output:
-	;	ISR address
+	;	EAX - ISR address
 
 	push ebp
 	mov ebp, esp
@@ -518,7 +486,6 @@ InterruptHandlerGetAddress:
 	mul ebx
 	mov esi, dword [kIDTPtr]
 	add esi, eax
-
 
 	; get what we came for and leave!
 	mov eax, 0x00000000
@@ -527,12 +494,11 @@ InterruptHandlerGetAddress:
 	shl eax, 16
 	sub esi, 6
 	mov ax, word [esi]
-	mov dword [ebp + 8], eax
 
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -540,13 +506,13 @@ ret
 
 section .text
 InterruptHandlerGetFlags:
-	; Returns the selector, handler address, and flags for the specified interrupt number
+	; Returns the flags for the specified interrupt number
 	;
 	;  input:
 	;	IDT index
 	;
 	;  output:
-	;	Flags
+	;	EAX - Flags
 
 	push ebp
 	mov ebp, esp
@@ -559,20 +525,17 @@ InterruptHandlerGetFlags:
 	mov esi, dword [kIDTPtr]
 	add esi, eax
 
-
 	; adjust the address to point to the selector
 	add esi, 5
-
 
 	; get what we came for and leave!
 	mov eax, 0x00000000
 	mov al, byte [esi]
-	mov dword [ebp + 8], eax
 
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -580,13 +543,13 @@ ret
 
 section .text
 InterruptHandlerGetSelector:
-	; Returns the selector, handler address, and flags for the specified interrupt number
+	; Returns the selector for the specified interrupt number
 	;
 	;  input:
 	;	IDT index
 	;
 	;  output:
-	;	ISR selector
+	;	EAX - ISR selector
 
 	push ebp
 	mov ebp, esp
@@ -607,12 +570,11 @@ InterruptHandlerGetSelector:
 	; get what we came for and leave!
 	mov eax, 0x00000000
 	mov ax, word [esi]
-	mov dword [ebp + 8], eax
 
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -623,13 +585,13 @@ InterruptHandlerSet:
 	; Formats the passed data and writes it to the IDT in the slot specified
 	;
 	;  input:
-	;   IDT index
-	;   ISR selector
-	;   ISR base address
-	;   flags
+	;	IDT index
+	;	ISR selector
+	;	ISR base address
+	;	Flags
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -687,10 +649,10 @@ InterruptUnimplemented:
 	; A generic handler to run when an unimplemented interrupt is called
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -718,10 +680,10 @@ ISRInitAll:
 	; Sets all the kernel interrupt handler addresses into the IDT
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp

@@ -18,13 +18,6 @@
 
 
 
-; 32-bit function listing:
-; PartitionEnumerate			Scans the partition tables of all drives in the drive list and loads their data into the partitions list
-
-
-
-
-
 ; external functions
 ;extern DriverSpaceEnd, DriverSpaceStart, LMElementAddressGet, LMElementCountGet, LMSlotFindFirstFree, MemAllocate, MemSearchString
 ;extern PrintIfConfigBits32, StringTokenHexadecimal
@@ -72,10 +65,10 @@ PartitionEnumerate:
 	; Scans the partition tables of all drives in the drive list and loads their data into the partitions list
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -96,14 +89,12 @@ PartitionEnumerate:
 	push 512
 	push dword 1
 	call MemAllocate
-	pop sectorBufferAddr
+	mov sectorBufferAddr, eax
 
 	; step through the drives list and discover partitions on each hard drive (other drive types are excluded)
-	push dword 0
 	push dword [tSystem.listDrives]
 	call LMElementCountGet
-	pop driveListElementCount
-	pop eax
+	mov driveListElementCount, ecx
 
 	; clear our counter
 	mov driveListCurrentElement, 0
@@ -113,10 +104,7 @@ PartitionEnumerate:
 		push driveListCurrentElement
 		push dword [tSystem.listDrives]
 		call LMElementAddressGet
-		pop esi
 		mov driveListCurrentElementAddr, esi
-		; ignore error code
-		pop eax
 
 		; see if this drive is a hard drive
 		cmp dword [tDriveInfo.deviceFlags], 1
@@ -196,21 +184,15 @@ ret
 
 .BuildPartitionEntry:
 	; get first free slot in the partition list
-	push dword 0
 	push dword [tSystem.listPartitions]
 	call LMSlotFindFirstFree
-	pop eax
-	pop ebx
 	mov partitionListCurrentElement, eax
 
 	; get the starting address of that specific slot into esi and save it for later
 	push eax
 	push dword [tSystem.listPartitions]
 	call LMElementAddressGet
-	pop esi
 	mov partitionListCurrentElementAddr, esi
-	; ignore error code
-	pop eax
 
 	; save base port and device info (from this drive's slot in the drive list) to the slot we're writing in the partition table
 	mov esi, driveListCurrentElementAddr
@@ -268,7 +250,7 @@ ret
 		push dword 16
 		push esi
 		call MemSearchString
-		pop edi
+		mov edi, eax
 
 		; restore search address
 		pop esi

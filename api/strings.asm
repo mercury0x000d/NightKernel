@@ -44,8 +44,8 @@ ConvertByteToHexString16:
 	; Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode
 	;
 	;  input:
-	;	numeric byte value
-	;	string address
+	;	Numeric byte value
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -89,8 +89,8 @@ ConvertWordToHexString16:
 	; Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
 	;
 	;  input:
-	;	numeric word value
-	;	string address
+	;	Numeric word value
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -168,8 +168,8 @@ ConvertNumberBinaryToString:
 	; Note: No terminating null is put on the end of the string - do that yourself.
 	;
 	;  input:
-	;	numeric value
-	;	string address
+	;	Numeric value
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -219,8 +219,8 @@ ConvertNumberDecimalToString:
 	; Note: No terminating null is put on the end of the string - do that yourself.
 	;
 	;  input:
-	;	numeric value
-	;	string address
+	;	Numeric value
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -270,8 +270,8 @@ ConvertNumberHexToString:
 	; Note: No terminating null is put on the end of the string - do that yourself.
 	;
 	;  input:
-	;	numeric value
-	;	string address
+	;	Numeric value
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -360,8 +360,8 @@ ConvertNumberOctalToString:
 	; Note: No terminating null is put on the end of the string - do that yourself.
 	;
 	;  input:
-	;	numeric value
-	;	string address
+	;	Numeric value
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -393,9 +393,10 @@ ConvertNumberOctalToString:
 		dec esi														; move to the next position in the buffer
 		cmp eax, 0
 		jz .Exit													; if ax=0, end of the procedure
-		jmp .DecodeLoop												; else repeat
-	.Exit:
+	jmp .DecodeLoop													; else repeat
 
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -412,7 +413,7 @@ ConvertStringBinaryToNumber:
 	;	String address
 	;
 	;  output:
-	;	Numeric value
+	;	EAX - Numeric value
 
 	push ebp
 	mov ebp, esp
@@ -427,7 +428,7 @@ ConvertStringBinaryToNumber:
 	; get the string length
 	push dword [ebp + 8]
 	call StringLength
-	pop strLen
+	mov strLen, eax
 
 	; leave if the string is longer than 32 characters
 	cmp strLen, 32
@@ -482,14 +483,13 @@ ConvertStringBinaryToNumber:
 	.Error:
 	mov accumulator, 0
 
-	
+
 	.Done:
 	mov eax, accumulator
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -503,7 +503,7 @@ ConvertStringDecimalToNumber:
 	;	String address
 	;
 	;  output:
-	;	Numeric value
+	;	EAX - Numeric value
 
 	push ebp
 	mov ebp, esp
@@ -518,7 +518,7 @@ ConvertStringDecimalToNumber:
 	; get the string length
 	push dword [ebp + 8]
 	call StringLength
-	pop strLen
+	mov strLen, eax
 
 	; leave if the string is longer than 10 characters
 	cmp strLen, 10
@@ -576,14 +576,13 @@ ConvertStringDecimalToNumber:
 	.Error:
 	mov accumulator, 0
 
-	
+
 	.Done:
 	mov eax, accumulator
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -597,7 +596,7 @@ ConvertStringHexToNumber:
 	;	String address
 	;
 	;  output:
-	;	Numeric value
+	;	EAX - Numeric value
 
 	push ebp
 	mov ebp, esp
@@ -612,7 +611,7 @@ ConvertStringHexToNumber:
 	; get the string length
 	push dword [ebp + 8]
 	call StringLength
-	pop strLen
+	mov strLen, eax
 
 	; leave if the string is longer than 8 characters
 	cmp strLen, 8
@@ -695,11 +694,10 @@ ConvertStringHexToNumber:
 	
 	.Done:
 	mov eax, accumulator
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -713,7 +711,7 @@ ConvertStringOctalToNumber:
 	;	String address
 	;
 	;  output:
-	;	Numeric value
+	;	EAX - Numeric value
 
 	push ebp
 	mov ebp, esp
@@ -728,7 +726,7 @@ ConvertStringOctalToNumber:
 	; get the string length
 	push dword [ebp + 8]
 	call StringLength
-	pop strLen
+	mov strLen, eax
 
 	; leave if the string is longer than 11 characters
 	cmp strLen, 11
@@ -786,11 +784,10 @@ ConvertStringOctalToNumber:
 	
 	.Done:
 	mov eax, accumulator
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -801,7 +798,7 @@ StringCaseLower:
 	; Converts a string to lower case
 	;
 	;  input:
-	;	string address
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -845,7 +842,7 @@ StringCaseUpper:
 	; Converts a string to upper case
 	;
 	;  input:
-	;	string address
+	;	String address
 	;
 	;  output:
 	;	n/a
@@ -889,7 +886,7 @@ StringCharAppend:
 	; Appends a character onto the end of the string specified
 	;
 	;  input:
-	;	string address
+	;	String address
 	;	ASCII code of character to add
 	;
 	;  output:
@@ -901,7 +898,7 @@ StringCharAppend:
 	; get the length of the string passed
 	push dword [ebp + 8]
 	call StringLength
-	pop edi
+	mov edi, eax
 	add edi, [ebp + 8]
 
 	; write the ASCII character
@@ -925,8 +922,8 @@ StringCharDelete:
 	; Deletes the character at the location specified from the string
 	;
 	;  input:
-	;	string address
-	;	character position to remove
+	;	String address
+	;	Character position to remove
 	;
 	;  output:
 	;	n/a
@@ -977,7 +974,7 @@ StringCharPrepend:
 	; Prepends a character onto the beginning of the string specified
 	;
 	;  input:
-	;	string address
+	;	String address
 	;	ASCII code of character to add
 	;
 	;  output:
@@ -990,7 +987,7 @@ StringCharPrepend:
 	; get the length of the string passed
 	push dword [ebp + 8]
 	call StringLength
-	pop ecx
+	mov ecx, eax
 	
 	; set up our string loop addresses
 	mov esi, [ebp + 8]
@@ -1027,8 +1024,8 @@ StringFill:
 	; Fills the entire string specified with the character specified
 	;
 	;  input:
-	;	string address
-	;	fill character
+	;	String address
+	;	Fill character
 	;
 	;  output:
 	;	n/a
@@ -1066,9 +1063,9 @@ StringInsert:
 	; Inserts a string into another string at the location specified
 	;
 	;  input:
-	;	address of main string
-	;	address of string to be inserted
-	;	position after which to insert the string
+	;	Address of main string
+	;	Address of string to be inserted
+	;	Position after which to insert the string
 	;
 	;  output:
 	;	n/a
@@ -1085,7 +1082,7 @@ StringInsert:
 	; get the length of the main string
 	push dword [ebp + 8]
 	call StringLength
-	pop mainLength
+	mov mainLength, eax
 
 
 	; check insert position; writing AT the end of the string is okay, PAST it is not
@@ -1100,7 +1097,7 @@ StringInsert:
 	; get the length of the insert string
 	push dword [ebp + 12]
 	call StringLength
-	pop insertLength
+	mov insertLength, eax
 
 
 	; load up some registers for speed
@@ -1153,7 +1150,7 @@ StringInsert:
 		cmp al, 0x00
 		
 		; if so, jump out of the loop - we're done!
-		je .StringWriteDone						
+		je .Exit
 
 		; if we get here, it's not the end yet
 		mov [ecx], al
@@ -1162,9 +1159,9 @@ StringInsert:
 		inc edx
 		inc ecx
 	jmp .StringWriteLoop
-	.StringWriteDone:
-	.Exit:
 
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1178,10 +1175,10 @@ StringLength:
 	; Returns the length of the string specified
 	;
 	;  input:
-	;	string starting address
+	;	String starting address
 	;
 	;  output:
-	;	string length
+	;	EAX - String length
 
 	push ebp
 	mov ebp, esp
@@ -1197,13 +1194,13 @@ StringLength:
 	sub edi, esi
 	dec edi
 
-	; push the info and exit
-	mov dword [ebp + 8], edi
+	; put the result into EAX and exit
+	mov eax, edi
 
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -1214,16 +1211,15 @@ StringPadLeft:
 	; Pads the left side of the string specified with the character specified until it is the length specified
 	;
 	;  input:
-	;	string address
-	;	padding character
-	;	length to which the string will be extended
+	;	String address
+	;	Padding character
+	;	Length to which the string will be extended
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
-
 
 	; allocate local variables
 	sub esp, 4
@@ -1233,7 +1229,7 @@ StringPadLeft:
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop strLen
+	mov strLen, eax
 
 	; exit if the string specified is already greater than the length given
 	mov eax, dword [ebp + 16]
@@ -1256,6 +1252,7 @@ StringPadLeft:
 	inc ecx
 	pushf
 	std
+
 	.ShiftLoop:
 		lodsb
 		stosb
@@ -1269,8 +1266,8 @@ StringPadLeft:
 	push dword [ebp + 8]
 	call MemFill
 
-	.Exit:
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1284,9 +1281,9 @@ StringPadRight:
 	; Pads the right side of the string specified with the character specified until it is the length specified
 	;
 	;  input:
-	;	string address
-	;	padding character
-	;	length to which string will be extended
+	;	String address
+	;	Padding character
+	;	Length to which string will be extended
 	;
 	;  output:
 	;	n/a
@@ -1303,7 +1300,7 @@ StringPadRight:
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop strLen
+	mov strLen, eax
 
 	; exit if the string specified is already greater than the length given
 	mov eax, dword [ebp + 16]
@@ -1330,8 +1327,8 @@ StringPadRight:
 	add ebx, dword [ebp + 16]
 	mov byte [ebx], 0
 
-	.Exit:
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1345,9 +1342,9 @@ StringReplaceChars:
 	; Replaces all occurrances of the specified character with another character specified
 	;
 	;  input:
-	;	string address
-	;	character to be replaced
-	;	replacement character
+	;	String address
+	;	Character to be replaced
+	;	Replacement character
 	;
 	;  output:
 	;	n/a
@@ -1391,16 +1388,17 @@ StringReplaceCharsInRange:
 	; Replaces any character within the range of ASCII codes specified with the specified character
 	;
 	;  input:
-	;	string address
-	;	start of ASCII range
-	;	end of ASCII range
-	;	replacement character
+	;	String address
+	;	Start of ASCII range
+	;	End of ASCII range
+	;	Replacement character
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
+
 
 	mov ecx, [ebp + 8]
 	mov eax, [ebp + 12]
@@ -1418,7 +1416,7 @@ StringReplaceCharsInRange:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .StringLoopDone
+		je .Exit
 
 		cmp al, bh
 		jb .NotInRange
@@ -1432,8 +1430,9 @@ StringReplaceCharsInRange:
 		.NotInRange:
 		inc ecx
 	jmp .StringLoop
-	.StringLoopDone:
 
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1447,11 +1446,11 @@ StringSearchChar:
 	; Returns the position in the string specified of the character code specified
 	;
 	;  input:
-	;	address of string to be scanned
+	;	Address of string to be scanned
 	;	ASCII value of byte for which to search
 	;
 	;  output:
-	;	position of match, or zero if no match
+	;	EAX - Position of match, or zero if no match
 
 	push ebp
 	mov ebp, esp
@@ -1465,7 +1464,7 @@ StringSearchChar:
 	; get length of the main string
 	push dword [ebp + 8]
 	call StringLength
-	pop ecx
+	mov ecx, eax
 
 
 	; exit if the string was null, save eax if not
@@ -1490,15 +1489,13 @@ StringSearchChar:
 
 	; a match was found, so update the position
 	sub stringLen, ecx
-	mov ecx, stringLen
+	mov eax, stringLen
 
 
 	.Exit:
-	mov dword [ebp + 12], ecx
-
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -1509,11 +1506,11 @@ StringSearchCharList:
 	; Returns the position in the string specified of the first match from a list of characters
 	;
 	;  input:
-	;	address of string to be scanned
-	;	address of character list string
+	;	Address of string to be scanned
+	;	Address of character list string
 	;
 	;  output:
-	;	position of match, or zero if no match
+	;	EAX - Position of match, or zero if no match
 
 	push ebp
 	mov ebp, esp
@@ -1532,7 +1529,6 @@ StringSearchCharList:
 	; get length of the main string
 	push dword [ebp + 8]
 	call StringLength
-	pop eax
 
 	; exit if the string was null, save eax if not
 	cmp eax, 0
@@ -1542,7 +1538,6 @@ StringSearchCharList:
 	; get length of the list string
 	push dword [ebp + 12]
 	call StringLength
-	pop eax
 
 	; exit if the string was null, save eax if not
 	cmp eax, 0
@@ -1585,20 +1580,22 @@ StringSearchCharList:
 		mov ecx, ebx
 		inc esi
 	loop .scanLoop
-	
+
+
 	.Exit:
 	; see if the return value is still 0xFFFFFFFF and make it zero if so
 	cmp returnValue, 0xFFFFFFFF
 	jne .NoAdjust
 	mov returnValue, 0
 
+
 	.NoAdjust:
 	mov eax, returnValue
-	mov dword [ebp + 12], eax
+
 
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -1609,9 +1606,9 @@ StringTokenBinary:
 	; Finds the first occurrance of the ^ character and replaces it with a binary number, truncated to the length specified
 	;
 	;  input:
-	;	string address
-	;	dword value to be added to the string
-	;	number trim value
+	;	String address
+	;	Dword value to be added to the string
+	;	Number trim value
 	;
 	;  output:
 	;	n/a
@@ -1629,7 +1626,6 @@ StringTokenBinary:
 	; get the length of the formatting string, exit if it's null
 	push dword [ebp + 8]
 	call StringLength
-	pop eax
 	cmp eax, 0
 	je .Done
 
@@ -1638,7 +1634,7 @@ StringTokenBinary:
 	push dword 0x0000005E
 	push dword [ebp + 8]
 	call StringSearchChar
-	pop tokenPosition
+	mov tokenPosition, eax
 
 
 	; if the token location is 0, then no token was found... so we exit
@@ -1723,16 +1719,15 @@ StringTokenDecimal:
 	; Finds the first occurrance of the ^ character and replaces it with a decimal number, truncated to the length specified
 	;
 	;  input:
-	;	string address
-	;	dword value to be added to the string
-	;	number trim value
+	;	String address
+	;	Dword value to be added to the string
+	;	Number trim value
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
-
 
 	; allocate local variables
 	sub esp, 19
@@ -1744,7 +1739,6 @@ StringTokenDecimal:
 	; get the length of the formatting string, exit if it's null
 	push dword [ebp + 8]
 	call StringLength
-	pop eax
 	cmp eax, 0
 	je .Done
 
@@ -1753,7 +1747,7 @@ StringTokenDecimal:
 	push dword 0x0000005E
 	push dword [ebp + 8]
 	call StringSearchChar
-	pop tokenPosition
+	mov tokenPosition, eax
 
 
 	; if the token location is 0, then no token was found... so we exit
@@ -1838,16 +1832,15 @@ StringTokenHexadecimal:
 	; Finds the first occurrance of the ^ character and replaces it with a hexadecimal number, truncated to the length specified
 	;
 	;  input:
-	;	string address
-	;	dword value to be added to the string
-	;	number trim value
+	;	String address
+	;	Dword value to be added to the string
+	;	Number trim value
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
-
 
 	; allocate local variables
 	sub esp, 17
@@ -1859,7 +1852,6 @@ StringTokenHexadecimal:
 	; get the length of the formatting string, exit if it's null
 	push dword [ebp + 8]
 	call StringLength
-	pop eax
 	cmp eax, 0
 	je .Done
 
@@ -1868,7 +1860,7 @@ StringTokenHexadecimal:
 	push dword 0x0000005E
 	push dword [ebp + 8]
 	call StringSearchChar
-	pop tokenPosition
+	mov tokenPosition, eax
 
 
 	; if the token location is 0, then no token was found... so we exit
@@ -1953,16 +1945,15 @@ StringTokenOctal:
 	; Finds the first occurrance of the ^ character and replaces it with an octal number, truncated to the length specified
 	;
 	;  input:
-	;	string address
-	;	dword value to be added to the string
-	;	number trim value
+	;	String address
+	;	DWord value to be added to the string
+	;	Number trim value
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
-
 
 	; allocate local variables
 	sub esp, 20
@@ -1974,7 +1965,6 @@ StringTokenOctal:
 	; get the length of the formatting string, exit if it's null
 	push dword [ebp + 8]
 	call StringLength
-	pop eax
 	cmp eax, 0
 	je .Done
 
@@ -1983,7 +1973,7 @@ StringTokenOctal:
 	push dword 0x0000005E
 	push dword [ebp + 8]
 	call StringSearchChar
-	pop tokenPosition
+	mov tokenPosition, eax
 
 
 	; if the token location is 0, then no token was found... so we exit
@@ -2078,7 +2068,6 @@ StringTokenString:
 	push ebp
 	mov ebp, esp
 
-
 	; allocate local variables
 	sub esp, 4
 	%define tokenPosition						dword [ebp - 4]
@@ -2087,7 +2076,6 @@ StringTokenString:
 	; get the length of the formatting string, exit if it's null
 	push dword [ebp + 8]
 	call StringLength
-	pop eax
 	cmp eax, 0
 	je .Done
 
@@ -2096,7 +2084,7 @@ StringTokenString:
 	push dword 0x0000005E
 	push dword [ebp + 8]
 	call StringSearchChar
-	pop tokenPosition
+	mov tokenPosition, eax
 
 
 	; if the token location is 0, then no token was found... so we exit
@@ -2141,7 +2129,7 @@ StringTrimLeft:
 	; Trims any occurrances of the character specified off the left side of the string
 	;
 	;  input:
-	;	string address
+	;	String address
 	;	ASCII code of the character to be trimmed
 	;
 	;  output:
@@ -2192,6 +2180,7 @@ StringTrimLeft:
 		inc ecx
 	jmp .StringShiftLoop
 
+
 	.Done:
 	mov esp, ebp
 	pop ebp
@@ -2215,13 +2204,13 @@ StringTrimRight:
 	push ebp
 	mov ebp, esp
 
+
 	mov ecx, [ebp + 8]
 	mov ebx, [ebp + 12]
 
 	; get the length of the string and use it to adjust the starting pointer of the string
 	push ecx
 	call StringLength
-	pop eax
 	mov ecx, [ebp + 8]
 	add ecx, eax
 	dec ecx
@@ -2232,7 +2221,7 @@ StringTrimRight:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .StringTrimDone
+		je .Done
 
 		cmp al, bl
 		jne .Truncate
@@ -2244,8 +2233,8 @@ StringTrimRight:
 	inc ecx
 	mov byte [ecx], 0
 
-	.StringTrimDone:
 
+	.Done:
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2259,15 +2248,14 @@ StringTruncateLeft:
 	; Truncates the string to the length specified by trimming characters off the beginning
 	;
 	;  input:
-	;	string address
-	;	length to which the string will be shortened
+	;	String address
+	;	Length to which the string will be shortened
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
-
 
 	; allocate local variables
 	sub esp, 4
@@ -2277,7 +2265,7 @@ StringTruncateLeft:
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop strLength
+	mov strLength, eax
 
 	; exit if the string specified is shorter than the length given
 	mov eax, dword [ebp + 12]
@@ -2312,8 +2300,8 @@ StringTruncateRight:
 	; Truncates the string to the length specified by trimming characters off the end
 	;
 	;  input:
-	;   string address
-	;   length to which the string will be shortened
+	;   String address
+	;   Length to which the string will be shortened
 	;
 	;  output:
 	;   n/a
@@ -2329,7 +2317,7 @@ StringTruncateRight:
 	; get the length of the string
 	push dword [ebp + 8]
 	call StringLength
-	pop strLength
+	mov strLength, eax
 
 	; exit if the string specified is shorter than the length given
 	mov eax, dword [ebp + 12]
@@ -2345,8 +2333,8 @@ StringTruncateRight:
 	mov eax, 0
 	stosb
 
-	.Exit:
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2360,11 +2348,11 @@ StringWordCount:
 	; Counts the words in the string specified when viewed as a sentence separated by the byte specified
 	;
 	;  input:
-	;	string address
-	;	list of characters to be used as separators (cannot include nulls)
+	;	String address
+	;	List of characters to be used as separators (cannot include nulls)
 	;
 	;  output:
-	;	word count
+	;	EAX - Word count
 
 	push ebp
 	mov ebp, esp
@@ -2385,22 +2373,20 @@ StringWordCount:
 	; get length of the main string
 	push dword [ebp + 8]
 	call StringLength
-	pop ebx
 
 	; exit if the string was null, save eax if not
-	cmp ebx, 0
+	cmp eax, 0
 	je .Exit
-	mov mainStrLen, ebx
+	mov mainStrLen, eax
 
 	; get length of the list string
 	push dword [ebp + 12]
 	call StringLength
-	pop ebx
 
 	; exit if the string was null, save eax if not
-	cmp ebx, 0
+	cmp eax, 0
 	je .Exit
-	mov listStrLen, ebx
+	mov listStrLen, eax
 
 	; set up loop value
 	mov ecx, mainStrLen
@@ -2427,14 +2413,13 @@ StringWordCount:
 		sub eax, 15
 		push eax
 		call StringSearchCharList
-		pop edx
 
 		; restore important stuff
 		pop ecx
 		pop esi
 
 		; see if a match was found
-		cmp edx, 0
+		cmp eax, 0
 		je .NotASeperator
 			; make a note that this character was a separator
 			mov lastType, 2
@@ -2460,12 +2445,11 @@ StringWordCount:
 	; get eax ready for writing the return value
 	mov eax, wordCount
 
-	.Exit:
-	mov dword [ebp + 12], eax
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -2476,17 +2460,16 @@ StringWordGet:
 	; Returns the word specified from the string specified when separated by the byte specified
 	;
 	;  input:
-	;	string address
-	;	list of characters to be used as separators (cannot include nulls)
-	;	word number which to return
-	;	address of string to hold the word requested
+	;	String address
+	;	List of characters to be used as separators (cannot include nulls)
+	;	Word number which to return
+	;	Address of string to hold the word requested
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
-
 
 	; allocate local variables
 	sub esp, 15
@@ -2503,22 +2486,20 @@ StringWordGet:
 	; get length of the main string
 	push dword [ebp + 8]
 	call StringLength
-	pop ebx
 
 	; exit if the string was null, save eax if not
-	cmp ebx, 0
+	cmp eax, 0
 	je .Exit
-	mov mainStrLen, ebx
+	mov mainStrLen, eax
 
 	; get length of the list string
 	push dword [ebp + 12]
 	call StringLength
-	pop ebx
 
 	; exit if the string was null, save eax if not
-	cmp ebx, 0
+	cmp eax, 0
 	je .Exit
-	mov listStrLen, ebx
+	mov listStrLen, eax
 
 	; set up our loop value
 	mov ecx, mainStrLen
@@ -2551,7 +2532,7 @@ StringWordGet:
 		sub eax, 15
 		push eax
 		call StringSearchCharList
-		pop edx
+		mov edx, eax
 
 		; restore important stuff
 		pop ecx
@@ -2601,12 +2582,15 @@ StringWordGet:
 
 	loop .WordLoop
 
+
 	.WordFound:
 	; get eax ready for writing the return value
 	mov eax, wordCount
 
+
 	.Exit:
 	mov dword [ebp + 12], eax
+
 
 	mov esp, ebp
 	pop ebp

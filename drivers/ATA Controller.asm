@@ -191,7 +191,6 @@ C01Init:
 	push dword [ebp + 12]
 	push dword [ebp + 8]
 	call PCIReadDWord
-	pop eax
 
 	; if the value returned was zero, it should actually be 0x03F6
 	cmp ax, 0
@@ -206,7 +205,6 @@ C01Init:
 	push dword [ebp + 12]
 	push dword [ebp + 8]
 	call PCIReadDWord
-	pop eax
 
 	; if the value returned was zero, it should actually be 0x01F0
 	cmp ax, 0
@@ -223,7 +221,6 @@ C01Init:
 	push dword [ebp + 12]
 	push dword [ebp + 8]
 	call PCIReadDWord
-	pop eax
 
 	; if the value returned was zero, it should actually be 0x0376
 	cmp ax, 0
@@ -238,7 +235,6 @@ C01Init:
 	push dword [ebp + 12]
 	push dword [ebp + 8]
 	call PCIReadDWord
-	pop eax
 
 	; if the value returned was zero, it should actually be 0x0170
 	cmp ax, 0
@@ -680,7 +676,7 @@ C01DetectChannelDevices:
 	push 512
 	push dword 1
 	call MemAllocate
-	pop dword [ebp - 4]
+	mov dword [ebp - 4], eax
 
 	; now we probe all the drive slots to see what's there
 	; check primary channel drive 0
@@ -701,20 +697,14 @@ C01DetectChannelDevices:
 		push eax
 
 		; get first free slot
-		push dword 0
 		push dword [tSystem.listDrives]
 		call LMSlotFindFirstFree
-		pop eax
-		pop ebx
 
 		; get the address of that slot into esi
 		push eax
 		push dword [tSystem.listDrives]
 		call LMElementAddressGet
-		pop esi
-		mov [ebp - 8], esi
-		; ignore error code
-		pop ecx
+		mov dword [ebp - 8], esi
 
 		; save base port and device number to table
 		xor ecx, ecx
@@ -745,7 +735,7 @@ C01DetectChannelDevices:
 		push dword 1
 		call MemAllocate
 		mov esi, [ebp - 8]
-		pop dword [tDriveInfo.cacheAddress]
+		mov dword [tDriveInfo.cacheAddress], eax
 
 		; save esi
 		push esi
@@ -774,7 +764,8 @@ C01DetectChannelDevices:
 		call MemCopy
 
 		; print what we've found
-		push eax
+		mov esi, dword [ebp - 8]
+		push dword [tDriveInfo.deviceFlags]
 		push 0
 		xor ecx, ecx
 		mov cx, word [ebp + 8]
@@ -801,19 +792,14 @@ C01DetectChannelDevices:
 		push eax
 
 		; get first free slot
-		push dword 0
 		push dword [tSystem.listDrives]
 		call LMSlotFindFirstFree
-		pop eax
-		pop ebx
 
 		; get the address of that slot into esi
 		push eax
 		push dword [tSystem.listDrives]
 		call LMElementAddressGet
-		pop esi
-		; ignore error code
-		pop ecx
+		push esi
 
 		; save base port and device number to table
 		xor ecx, ecx
@@ -844,7 +830,7 @@ C01DetectChannelDevices:
 		push dword 1048576
 		push dword 1
 		call MemAllocate
-		pop dword [tDriveInfo.cacheAddress]
+		mov dword [tDriveInfo.cacheAddress], eax
 
 		; fill in model
 		; tDriveInfo.model
@@ -854,7 +840,8 @@ C01DetectChannelDevices:
 
 
 		; print what we've found
-		push eax
+		pop esi
+		push dword [tDriveInfo.deviceFlags]
 		push 1
 		xor ecx, ecx
 		mov cx, word [ebp + 8]

@@ -19,9 +19,16 @@
 
 
 section .data
+
+; a define for use by Xenops, the version-updating tool with the most awesome name ever :D
+%define BUILD 10
+
 ; vars, konstants, 'n' such
-kTrue											dd 0x00000001
-kFalse											dd 0x00000000
+%define true									1
+%define false									0
+
+
+
 kKernelStack									dd 8192
 kDriverSignature$								db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
 
@@ -35,10 +42,11 @@ tSystem:
 	.configBits									dd 00000000000000000000000000000111b
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x1B
+	.versionMinor								db 0x1C
+	.versionBuild								dw BUILD
 	.ticksSinceBoot								dd 0x00000000
-	.currentTask								dd 0x00
-	.currentTaskSlotAddress						dd 0x00
+	.currentTask								dd 0x00000000
+	.currentTaskSlotAddress						dd 0x00000000
 	.taskingEnable								db 0x00
 	.taskStackSize								dd 1024		; a 1 KiB stack is almost guaranteed to be too small in the future
 	.taskKernelStackSize						dd 1024
@@ -137,13 +145,13 @@ section .bss
 %define tTaskInfo.kernelStackAddress			(esi + 20)
 %define tTaskInfo.priority						(esi + 24)
 %define tTaskInfo.turnsRemaining				(esi + 25)
-%define tTaskInfo.taskFlags						(esi + 26)
-%define tTaskInfo.unused						(esi + 27)
+%define tTaskInfo.unused						(esi + 26)
 %define tTaskInfo.switchInLow					(esi + 28)
 %define tTaskInfo.switchInHigh					(esi + 32)
 %define tTaskInfo.cycleCountLow					(esi + 36)
 %define tTaskInfo.cycleCountHigh				(esi + 40)
 %define tTaskInfo.spawnedBy						(esi + 44)
+%define tTaskInfo.taskFlags						(esi + 48)
 %define tTaskInfo.name							(esi + 64)		; name field is 16 bytes (for now, may need to expand)
 
 

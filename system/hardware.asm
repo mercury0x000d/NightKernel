@@ -18,17 +18,6 @@
 
 
 
-; 32-bit function listing:
-; DriverLegacyLoad				Scans all drivers in the kernel and runs each legacy driver found
-; PartitionEnumerate			Scans the partition tables of all drives in the drive list and loads their data into the partitions list
-; PITInit						Init the PIT for our timing purposes
-; Random						Returns a random number using the XORShift method
-; Reboot						Performs a warm reboot of the PC
-
-
-
-
-
 ; external functions
 ;extern MemSearchString
 
@@ -47,7 +36,7 @@ bits 32
 
 section .text
 DriverLegacyLoad:
-	; Scans all drivers in the kernel and runs each legacy driver found
+	; Scans all drivers in the kernel's driver space and runs each legacy driver found
 	;
 	;  input:
 	;   n/a
@@ -70,7 +59,7 @@ DriverLegacyLoad:
 		push dword 16
 		push esi
 		call MemSearchString
-		pop edi
+		mov edi, eax
 
 ; corrects for a bug where MemSearchString returns the match address-1
 inc edi
@@ -131,7 +120,7 @@ ret
 
 section .text
 PITInit:
-	; Init the PIT for our timing purposes (256 ticks per second)
+	; Init the PIT for 256 ticks per second
 	;
 	;  input:
 	;   n/a
@@ -166,18 +155,19 @@ Random:
 	; Returns a random number using the XORShift method
 	;
 	;  input:
-	;   number limit
+	;   Number limit
 	;
 	;  output:
-	;   32-bit random number between 0 and the number limit
+	;   EAX - 32-bit random number between 0 and the number limit
 
 	push ebp
 	mov ebp, esp
 
-	mov ebx, [ebp + 8]
+
+	mov ebx, dword [ebp + 8]
 
 	; use good ol' XORShift to get a random
-	mov eax, [.randomSeed]
+	mov eax, dword [.randomSeed]
 	mov edx, eax
 	shl eax, 13
 	xor eax, edx
@@ -187,19 +177,17 @@ Random:
 	mov edx, eax
 	shl eax, 5
 	xor eax, edx
-	mov [.randomSeed], eax
+	mov dword [.randomSeed], eax
 
 	; use some modulo to make sure the random is below the requested number
 	mov edx, 0x00000000
 	div ebx
 	mov eax, edx
 
-	; throw the numbers on the stack and get going!
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 section .data
 .randomSeed										dd 0x92D68CA2
@@ -221,6 +209,7 @@ Reboot:
 	push ebp
 	mov ebp, esp
 
+
 	; try the keyboard controller method for reboot
 	mov dx, 0x92
 	in al, dx
@@ -234,6 +223,7 @@ Reboot:
 
 	; hopefully never reach this, but if the reboots failed we can at least do a hard lockup...
 	jmp $
+
 
 	mov esp, ebp
 	pop ebp

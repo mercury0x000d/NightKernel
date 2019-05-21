@@ -18,19 +18,6 @@
 
 
 
-; 16-bit function listing:
-; SetSystemAPM					Gets the APM interface version and saves results to the tSystem structure
-
-
-
-; 32-bit function listing:
-; BCDToDecimal					Converts a 32-bit BCD number to decimal
-; TimerWait						Waits the specified number of ticks
-
-
-
-
-
 ; external variables
 ;extern tSystem.APMFeatures, tSystem.APMVersionMajor, tSystem.APMVersionMinor, tSystem.ticksSinceBoot
 
@@ -149,7 +136,7 @@ TimerWait:
 	; Waits the specified number of ticks
 	;
 	;  input:
-	;   tick count
+	;   Tick count
 	;
 	;  output:
 	;   n/a

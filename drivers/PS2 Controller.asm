@@ -320,14 +320,13 @@ PS2ControllerInit:
 	push 256
 	push 1
 	call MemAllocate
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp eax, 0
 	je .errorTimeout
 	
 	; if we get here, we got a valid memory block
-	mov [kKeyBufferAddress], ebx
+	mov [kKeyBufferAddress], eax
 
 
 	; And finally, send a reset command to each port. If the device responds, it will trigger the interrupt handler and

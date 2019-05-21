@@ -21,18 +21,6 @@
 
 
 
-; 32-bit function listing:
-; TaskInit						Initializes the Task Manager and its required data structure
-; TaskKill						Kills the specified task
-; TaskMemDisposeAll				Disposes of all memory allocated by the task number specified
-; TaskNameSet					Sets the name field of the specified task
-; TaskNew						Sets up a new task for running
-; TaskSwitch					Performs a context switch to the next task
-
-
-
-
-
 ; external functions
 ;extern LMElementAddressGet, LMListInit, LMSlotFindFirstFree, LM_Internal_ElementAddressGet, MemAllocate, MemAllocateAligned, MemFill
 
@@ -70,13 +58,12 @@ TaskInit:
 	push 24592
 	push dword 1
 	call MemAllocate
-	pop edi
-	mov [tSystem.listTasks], edi
+	mov [tSystem.listTasks], eax
 
 	; set up the list header
 	push 96
 	push 256
-	push edi
+	push eax
 	call LMListInit
 
 	; Use up slots 0 and 1 so that they won't get assigned to tasks. Why do this? It all goes back to the fact that a task number
@@ -84,15 +71,11 @@ TaskInit:
 	push 0
 	push dword [tSystem.listTasks]
 	call LMElementAddressGet
-	pop esi
-	pop eax
 	mov [esi], dword 0xFFFFFFFF
 
 	push 1
 	push dword [tSystem.listTasks]
 	call LMElementAddressGet
-	pop esi
-	pop eax
 	mov [esi], dword 0xFFFFFFFF
 
 	; tell the CPU where the TSS is
@@ -139,8 +122,6 @@ TaskKill:
 	push dword [ebp + 8]
 	push dword [tSystem.listTasks]
 	call LMElementAddressGet
-	pop esi
-	pop ebx
 
 	; zero out this task's memory slot
 	push 0x00000000
@@ -194,7 +175,6 @@ TaskMemDisposeAll:
 
 	push dword [tSystem.listMemory]
 	call LM_Internal_ElementCountGet
-	pop ecx
 
 	; set up a loop to step through every element of the memory list
 	.DisposeLoop:
@@ -204,7 +184,6 @@ TaskMemDisposeAll:
 		push slotCounter
 		push dword [tSystem.listMemory]
 		call LM_Internal_ElementAddressGet
-		pop esi
 
 		mov eax, dword [ebp + 8]
 		cmp dword [tMemInfo.task], eax
@@ -252,12 +231,12 @@ TaskNameSet:
 	push eax
 	push dword [tSystem.listTasks]
 	call LM_Internal_ElementAddressGet
-	pop taskSlotAddress
+	mov taskSlotAddress, esi
 
 	; get and save the length of the string specified
 	push dword [ebp + 12]
 	call StringLength
-	pop strLength
+	mov strLength, eax
 
 	; handle long name strings (only copy the first 31 chars)
 	cmp strLength, 31
@@ -288,10 +267,10 @@ TaskNew:
 	;
 	;  input:
 	;	Entry point of new task
-	;	EFLAGS register for this task
+	;	EFlags register for this task
 	;
 	;  output:
-	;	Task number
+	;	EAX - Task number
 
 	push ebp
 	mov ebp, esp
@@ -309,19 +288,14 @@ TaskNew:
 	mov dataSegment, 0x23
 
 	; get first free slot in the task list
-	push dword 0
 	push dword [tSystem.listTasks]
 	call LMSlotFindFirstFree
-	pop eax
-	pop ebx
 	mov taskListSlot, eax
 
 	; get the starting address of that specific slot into esi
 	push eax
 	push dword [tSystem.listTasks]
 	call LMElementAddressGet
-	pop esi
-	pop eax
 	mov taskListSlotAddress, esi
 
 	; set entry point (starting EIP)
@@ -342,7 +316,6 @@ TaskNew:
 	push dword [tSystem.taskStackSize]
 	push taskListSlot
 	call MemAllocateAligned
-	pop eax
 	mov esi, taskListSlotAddress
 	mov [tTaskInfo.stackAddress], eax
 
@@ -356,7 +329,6 @@ TaskNew:
 	push dword [tSystem.taskKernelStackSize]
 	push taskListSlot
 	call MemAllocateAligned
-	pop eax
 	mov esi, taskListSlotAddress
 	mov [tTaskInfo.kernelStackAddress], eax
 
@@ -382,7 +354,7 @@ TaskNew:
 		push dword 0x0000
 		mov codeSegment, 0x00
 		mov dataSegment, 0x00
-		or byte [tTaskInfo.taskFlags], 00000100b
+		bts dword [tTaskInfo.taskFlags], 2
 	.NotV86:
 
 	; push the data segment for SS and user stack address
@@ -420,12 +392,11 @@ TaskNew:
 
 	; return the task number
 	mov eax, taskListSlot
-	mov dword [ebp + 12], eax
 
 
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
 
 
 
@@ -502,42 +473,26 @@ TaskSwitch:
 
 
 	.SkipSaveState:
-
-	; This will be slower than it could potentially be if we didn't use the List Manager here, but you know the old adage;
-	; first make it run, THEN make it run fast. We can always optimize this later.
-
 	; Set up a loop to determine the next task to which we should switch. We simply step through every task's ESP
 	; value until we get one that's non-zero, then use it.
 	mov ebx, dword [tSystem.currentTask]
+	mov edi, dword [tSystem.listTasks]
 	.findNextTaskLoop:
-		; add one to the task number, then mask to make sure we stay under 255
-		inc ebx
-		and ebx, 0x000000FF
+		; increment the task number using the low byte only to make sure we stay under 255
+		inc bl
 
+		; calculate the address of this task's slot in the Task List
+		; start with the size of a single tTaskInfo element in EAX
+		mov eax, 96
+		mul ebx
+		lea esi, [eax + edi + 16]
 
-		; We use a couple tricks here below for speed. First, we're calling an internal List Manager function directly instead
-		; of going through the slower public interface. This bypasses the parameter checking that's normally performed, but
-		; that's okay since we are managing the input internally, so we know it will be correct. Second, we use the EBX
-		; register to track the current task number we're testing. Why EBX? Because LM_Internal_ElementAddressGet() doesn't
-		; modify it, so we don't need to save it here, saving us a handful of CPU cycles.
-
-		; get that task number's starting address
-		push ebx
-		push dword [tSystem.listTasks]
-		call LM_Internal_ElementAddressGet
-		pop esi
-
-		; get the ESP register of this task into ecx
-		mov ecx, dword [tTaskInfo.esp0]
-
-		; see if we have something that's not zero
-		cmp ecx, 0
+		; see if we have a kernel stack pointer that's not zero
+		cmp dword [tTaskInfo.esp0], 0
 		je .findNextTaskLoop
 
 		; see if the task is suspended
-		mov ax, 0x0000
-		mov al, byte [tTaskInfo.taskFlags]
-		bt ax, 1
+		bt dword [tTaskInfo.taskFlags], 1
 	jc .findNextTaskLoop
 
 	; by the time we get here, we know what task to execute next
@@ -552,13 +507,12 @@ TaskSwitch:
 	mov dword [tTaskInfo.switchInHigh], edx
 
 	; switch to the kernel stack of the new task
+	mov ecx, dword [tTaskInfo.esp0]
 	mov esp, ecx
 
 	; adjust ECX to point to the base of the stack for future use
-	mov al, byte [tTaskInfo.taskFlags]
-	and al, 00000100b
-	cmp al, 00000100b
-	jne .NotV86
+	bt dword [tTaskInfo.taskFlags], 2
+	jnc .NotV86
 		add ecx, 16
 	.NotV86:
 	add ecx, 48
@@ -566,10 +520,8 @@ TaskSwitch:
 
 	; If this is not a V86 Task, reset the segment registers.
 	; If it is, we do nothing since the CPU will automatically pop them off the stack.
-	mov al, byte [tTaskInfo.taskFlags]
-	and al, 00000100b
-	cmp al, 00000100b
-	je .LoadStateV86
+	bt dword [tTaskInfo.taskFlags], 2
+	jc .LoadStateV86
 		mov ax, 0x23
 		mov ds, ax
 		mov es, ax 
