@@ -109,3 +109,5 @@ clean:
 	-$(RM) -r $(OBJDIR)
 	-$(RM) -r $(OUTPUTDIR)
 	
+run:
+	virtualbox --startvm "Night" --debug-command-line --start-running

@@ -18,6 +18,11 @@
 
 
 
+global	Class01DriverHeader, C01Init, C01ATAPISectorReadPIO, C01ATASectorReadLBA28, C01ATASectorWriteLBA28, C01DetectChannelDevices,\
+		C01DriveIdentify, C01InterruptHandlerPrimary, C01InterruptHandlerSecondary, C01WaitForReady, InternalDriveFoundPrint
+
+
+
 ; 32-bit function listing:
 ; C01Init						Performs any necessary setup of the driver
 ; C01ATAPISectorReadPIO
@@ -31,10 +36,9 @@
 ; InternalDriveFoundPrint		Prints data about the drive discovered by C01DriveIdentify()
 
 
-%include "globals.inc"
-
 extern PCIReadDWord, InterruptHandlerSet, PICIntComplete, MemAllocate, LMElementAddressGet,\
 		MemCopy, LMSlotFindFirstFree, StringTokenString, StringTokenDecimal, StringTokenHexadecimal, StringTrimRight
+
 
 ; defines
 %define kATAChannelPrimary						0x00

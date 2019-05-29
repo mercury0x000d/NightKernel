@@ -741,9 +741,9 @@ section .text
 section .text
 global DriverSpaceStart
 DriverSpaceStart:
-;%include "drivers/ATA Controller.asm"
-;#%include "drivers/FAT12.asm"
-;#%include "drivers/PS2 Controller.asm"
+%include "drivers/ATAController.drv"
+%include "drivers/FAT12.drv"
+%include "drivers/PS2Controller.drv"
 ;%include "drivers/FAT16Small.asm"
 ;%include "drivers/FAT16Large.asm"
 ;%include "drivers/FAT32.asm"

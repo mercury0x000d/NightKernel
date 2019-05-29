@@ -18,6 +18,11 @@
 
 
 
+global	FSType01DriverHeader, FAT12FileCreate, FAT12FileDelete, FAT12FileInfoGet, FAT12FileInfoSet, FAT12FileRead,\
+		FAT12FileSizeGet, FAT12FileSizeSet, FAT12FileWrite
+
+
+
 ; 32-bit function listing:
 ; FAT12FileCreate				Creates a new file at the path specified
 ; FAT12FileDelete				Deletes the file specified
@@ -30,9 +35,9 @@
 
 
 
-%include "globals.inc"
-
 extern LMElementAddressGet, MemCopy, StringTokenDecimal, StringTokenString, PrintIfConfigBits32
+
+
 
 bits 32
 

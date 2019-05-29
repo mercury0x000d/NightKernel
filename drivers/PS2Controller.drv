@@ -38,11 +38,21 @@
 ; PS2PortInitDevice				Initializes the device on the port specified
 ; PS2PortSendTo2				Tells the PS/2 Controller the next command goes to port 2 if necessary
 
-global KeyGet, KeyWait
+
+
+
+
+global	PS2ControllerLegacyDriverHeader, PS2ControllerInit, KeyGet, KeyWait, PS2ControllerCommand, PS2ControllerPortTest,\
+		PS2ControllerWaitDataRead, PS2ControllerWaitDataWrite, PS2DeviceCommand, PS2DeviceIdentify, PS2InitKeyboard, PS2InitMouse,\
+		PS2InputHandlerDispatch, PS2InputHandlerKeyboard, PS2InputHandlerMouse, PS2NewConnect, PS2Port1InterruptHandler,\
+		PS2Port2InterruptHandler, PS2PortInitDevice, PS2PortSendTo2
 
 extern PrintIfConfigBits32, InterruptHandlerSet, PICIRQDisable, PICIRQEnable,\
 		MemAllocate, TimerWait, PrintRegs32, PICIRQDisableAll, PICIRQEnableAll,\
 		PICIntComplete
+
+
+
 ; globals
 section .bss
 kKeyBufferAddress								resd 1
@@ -52,8 +62,6 @@ kKeyBufferWrite									db 0x00
 kKeyBufferRead									db 0x00
 
 
-
-%include "globals.inc"
 
 bits 32
 
