@@ -73,3 +73,20 @@ all:
 
 	$(info Build complete, booting VM. (Press Ctrl-C in this terminal to end.))
 	@virtualbox --startvm "Night" --debug-command-line --start-running
+
+# should there be an issue trying the previous functions (or if you just want to 
+# test it a different way) try this one. make sure you have a 
+# snapshot so you can revert back after testing.
+manual:
+	$(info Assembling the Night Kernel...)
+	@nasm $(asflags) -o builds/kernel.sys kernel.asm
+
+	$(info Making ISO image...)
+	mkisofs -o builds/kernel.iso builds/kernel.sys docs/scripts/kcopy.bat
+
+	$(info Build complete, booting VM. (Press Ctrl-C in this terminal to end.))
+	@virtualbox --startvm "Night" --debug-command-line --start-running
+
+	# of course, we update the kernel build number with the best tool on earth ever made! :P
+	./xenops --file globals.asm
+
