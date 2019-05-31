@@ -76,7 +76,7 @@ all:
 
 # should there be an issue trying the previous functions (or if you just want to 
 # test it a different way) try this one. make sure you have a 
-# snapshot so you can revert back after testing.
+# snapshot so you can revert back after testing. (You need to install FD manually on the VM btw)
 manual:
 	$(info Assembling the Night Kernel...)
 	@nasm $(asflags) -o builds/kernel.sys kernel.asm
