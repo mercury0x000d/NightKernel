@@ -3,7 +3,7 @@
 		<meta http-equiv="Content-Type" content="text/html">
 		<title>Night Kernel Reference Manual</title>
 	</head>
-	
+
 	<style>
 		caption
 		{
@@ -38,53 +38,8 @@
 		{
 			margin-top: 0px;
 		}
-
-
-		.accordion
-		{
-			background-color: #E0E0E0;
-			color: #000000;
-			cursor: pointer;
-			padding: 4px;
-			width: 100%;
-			border: none;
-			text-align: left;
-			outline: none;
-			transition: 0.2s;
-		}
-
-		.active, .accordion:hover
-		{
-			background-color: #C0C0C0;
-		}
-
-		.accordion:after
-		{
-			color: #808080;
-			content: '\002B';
-			float: right;
-			font-weight: bold;
-			margin-left: 8px;
-		}
-
-		.active:after
-		{
-			color: #808080;
-			content: "\2212";
-			float: right;
-			font-weight: bold;
-			margin-left: 8px;
-		}
-
-		.panel
-		{
-			padding: 0 4px;
-			background-color: white;
-			max-height: 0;
-			overflow: hidden;
-			transition: max-height 0.2s ease-out;
-		}
 	</style>
+
 	<body>
 		<h1 align="center">Night Kernel Reference Manual</h1>
 		<p align="center">
@@ -199,11 +154,15 @@
 					<th><i>Result</i></th>
 				</tr>
 				<tr>
-					<td>buildnight</td>
+					<td>build</td>
 					<td>Assembles the kernel using NASM. After assembling, you will have a file called <i>kernel.sys</i> in the <i>builds</i> directory which can be copied over top of the existing FreeDOS kernel on any bootable FreeDOS disk.
 				</tr>
 				<tr>
-					<td>updateimage</td>
+					<td>imagecd</td>
+					<td>Copies the built <i>kernel.sys</i> to the CD image. The CD image will be created if it does not already exist.</i></td> 
+				</tr>
+				<tr>
+					<td>imagehd</td>
 					<td>Mounts the virtual disk image <i>night.vdi</i> and copies <i>kernel.sys</i> to it. You will be prompted for your root password as a normal function of this option.</i></td> 
 				</tr>
 				<tr>
@@ -211,8 +170,12 @@
 					<td>Runs the kernel in a VirtualBox virtual machine.</i></td>
 				</tr>
 				<tr>
-					<td>all</td>
-					<td>Performs all of the above steps: builds Night, mounts the included disk image and copies to it the newly build kernel, then launches the virtual machine.</td>
+					<td>allcd</td>
+					<td>Builds Night, copies the kernel to the CD image, then launches the virtual machine. You must have the VM configured to boot from the CD image, which will be created if it does not already exist.</td>
+				</tr>
+				<tr>
+					<td>allhd</td>
+					<td>Builds Night, mounts the included disk image and copies to it the newly build kernel, then launches the virtual machine.</td>
 				</tr>
 			</table>
 		</p>
@@ -1605,11 +1568,6 @@
 		<hr>
 		<h2><a name="NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a></h2>
 		<p>
-			<ul>
-				<li>Public functions are intended for calling from any other routines.</li>
-				<li>Internal functions are only intended to be called by the kernel internally.</li>
-			</ul>
-
 			<table style="width:100%" rules="none">
 				<col width = 25%>
 				<col width = 25%>
@@ -1664,6 +1622,9 @@
 					</td>
 				</tr>
 			</table>
+			<br>
+			- Public functions are intended for calling from any other routines.<br>
+			- Internal functions are only intended to be called by the kernel internally.<br>
 			<br>
 			<br>
 			<br>
