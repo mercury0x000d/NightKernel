@@ -10,6 +10,12 @@ build:
 
 
 
+imagecd:
+	${Copy built kernel to CD image}
+	mkisofs -o builds/kernel.iso builds/kernel.sys scripts/kcopy.bat
+
+
+
 imagehd:
 	${Make a folder to which we will mount the vdi image}
 	@mkdir VBoxDisk -p
@@ -36,13 +42,19 @@ imagehd:
 
 
 
-imagecd:
+run:
+	$(info Press Ctrl-C in this terminal to end VM execution.)
+	@virtualbox --startvm "Night" --debug-command-line --start-running
+
+
+
+allcd:
+	${Assemble the Night Kernel}
+	@nasm $(asflags) -o builds/kernel.sys kernel.asm
+
 	${Copy built kernel to CD image}
 	mkisofs -o builds/kernel.iso builds/kernel.sys scripts/kcopy.bat
 
-
-
-run:
 	$(info Press Ctrl-C in this terminal to end VM execution.)
 	@virtualbox --startvm "Night" --debug-command-line --start-running
 
@@ -74,18 +86,6 @@ allhd:
 
 	${Remove loop device}
 	@sudo losetup -d /dev/loop0
-
-	$(info Press Ctrl-C in this terminal to end VM execution.)
-	@virtualbox --startvm "Night" --debug-command-line --start-running
-
-
-
-allcd:
-	${Assemble the Night Kernel}
-	@nasm $(asflags) -o builds/kernel.sys kernel.asm
-
-	${Copy built kernel to CD image}
-	mkisofs -o builds/kernel.iso builds/kernel.sys scripts/kcopy.bat
 
 	$(info Press Ctrl-C in this terminal to end VM execution.)
 	@virtualbox --startvm "Night" --debug-command-line --start-running
