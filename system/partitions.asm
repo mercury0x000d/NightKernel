@@ -18,19 +18,6 @@
 
 
 
-; external functions
-;extern DriverSpaceEnd, DriverSpaceStart, LMElementAddressGet, LMElementCountGet, LMSlotFindFirstFree, MemAllocate, MemSearchString
-;extern PrintIfConfigBits32, StringTokenHexadecimal
-
-; external variables
-;extern kDriverSignature$, tDriveInfo.ATABasePort, tDriveInfo.ATADeviceNumber, tDriveInfo.deviceFlags, tDriveInfo.readSector
-;extern tPartitionInfo.ATAbasePort, tPartitionInfo.ATAdevice, tPartitionInfo.attributes, tPartitionInfo.driveListNumber
-;extern tPartitionInfo.sectorCount, tPartitionInfo.startingLBA, tPartitionInfo.systemID, tSystem.listDrives, tSystem.listPartitions
-
-
-
-
-
 bits 32
 
 

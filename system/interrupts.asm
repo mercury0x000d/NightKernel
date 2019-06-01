@@ -25,17 +25,6 @@ kIDTPtr											dd 0x00000000
 
 
 
-; external functions
-;extern KeyWait, MemAllocate, MemCopy, PICIntComplete, Print32, PrintRAM32, PrintRegs32, RTCInterruptHandler, ScreenClear32, StringTokenBinary
-;extern StringTokenHexadecimal, StringTokenString, TaskKill, TaskSwitch
-
-; external variables
-;extern kMaxLines, tSystem.currentTask, tSystem.currentTaskSlotAddress, tSystem.taskingEnable, tSystem.ticksSinceBoot
-
-
-
-
-
 bits 32
 
 

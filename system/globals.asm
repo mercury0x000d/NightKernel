@@ -21,11 +21,17 @@
 section .data
 
 ; a define for use by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 10
+%define BUILD 13
 
 ; vars, konstants, 'n' such
 %define true									1
 %define false									0
+
+; for configbits settings - great idea, Antony!
+%define kCBDebugMode							1
+%define kCBVerbose								2
+%define kCBLines50								4
+%define kCBVMEnable								8
 
 
 

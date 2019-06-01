@@ -18,19 +18,6 @@
 
 
 
-; external functions
-;extern A20Enable, APMEnable, DebugMenu, DriverLegacyLoad, GDTStart, IDTInit, ISRInitAll, LMListInit, MemAllocate, MemAllocateAligned, MemCopy
-;extern MemInit, MemProbe, PCIInitBus, PCILoadDrivers, PCIProbe, PICIRQDisableAll, PICIRQEnableAll, PICInit, PITInit, PartitionEnumerate
-;extern Print32, PrintIfConfigBits16, PrintIfConfigBits32, PrintRegs32, RTCInit, ScreenClear32, SetSystemAPM, SetSystemCPUID, StringTokenBinary
-;extern StringTokenDecimal, StringTokenHexadecimal, TaskInit, TaskNew, TimerWait
-
-; external variables
-;extern gBackColor, gTextColor, kBytesPerScreen, kMaxLines
-
-
-
-
-
 [map all kernel.map]
 org 0x00000600
 

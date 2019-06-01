@@ -18,16 +18,6 @@
 
 
 
-; external functions
-;extern MemSearchString
-
-; external variables
-;extern DriverSpaceStart, kDriverSignature$, DriverSpaceEnd
-
-
-
-
-
 bits 32
 
 

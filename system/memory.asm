@@ -27,18 +27,6 @@
 
 
 
-; external functions
-;extern ConvertByteToHexString16, LMElementAddressGet, LMElementCountGet, LMElementDelete, LMElementDuplicate, LMElementSizeGet, LMListInit
-;extern Print16, PrintIfConfigBits16, StringLength
-
-; external variables
-;extern gBackColor, gTextColor, false, true, tSystem.configBits, tSystem.listMemory, tSystem.memoryInitialAvailableBytes
-;extern tSystem.memoryInstalledBytes, tSystem.memoryListReservedSpace
-
-
-
-
-
 bits 16
 
 

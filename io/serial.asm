@@ -18,13 +18,6 @@
 
 
 
-; external variables
-;extern tSystem.ticksSinceBoot
-
-
-
-
-
 bits 32
 
 

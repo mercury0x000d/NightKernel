@@ -28,13 +28,6 @@
 
 
 
-; external functions
-;extern MemCopy
-
-
-
-
-
 bits 32
 
 

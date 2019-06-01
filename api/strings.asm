@@ -26,13 +26,6 @@ kHexDigits										db '0123456789ABCDEF'
 
 
 
-; external functions
-;extern MemFill, MemCopy
-
-
-
-
-
 bits 16
 
 

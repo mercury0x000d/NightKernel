@@ -31,16 +31,6 @@ kBytesPerScreen									dw 4000
 
 
 
-; external functions
-;extern ConvertNumberHexToString, ConvertWordToHexString16, MemCopy, MemFill, StringTokenHexadecimal, StringTokenString
-
-; external variables
-;extern tSystem.configBits
-
-
-
-
-
 bits 16
 
 

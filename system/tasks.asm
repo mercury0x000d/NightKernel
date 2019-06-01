@@ -21,17 +21,6 @@
 
 
 
-; external functions
-;extern LMElementAddressGet, LMListInit, LMSlotFindFirstFree, LM_Internal_ElementAddressGet, MemAllocate, MemAllocateAligned, MemFill
-
-; external variables
-;extern tSystem.currentTask, tSystem.currentTaskSlotAddress, tSystem.listTasks, tSystem.taskingEnable, tTaskInfo.entryPoint, tTaskInfo.esp
-;extern tTaskInfo.esp0, tTaskInfo.kernelStackAddress, tTaskInfo.stackAddress
-
-
-
-
-
 bits 32
 
 

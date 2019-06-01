@@ -18,20 +18,6 @@
 
 
 
-; external functions
-;extern ConvertStringHexToNumber, KeyGet, KeyWait, LMElementAddressGet, LMElementCountGet, LMItemAddAtSlot, LMListInit, MemAllocate, MemCopy
-;extern PCICalculateNext, PCIGetNextFunction, PCIReadAll, Print32, PrintRAM32, Reboot, ScreenClear32, StringCharAppend, StringLength
-;extern StringTokenDecimal, StringTokenHexadecimal, StringTokenString, StringTruncateLeft
-
-; external variables
-;extern kMaxLines, tMemInfo.address, tMemInfo.size, tMemInfo.task, tSystem.CPUIDBrand$, tSystem.PCIDeviceCount, tSystem.copyright$
-;extern tSystem.listDrives, tSystem.listMemory, tSystem.listPCIDevices, tSystem.listPartitions, tSystem.listTasks, tSystem.versionMajor
-;extern tSystem.versionMinor
-
-
-
-
-
 bits 32
 
 

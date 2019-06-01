@@ -32,13 +32,6 @@
 
 
 
-; external functions
-;extern LMElementAddressGet, MemCopy, PrintIfConfigBits32, StringTokenDecimal, StringTokenString
-
-
-
-
-
 bits 32
 
 

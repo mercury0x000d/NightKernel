@@ -26,17 +26,6 @@
 
 
 
-; external functions
-;extern DriverSpaceEnd, DriverSpaceStart, LMElementAddressGet, LMElementCountGet, LMListInit, MemAllocate, MemCopy, MemSearchString
-;extern PrintIfConfigBits32, StringTokenDecimal, StringTokenHexadecimal
-
-; external variables
-;extern gCursorY, kDriverSignature$, false, true, tSystem.PCICapabilities, tSystem.PCIDeviceCount, tSystem.PCIVersion, tSystem.listPCIDevices
-
-
-
-
-
 bits 16
 
 

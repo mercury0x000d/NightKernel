@@ -108,14 +108,6 @@
 
 
 
-; external functions
-;extern InterruptHandlerSet, LMElementAddressGet, LMSlotFindFirstFree, MemAllocate, MemCopy, MemSwapWordBytes, PCIReadDWord, PICIntComplete
-;extern PrintIfConfigBits32, StringTokenDecimal, StringTokenHexadecimal, StringTokenString, StringTrimRight
-
-
-
-
-
 bits 32
 
 

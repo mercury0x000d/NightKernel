@@ -18,13 +18,6 @@
 
 
 
-; external variables
-;extern tSystem.CPUIDBrand$, tSystem.CPUIDLargestBasicQuery, tSystem.CPUIDLargestExtendedQuery, tSystem.CPUIDVendor$
-
-
-
-
-
 bits 32
 
 

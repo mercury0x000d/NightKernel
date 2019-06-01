@@ -18,16 +18,6 @@
 
 
 
-; external functions
-;extern BCDToDecimal, PrintIfConfigBits32
-
-; external variables
-;extern tSystem.RTCStatusRegisterB, tSystem.day, tSystem.hours, tSystem.minutes, tSystem.month, tSystem.seconds, tSystem.year
-
-
-
-
-
 bits 32
 
 

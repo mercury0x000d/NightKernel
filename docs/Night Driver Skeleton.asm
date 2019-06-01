@@ -51,10 +51,15 @@ DriverHeader:
 ; 31											legacy driver
 .driverFlags									dd 00000000000000000000000000000000b
 
-; pointers to the read and write functions to be called from outside the driver
-.ReadCodePointer								dd 0x00000000
-.WriteCodePointer								dd 0x00000000
-
+; a series of function pointers for functions to be called from outside the driver
+.Read											dd 0x00000000 ; Handles reading from the device
+.Write											dd 0x00000000 ; Handles writing to the device
+.Probe											dd 0x00000000 ; Called to query the existence of a device and driver compatibility
+.Remove											dd 0x00000000 ; Called when device is removed
+.Online											dd 0x00000000 ; Called to put the device online (after offlining it)
+.Offline										dd 0x00000000 ; Called to put the device offline for removal (may fail)
+.Suspend										dd 0x00000000 ; Called when a device wants to go to sleep mode
+.Resume											dd 0x00000000 ; Called to bring the device out of sleep mode
 
 
 ; due to the nature of the Night driver detection model, the driver init code must directly follow the header

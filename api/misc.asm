@@ -18,13 +18,6 @@
 
 
 
-; external variables
-;extern tSystem.APMFeatures, tSystem.APMVersionMajor, tSystem.APMVersionMinor, tSystem.ticksSinceBoot
-
-
-
-
-
 bits 16
 
 
