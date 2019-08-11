@@ -23,9 +23,20 @@ org 0x00000600
 
 
 
-
-
 bits 16
+
+
+
+; constant defines
+%define true									1
+%define false									0
+%define null									0
+
+; for configbits settings - great idea, Antony!
+%define kCBDebugMode							0
+%define kCBVerbose								1
+%define kCBLines50								2
+%define kCBVMEnable								3
 
 
 
@@ -57,9 +68,12 @@ mov ah, 0x00
 mov al, 0x03
 int 0x10
 
+
+
+
 ; check the configbits to see if we should use 50 lines
-test dword [tSystem.configBits], 000000000000000000000000000000100b
-jz .stickWith25
+bt dword [tSystem.configBits], kCBLines50
+jnc .stickWith25
 
 	; if we get here, we should shift to 50-line mode
 	; first we update the constants
@@ -112,17 +126,17 @@ call APMEnable
 
 
 
-; probe the PCI controller while we still can
+; load that GDT!
 push progressText05$
 call PrintIfConfigBits16
-call PCIProbe
+lgdt [gdt]
 
 
 
-; load that GDT!
+; probe the PCI controller while we still can
 push progressText06$
 call PrintIfConfigBits16
-lgdt [gdt]
+call PCIProbe
 
 
 
@@ -235,65 +249,116 @@ call SetSystemCPUID
 push progressText10$
 call PrintIfConfigBits32
 
-; the drives list will be 256 entries of 120 bytes each (the size of a single tDriveInfo element) plus header
-; 256 * 120 + 16 = 30736
-; allocate memory for the list
-push 30736
+; the drives list will be 256 entries of 144 bytes each (the size of a single tDriveInfo element) plus header
+push 256 * 144 + 16
 push dword 1
 call MemAllocate
 mov [tSystem.listDrives], eax
 
 ; set up the list header
-push 120
+push 144
 push 256
 push eax
 call LMListInit
 
 
-; the partitions list will be 256 entries of 76 bytes each (the size of a single tPartitionInfo element)
-; 256 * 76 + 16 = 19472
+; the driveLetters list will be 26 entries (A - Z) of 4 bytes each plus header
+push 26 * 4 + 16
+push dword 1
+call MemAllocate
+mov [tSystem.listDriveLetters], eax
+
+; set all elements to 0xFFFFFFFF
+push 0xFF
+push 26 * 4 + 16
+push eax
+call MemFill
+
+; set up the list header
+push 4
+push 26
+push eax
+call LMListInit
+
+
+; the FSHandler list will be 256 entries of 4 bytes each (the size of a single 32-bit address) plus header
+push 256 * 4 + 16
+push dword 1
+call MemAllocate
+mov [tSystem.listFSHandlers], eax
+
+; set up the list header
+push 4
+push 256
+push eax
+call LMListInit
+
+
+; the partitions list will be 256 entries of 128 bytes each (the size of a single tPartitionInfo element)
 ; allocate memory for the list
-push 19472
+push 256 * 128 + 16
 push dword 1
 call MemAllocate
 mov [tSystem.listPartitions], eax
 
 ; set up the list header
-push 76
+push 128
 push 256
 push eax
 call LMListInit
 
 
+; the PCI handlers list will be 65536 entries of 4 bytes each (the size of a single 32-bit address)
+; allocate memory for the list
+push 65536 * 4 + 16
+push dword 1
+call MemAllocate
+mov [tSystem.listPCIHandlers], eax
 
-; if we have a PCI controller in the first place, init the bus, find out how many PCI devices we have, and save that info to the system struct
-cmp dword [tSystem.PCIVersion], 0
-je .NoPCI
+; set up the list header
+push 4
+push 65536
+push eax
+call LMListInit
 
-	; if we get here, we have PCI
-	; so let's init things!
-	push progressText11$
-	call PrintIfConfigBits32
-	call PCIInitBus
 
-	; now load drivers for PCI devices
-	push progressText12$
-	call PrintIfConfigBits32
-	call PCILoadDrivers
-	jmp .PCIComplete
 
-.NoPCI:
-push PCIFailed$
+; init PS/2 driver
+push progressText11$
+call PrintIfConfigBits32
+call PS2ControllerInit
+
+
+
+; set up default handlers
+push progressText12$
 call PrintIfConfigBits32
 
-.PCIComplete:
+push dword 0
+push dword 0
+push dword 0
+push dword 0
+push dword 0
+call FAT16ServiceHandler
+
+push dword 0
+push dword 0
+push dword 0
+push dword 0
+push dword 0
+call FAT32ServiceHandler
+
+push IDEServiceHandler
+push 1
+push 1
+call PCIHandlerSet
 
 
 
-; load drivers for legacy devices
+; init PCI devices
 push progressText13$
 call PrintIfConfigBits32
-call DriverLegacyLoad
+call PCIDeviceInitAll
 
 
 
@@ -304,8 +369,18 @@ call PartitionEnumerate
 
 
 
-; init Task Manager
+; map partitions
+; for now, we just do drive C
 push progressText15$
+call PrintIfConfigBits32
+push 2
+push 0
+call PartitionMap
+
+
+
+; init Task Manager
+push progressText16$
 call PrintIfConfigBits32
 call TaskInit
 
@@ -313,16 +388,53 @@ call TaskInit
 
 
 
+; test load a file
+push 0xFF
+push 0x100000
+push 0x200000
+call MemFill
+
+push 0x200000
+;push .path8$
+push .path7$
+;push .path6$
+;push .path5$
+;push .path4$
+;push .path3$
+;push .path2$
+;push .path1$
+call FMFileLoad
+
+; show if there was an error in eax from the above call
+call PrintRegs32
+
+push 0
+push 7
+push 10
+push 1
+push 10
+push 0x200000
+call PrintRAM32
 
 
+push .path7$
+call FMFileDelete
 
+; show if there was an error in eax from the above call
+call PrintRegs32
 
+mov eax, 0x200000
+jmp $
 
-
-
-
-
-
+.path1$											db 'c:\autoexec.bat', 0x00
+.path2$											db '00:\autoexec.bat', 0x00
+.path3$											db 'c:\TESTING\system\tools\items\code\fluff\nonsense\secret.txt', 0x00
+.path4$											db 'x:\', 0x00
+.path5$											db '00:\kernel.sys', 0x00
+.path6$											db 'c:\TESTING\who.TXT', 0x00
+.path7$											db 'c:\TESTING\john.TXT', 0x00
+.path8$											db 'c:\TESTING\cbcfiles\pcworld\utils\logging.bas', 0x00
+.path9$											db 'c:\TESTING\cbcfiles\pcworld\utils', 0x00
 
 
 
@@ -518,10 +630,9 @@ PagingDone:
 
 
 
-mov eax, dword [tSystem.configBits]
-and eax, 000000000000000000000000000000001b
-cmp eax, 000000000000000000000000000000001b
-jne .SkipStartDelay
+
+bt dword [tSystem.configBits], kCBDebugMode
+jnc .SkipStartDelay
 	; if we get here, we're in Debug Mode
 	; wouldn't it be nice if we gave the user a moment to admire all those handy debug messages?
 	push 512
@@ -932,13 +1043,13 @@ progressText0D$									db 'Initializing RTC', 0x00
 progressText0E$									db 'Enabling interrupts', 0x00
 progressText0F$									db 'Load system data to the info struct', 0x00
 progressText10$									db 'Allocating list space', 0x00
-progressText11$									db 'Initializing PCI bus', 0x00
-progressText12$									db 'Loading PCI drivers', 0x00
-progressText13$									db 'Loading legacy device drivers', 0x00
+progressText11$									db 'Initializing PS/2 driver', 0x00
+progressText12$									db 'Setting up default handler addresses', 0x00
+progressText13$									db 'Initializing PCI devices', 0x00
 progressText14$									db 'Enumerating partitions', 0x00
-progressText15$									db 'Initializing Task Manager', 0x00
+progressText15$									db 'Mapping partitions', 0x00
+progressText16$									db 'Initializing Task Manager', 0x00
 memE820Unsupported$								db 'Could not detect memory, function unsupported', 0x00
-PCIFailed$										db 'PCI Controller not detected', 0x00
 name$											db 'Kernel Debug Menu', 0x00
 
 
@@ -951,14 +1062,16 @@ section .text
 %include "api/lists.asm"
 %include "api/misc.asm"
 %include "api/strings.asm"
+%include "io/files.asm"
 %include "io/serial.asm"
 %include "system/CMOS.asm"
 %include "system/CPU.asm"
+%include "system/disks.asm"
 %include "system/GDT.asm"
 %include "system/hardware.asm"
 %include "system/interrupts.asm"
 %include "system/memory.asm"
-%include "system/partitions.asm"
+%include "system/numbers.asm"
 %include "system/PCI.asm"
 %include "system/PIC.asm"
 %include "system/power.asm"
@@ -967,15 +1080,7 @@ section .text
 %include "video/screen.asm"
 %include "system/debug.asm"
 
-
-
 ; includes for drivers
-section .text
-DriverSpaceStart:
-%include "drivers/ATA Controller.asm"
-%include "drivers/FAT12.asm"
+%include "drivers/IDE Controller.asm"
+%include "drivers/FAT Filesystem.asm"
 %include "drivers/PS2 Controller.asm"
-;%include "drivers/FAT16Small.asm"
-;%include "drivers/FAT16Large.asm"
-;%include "drivers/FAT32.asm"
-DriverSpaceEnd:

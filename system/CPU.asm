@@ -29,10 +29,10 @@ SetSystemCPUID:
 	; Probes the CPU using CPUID instruction and saves results to the tSystem structure
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp

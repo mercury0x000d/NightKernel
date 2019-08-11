@@ -358,9 +358,7 @@ CriticalError:
 
 
 	; wait for a key to be pressed
-	push dword 0
 	call KeyWait
-	pop eax
 
 	
 	; disable those interrupts again before we hurt somebody, and re-enable tasking

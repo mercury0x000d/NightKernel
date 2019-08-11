@@ -29,10 +29,10 @@ RTCAdjustBCD:
 	; Adjusts the time values in the tSystem struct from BCD to decimal
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -96,10 +96,10 @@ RTCInit:
 	; Initializes the RTC
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -183,10 +183,10 @@ RTCInterruptHandler:
 	; Handles RTC interrupts
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp

@@ -17,28 +17,6 @@
 
 
 
-; 32-bit function listing:
-; PS2ControllerInit				Initializes the driver and controller
-; KeyGet						Returns the oldest key in the key buffer, or null if it's empty
-; KeyWait						Waits until a key is pressed, then returns that key
-; PS2ControllerCommand			Sends a command to the PS/2 Controller with proper wait states
-; PS2ControllerPortTest			Tests the PS/2 port specified
-; PS2ControllerWaitDataRead		Reads data from the PS/2 controller with a 16 tick timeout (1/16 of a second)
-; PS2ControllerWaitDataWrite	Waits until the PS/2 controller is ready to accept data with a 16 tick timeout (1/16 of a second)
-; PS2DeviceCommand				Sends a command to a PS/2 device with proper wait states
-; PS2DeviceIdentify				Executes the PS/2 Identify command and returns the result
-; PS2InitKeyboard				Initializes the PS/2 keyboard
-; PS2InitMouse					Initializes the PS/2 mouse
-; PS2InputHandlerDispatch		Chooses which device handler receives input given
-; PS2InputHandlerKeyboard		Handles input from a PS/2 Keyboard
-; PS2InputHandlerMouse			Handles input from a PS/2 Mouse
-; PS2NewConnect					Handles identifying and initializing new connected devices
-; PS2Port1InterruptHandler		Handles interrupts from PS/2 Controller Port 1
-; PS2Port2InterruptHandler		Handles interrupts from PS/2 Controller Port 2
-; PS2PortInitDevice				Initializes the device on the port specified
-; PS2PortSendTo2				Tells the PS/2 Controller the next command goes to port 2 if necessary
-
-
 
 ; globals
 section .bss
@@ -52,14 +30,6 @@ kKeyBufferRead									db 0x00
 
 
 
-; external functions
-;extern InterruptHandlerSet, MemAllocate, PICIRQDisable, PICIRQDisableAll, PICIRQEnable, PICIRQEnableAll, PICIntComplete, PrintIfConfigBits32
-;extern PrintRegs32, TimerWait
-
-
-
-
-
 bits 32
 
 
@@ -67,9 +37,187 @@ bits 32
 
 
 section .text
-PS2ControllerLegacyDriverHeader:
-.signature$										db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
-.driverFlags									dd 10000000000000000000000000000001b
+KeyGet:
+	; Returns the oldest key in the key buffer, or null if it's empty
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	AL - Key pressed
+
+	push ebp
+	mov ebp, esp
+
+	mov eax, 0x00000000
+	mov ecx, 0x00000000
+	mov edx, 0x00000000
+
+	; load the buffer positions
+	mov cl, byte [kKeyBufferRead]
+	mov dl, byte [kKeyBufferWrite]
+
+	; if the read position is the same as the write position, the buffer is empty and we can exit
+	cmp dl, cl
+	je .done
+
+	; calculate the read address into esi
+	mov esi, [kKeyBufferAddress]
+	add esi, ecx
+
+	; get the byte to return into al
+	mov byte al, [esi]
+
+	; update the read position
+	inc cl
+	mov byte [kKeyBufferRead], cl
+
+
+	.done:
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+KeyWait:
+	; Waits until a key is pressed, then returns that key
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	AL - Key code
+
+	push ebp
+	mov ebp, esp
+
+
+	.KeyLoop:
+		call KeyGet
+		cmp al, 0x00
+	je .KeyLoop
+
+
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+PS2ControllerCommand:
+	; Sends a command to the PS/2 Controller with proper wait states
+	;
+	;  input:
+	;	Command byte
+	;	Data byte
+	;
+	;  output:
+	;	EAX - Controller response (if any)
+	;	EBX - Error code
+
+	push ebp
+	mov ebp, esp
+
+
+	; wait until ready to write
+	call PS2ControllerWaitDataWrite
+	cmp eax, 0
+	jne .TimeoutWrite
+
+	; send command
+	mov eax, [ebp + 8]
+	out 0x64, al
+
+
+	; see if the command sent has anything to say in response
+	cmp al, 0x20
+	jne .Not20
+		; if we get here, handle response for command 0x20 (Read controller configuration byte)
+		call .StandardSingleByteRead
+		jmp .Success
+	.Not20:
+
+
+	cmp al, 0x60
+	jne .Not60
+		; if we get here, handle response for command 0x60 (Write controller configuration byte)
+
+		; wait until ready to write
+		call PS2ControllerWaitDataWrite
+		cmp eax, 0
+		jne .TimeoutWrite
+
+		; write the data byte for this command
+		mov eax, [ebp + 12]
+		out 0x60, al
+
+		jmp .Success
+	.Not60:
+
+	cmp al, 0xA9
+	jne .NotA9
+		; if we get here, handle response for command 0xA9 (Test Port 2)
+		call .StandardSingleByteRead
+		jmp .Success
+	.NotA9:
+
+
+	cmp al, 0xAA
+	jne .NotAA
+		; if we get here, handle response for command 0xAA (Test controller)
+		call .StandardSingleByteRead
+		jmp .Success
+	.NotAA:
+
+	cmp al, 0xAB
+	jne .NotAB
+		; if we get here, handle response for command 0xAB (Test Port 1)
+		call .StandardSingleByteRead
+		jmp .Success
+	.NotAB:
+
+	; If we get here, the command has been sent, and there's no special reply. Success!
+	jmp .Success
+
+	.NoAck:
+	mov ebx, kErrPS2AckFail
+	jmp .Done
+
+
+	.TimeoutRead:
+	mov ebx, kErrPS2ControllerReadTimeout
+	jmp .Done
+
+
+	.TimeoutWrite:
+	mov ebx, kErrPS2ControllerWriteTimeout
+
+	.Success:
+	; signify no error
+	mov ebx, kErrNone
+
+	.Done:
+	mov esp, ebp
+	pop ebp
+ret 8
+
+.StandardSingleByteRead:
+	; wait until ready to read
+	call PS2ControllerWaitDataRead
+	cmp eax, 0
+	jne .TimeoutRead
+
+	; read a byte
+	mov eax, 0x00000000
+	in al, 0x60
+ret
 
 
 
@@ -80,10 +228,10 @@ PS2ControllerInit:
 	; Initializes the driver, controller, and any devices found on either port
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -93,11 +241,6 @@ PS2ControllerInit:
 	sub esp, 2
 	%define IRQFlags							byte [ebp - 1]
 	%define configRegister						byte [ebp - 2]
-
-
-	; announce ourselves!
-	push .driverIntro$
-	call PrintIfConfigBits32
 
 
 	; init the IRQ flags - we use this in tracking which IRQs, if any, will remain disabled
@@ -130,22 +273,18 @@ PS2ControllerInit:
 	push dword 0
 	push dword 0xAD
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 	; no need to check if port 2 exists first - this will be ignored if it doesn't
 	push dword 0
 	push dword 0xA7
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -153,11 +292,9 @@ PS2ControllerInit:
 	push dword 0
 	push dword 0x20
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 	; clear bits 0 (Port 1 interrupt), 1 (Port 2 interrupt), and 6 (Port 1 translation)
@@ -170,11 +307,9 @@ PS2ControllerInit:
 	push eax
 	push dword 0x60
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -182,11 +317,9 @@ PS2ControllerInit:
 	push dword 0
 	push dword 0xAA
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 	; check the test results
@@ -200,11 +333,9 @@ PS2ControllerInit:
 	push eax
 	push dword 0x60
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -212,14 +343,11 @@ PS2ControllerInit:
 	push .port1Probing$
 	call PrintIfConfigBits32
 
-	push dword 0
 	push dword 1
 	call PS2ControllerPortTest
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -232,14 +360,11 @@ PS2ControllerInit:
 	call PrintIfConfigBits32
 
 	; send command - Test port 2
-	push dword 0
 	push dword 2
 	call PS2ControllerPortTest
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -251,21 +376,17 @@ PS2ControllerInit:
 	push dword 0
 	push dword 0xAE
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 	push dword 0
 	push dword 0xA8
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -273,11 +394,9 @@ PS2ControllerInit:
 	push dword 0
 	push dword 0x20
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -286,11 +405,9 @@ PS2ControllerInit:
 	push dword 0
 	push dword 0x20
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 	; set bits 0 (Port 1 interrupt) and 1 (Port 2 interrupt)
@@ -300,11 +417,9 @@ PS2ControllerInit:
 	push eax
 	push dword 0x60
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .errorTimeout
 
 
@@ -322,7 +437,7 @@ PS2ControllerInit:
 	call MemAllocate
 
 	; check for error
-	cmp eax, 0
+	cmp eax, kErrNone
 	je .errorTimeout
 	
 	; if we get here, we got a valid memory block
@@ -337,8 +452,6 @@ PS2ControllerInit:
 	push dword 0xFF
 	push dword 1
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; give the interrupt handler a tiny bit of time to do its job for port 1
 	push dword 16
@@ -350,8 +463,6 @@ PS2ControllerInit:
 	push dword 0xFF
 	push dword 2
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	jmp .Done
 
@@ -419,7 +530,6 @@ ret
 ret
 
 section .data
-.driverIntro$									db 'PS/2 Controller Driver, 2019 by Mercury0x0D', 0x00
 .selfTestFailed$								db 'Self Test fail, aborting init', 0x00
 .port1Probing$									db 'Probing port 1', 0x00
 .port2Probing$									db 'Probing port 2', 0x00
@@ -437,220 +547,15 @@ section .data
 
 
 section .text
-KeyGet:
-	; Returns the oldest key in the key buffer, or null if it's empty
-	;
-	;  input:
-	;   dummy value
-	;
-	;  output:
-	;   key pressed in lowest byte of 32-bit value
-
-	push ebp
-	mov ebp, esp
-
-	mov eax, 0x00000000
-	mov ecx, 0x00000000
-	mov edx, 0x00000000
-
-	; load the buffer positions
-	mov cl, byte [kKeyBufferRead]
-	mov dl, byte [kKeyBufferWrite]
-
-	; if the read position is the same as the write position, the buffer is empty and we can exit
-	cmp dl, cl
-	je .done
-
-	; calculate the read address into esi
-	mov esi, [kKeyBufferAddress]
-	add esi, ecx
-
-	; get the byte to return into al
-	mov byte al, [esi]
-
-	; update the read position
-	inc cl
-	mov byte [kKeyBufferRead], cl
-
-	.done:
-	; push the data we got onto the stack and exit
-	mov dword [ebp + 8], eax
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-
-
-section .text
-KeyWait:
-	; Waits until a key is pressed, then returns that key
-	;
-	;  input:
-	;   dummy value
-	;
-	;  output:
-	;   key code
-
-	push ebp
-	mov ebp, esp
-
-
-	.KeyLoop:
-		push 0
-		call KeyGet
-		pop eax
-		cmp al, 0x00
-	je .KeyLoop
-
-
-	mov dword [ebp + 8], eax
-
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-
-
-section .text
-PS2ControllerCommand:
-	; Sends a command to the PS/2 Controller with proper wait states
-	;
-	;  input:
-	;	Command byte
-	;	Data byte
-	;
-	;  output:
-	;	Controller response (if any)
-	;	Error code
-
-	push ebp
-	mov ebp, esp
-
-
-	; wait until ready to write
-	push dword 0
-	call PS2ControllerWaitDataWrite
-	pop eax
-	cmp eax, 0
-	jne .TimeoutWrite
-
-	; send command
-	mov eax, [ebp + 8]
-	out 0x64, al
-
-
-	; see if the command sent has anything to say in response
-	cmp al, 0x20
-	jne .Not20
-		; if we get here, handle response for command 0x20 (Read controller configuration byte)
-		call .StandardSingleByteRead
-		mov [ebp + 8], eax
-		jmp .Success
-	.Not20:
-
-
-	cmp al, 0x60
-	jne .Not60
-		; if we get here, handle response for command 0x60 (Write controller configuration byte)
-
-		; wait until ready to write
-		push dword 0
-		call PS2ControllerWaitDataWrite
-		pop eax
-		cmp eax, 0
-		jne .TimeoutWrite
-
-		; write the data byte for this command
-		mov eax, [ebp + 12]
-		out 0x60, al
-
-		jmp .Success
-	.Not60:
-
-	cmp al, 0xA9
-	jne .NotA9
-		; if we get here, handle response for command 0xA9 (Test Port 2)
-		call .StandardSingleByteRead
-		mov [ebp + 8], eax
-		jmp .Success
-	.NotA9:
-
-
-	cmp al, 0xAA
-	jne .NotAA
-		; if we get here, handle response for command 0xAA (Test controller)
-		call .StandardSingleByteRead
-		mov [ebp + 8], eax
-		jmp .Success
-	.NotAA:
-
-	cmp al, 0xAB
-	jne .NotAB
-		; if we get here, handle response for command 0xAB (Test Port 1)
-		call .StandardSingleByteRead
-		mov [ebp + 8], eax
-		jmp .Success
-	.NotAB:
-
-	; If we get here, the command has been sent, and there's no special reply. Success!
-	jmp .Success
-
-	.NoAck:
-	mov dword [ebp + 12], 0x0000FF00
-	jmp .Done
-
-
-	.TimeoutRead:
-	mov dword [ebp + 12], 0x0000FF01
-	jmp .Done
-
-
-	.TimeoutWrite:
-	mov dword [ebp + 12], 0x0000FF02
-
-	.Success:
-	; signify no error
-	mov dword [ebp + 12], 0
-
-	.Done:
-	mov esp, ebp
-	pop ebp
-ret
-
-.StandardSingleByteRead:
-	; wait until ready to read
-	push dword 0
-	call PS2ControllerWaitDataRead
-	pop eax
-	cmp eax, 0
-	jne .TimeoutRead
-
-	; read a byte
-	mov eax, 0x00000000
-	in al, 0x60
-ret
-
-
-
-
-
-section .text
 PS2ControllerPortTest:
 	; Tests the PS/2 port specified
 	;
 	;  input:
 	;	Port number
-	;	Dummy value
 	;
 	;  output:
-	;	Port status
-	;	Error code
+	;	EAX - Port status
+	;	EBX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -677,14 +582,12 @@ PS2ControllerPortTest:
 	push dword 0
 	push dword ebx
 	call PS2ControllerCommand
-	pop dword [ebp + 8]
-	pop dword [ebp + 12]
 
 
 	.Done:
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -692,13 +595,13 @@ ret
 
 section .text
 PS2ControllerWaitDataRead:
-	; Reads data from the PS/2 controller with a 16 tick timeout (1/16 of a second)
+	; Reads data from the PS/2 controller
 	;
 	;  input:
-	;	dummy value
+	;	n/a
 	;
 	;  output:
-	;	error code
+	;	EAX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -718,11 +621,15 @@ PS2ControllerWaitDataRead:
 		cmp ecx, 16
 	jb .waitLoop
 
-	; if we get here, we've timed out
-	mov dword [ebp + 8], 0x0000FF01
-
+	; if we get here, the 16 tick timeout (1/16 of a second) has occurred
+	mov eax, kErrPS2ControllerReadTimeout
+	jmp .Exit
 
 	.Done:
+	mov eax, kErrNone
+
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret
@@ -733,13 +640,13 @@ ret
 
 section .text
 PS2ControllerWaitDataWrite:
-	; Waits until the PS/2 controller is ready to accept data with a 16 tick timeout (1/16 of a second)
+	; Writes data to the PS/2 controller
 	;
 	;  input:
-	;	dummy value
+	;	n/a
 	;
 	;  output:
-	;	error code
+	;	EAX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -759,11 +666,14 @@ PS2ControllerWaitDataWrite:
 		cmp ecx, 16
 	jb .waitLoop
 
-	; if we get here, we've timed out
-	mov dword [ebp + 8], 0x0000FF02
-
+	; if we get here, the 16 tick timeout (1/16 of a second) has occurred
+	mov eax, kErrPS2ControllerWriteTimeout
+	jmp .Exit
 
 	.Done:
+	mov eax, kErrNone
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret
@@ -774,7 +684,7 @@ ret
 
 section .text
 PS2DeviceCommand:
-	; Sends a command to a PS/2 device with proper wait states
+	; Sends a command to a PS/2 device
 	;
 	;  input:
 	;	Port number of the device to recieve the command
@@ -782,8 +692,8 @@ PS2DeviceCommand:
 	;	Data byte
 	;
 	;  output:
-	;	Device response (if any)
-	;	Error code
+	;	EAX - Device response (if any)
+	;	EBX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -794,9 +704,7 @@ PS2DeviceCommand:
 	call PS2PortSendTo2
 
 	; wait until ready to write
-	push dword 0
 	call PS2ControllerWaitDataWrite
-	pop eax
 	cmp eax, 0
 	jne .TimeoutWrite
 
@@ -811,9 +719,7 @@ PS2DeviceCommand:
 		; if we get here, handle response for command 0xF0 (select code set)
 
 		; wait until ready to read
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .TimeoutRead
 
@@ -826,9 +732,7 @@ PS2DeviceCommand:
 		call PS2PortSendTo2
 
 		; wait until ready to write
-		push dword 0
 		call PS2ControllerWaitDataWrite
-		pop eax
 		cmp eax, 0
 		jne .TimeoutWrite
 
@@ -837,9 +741,7 @@ PS2DeviceCommand:
 		out 0x60, al
 
 		; wait until ready to read
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .TimeoutRead
 
@@ -856,9 +758,7 @@ PS2DeviceCommand:
 		; if we get here, handle response for command 0xF0 (select code set)
 
 		; wait until ready to read
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .TimeoutRead
 
@@ -868,9 +768,7 @@ PS2DeviceCommand:
 		jne .NoAck
 
 		; wait until ready to write
-		push dword 0
 		call PS2ControllerWaitDataWrite
-		pop eax
 		cmp eax, 0
 		jne .TimeoutWrite
 
@@ -881,9 +779,7 @@ PS2DeviceCommand:
 		out 0x60, al
 
 		; wait until ready to read
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .TimeoutRead
 
@@ -899,7 +795,6 @@ PS2DeviceCommand:
 	jne .NotF2
 		; if we get here, handle response for command 0xF2 (Identify)
 		call .StandardSingleByteRead
-		mov dword [ebp + 12], eax
 		jmp .Success
 	.NotF2:
 
@@ -908,9 +803,7 @@ PS2DeviceCommand:
 		; if we get here, handle response for command 0xF3 (set sample rate)
 
 		; wait until ready to read
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .TimeoutRead
 
@@ -925,9 +818,7 @@ PS2DeviceCommand:
 		call PS2PortSendTo2
 
 		; wait until ready to write
-		push dword 0
 		call PS2ControllerWaitDataWrite
-		pop eax
 		cmp eax, 0
 		jne .TimeoutWrite
 
@@ -936,9 +827,7 @@ PS2DeviceCommand:
 		out 0x60, al
 
 		; wait until ready to read
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .TimeoutRead
 
@@ -954,7 +843,6 @@ PS2DeviceCommand:
 	jne .NotF4
 		; if we get here, handle response for command 0xF4 (Enable data reporting)
 		call .StandardSingleByteRead
-		mov dword [ebp + 12], eax
 		jmp .Success
 	.NotF4:
 
@@ -962,7 +850,6 @@ PS2DeviceCommand:
 	jne .NotF5
 		; if we get here, handle response for command 0xF5 (Disable data reporting)
 		call .StandardSingleByteRead
-		mov dword [ebp + 12], eax
 		jmp .Success
 	.NotF5:
 
@@ -970,7 +857,6 @@ PS2DeviceCommand:
 	jne .NotF6
 		; if we get here, handle response for command 0xF6 (Use default settings)
 		call .StandardSingleByteRead
-		mov dword [ebp + 12], eax
 		jmp .Success
 	.NotF6:
 
@@ -978,7 +864,6 @@ PS2DeviceCommand:
 	jne .NotFF
 		; if we get here, handle response for command 0xFF (Reset)
 		call .StandardSingleByteRead
-		mov dword [ebp + 12], eax
 		jmp .Success
 	.NotFF:
 
@@ -989,37 +874,35 @@ PS2DeviceCommand:
 
 	.NoAck:
 	; device failed to ack
-	mov dword [ebp + 12], 0x00000000
-	mov dword [ebp + 16], 0x0000FF00
+	mov eax, 0
+	mov ebx, kErrPS2AckFail
 	jmp .Done
 
 
 	.TimeoutRead:
 	; read timeout occurred
-	mov dword [ebp + 12], 0x00000000
-	mov dword [ebp + 16], 0x0000FF01
+	mov eax, 0
+	mov ebx, kErrPS2ControllerReadTimeout
 	jmp .Done
 
 
 	.TimeoutWrite:
 	; write timeout occurred
-	mov dword [ebp + 12], 0x00000000
-	mov dword [ebp + 16], 0x0000FF02
+	mov eax, 0
+	mov ebx, kErrPS2ControllerWriteTimeout
 
 	.Success:
 	; signify no error
-	mov dword [ebp + 16], 0
+	mov ebx, kErrNone
 
 	.Done:
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 12
 
 .StandardSingleByteRead:
 	; wait until ready to read
-	push dword 0
 	call PS2ControllerWaitDataRead
-	pop eax
 	cmp eax, 0
 	jne .TimeoutRead
 
@@ -1038,11 +921,10 @@ PS2DeviceIdentify:
 	;
 	;  input:
 	;	Port on which the device resides
-	;	dummy value
 	;
 	;  output:
-	;	device identification (with 0xFF for bytes that were not returned by the driver)
-	;	error code
+	;	EAX - Device identification (with 0xFF for bytes that were not returned by the driver)
+	;	EBX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -1061,8 +943,6 @@ PS2DeviceIdentify:
 	push dword 0xF2
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for ack
 	cmp al, 0xFA
@@ -1073,9 +953,7 @@ PS2DeviceIdentify:
 	; we should get no more than 2 back, so it won't matter that any more than four will wrap around in the IDBytes variable
 	.IDLoop:
 		; make sure we're ready to read, and handle the result accordingly
-		push dword 0
 		call PS2ControllerWaitDataRead
-		pop eax
 		cmp eax, 0
 		jne .IDLoopDone
 	
@@ -1093,35 +971,34 @@ PS2DeviceIdentify:
 	.IDLoopDone:
 		; all done, and no error!
 		mov eax, IDBytes
-		mov dword [ebp + 8], eax
-		mov dword [ebp + 12], 0x00000000
+		mov ebx, kErrNone
 	jmp .Done
 
 
 	.NoAck:
 		; the device failed to ack
-		mov dword [ebp + 8], 0x00000000
-		mov dword [ebp + 12], 0x0000FF00
+		mov eax, 0
+		mov ebx, kErrPS2AckFail
 	jmp .Done
 
 
 	.TimeoutRead:
 		; read timeout occurred
-		mov dword [ebp + 8], 0x00000000
-		mov dword [ebp + 12], 0x0000FF01
+		mov eax, 0
+		mov ebx, kErrPS2ControllerReadTimeout
 	jmp .Done
 
 
 	.TimeoutWrite:
 		; hmm... could this be a <WRITE TIMEOUT>?
-		mov dword [ebp + 8], 0x00000000
-		mov dword [ebp + 12], 0x0000FF02
+		mov eax, 0
+		mov ebx, kErrPS2ControllerWriteTimeout
 
 
 	.Done:
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -1130,13 +1007,13 @@ ret
 
 section .text
 PS2InitKeyboard:
-	; Sets up the keyboard defaults
+	; Initializes the PS/2 keyboard
 	;
 	;  input:
-	;   Port number on which the keyboard resides
+	;	Port number on which the keyboard resides
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -1147,11 +1024,9 @@ PS2InitKeyboard:
 	push dword 0xF5
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1160,11 +1035,9 @@ PS2InitKeyboard:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1173,11 +1046,9 @@ PS2InitKeyboard:
 	push dword 0xF0
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1186,11 +1057,9 @@ PS2InitKeyboard:
 	push dword 0xED
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1199,8 +1068,6 @@ PS2InitKeyboard:
 	push dword 0xF4
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 
 	.Done:
@@ -1217,10 +1084,10 @@ PS2InitMouse:
 	; Initializes the PS/2 mouse
 	;
 	;  input:
-	;   Port number on which the mouse resides
+	;	Port number on which the mouse resides
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -1237,8 +1104,6 @@ PS2InitMouse:
 	push dword 0xF5
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 
 	; use default settings
@@ -1246,8 +1111,6 @@ PS2InitMouse:
 	push dword 0xF6
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 
 	; attempt to promote mouse from 0x00 (Standard Mouse) to 0x03 (Wheel Mouse)
@@ -1255,11 +1118,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1267,11 +1128,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1279,11 +1138,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1291,13 +1148,10 @@ PS2InitMouse:
 	push dword [ebp + 8]
 	call PS2PortSendTo2
 	push dword 0
-	push dword 0
 	call PS2DeviceIdentify
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1319,11 +1173,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1331,11 +1183,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1343,11 +1193,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1355,13 +1203,10 @@ PS2InitMouse:
 	push dword [ebp + 8]
 	call PS2PortSendTo2
 	push dword 0
-	push dword 0
 	call PS2DeviceIdentify
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1383,11 +1228,9 @@ PS2InitMouse:
 	push dword 0xF3
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1396,11 +1239,9 @@ PS2InitMouse:
 	push dword 0xF4
 	push dword [ebp + 8]
 	call PS2DeviceCommand
-	pop eax
-	pop ebx
 
 	; check for error
-	cmp ebx, 0
+	cmp ebx, kErrNone
 	jne .Done
 
 
@@ -1822,11 +1663,8 @@ PS2NewConnect:
 
 
 	; now that we have a timer interrupt firing, we get and save the device ID
-	push dword 0
 	push dword [ebp + 8]
 	call PS2DeviceIdentify
-	pop eax
-	pop ebx
 	; We don't care about checking for errors here.
 	; If it timed out, the device ID will be 0xFFFF anyway to indicate no device.
 
@@ -1846,7 +1684,6 @@ PS2NewConnect:
 	; init the device
 	push dword [ebp + 8]
 	call PS2PortInitDevice
-	pop eax
 
 
 	; restore proper interrupt state
@@ -2012,7 +1849,7 @@ PS2PortInitDevice:
 	;	Port number on which the device resides
 	;
 	;  output:
-	;	error code
+	;	EAX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -2072,11 +1909,10 @@ PS2PortInitDevice:
 		push dword [ebp + 8]
 		call PS2InitKeyboard
 
-.InitError:
 	.Done:
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -2104,8 +1940,6 @@ PS2PortSendTo2:
 	push dword 0
 	push dword 0xD4
 	call PS2ControllerCommand
-	pop eax
-	pop ebx
 
 
 	.Done:

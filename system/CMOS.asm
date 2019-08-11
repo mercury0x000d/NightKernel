@@ -66,7 +66,7 @@ CMOSWrite:
 	;	Value to write (8 bits)
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp

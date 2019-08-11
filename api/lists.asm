@@ -49,36 +49,41 @@ LMElementAddressGet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
+	%define elementNum							dword [ebp + 12]
+
 
 	; see if the list is valid
-	push dword [ebp + 8]
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
 		mov esi, 0
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
 	; see if element is valid
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push listPtr
 	call LMElementValidate
 
 	cmp edx, true
 	je .ElementValid
 		; if we get here, the element isn't valid
 		mov esi, 0
-		mov edx, 0xF002
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.ElementValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push listPtr
 	call LM_Internal_ElementAddressGet
-	mov edx, 0x0000
+
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -104,8 +109,11 @@ LMElementCountGet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
@@ -113,13 +121,14 @@ LMElementCountGet:
 
 		; if we get here, the list isn't valid
 		mov ecx, 0
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 
 	.TestPassed:
-	push dword [ebp + 8]
+	push listPtr
 	call LM_Internal_ElementCountGet
-	mov edx, 0x0000
+
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -145,22 +154,26 @@ LMElementCountSet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
+	%define newElementCount						dword [ebp + 12]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push newElementCount
+	push listPtr
 	call LM_Internal_ElementCountSet
 
-	mov edx, 0x0000
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -186,33 +199,37 @@ LMElementDelete:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
+	%define elementNum							dword [ebp + 12]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push listPtr
 	call LMElementValidate
 
 	cmp edx, true
 	je .ElementValid
 		; if we get here, the element isn't valid
-		mov edx, 0xF002
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.ElementValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push listPtr
 	call LM_Internal_ElementDelete
 
-	mov edx, 0x0000
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -238,33 +255,37 @@ LMElementDuplicate:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
+	%define elementNum							dword [ebp + 12]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push listPtr
 	call LMElementValidate
 
 	cmp edx, true
 	je .ElementValid
 		; if we get here, the element isn't valid
-		mov edx, 0xF002
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.ElementValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push listPtr
 	call LM_Internal_ElementDuplicate
 
-	mov edx, 0x0000
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -290,22 +311,25 @@ LMElementSizeGet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 8]
+	push listPtr
 	call LM_Internal_ElementSizeGet
 	mov eax, edx
 
-	mov edx, 0x0000
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -333,12 +357,16 @@ LMElementValidate:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
+	%define elementNum							dword [ebp + 12]
+
 
 	; check element validity
-	mov esi, [ebp + 8]
+	mov esi, listPtr
 	mov eax, dword [tListInfo.elementCount]
 
-	cmp dword [ebp + 12], eax
+	cmp elementNum, eax
 	jb .ElementValid
 
 	mov edx, false
@@ -373,36 +401,41 @@ LMItemAddAtSlot:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
+	%define slotNum								dword [ebp + 12]
+	%define newItemPtr							dword [ebp + 16]
+	%define newItemSize							dword [ebp + 20]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov dword [ebp + 8], 0
-		mov dword [ebp + 20], 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push slotNum
+	push listPtr
 	call LMElementValidate
 
 	cmp edx, true
 	je .ElementValid
 		; if we get here, the element isn't valid
-		mov edx, 0xF002
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.ElementValid:
 
-	push dword [ebp + 20]
-	push dword [ebp + 16]
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push newItemSize
+	push newItemPtr
+	push slotNum
+	push listPtr
 	call LM_Internal_ItemAddAtSlot
 
-	mov edx, 0x0000
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -427,8 +460,11 @@ LMListCompact:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define listPtr								dword [ebp + 8]
 
-	push dword [ebp + 8]
+
+	push listPtr
 	call LM_Internal_ListCompact
 
 
@@ -455,14 +491,19 @@ LMListInit:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define elementCount						dword [ebp + 12]
+	%define elementSize							dword [ebp + 16]
+
 	; allocate local variables
 	sub esp, 4
 	%define listSize							dword [ebp - 4]
 
 
 	; calculate the total size of the memory this list will occupy
-	mov eax, [ebp + 12]
-	mov ebx, [ebp + 16]
+	mov eax, elementCount
+	mov ebx, elementSize
 	mov edx, 0x00000000
 	mul ebx
 	add eax, 16
@@ -471,18 +512,18 @@ LMListInit:
 
 
 	; get the list ready for writing
-	mov esi, [ebp + 8]
+	mov esi, address
 
 
 	; write the data to the start of the list area, starting with the signature
 	mov dword [tListInfo.signature], 'list'
 
 	; write the size of each element next
-	mov ebx, [ebp + 16]
+	mov ebx, elementSize
 	mov dword [tListInfo.elementSize], ebx
 
 	; write the total number of elements
-	mov eax, [ebp + 12]
+	mov eax, elementCount
 	mov dword [tListInfo.elementCount], eax
 
 	; write total size of list
@@ -512,8 +553,11 @@ LMListSearch:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
 
-	push dword [ebp + 8]
+
+	push address
 	call LM_Internal_ListSearch
 
 
@@ -540,9 +584,12 @@ LMListValidate:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+
 
 	; check list validity
-	mov esi, [ebp + 8]
+	mov esi, address
 	mov eax, dword [esi]
 
 	cmp eax, 'list'
@@ -578,21 +625,24 @@ LMSlotFindFirstFree:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
 
-	push dword [ebp + 8]
+
+	push address
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 8]
+	push address
 	call LM_Internal_SlotFindFirstFree
 
-	mov edx, 0x0000
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -620,30 +670,34 @@ LMSlotFreeTest:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define elementNum							dword [ebp + 12]
 
-	push dword [ebp + 8]
+
+	push address
 	call LMListValidate
 
 	cmp edx, true
 	je .ListValid
 		; if we get here, the list isn't valid
-		mov edx, 0xF000
+		mov edx, kErrInvalidParameter
 		jmp .Exit
 	.ListValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push address
 	call LMElementValidate
 
 	cmp edx, true
 	je .ElementValid
 		; if we get here, the element isn't valid
-		mov edx, 0xF002
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.ElementValid:
 
-	push dword [ebp + 12]
-	push dword [ebp + 8]
+	push elementNum
+	push address
 	call LM_Internal_SlotFreeTest
 
 
@@ -671,13 +725,17 @@ LM_Internal_ElementAddressGet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define elementNum							dword [ebp + 12]
+
 
 	; get the size of each element in this list
-	mov esi, [ebp + 8]
+	mov esi, address
 	mov eax, [tListInfo.elementSize]
 
 	; calculate the new destination address
-	mul dword [ebp + 12]
+	mul elementNum
 	lea esi, [eax + esi + 16]
 
 
@@ -704,9 +762,12 @@ LM_Internal_ElementCountGet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+
 
 	; get the element size
-	mov esi, [ebp + 8]
+	mov esi, address
 	mov ecx, [tListInfo.elementCount]
 
 
@@ -733,10 +794,14 @@ LM_Internal_ElementCountSet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define newSlotCount						dword [ebp + 12]
+
 
 	; set the element size
-	mov esi, [ebp + 8]
-	mov edx, [ebp + 12]
+	mov esi, address
+	mov edx, newSlotCount
 	mov [tListInfo.elementCount], edx
 
 
@@ -763,6 +828,10 @@ LM_Internal_ElementDelete:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define element								dword [ebp + 12]
+
 	; allocate local variables
 	sub esp, 12
 	%define elementSize							dword [ebp - 4]
@@ -771,21 +840,22 @@ LM_Internal_ElementDelete:
 
 
 	; get the element size of this list
-	push dword [ebp + 8]
+	push address
 	call LM_Internal_ElementSizeGet
 	mov elementSize, eax
 
 	; get the number of elements in this list
 	push dword 0
-	push dword [ebp + 8]
+	push address
 	call LM_Internal_ElementCountGet
 
 	; save the number of elements for later
 	mov elementCount, ecx
 
 	; set up a loop to copy down by one all elements from the one to be deleted to the end
+	; Yes, we'll be modifying the contents of a passed parameter here, live and in-place. You got a problem with that? ;)
 	dec ecx
-	mov ebx, dword [ebp + 12]
+	mov ebx, element
 	sub ecx, ebx
 
 	.ElementCopyLoop:
@@ -794,9 +864,9 @@ LM_Internal_ElementDelete:
 		mov loopCounter, ecx
 
 		; get the starting address of the destination element
-		mov edx, dword [ebp + 12]
+		mov edx, element
 		push edx
-		mov eax, dword [ebp + 8]
+		mov eax, address
 		push eax
 		call LM_Internal_ElementAddressGet
 
@@ -804,10 +874,10 @@ LM_Internal_ElementDelete:
 		push esi
 
 		; get the starting address of the source element
-		mov edx, dword [ebp + 12]
+		mov edx, element
 		inc edx
 		push edx
-		push dword [ebp + 8]
+		push address
 		call LM_Internal_ElementAddressGet
 		mov eax, esi
 
@@ -821,13 +891,13 @@ LM_Internal_ElementDelete:
 		call MemCopy
 
 		; increment the index
-		inc dword [ebp + 12]
+		inc element
 
 	mov ecx, loopCounter
 	loop .ElementCopyLoop
 
 	; update the number of elements in this list
-	mov esi, dword [ebp + 8]
+	mov esi, address
 	mov eax, dword [tListInfo.elementCount]
 	dec eax
 	mov dword [tListInfo.elementCount], eax
@@ -861,6 +931,10 @@ LM_Internal_ElementDuplicate:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define element								dword [ebp + 12]
+
 	; allocate local variables
 	sub esp, 12
 	%define elementSize							dword [ebp - 4]
@@ -869,13 +943,13 @@ LM_Internal_ElementDuplicate:
 
 
 	; get the element size of this list
-	push dword [ebp + 8]
+	push address
 	call LM_Internal_ElementSizeGet
 	mov elementSize, eax
 
 	; get the number of elements in this list
 	push dword 0
-	push dword [ebp + 8]
+	push address
 	call LM_Internal_ElementCountGet
 
 	; increment the number of elements and save for later
@@ -884,13 +958,13 @@ LM_Internal_ElementDuplicate:
 
 	; update the number of elements in this list
 	push ecx
-	push dword [ebp + 8]
+	push address
 	call LM_Internal_ElementCountSet
 
 	; set up a loop to copy down by one all elements from the end to the one to be duplicated
 	mov ecx, elementCount
 	dec ecx
-	mov ebx, dword [ebp + 12]
+	mov ebx, element
 	sub ecx, ebx
 
 	.ElementCopyLoop:
@@ -901,7 +975,7 @@ LM_Internal_ElementDuplicate:
 		dec elementCount
 		mov edx, elementCount
 		push edx
-		push dword [ebp + 8]
+		push address
 		call LM_Internal_ElementAddressGet
 
 		; save this address
@@ -911,7 +985,7 @@ LM_Internal_ElementDuplicate:
 		mov edx, elementCount
 		dec edx
 		push edx
-		push dword [ebp + 8]
+		push address
 		call LM_Internal_ElementAddressGet
 		
 		; retrieve the earlier saved address
@@ -928,7 +1002,7 @@ LM_Internal_ElementDuplicate:
 
 
 	; update the list's size field
-	mov esi, dword [ebp + 8]
+	mov esi, address
 	mov eax, dword [tListInfo.listSize]
 	add eax, elementSize
 	mov dword [tListInfo.listSize], eax
@@ -955,9 +1029,12 @@ LM_Internal_ElementSizeGet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+
 
 	; get the element size
-	mov esi, [ebp + 8]
+	mov esi, address
 	mov eax, [tListInfo.elementSize]
 
 
@@ -985,9 +1062,15 @@ LM_Internal_ItemAddAtSlot:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define addSlot								dword [ebp + 12]
+	%define newItemAddress						dword [ebp + 16]
+	%define newItemSize							dword [ebp + 20]
 
-	mov esi, [ebp + 8]
-	mov edx, [ebp + 12]
+
+	mov esi, address
+	mov edx, addSlot
 
 	; check list validity
 	mov eax, dword [esi]
@@ -1002,12 +1085,12 @@ LM_Internal_ItemAddAtSlot:
 	; the list passed the data integrity check, so we proceed
 
 	; get the size of each element in this list
-	mov edi, dword [ebp + 8]
+	mov edi, address
 	push edi
 	call LM_Internal_ElementSizeGet
 
 	; now compare that to the given size of the new item
-	cmp dword [ebp + 20], eax
+	cmp newItemSize, eax
 	jle .SizeValid
 
 	; add error handling code here later
@@ -1016,19 +1099,19 @@ LM_Internal_ItemAddAtSlot:
 
 	.SizeValid:
 	; if we get here, the size is ok, so we add it to the list!
-	mov esi, [ebp + 16]
-	mov ebx, [ebp + 20]
+	mov esi, newItemAddress
+	mov ebx, newItemSize
 
 	; calculate the new destination address
-	mov edx, dword [ebp + 12]
+	mov edx, addSlot
 	mul edx
-	mov edi, dword [ebp + 8]
+	mov edi, address
 	add eax, edi
 	add eax, 16
 
 	; prep the memory copy
-	mov esi, dword [ebp + 16]
-	mov ebx, dword [ebp + 20]
+	mov esi, newItemAddress
+	mov ebx, newItemSize
 
 	; copy the memory
 	push ebx
@@ -1105,9 +1188,12 @@ LM_Internal_SlotFindFirstFree:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+
 
 	; load the list address
-	mov esi, [ebp + 8]
+	mov esi, address
 
 	; initialize our counter
 	mov edx, 0x00000000
@@ -1119,7 +1205,7 @@ LM_Internal_SlotFindFirstFree:
 
 		; test this element
 		push edx
-		push dword [ebp + 8]
+		push address
 		call LM_Internal_SlotFreeTest
 		mov eax, edx
 
@@ -1170,10 +1256,15 @@ LM_Internal_SlotFreeTest:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define element								dword [ebp + 12]
+
 
 	; calculate the element's address in RAM
+	mov esi, address
 	mov eax, [tListInfo.elementSize]
-	mul edx
+	mul element
 	add eax, esi
 	add eax, 16
 

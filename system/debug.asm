@@ -424,9 +424,7 @@ Debugger:
 
 
 	; wait for a key to be pressed
-	push dword 0
 	call KeyWait
-	pop eax
 
 
 	; disable interrupts again and re-enable tasking
@@ -673,10 +671,10 @@ DebugMenu:
 	; Implements the in-kernel debugging menu
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -776,9 +774,7 @@ DebugMenu:
 	call Print32
 
 	.DebugLoop:
-		push 0
 		call KeyGet
-		pop eax
 
 		cmp al, 0x45							; choice 0
 		jne .Not0
@@ -858,7 +854,7 @@ section .data
 .debugText6$									db '6 - ', 0x00
 .debugText7$									db '7 - ', 0x00
 .debugText8$									db '8 - ', 0x00
-.debugText9$									db '9 - Crash. Yes, really. Relax, it', 0x27,'s just for testing.', 0x00
+.debugText9$									db '9 - Bandicoot', 0x00
 .debugText0$									db '0 - Reboot', 0x00
 .escMessage$									db 'Press Escape from any sub menu above to return to this main menu', 0x00
 .debuggerMessage$								db 'What a horrible Night to have a bug.', 0x00
@@ -880,6 +876,23 @@ DebugPCIDevices:
 	;  output:
 	;	n/a
 
+	push ebp
+	mov ebp, esp
+
+	; allocate local variables
+	sub esp, 40
+	%define cursorY								dword [ebp - 4]
+	%define PCIBus								dword [ebp - 8]
+	%define PCIDevice							dword [ebp - 12]
+	%define PCIFunction							dword [ebp - 16]
+	%define vendor								dword [ebp - 20]
+	%define device								dword [ebp - 24]
+	%define class								dword [ebp - 28]
+	%define subclass							dword [ebp - 32]
+	%define progif								dword [ebp - 36]
+	%define revision							dword [ebp - 40]
+
+
 	; create a new list to hold the PCI device labels if necessary
 	cmp byte [.flag], 1
 	je .PCIInitSkip
@@ -887,9 +900,8 @@ DebugPCIDevices:
 		; if we get here, this hasn't been set up yet... so let's do so!
 
 		; the list will be 256 entries of 36 bytes each
-		; 256 * 36 + 16 = 9232 (0x2410)
 		; allocate memory for the list
-		push 9232
+		push 256 * 36 + 16
 		push dword 1
 		call MemAllocate
 
@@ -1047,253 +1059,164 @@ DebugPCIDevices:
 	push .PCIInfoText$
 	call Print32
 
-	; see if we have to print data on all devices of on a specific device
-	cmp dword [.currentDevice], 0
-	jne .PrintSpecificDevice
-	
-		; if we get here, the index is 0 so we print all devices
-	
-		; build and print the device count string
-		push 80
-		push .scratch$
-		push .PCIDeviceCountText$
-		call MemCopy
-
-		push dword 0
-		push dword [tSystem.PCIDeviceCount]
-		push .scratch$
-		call StringTokenHexadecimal
-
-		push dword 0x00000000
-		push dword 0x00000007
-		push dword 1
-		push dword 13
-		push .scratch$
-		call Print32
-
-
-		; print the device description header
-		push dword 0x00000000
-		push dword 0x00000007
-		push dword 3
-		push dword 1
-		push .PCIDeviceDescriptionText1$
-		call Print32
-
-
-		; init the values
-		mov dword [.PCIBus], 0
-		mov dword [.PCIDevice], 0
-		mov dword [.PCIFunction], 0
-
-		mov cursorY, 4
-		.PCIListAllLoop:
-			push dword [.PCIFunction]
-			push dword [.PCIDevice]
-			push dword [.PCIBus]
-			call PCIGetNextFunction
-			mov dword [.PCIBus], eax
-			mov dword [.PCIDevice], ebx
-			mov dword [.PCIFunction], ecx
-
-			; see if we're done yet
-			mov eax, dword [.PCIBus]
-			add eax, dword [.PCIDevice]
-			add eax, dword [.PCIFunction]
-			cmp eax, 0x0002FFFD
-			je .GetInputLoop
-
-			; get info on the first device
-			push PCIDeviceInfo
-			push dword [.PCIFunction]
-			push dword [.PCIDevice]
-			push dword [.PCIBus]
-			call PCIReadAll
-
-			; first calculate the address of the string which describes this device
-			mov eax, 0x00000000
-			mov al, byte [PCIDeviceInfo.PCIClass]
-			push eax
-			push dword [PCIDeviceInfo.PCIClassTable]
-			call LMElementAddressGet
-
-			; save the address for later
-			push esi
-
-			; build the rest of the PCI data into line 1 for this device
-			push 80
-			push .scratch$
-			push .format$
-			call MemCopy
-
-			push dword 2
-			push dword [.PCIBus]
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 2
-			push dword [.PCIDevice]
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 1
-			push dword [.PCIFunction]
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 4
-			mov eax, 0x00000000
-			mov ax, [PCIDeviceInfo.PCIVendorID]
-			push eax
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 4
-			mov eax, 0x00000000
-			mov ax, [PCIDeviceInfo.PCIDeviceID]
-			push eax
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 2
-			mov eax, 0x00000000
-			mov al, [PCIDeviceInfo.PCIClass]
-			push eax
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 2
-			mov eax, 0x00000000
-			mov al, [PCIDeviceInfo.PCISubclass]
-			push eax
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 2
-			mov eax, 0x00000000
-			mov al, [PCIDeviceInfo.PCIProgIf]
-			push eax
-			push .scratch$
-			call StringTokenHexadecimal
-
-			push dword 2
-			mov eax, 0x00000000
-			mov al, [PCIDeviceInfo.PCIRevision]
-			push eax
-			push .scratch$
-			call StringTokenHexadecimal
-
-			pop eax
-			push dword 0
-			push eax
-			push .scratch$
-			call StringTokenString
-
-			; print the string we just built
-			push dword 0x00000000
-			push dword 0x00000007
-			push dword cursorY
-			push dword 1
-			push .scratch$
-			call Print32
-			xor ebx, ebx
-			mov bl, ah
-			mov cursorY, ebx
-
-			; advance to the next slot
-			push dword [.PCIFunction]
-			push dword [.PCIDevice]
-			push dword [.PCIBus]
-			call PCICalculateNext
-			mov dword [.PCIBus], eax
-			mov dword [.PCIDevice], ebx
-			mov dword [.PCIFunction], ecx
-
-		jmp .PCIListAllLoop
-
-	.PrintSpecificDevice:
-	; here we print info for just one specific device
-	; we start by building and printing the device count string
-	push 80
-	push .scratch$
-	push .PCIDeviceListingText$
-	call MemCopy
-
-	push dword 0
-	push dword [.currentDevice]
-	push .scratch$
-	call StringTokenDecimal
-
-	push dword 0
-	push dword [tSystem.PCIDeviceCount]
-	push .scratch$
-	call StringTokenDecimal
-
-	push dword 0x00000000
-	push dword 0x00000007
-	push dword 1
-	push dword 1
-	push .scratch$
-	call Print32
-
-
-	mov eax, dword [.currentDevice]
-	dec eax
-	push eax
-	push dword [tSystem.listPCIDevices]
-	call LMElementAddressGet
-
-	; adjust the address to skip the pci bus/device/function data
-	add esi, 12
-
-	; dump the memory space
+	; print the device description header
 	push dword 0x00000000
 	push dword 0x00000007
 	push dword 3
 	push dword 1
-	push dword 16
-	push esi
-	call PrintRAM32
-			
-	.GetInputLoop:
-		push 0
-		call KeyWait
-		pop eax
+	push .PCIDeviceDescriptionText1$
+	call Print32
 
-		; see what was pressed
-		cmp eax, 0x7D
-		je .PageUp
-	
-		cmp eax, 0x7A
-		je .PageDown
-	
-		cmp eax, 0x76
+
+	; init the values
+	mov PCIBus, 0xFFFFFFFF
+	mov PCIDevice, 0xFFFFFFFF
+	mov PCIFunction, 0xFFFFFFFF
+
+	mov cursorY, 4
+	.PCIListAllLoop:
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIFunctionNextGet
+		mov PCIBus, eax
+		mov PCIDevice, ebx
+		mov PCIFunction, ecx
+
+		; see if we're done yet
+		mov eax, PCIBus
+		add eax, PCIDevice
+		add eax, PCIFunction
+		cmp eax, 0x0002FFFD
 		je .End
 
-	jmp .GetInputLoop
+		; get info on the device
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIInfoVendorGet
+		mov vendor, eax
 
-	.PageUp:
-		dec dword [.currentDevice]
-		cmp dword [.currentDevice], 0xFFFFFFFF
-		jne DebugPCIDevices
-		inc dword [.currentDevice]
-	jmp .GetInputLoop
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIInfoDeviceGet
+		mov device, eax
 
-	.PageDown:
-		inc dword [.currentDevice]
-		mov eax, dword [tSystem.PCIDeviceCount]
-		cmp dword [.currentDevice], eax
-		jbe DebugPCIDevices
-		dec dword [.currentDevice]
-	jmp .GetInputLoop
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIInfoClassGet
+		mov class, eax
+
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIInfoSubclassGet
+		mov subclass, eax
+
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIInfoProgIfGet
+		mov progif, eax
+
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIInfoRevisionGet
+		mov revision, eax
+
+
+		; first calculate the address of the string which describes this device
+		push class
+		push dword [PCIDeviceInfo.PCIClassTable]
+		call LMElementAddressGet
+
+		; save the address for later
+		push esi
+
+		; build the rest of the PCI data into line 1 for this device
+		push 80
+		push .scratch$
+		push .format$
+		call MemCopy
+
+		push dword 2
+		push PCIBus
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push PCIDevice
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 1
+		push PCIFunction
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 4
+		push vendor
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 4
+		push device
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push class
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push subclass
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push progif
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 2
+		push revision
+		push .scratch$
+		call StringTokenHexadecimal
+
+		pop eax
+		push dword 0
+		push eax
+		push .scratch$
+		call StringTokenString
+
+		; print the string we just built
+		push dword 0x00000000
+		push dword 0x00000007
+		push cursorY
+		push dword 1
+		push .scratch$
+		call Print32
+		xor ebx, ebx
+		mov bl, ah
+		mov cursorY, ebx
+
+	jmp .PCIListAllLoop
+
 
 	.End:
-	; set this for next time
-	mov dword [.currentDevice], 0
+	call DebugWaitForEscape
 
 	; clear the screen and exit
 	push 0x00000000
 	call ScreenClear32
+
+
+	mov esp, ebp
+	pop ebp
 ret
 
 section .bss
@@ -1302,46 +1225,11 @@ section .bss
 section .data
 .flag											db 0x00
 .PCIInfoText$									db 'PCI Devices', 0x00
-.PCIDeviceCountText$							db '(^ found)', 0x00
-.PCIDeviceListingText$							db 'Shadowed register space for device ^ of ^', 0x00
 .PCIDeviceDescriptionText1$						db 'Bus Dev  Fn  Vend  Dev   Cl  Sc  PI  Rv  Description', 0x00
 .format$										db '^  ^   ^   ^  ^  ^  ^  ^  ^  ^', 0x00
-.PCIBus											dd 0x00000000
-.PCIDevice										dd 0x00000000
-.PCIFunction									dd 0x00000000
-.currentDevice									dd 0x00000000
 
 ; struct to hold all data about a single PCI device for the system menu
 PCIDeviceInfo:
-.PCIVendorID									dw 0x0000
-.PCIDeviceID									dw 0x0000
-.PCICommand										dw 0x0000
-.PCIStatus										dw 0x0000
-.PCIRevision									db 0x00
-.PCIProgIf										db 0x00
-.PCISubclass									db 0x00
-.PCIClass										db 0x00
-.PCICacheLineSize								db 0x00
-.PCILatencyTimer								db 0x00
-.PCIHeaderType									db 0x00
-.PCIBIST										db 0x00
-.PCIBAR0										dd 0x00000000
-.PCIBAR1										dd 0x00000000
-.PCIBAR2										dd 0x00000000
-.PCIBAR3										dd 0x00000000
-.PCIBAR4										dd 0x00000000
-.PCIBAR5										dd 0x00000000
-.PCICardbusCISPointer							dd 0x00000000
-.PCISubsystemVendorID							dw 0x0000
-.PCISubsystemID									dw 0x0000
-.PCIExpansionROMBaseAddress						dd 0x00000000
-.PCICapabilitiesPointer							db 0x00
-.PCIReserved									times 7 db 0x00
-.PCIInterruptLine								db 0x00
-.PCIInterruptPin								db 0x00
-.PCIMaxGrant									db 0x00
-.PCIMaxLatency									db 0x00
-.PCIRegisters									times 192 db 0x00
 .PCIClassTable									dd 0x00000000
 .PCI00$											db 'Unclassified device', 0x00
 .PCI01$											db 'Mass Storage Controller', 0x00
@@ -1449,10 +1337,7 @@ DebugRAMBrowser:
 
 
 		; get a keypress and handle it
-		push 0
 		call KeyGet
-		pop eax
-
 
 		cmp al, 0x45							; 0
 		jne .Not0
@@ -1797,6 +1682,44 @@ DebugSystemInfo:
 	call Print32
 
 
+	; build and print the DriveLetters List string
+	push 80
+	push .scratch$
+	push .listDriveLettersFormat$
+	call MemCopy
+
+	push dword 8
+	push dword [tSystem.listDriveLetters]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 13
+	push dword 1
+	push .scratch$
+	call Print32
+
+
+	; build and print the FS Handlers List string
+	push 80
+	push .scratch$
+	push .listFSHandlersFormat$
+	call MemCopy
+
+	push dword 8
+	push dword [tSystem.listFSHandlers]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 15
+	push dword 1
+	push .scratch$
+	call Print32
+
+
 	; build and print the Memory List string
 	push 80
 	push .scratch$
@@ -1810,7 +1733,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 13
+	push dword 17
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1829,26 +1752,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 15
-	push dword 1
-	push .scratch$
-	call Print32
-
-
-	; build and print the PCI Devices List string
-	push 80
-	push .scratch$
-	push .listPCIDevicesFormat$
-	call MemCopy
-
-	push dword 8
-	push dword [tSystem.listPCIDevices]
-	push .scratch$
-	call StringTokenHexadecimal
-
-	push dword 0x00000000
-	push dword 0x00000007
-	push dword 17
+	push dword 19
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1867,7 +1771,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 19
+	push dword 21
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1888,11 +1792,13 @@ ret
 section .data
 .systemInfoText$								db 'System Information', 0x00
 .versionFormat$									db 'Kernel version ^.^ build ^', 0x00
-.listDriveFormat$								db 'Drive List                0x^', 0x00
-.listPartitionFormat$							db 'Partition List            0x^', 0x00
-.listPCIDevicesFormat$							db 'PCI Devices List          0x^', 0x00
-.listTasksFormat$								db 'Tasks List                0x^', 0x00
-.listMemoryFormat$								db 'Memory List               0x^', 0x00
+.listDriveFormat$								db 'Drive List             0x^', 0x00
+.listDriveLettersFormat$						db 'Drive Letters List     0x^', 0x00
+.listFSHandlersFormat$							db 'FS Handlers List       0x^', 0x00
+.listPartitionFormat$							db 'Partition List         0x^', 0x00
+.listPCIDevicesFormat$							db 'PCI Devices List       0x^', 0x00
+.listTasksFormat$								db 'Tasks List             0x^', 0x00
+.listMemoryFormat$								db 'Memory List            0x^', 0x00
 
 section .bss
 .scratch$										resb 80
@@ -2168,29 +2074,27 @@ DebugTaskBrowser:
 
 
 		; now get and handle input
-		push 0
 		call KeyGet
-		pop eax
 
 		; see what was pressed
-		cmp eax, 0x7D							; Page Up
+		cmp al, 0x7D							; Page Up
 		jne .NotPageUp
 			dec currentTask
 			jmp .PrintTaskInfo
 		.NotPageUp:
 
-		cmp eax, 0x7A							; Page Down
+		cmp al, 0x7A							; Page Down
 		jne .NotPageDown
 			inc currentTask
 			jmp .PrintTaskInfo
 		.NotPageDown:
 
-		cmp eax, 0x76							; Escape
+		cmp al, 0x76							; Escape
 		jne .NotEscape
 			jmp .End
 		.NotEscape:
 
-		cmp eax, 0x29							; Spacebar
+		cmp al, 0x29							; Spacebar
 		jne .NotSpacebar
 			mov esi, currentTaskSlotAddress
 			mov al, byte [tTaskInfo.taskFlags]
@@ -2199,7 +2103,7 @@ DebugTaskBrowser:
 			jmp .PrintTaskInfo
 		.NotSpacebar:
 
-		cmp eax, 0x5A							; Enter
+		cmp al, 0x5A							; Enter
 		jne .NotEnter
 			mov eax, 0x00000000
 			mov al, currentTask
@@ -2251,7 +2155,7 @@ section .data
 .taskFlagsFormat$								db 'Flags                      0x^', 0x00
 .CPULoadFormat$									db 'Timeslice utilization      ^ ^', 0x00
 .pageDirAddressFormat$							db 'Page directory address     0x^', 0x00
-.name$											db 'Kernel Debug Menu -------------', 0x00
+
 
 
 
@@ -2321,9 +2225,7 @@ DebugWaitForEscape:
 	.KeyLoop:
 
 		; get a key
-		push 0
 		call KeyWait
-		pop eax
 
 		; see if it was Escape
 		cmp al, 0x76

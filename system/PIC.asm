@@ -39,10 +39,10 @@ PICInit:
 	; Initializes & remaps both PICs
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -120,10 +120,10 @@ PICIntComplete:
 	; Tells both PICs the pending interrupt has been handled
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -154,10 +154,10 @@ PICIRQDisable:
 	; Disables the IRQ specified
 	;
 	;  input:
-	;   IRQ number
+	;	IRQ number
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -214,10 +214,10 @@ PICIRQDisableAll:
 	; Disables all IRQ lines across both PICs
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -248,10 +248,10 @@ PICIRQEnable:
 	; Enables the IRQ specified
 	;
 	;  input:
-	;   IRQ number
+	;	IRQ number
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -308,10 +308,10 @@ PICIRQEnableAll:
 	; Enables all IRQ lines across both PICs
 	;
 	;  input:
-	;   n/a
+	;	n/a
 	;
 	;  output:
-	;   n/a
+	;	n/a
 
 	push ebp
 	mov ebp, esp

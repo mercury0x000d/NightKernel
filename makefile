@@ -6,10 +6,10 @@ asflags = -f bin -F null -g -l night.lst
 
 allcd:
 	${Assemble the Night Kernel}
-	@nasm $(asflags) -o builds/kernel.sys kernel.asm
+	@nasm $(asflags) -o builds/KERNEL.SYS kernel.asm
 
 	${Copy built kernel to CD image}
-	mkisofs -o builds/kernel.iso builds/kernel.sys scripts/kcopy.bat
+	mkisofs -o builds/kernel.iso builds/KERNEL.SYS scripts/kcopy.bat
 
 	$(info Press Ctrl-C in this terminal to end VM execution.)
 	@virtualbox --startvm "Night" --debug-command-line --start-running
@@ -18,8 +18,7 @@ allcd:
 
 allhd:
 	${Assemble the Night Kernel}
-	@nasm $(asflags) -o builds/kernel.sys kernel.asm
-
+	@nasm $(asflags) -o builds/KERNEL.SYS kernel.asm
 
 	${Make a folder to which we will mount the vdi image}
 	@mkdir VBoxDisk -p
@@ -32,10 +31,10 @@ allhd:
 	@sudo mount /dev/loop0 ./VBoxDisk
 
 	${Delete old kernel image from virtual disk}
-	@sudo rm ./VBoxDisk/kernel.sys
+	@sudo rm ./VBoxDisk/KERNEL.SYS
 
 	${Copy built kernel to VDI image}
-	@sudo cp "builds/kernel.sys" "./VBoxDisk/kernel.sys"
+	@sudo cp "builds/KERNEL.SYS" "./VBoxDisk/KERNEL.SYS"
 
 	${Unmount virtual disk}
 	@sudo umount ./VBoxDisk
@@ -50,13 +49,13 @@ allhd:
 
 build:
 	${Assemble the Night Kernel}
-	@nasm $(asflags) -o builds/kernel.sys kernel.asm
+	@nasm $(asflags) -o builds/KERNEL.SYS kernel.asm
 
 
 
 imagecd:
 	${Copy built kernel to CD image}
-	mkisofs -o builds/kernel.iso builds/kernel.sys scripts/kcopy.bat
+	mkisofs -o builds/kernel.iso builds/KERNEL.SYS scripts/kcopy.bat
 
 
 
@@ -72,10 +71,10 @@ imagehd:
 	@sudo mount /dev/loop0 ./VBoxDisk
 
 	${Delete old kernel image from virtual disk}
-	@sudo rm ./VBoxDisk/kernel.sys
+	@sudo rm ./VBoxDisk/KERNEL.SYS
 
 	${Copy built kernel to VDI image}
-	@sudo cp "builds/kernel.sys" "./VBoxDisk/kernel.sys"
+	@sudo cp "builds/KERNEL.SYS" "./VBoxDisk/KERNEL.SYS"
 
 	${Unmount virtual disk}
 	@sudo umount ./VBoxDisk

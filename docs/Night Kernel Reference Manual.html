@@ -103,7 +103,7 @@
 			<br>
 			After a subsequent upgrade to a 80486 machine, the project - then known simply as &quotPCOS&quot - evolved as well. The next version was the first to feature color graphics (albeit in only 16 shades), a rudimentary UI and windowing toolkit, and mouse control. It was initially coded with QBASIC but quickly migrated to Visual BASIC as it outgrew the former language. As the project continued, it naturally became desirable to add true preemptive multitasking. Alas, the problem with that is that running multiple simultaneous DOS programs at once, reliably, under a mere shell would be much too complex to be feasible.<br>
 			<br>
-			After a series of code refinements which pressed the limits of the current development rig, , the main development rig was upgraded once again, this time to a 667 MHz Celeron machine. The project's source code was migrated to PowerBASIC, and the added processing power of the new PC made possible the incorporation of a virtual machine of sorts which would allow applications compiled for it to run concurrently. The result was a tech demo featuring multiple applications coded in an Assembly language designed especially for the virtual machine, all running under a preemptive scheduler. In time, the project - which had by now taken on the name <i>Exelyx</i> - grew to have not only its own assembler, but a BASIC-to-assembly-bytecode converter as well.<br>
+			After a series of code refinements and feature enhancements pressed the limits of the development rig in use at the time, hardware was upgraded once again, this time to a 667 MHz Celeron machine. The project's source code was migrated to PowerBASIC, and the added processing power of the new PC made possible the incorporation of a virtual machine of sorts which would allow applications compiled for it to run concurrently. The result was a tech demo featuring multiple applications coded in an Assembly language designed especially for the virtual machine, all running under a preemptive scheduler. In time, the project - which had by now taken on the name <i>Exelyx</i> - grew to have not only its own assembler, but a BASIC-to-assembly-bytecode converter as well.<br>
 			<br>
 			Exelyx was evolved to one last form before being retired permanently in August of 2016; a DPMI-powered MS-DOS program with a code base rewritten in Watcom C. Though Exelyx is dead, some key sections of code developed during its lifespan have now been adapted, in part, for use in a new and refined platform; one which will rely on no underlying operating system or drivers, but shall supply the facilities to manage every aspect of the user's machine completely on its own.<br>
 			<br>
@@ -124,7 +124,11 @@
 		<hr>
 		<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 		<p>
+<<<<<<< Updated upstream
 			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt these directions to whatever other compatible environment you like. The sole applications needed are an assembler, NASM, and a small utility called <a href="https://github.com/m44rtn/xenops">Xenops</a> which makes it easy to update build numbers automatically. If you'd rather not use Xenops, Night can be built without its convenience, but you will need to modify the makefile. There are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch without the need to download additional modules.<br>
+=======
+			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt these directions to whatever other compatible environment you like. There are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch using the NASM assembler without the need to download additional modules.<br>
+>>>>>>> Stashed changes
 			<br>
 			<br>
 			<br>
@@ -314,7 +318,7 @@
 					<br>
 				</p>
 			</code>
-			Every function in Night begins by stating it is part of the <i>.text</i> section of the final binary image, so that the assembler knows to group this function in with the rest of the runnable code. Following this designation is the function label, which in this case is <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, and what it expects for input. Since the return results of all Night funtions are passed back to the caller in registers, the registers used by the function and what information they will contain can be found here as well.<br>
+			Every function in Night begins by stating it is part of the <i>.text</i> section of the final binary image, so that the assembler knows to group this function in with the rest of the runnable code. Following this designation is the function label, which in this case is <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, what it expects for input on the stack, what it returns as output, and in what registers that output is returned.<br>
 			<br>
 			<br>
 			<br>
@@ -327,7 +331,27 @@
 					<br>
 				</p>
 			</code>
-			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can use local variables in the function and it also provides a handy way to reference the various parameters passed from the caller. This is the standard entry procedure for every Night function which accepts input parameters or uses internal variables.<br>
+			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can more directly access parameters passed to this function and use local variables in the function as well. This is the standard entry procedure for every Night function which accepts input parameters or uses internal variables.<br>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<p style="background-color: DimGray">
+					<br>
+					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; define input parameters</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">taskNum</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">+</span> <span style="color: Fuchsia">8</span><span style="color: White">]</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">memorySize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">+</span> <span style="color: Fuchsia">12</span><span style="color: White">]</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style="color: Chartreuse">alignment</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">+</span> <span style="color: Fuchsia">16</span><span style="color: White">]</span><br>
+					<br>
+				</p>
+			</code>
+			Now that EBP has been preserved and set, offsets from it may be defined to represent parameters passed to this function. Values pushed onto the stack by the caller begin at <code>[EBP + 8]</code> and ascend from there. Since all of Night's functions expect 32-bit parameters, this means that the first parameter passed will live at <code>[EBP + 8]</code>, the second at <code>[EBP + 12]</code>, the third at <code>[EBP + 16]</code>, and so on. As for <code>[EBP + 0]</code> and <code>[EBP + 4]</code>, those stack locations are where the saved <code>EBP</code> register and the return address, respectively, live.<br>
+			<br>
+			Using <code>define</code> directives essentially tells NASM, "Every time you see <code><i>memorySize</i></code> in the code below, go ahead and substitute it with <code><i>dword [ebp + 12]</i></code>". Note that these directives are not <i>technically</i> required (using a bare reference like <code>dword [ebp + 12]</code> in the code directly is perfectly valid) but using them makes the code much easier for us humans to read.<br>
 			<br>
 			<br>
 			<br>
@@ -351,8 +375,9 @@
 					<br>
 				</p>
 			</code>
-			Now that EBP has been preserved and set, offsets from it may be defined to represent any local variables needed in this function. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined. Note that defining the variables with labels is not <i>technically</i> required (using bare references like <code>dword [ebp - 4]</code> in the code directly is perfectly valid) but using the <i>% define</i> directive essentially tells NASM something to the effect of, "Every time you see <i>blockTrailingSize</i> in the code below, go ahead and substitute it with <i><code>dword [ebp - 16]</code></i>" which makes the code much easier for us humans to read.<br>
+			Variables local to this function can be represented in a manner similar to that of parameters. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined.<br>
 			<br>
+			A handy mnemonic for remembering which EBP references are which is that <i>locals</i> are <i>lower</i> than EBP, and <i>parameters</i> are <i>positive</i>.<br>
 			<br>
 			<br>
 			<br>
@@ -362,7 +387,7 @@
 					<br>
 					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; make sure alignment is 2 or greater to avoid both wasted time (1) and division by zero errors (0)</span><br>
 			
-					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; cmp</span> <span style="color: Turquoise">dword</span> <span style="color: White">[</span><span style="color: Orange">ebp</span> <span style="color: White">+</span> <span style="color: Fuchsia">16</span><span style="color: White">],</span> <span style="color: Fuchsia">2</span><br>
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; cmp</span> <span style="color: Chartreuse">alignment</span><span style="color: White">,</span> <span style="color: Fuchsia">2</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; jb</span> <span style="color: Chartreuse">.Exit</span><br>
 					<br>
@@ -370,9 +395,7 @@
 					<br>
 				</p>
 			</code>
-			Next in this function is an example of how passed parameters are accessed. Values pushed onto the stack by the caller begin at <code>[EBP + 8]</code> and ascend from there. Since all of Night's functions expect 32-bit parameters, this means that the first parameter passed will live at <code>[EBP + 8]</code>, the second at <code>[EBP + 12]</code>, the third at <code>[EBP + 16]</code>, and so on. In the example above, the <code>cmp</code> command referencing <code>[EBP + 16]</code> is comparing the third parameter (or <i>alignment necessary</i>, as specified further above in the function's input and output description) to the value 2.<br>
-			<br>
-			A handy way of remembering which EBP references are which is <i>locals</i> are <i>lower</i> than EBP, and <i>parameters</i> are <i>positive</i>.<br>
+			Next in this function is an example of how passed parameters are accessed. As mentioned earlier, using <code>cmp dword [ebp + 12], 2</code> here would be totally acceptable by NASM, but thanks to the <code>define</code>s we set in place earlier, we can make the code much more easy to read. This code performs a simple check on the <code>alignment</code> passed and exits if it is below two.<br>
 			<br>
 			<br>
 			<br>
@@ -384,7 +407,7 @@
 					<br>
 					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; set the return values and exit</span><br>
 			
-					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">edx</span><span style="color: White">,</span> <span style="color: Fuchsia">0</span><br>
+					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">edx</span><span style="color: White">,</span> <span style="color: Chartreuse">kErrNone</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">eax</span><span style="color: White">,</span> <span style="color: Chartreuse">blockAddress</span><br>
 					<br>
@@ -414,7 +437,7 @@
 			<br>
 			<br>
 			<br>
-			P.S.: If you're using <i>Sublime Text</i> as your code editor of choice, install Nessphoro's NASM x86 Assembly package to get the fancy color coding shown above. :)<br>
+			P.S.: If you're using <i>Sublime Text</i> as your code editor of choice, install <a href="https://github.com/Nessphoro/sublimeassembly">Nessphoro's NASM x86 Assembly</a> package to get the fancy color coding shown above. :)<br>
 		</p>
 		<br>
 		<br>
@@ -425,36 +448,26 @@
 		<hr>
 		<h2><a name="Drivers">Section 5 - The Night Kernel Driver Model</a></h2>
 		<p>
-			<h3>Driver Structure</h3>
-			Every Night driver begins with a driver header, laid out as follows:<br>
-			<br>
-			<code>
-				<table style="width:100%">
-					<caption>Table 5.1 - Driver header format</caption>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
-						<th><i>Offset</i></th>
-						<th><i>Description</i></th>
-					</tr>
-					<tr>
-						<td>0x00</td>
-						<td>signature: 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05</td>
-					</tr>
-					<tr>
-						<td>0x10</td>
-						<td>driverFlags</td>
-					</tr>
-				</table>
-			</code>
-			<br>
-			The Night Kernel uses a modular approach to drivers, allowing individual driver files to be added or removed at will without having to alter any other sections of the kernel's code. The <code>signature</code> field allows the kernel to discover the driver regardless of where it may lie in the kernel's driver address space.<br>
+			MS-DOS drivers were very similar in layout to normal MS-DOS .COM-format applications. Night follows suit and expands upon this by setting up device structures so that other applications may supersede the kernel's default handler addresses if desired.<br>
 			<br>
 			The <code>driverFlags</code> field is a bank of flags to identify attributes about this driver. Currently, the following bit definitions are supported:<br>
 			<br>
+
+			<h3>Driver Types</h3>
+			Night drivers are divided into two main categories:<br>
+			<br>
+			<b>Filesystem Driver</b><br>
+			Night will support FAT12, FAT16, and FAT32 internally, but filesystem drivers, as their name implies, provide a method for adding support for additional file systems. An exhaustive list of these codes may be found at <a href="https://www.win.tue.nl/~aeb/partitions/partition_types-1.html">this external site</a>.<br>
+			<br>
+			<b>PCI Driver</b><br>
+			Night will probe the PCI bus and run the init code of the driver only if its capabilities (determined by the fields in the table below) are appropriate for the device in question.<br>
+			<br>
+			<br>
+			<br>
+
 			<code>
 				<table style="width:100%">
-					<caption>Table 5.2 - Driver flags bit definitions</caption>
+					<caption>Table 5.1 - Driver flags bit definitions</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -470,12 +483,8 @@
 						<td>Supports block device interface</td>
 					</tr>
 					<tr>
-						<td>02 - 28</td>
+						<td>02 - 29</td>
 						<td>Reserved</td>
-					</tr>
-					<tr>
-						<td>29</td>
-						<td>PCI driver</td>
 					</tr>
 					<tr>
 						<td>30</td>
@@ -483,88 +492,132 @@
 					</tr>
 					<tr>
 						<td>31</td>
-						<td>Legacy driver</td>
+						<td>PCI driver</td>
 					</tr>
 				</table>
 			</code>
 			<br>
-			Immediately after this structure can be found additional data depending on the type of driver.<br>
 			<br>
 			<br>
-			<br>
-			<h3>Driver Types</h3>
-			Night drivers are divided into three main categories:<br>
-			<br>
-			<b>Filesystem Driver</b><br>
-			A filesystem driver is, as its name implies, a driver to add kernel-level support for a particular file system.<br>
-			<br>
-			Fields specific to this driver type:<br>
+
 			<code>
 				<table style="width:100%">
-					<caption>Table 5.3 - File system driver sub-header format</caption>
+					<caption>Table 5.2 - Driver command codes - Block and character drivers</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
-						<th><i>Offset</i></th>
-						<th><i>Description</i></th>
+						<th><i>Value</i></th>
+						<th><i>Symbol</i></th>
 					</tr>
 					<tr>
-						<td>0x14</td>
-						<td>Filesystem Type</td>
+						<td>00</td>
+						<td>kDriverInit</td>
+					</tr>
+					<tr>
+						<td>01</td>
+						<td>kDriverMediaCheck</td>
+					</tr>
+					<tr>
+						<td>02</td>
+						<td>kDriverBuildBPB</td>
+					</tr>
+					<tr>
+						<td>03</td>
+						<td>kDriverIOCTLRead</td>
+					</tr>
+					<tr>
+						<td>04</td>
+						<td>kDriverRead</td>
+					</tr>
+					<tr>
+						<td>05</td>
+						<td>kDriverNondestructiveRead</td>
+					</tr>
+					<tr>
+						<td>06</td>
+						<td>kDriverInputStatus</td>
+					</tr>
+					<tr>
+						<td>07</td>
+						<td>kDriverFlushInputBuffers</td>
+					</tr>
+					<tr>
+						<td>08</td>
+						<td>kDriverWrite</td>
+					</tr>
+					<tr>
+						<td>09</td>
+						<td>kDriverWriteVerify</td>
+					</tr>
+					<tr>
+						<td>0A</td>
+						<td>kDriverOutputStatus</td>
+					</tr>
+					<tr>
+						<td>0B</td>
+						<td>kDriverFlushOutputBuffers</td>
+					</tr>
+					<tr>
+						<td>0C</td>
+						<td>kDriverIOCTLWrite</td>
+					</tr>
+					<tr>
+						<td>0D</td>
+						<td>kDriverOpen</td>
+					</tr>
+					<tr>
+						<td>0E</td>
+						<td>kDriverClose</td>
+					</tr>
+					<tr>
+						<td>0F</td>
+						<td>kDriverRemovableMedia</td>
+					</tr>
+					<tr>
+						<td>10</td>
+						<td>kDriverOutputUntilBusy</td>
 					</tr>
 				</table>
 			</code>
 			<br>
-			<i>Filesystem Type</i> refers to the single-byte code found in the partition table which identifies the kind of filesystem held in the volume. For example, a FAT 12 volume would have 0x01 here, and a FAT 32 volume would show 0x0B. An exhaustive list of these codes may be found at <a href="https://www.win.tue.nl/~aeb/partitions/partition_types-1.html">this external site</a>.<br>
 			<br>
 			<br>
-			<br>
-			<b>Legacy Driver</b><br>
-			A legacy driver is intended for a device with no attachment to an established detection interface, such as older ISA or other onboard devices such as the PS/2 controller. For example, the kernel may not directly support the ISA bus, but devces attached to it may still be detected by testing the response received from certain I/O ports associated with the devices. Every legacy driver found by the kernel will have its init code run, unlike PCI drivers which only have their init code executed if a device is found which matches their capabilities.<br>
-			<br>
-			Due to the nature of Legacy Drivers, they contain no specially structured data after the driver header.<br>
-			<br>
-			<br>
-			<br>
-			<b>PCI Driver</b><br>
-			Night will probe the PCI bus and run the init code of the driver only if its capabilities (determined by the fields in the table below) are appropriate for the device in question.<br>
-			<br>
-			Fields specific to this driver type:<br>
+
 			<code>
 				<table style="width:100%">
-					<caption>Table 5.4 - PCI driver sub-header format</caption>
+					<caption>Table 5.3 - Driver command codes - Filesystem drivers</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
-						<th><i>Offset</i></th>
-						<th><i>Description</i></th>
+						<th><i>Value</i></th>
+						<th><i>Symbol</i></th>
 					</tr>
 					<tr>
-						<td>0x14</td>
-						<td>classMatch</td>
+						<td>F0</td>
+						<td>kDriverFileLoad</td>
 					</tr>
 					<tr>
-						<td>0x18</td>
-						<td>subclassMatch</td>
+						<td>F1</td>
+						<td>kDriverFileInfoAccessedGet</td>
 					</tr>
 					<tr>
-						<td>0x1C</td>
-						<td>progIfMatch</td>
+						<td>F2</td>
+						<td>kDriverFileInfoCreatedGet</td>
 					</tr>
 					<tr>
-						<td>0x20</td>
-						<td>WriteCodePointer</td>
+						<td>F3</td>
+						<td>kDriverFileInfoModifiedGet</td>
 					</tr>
 					<tr>
-						<td>0x24</td>
-						<td>ReadCodePointer</td>
+						<td>F4</td>
+						<td>kDriverFileInfoSizeGet</td>
 					</tr>
 				</table>
 			</code>
 			<br>
-			The <code>classMatch</code>, <code>subclassMatch</code>, and <code>progIfMatch</code> fields are all used to match the driver to the device found on the PCI bus. A value of 0xFFFF in any of these fields means that the driver matches all values of that field; all other values are taken literally. For example, for the ATA driver, <code>classMatch</code> is set to 1, <code>subClassMatch</code> is set to 1, and <code>ProgIfMatch</code> is set to 0xFFFF, meaning that this driver can handle any devices with Class 1, Subclass 1, and any ProgIf (Program Interface) value at all.<br>
 			<br>
-			The function pointers <code>WriteCodePointer</code> and <code>ReadCodePointer</code> are how the kernel calls the read and write functions of the driver.<br>
+			<br>
+
 		</p>
 		<br>
 		<br>
@@ -588,7 +641,7 @@
 					</tr>
 					<tr>
 						<td>00</td>
-						<td>Enable Debug Menu</td>
+						<td>Enable Debug Mode</td>
 					</tr>
 					<tr>
 						<td>01</td>
@@ -904,6 +957,61 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>kernel.asm</i> - Implemented new driver handling method</li>
+				<li>Kernel: <i>kernel.asm</i>, <i>screen.asm</i> - Made use of new global defines for ConfigBits options</li>
+				<li>Kernel: <i>memory.asm</i> - Added paging.</li>
+				<li>Kernel: <i>PS/2 Controller.asm</i> - Added function info to the NKRM.</li>
+				<li>Manual: Added driver command code tables.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Removed PCI register dumps.</li>
+				<li>Kernel: <i>drives.asm</i> (Formerly <i>partitions.asm</i>) - Removed that <i>bloody</i> driver code! :)</li>
+				<li>Kernel: <i>drives.asm</i> Added <code>DiskRead()</code>, <code>PartitionMap()</code>, and <code>PartitionRead()</code>.</li>
+				<li>Kernel: <i>hardware.asm</i> - Eliminated the legacy driver loading system.</li>
+				<li>Kernel: <i>IDE Controller.asm</i>, <i>lists.asm</i>, <i>memory.asm</i>, <i>PCI.asm</i>, <i>strings.asm</i> - Added defines for input paramteters.</li>
+				<li>Kernel: <i>PCI.asm</i> - Added <code>PCIHandlerGet()</code> and <code>PCIHandlerSet()</code>.</li>
+				<li>Kernel: <i>PCI.asm</i> - Added <code>PCIInfoClassGet()</code>, <code>PCIInfoDeviceGet()</code>, <code>PCIInfoProgIfGet()</code>, <code>PCIInfoRevisionGet()</code>, <code>PCIInfoSubclassGet()</code>, and <code>PCIInfoVendorGet()</code>.</li>
+				<li>Kernel: <i>PCI.asm</i> - Overhauled code, renamed functions for consistency.</li>
+				<li>Kernel: <i>PCI.asm</i> - Removed PCI register caching.</li>
+				<li>Kernel: <i>PCI.asm</i> - Removed the "search" method of loading drivers in favor of the new table-based method.</li>
+				<li>Kernel: <i>PS/2 Controller.asm</i> - Changed all routines over to new method of returning values in registers instead of on the stack.</li>
+				<li>Kernel: <i>PS/2 Controller.asm</i> - Since this is the <i>only</i> legacy driver in the system, it made sense to just have Night handle it directly.</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringCharGet()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - Tidied up <code>StringWordCount()</code> and <code>StringWordGet()</code>.</li>
+				<li>Kernel: Condensed <i>FAT12.asm</i>, <i>FAT16.asm</i>, and <i>FAT32.asm</i>, into a single driver - <i>FAT Filesystem.asm</i>.</li>
+				<li>Manual: Added external links to MS-DOS function descriptions.</li>
+				<li>Manual: Added symbol names to error codes table.</li>
+				<li>Manual: Updated Coding Conventions section.</li>
+				<li>Manual: Updated drivers section.</li>
+				<li>Toolchain: Removed Xenops dependency. If we include one publicly-available utility, we may as well include all the others we use. And we're not doing that.</li>
+				<li>Toolchain: Included drive image is now FAT16 formatted.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>IDE Controller.asm</i> - All four possible IDE devices on a controller are now properly detected.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - Fixed a bug where a controller present with no drive attached was added to the drives list as a valid (albeit meaningless) drive.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - <code>IDEATASectorReadLBA28PIO()</code>  and <code>IDEATASectorWriteLBA28PIO()</code> now wait and flush the disk cache properly between sectors during multi-sector operations.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - Optimized and compacted <code>IDEDetectChannelDevices()</code>.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - The model name and serial number of device number one on both channels is now properly recorded.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed improper stack clearing upon exit in <code>Mem_Internal_MemListShrink()</code>.</li>
+				<li>Kernel: <i>lists.asm</i> - Fixed an error in <code>LM_Internal_SlotFreeTest()</code> regarding address calculation.</li>
+				<li>Kernel: <i>screen.asm</i> - Fixed a bug in <code>PrintRegs16()</code> and <code>PrintRegs32()</code> which did not print correct values for BP/EBP.</li>
+				<li>Kernel: <i>strings.asm</i> - Eliminated a remnant of the prior stack-based parameter passing method.</li>
+				<li>Kernel: <i>strings.asm</i> - Fixed an errant local variable reference in <code>StringCharPrepend()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - Fixed an out-of-bounds write in <code>StringPadRight()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - <code>StringWordGet()</code> now returns a null string if the requested word is greater than the number of words in the string.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations<br>
 			<br>
 			New<br>
@@ -1575,50 +1683,58 @@
 				<col width = 25%>
 				<tr>
 					<td>
-						<a href="#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a>
-						<br><br>
+						<a href="#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_disks.asm" style="font-size: 14px">Disk and Partition Functions - disks.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_files.asm" style="font-size: 14px">File and Path Functions - files.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
+						<br>
 					</td>
 					<td>
-						<a href="#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_partitions.asm" style="font-size: 14px">Partition Handling Functions - partitions.asm</a>
-						<br><br>
+						<a href="#NightFunctionReference_IDEController.asm" style="font-size: 14px">IDE Functions - IDE Controller.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_numbers.asm" style="font-size: 14px">Number Functions - numbers.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
+						<br>
 					</td>
 					<td>
-						<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a>
-						<br><br>
+						<a href="#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_PS2Controller.asm" style="font-size: 14px">PS/2 Functions - PS2 Controller.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
+						<br>
 					</td>
 					<td>
-						<a href="#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a>
-						<br><br>
-						<a href="#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a>
-						<br><br>
+						<a href="#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
+						<br>
 					</td>
 				</tr>
 			</table>
@@ -1874,11 +1990,273 @@
 			<br>
 			<br>
 
+			<a name="NightFunctionReference_disks.asm"><b>Disk and Partition Handling Functions - <i>disks.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.4 - partitions.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>DiskRead</code><br>
+						<br>
+						Reads sectors from the drive specified
+					</td>
+					<td>
+						<ol>
+							<li>Drive list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PartitionEnumerate</code><br>
+						<br>
+						Scans the drives list and discovers partitions on each drive
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PartitionGetFromPath</code><br>
+						<br>
+						Returns the partition number based on the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Partition number<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PartitionMap</code><br>
+						<br>
+						Maps the specified partition to the drive letter specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Drive number (0 = A, 1 = B, etc.)</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PartitionRead</code><br>
+						<br>
+						Reads sectors from the partition specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EBX - Error code
+					</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			<a name="NightFunctionReference_files.asm"><b>File and Path Functions - <i>files.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.5 - partitions.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileDelete</code><br>
+						<br>
+						Deletes the file specified
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileInfoAccessedGet</code><br>
+						<br>
+						Returns the date of last access for the specified file
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX (Upper 16 bits) - Year<br>
+						AL - Month<br>
+						AH - Day<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileInfoCreatedGet</code><br>
+						<br>
+						Returns the date and time of creation for the specified file
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX (Upper 16 bits) - Year<br>
+						AL - Month<br>
+						AH - Day<br>
+						EBX (Upper 16 bits) - Hours<br>
+						BH - Minutes<br>
+						BL - Seconds<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileInfoModifiedGet</code><br>
+						<br>
+						Returns the date and time of last modification for the specified file
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX (Upper 16 bits) - Year<br>
+						AL - Month<br>
+						AH - Day<br>
+						EBX (Upper 16 bits) - Hours<br>
+						BH - Minutes<br>
+						BL - Seconds<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileInfoSizeGet</code><br>
+						<br>
+						Returns the size in bytes of the file specified
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Error code<br>
+						ECX - File size
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileLoad</code><br>
+						<br>
+						Loads the file specified at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+							<li>Address at which to load file</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMPathPartitionGet</code><br>
+						<br>
+						Returns the partition number based on the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Partition number<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMPathPartitionStripDrive</code><br>
+						<br>
+						Returns the path with the leading drive letter/partition specifier removed
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMPathValidate</code><br>
+						<br>
+						Verifies if a path specified is valid per usual DOS rules
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Result<br>
+						&emsp;True - The path is valid<br>
+						&emsp;False - The path is not valid
+					</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
 			<a name="NightFunctionReference_GDT.asm"><b>GDT Functions - <i>GDT.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.4 - GDT.asm 32-bit public functions</caption>
+				<caption>Table A1.6 - GDT.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2029,7 +2407,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.5 - hardware.asm 32-bit public functions</caption>
+				<caption>Table A1.7 - hardware.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2037,15 +2415,6 @@
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
-				</tr>
-				<tr>
-					<td>
-						<code>DriverLegacyLoad</code><br>
-						<br>
-						Scans all drivers in the kernel's driver space and runs each legacy driver found
-					</td>
-					<td>n/a</td>
-					<td>n/a</td>
 				</tr>
 				<tr>
 					<td>
@@ -2083,11 +2452,173 @@
 			<br>
 			<br>
 
+			<a name="NightFunctionReference_IDEController.asm"><b>IDE Functions - <i>IDE Controller.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.8 - IDE Controller.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEATAPISectorReadPIO</code><br>
+						Reads sectors from an ATAPI device<br>
+					</td>
+					<td>
+						<ol>
+							<li>I/O base port</li>
+							<li>Device number (0 or 1)</li>
+							<li>LBA address of starting sector</li>
+							<li>Number of sectors to write</li>
+							<li>Memory buffer address to which data will be written</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEATASectorReadLBA28PIO</code><br>
+						Reads sectors from disk using LBA28<br>
+					</td>
+					<td>
+						<ol>
+							<li>I/O base port</li>
+							<li>Device number (0 or 1)</li>
+							<li>LBA address of starting sector</li>
+							<li>Number of sectors to write</li>
+							<li>Memory buffer address to which data will be written</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEATASectorWriteLBA28PIO</code><br>
+						Writes sectors to disk using LBA28<br>
+					</td>
+					<td>
+						<ol>
+							<li>I/O base port</li>
+							<li>Device number (0 or 1)</li>
+							<li>LBA address of starting sector</li>
+							<li>Number of sectors to write</li>
+							<li>Memory buffer address from which data will be read</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEDetectChannelDevices</code><br>
+						Checks both of the device spots on the ATA channel specified and saves their data to the drives list<br>
+					</td>
+					<td>
+						<ol>
+							<li>I/O base port</li>
+							<li>Control base port</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEDriveIdentify</code><br>
+						Returns identifying information about the device specified<br>
+					</td>
+					<td>
+						<ol>
+							<li>Buffer address for results of Identify command</li>
+							<li>ATA channel I/O base port</li>
+							<li>Device number (0 or 1)</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Device code<br>
+						&emsp;0x00 - Other<br>
+						&emsp;0x01 - PATA device<br>
+						&emsp;0x02 - SATA device<br>
+						&emsp;0x03 - ATAPI device<br>
+						&emsp;0xFF - No device found
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEInit</code><br>
+						Performs any necessary setup of the driver<br>
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEInterruptHandlerPrimary</code><br>
+						Interrupt handler for ATA interrupts<br>
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEInterruptHandlerSecondary</code><br>
+						Interrupt handler for ATA interrupts<br>
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEServiceHandler</code><br>
+						The service routine called by external applications<br>
+						<br>
+						Note: Parameters 1 through 5 vary based on the command sent.
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>Command code</li>
+							<li>Parameter 1</li>
+							<li>Parameter 2</li>
+							<li>Parameter 3</li>
+						</ol>
+					</td>
+					<td>EAX - driver response</td>
+				</tr>
+				<tr>
+					<td>
+						<code>IDEWaitForReady</code><br>
+						Waits for bit 7 of the passed port value to go clear, then returns<br>
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
 			<a name="NightFunctionReference_interrupts.asm"><b>Interrupt Functions - <i>interrupts.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.6 - interrupts.asm 32-bit public functions</caption>
+				<caption>Table A1.9 - interrupts.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2220,7 +2751,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.7 - List Manager 32-bit public functions</caption>
+				<caption>Table A1.10 - List Manager 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2462,7 +2993,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.8 - List Manager 32-bit internal functions</caption>
+				<caption>Table A1.11 - List Manager 32-bit internal functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2647,7 +3178,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.9 - Memory Manager 16-bit public functions</caption>
+				<caption>Table A1.12 - Memory Manager 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2734,7 +3265,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.10 - Memory Manager 32-bit public functions</caption>
+				<caption>Table A1.13 - Memory Manager 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2968,7 +3499,7 @@
 					</td>
 					<td>
 						<ol>
-							<li>Search range start</li>
+							<li>Search region start</li>
 							<li>Search region length</li>
 							<li>Address of string for which to search</li>
 						</ol>
@@ -3048,7 +3579,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.11 - Memory Manager 32-bit internal functions</caption>
+				<caption>Table A1.14 - Memory Manager 32-bit internal functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3101,7 +3632,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.12 - misc.asm 16-bit public functions</caption>
+				<caption>Table A1.15 - misc.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3126,7 +3657,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.13 - misc.asm 32-bit public functions</caption>
+				<caption>Table A1.16 - misc.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3134,15 +3665,6 @@
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
-				</tr>
-				<tr>
-					<td>
-						<code>BCDToDecimal</code><br>
-						<br>
-						Converts a 32-bit BCD number to decimal
-					</td>
-					<td>n/a</td>
-					<td>n/a</td>
 				</tr>
 				<tr>
 					<td>
@@ -3162,11 +3684,11 @@
 			<br>
 			<br>
 
-			<a name="NightFunctionReference_partitions.asm"><b>Partition Handling Functions - <i>partitions.asm</i></b></a><br>
+			<a name="NightFunctionReference_numbers.asm"><b>Number Functions - <i>numbers.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.14 - partitions.asm 32-bit public functions</caption>
+				<caption>Table A1.17 - numbers.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3177,12 +3699,31 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PartitionEnumerate</code><br>
+						<code>BCDToDecimal</code><br>
 						<br>
-						Scans the partition tables of all drives in the drive list and loads their data into the partitions list
+						Converts a 32-bit BCD number to decimal
 					</td>
 					<td>n/a</td>
 					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>RangeCheck</code><br>
+						<br>
+						Checks that a value passed is in range
+					</td>
+					<td>
+						<ol>
+							<li>Value to be tested</li>
+							<li>Lower range boundary</li>
+							<li>Upper range boundary</li>
+						</ol>
+					</td>
+					<td>
+						AL - Result<br>
+						&emsp;True - The value is in range<br>
+						&emsp;False - The value is not in range
+					</td>
 				</tr>
 			</table>
 			<br>
@@ -3193,7 +3734,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.15 - PCI Functions 16-bit public functions</caption>
+				<caption>Table A1.18 - PCI Functions 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3218,7 +3759,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.16 - PCI Functions 32-bit public functions</caption>
+				<caption>Table A1.19 - PCI Functions 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3248,7 +3789,16 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PCICheckForFunction</code><br>
+						<code>PCIDeviceInitAll</code><br>
+						<br>
+						Sends an init command to each present driver for each detected PCI device
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIFunctionCheck</code><br>
 						<br>
 						Checks the bus/device/function specified to see if there's something there
 					</td>
@@ -3267,40 +3817,18 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PCIDriverSearch</code><br>
-						<br>
-						Scans all the drivers in the kernel to see if any match the class/subclass/progif given
-					</td>
-					<td>
-						<ol>
-							<li>PCI Class value</li>
-							<li>PCI Subclass value</li>
-							<li>PCI ProgIf value</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Driver init function address<br>
-						(or zero if no appropriate driver found)
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIGetFunctionCount</code><br>
+						<code>PCIFunctionCountGet</code><br>
 						<br>
 						Returns the total number of functions across all PCI busses in the system
 					</td>
+					<td>n/a</td>
 					<td>
-						<ol>
-							<li>n/a</li>
-						</ol>
-					</td>
-					<td>
-						EAX - PCI device count
+						EAX - Function count
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<code>PCIGetNextFunction</code><br>
+						<code>PCIFunctionNextGet</code><br>
 						<br>
 						Starts a scan at the bus/device/function specified to find the next function in order
 					</td>
@@ -3319,16 +3847,162 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PCIInitBus</code><br>
+						<code>PCIHandlerCommand</code><br>
 						<br>
-						Scans all PCI busses and shadows all data to a List Manager list
+						Sends a command to the handler of the PCI device specified<br>
+						<br>
+						Note: Parameters 1 through 5 vary based on the command sent.
 					</td>
-					<td>n/a</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+							<li>Command code</li>
+							<li>Parameter 1</li>
+							<li>Parameter 2</li>
+							<li>Parameter 3</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIHandlerGet</code><br>
+						<br>
+						Returns the handler address for the specified PCI class and subclass
+					</td>
+					<td>
+						<ol>
+							<li>PCI Class</li>
+							<li>PCI Subclass</li>
+						</ol>
+					</td>
+					<td>EAX - Handler physical address</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIHandlerSet</code><br>
+						<br>
+						Returns the handler address for the specified PCI class and subclass
+					</td>
+					<td>
+						<ol>
+							<li>PCI Class</li>
+							<li>PCI Subclass</li>
+							<li>Handler physical address</li>
+						</ol>
+					</td>
 					<td>n/a</td>
 				</tr>
 				<tr>
 					<td>
-						<code>PCILiveRead</code><br>
+						<code>PCIInfoClassGet</code><br>
+						<br>
+						Returns the class of the device at the PCI bus location specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						AL - Class<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIInfoDeviceGet</code><br>
+						<br>
+						Returns the device ID of the device at the PCI bus location specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						AX - Device ID<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIInfoProgIfGet</code><br>
+						<br>
+						Returns the program interface (ProgIf) of the device at the PCI bus location specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						AL - ProgIf<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIInfoRevisionGet</code><br>
+						<br>
+						Returns the revision of the device at the PCI bus location specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						AL - Revision<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIInfoSubclassGet</code><br>
+						<br>
+						Returns the subclass of the device at the PCI bus location specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						AL - Subclass<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIInfoVendorGet</code><br>
+						<br>
+						Returns the vendor ID of the device at the PCI bus location specified
+					</td>
+					<td>
+						<ol>
+							<li>PCI Bus</li>
+							<li>PCI Device</li>
+							<li>PCI Function</li>
+						</ol>
+					</td>
+					<td>
+						AX - Vendor ID<br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PCIRegisterRead</code><br>
 						<br>
 						Reads a 32-bit register value from the PCI target specified
 					</td>
@@ -3346,33 +4020,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PCILiveWrite</code><br>
-						<br>
-						Writes a 32-bit value to the target PCI register specified
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-							<li>Value to write</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCILoadDrivers</code><br>
-						<br>
-						Cycles through all functions in the PCI list and loads drivers for each
-					</td>
-					<td>n/a</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIReadAll</code><br>
+						<code>PCIRegisterReadAll</code><br>
 						<br>
 						Gets all info for the specified PCI device and fills it into the struct at the given address
 					</td>
@@ -3388,9 +4036,9 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PCIReadByte</code><br>
+						<code>PCIRegisterWrite</code><br>
 						<br>
-						Reads a byte register from the PCI target specified
+						Writes a 32-bit value to the target PCI register specified
 					</td>
 					<td>
 						<ol>
@@ -3398,95 +4046,7 @@
 							<li>PCI Device</li>
 							<li>PCI Function</li>
 							<li>PCI Register</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Register value
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIReadWord</code><br>
-						<br>
-						Reads a word register from the PCI target specified
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Register value
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIReadDWord</code><br>
-						<br>
-						Reads a dword register from the PCI target specified
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Register value
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIWriteByte</code><br>
-						<br>
-						Writes a byte value to the PCI target specified
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-							<li>Register value</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIWriteWord</code><br>
-						<br>
-						Writes a word value to the PCI target specified
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-							<li>Register value</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PCIWriteDword</code><br>
-						<br>
-						Writes a dword value to the PCI target specified
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>PCI Register</li>
-							<li>Register value</li>
+							<li>Value to write</li>
 						</ol>
 					</td>
 					<td>n/a</td>
@@ -3500,7 +4060,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.17 - PIC.asm 32-bit public functions</caption>
+				<caption>Table A1.20 - PIC.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3576,11 +4136,264 @@
 			<br>
 			<br>
 
+			<a name="NightFunctionReference_PS2Controller.asm"><b>PS/2 Functions - <i>PS2 Controller.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.21 - PS2 Controller.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>KeyGet</code><br>
+						<br>
+						Returns the oldest key in the key buffer, or null if it's empty
+					</td>
+					<td>n/a</td>
+					<td>AL - Key pressed</td>
+				</tr>
+				<tr>
+					<td>
+						<code>KeyWait</code><br>
+						<br>
+						Waits until a key is pressed, then returns that key
+					</td>
+					<td>n/a</td>
+					<td>AL - Key pressed</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2ControllerCommand</code><br>
+						<br>
+						Sends a command to the PS/2 Controller with proper wait states
+					</td>
+					<td>
+						<ol>
+							<li>Command byte</li>
+							<li>Data byte</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Controller response (if any)<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2ControllerInit</code><br>
+						<br>
+						Initializes the driver and controller
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2ControllerPortTest</code><br>
+						<br>
+						Tests the PS/2 port specified
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Port status<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2ControllerWaitDataRead</code><br>
+						<br>
+						Reads data from the PS/2 controller
+					</td>
+					<td>n/a</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2ControllerWaitDataWrite</code><br>
+						<br>
+						Writes data to the PS/2 controller
+					</td>
+					<td>n/a</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2DeviceCommand</code><br>
+						<br>
+						Sends a command to a PS/2 device
+					</td>
+					<td>
+						<ol>
+							<li>Port number of the device to recieve the command</li>
+							<li>Command byte</li>
+							<li>Data byte</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Controller response (if any)<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2DeviceIdentify</code><br>
+						<br>
+						Executes the PS/2 Identify command and returns the result
+					</td>
+					<td>
+						<ol>
+							<li>Port on which the device resides</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Device identification (with 0xFF for bytes that were not returned by the driver)<br>
+						EBX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2InitKeyboard</code><br>
+						<br>
+						Initializes the PS/2 keyboard
+					</td>
+					<td>
+						<ol>
+							<li>Port number on which the keyboard resides</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2InitMouse</code><br>
+						<br>
+						Initializes the PS/2 mouse
+					</td>
+					<td>
+						<ol>
+							<li>Port number on which the mouse resides</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2InputHandlerDispatch</code><br>
+						<br>
+						Chooses which device handler receives input given
+					</td>
+					<td>
+						<ol>
+							<li>PS/2 Device ID</li>
+							<li>Data to be passed to the input handler</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2InputHandlerKeyboard</code><br>
+						<br>
+						Handles input from a PS/2 Keyboard
+					</td>
+					<td>
+						<ol>
+							<li>Input data</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2InputHandlerMouse</code><br>
+						<br>
+						Handles input from a PS/2 Mouse
+					</td>
+					<td>
+						<ol>
+							<li>Input data</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2NewConnect</code><br>
+						<br>
+						Handles identifying and initializing new connected devices
+					</td>
+					<td>
+						<ol>
+							<li>Port number</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2Port1InterruptHandler</code><br>
+						<br>
+						Handles interrupts from PS/2 Controller Port 1
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2Port2InterruptHandler</code><br>
+						<br>
+						Handles interrupts from PS/2 Controller Port 2
+					</td>
+					<td>n/a</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2PortInitDevice</code><br>
+						<br>
+						Initializes the device on the port specified
+					</td>
+					<td>
+						<ol>
+							<li>Port number on which the device resides</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PS2PortSendTo2</code><br>
+						<br>
+						Tells the PS/2 Controller the next command goes to port 2 if necessary
+					</td>
+					<td>
+						<ol>
+							<li>Port number being addressed</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
 			<a name="NightFunctionReference_power.asm"><b>Power Functions - <i>power.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.18 - power.asm 16-bit public functions</caption>
+				<caption>Table A1.22 - power.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3625,7 +4438,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.19 - RTC.asm 32-bit public functions</caption>
+				<caption>Table A1.23 - RTC.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3670,7 +4483,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.20 - screen.asm 16-bit public functions</caption>
+				<caption>Table A1.24 - screen.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3743,7 +4556,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.21 - screen.asm 32-bit public functions</caption>
+				<caption>Table A1.25 - screen.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3803,7 +4616,7 @@
 					<td>
 						<ol>
 							<li>Starting address</li>
-							<li>Number of lines</li>
+							<li>Number of 16-byte lines</li>
 							<li>X position</li>
 							<li>Y position</li>
 							<li>Text color</li>
@@ -3856,7 +4669,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.22 - serial.asm 32-bit public functions</caption>
+				<caption>Table A1.26 - serial.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4099,7 +4912,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.23 - strings.asm 16-bit public functions</caption>
+				<caption>Table A1.27 - strings.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4143,7 +4956,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.24 - strings.asm 32-bit public functions</caption>
+				<caption>Table A1.28 - strings.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4333,6 +5146,20 @@
 				</tr>
 				<tr>
 					<td>
+						<code>StringCharGet</code><br>
+						<br>
+						Returns the ASCII code of the character specified
+					</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Character position</li>
+						</ol>
+					</td>
+					<td>AL - ASCII code of character</td>
+				</tr>
+				<tr>
+					<td>
 						<code>StringCharPrepend</code><br>
 						<br>
 						Prepends a character onto the beginning of the string specified
@@ -4341,6 +5168,37 @@
 						<ol>
 							<li>String address</li>
 							<li>ASCII code of character to add</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>StringCharReplace</code><br>
+						<br>
+						Replaces all occurrances of the specified character with another character specified
+					</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Character to be replaced</li>
+							<li>Replacement character</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>StringCharReplaceRange</code><br>
+						<br>
+						Replaces any character within the range of ASCII codes specified with the specified character
+					</td>
+					<td>
+						<ol>
+							<li>String address</li>
+							<li>Start of ASCII range</li>
+							<li>End of ASCII range</li>
+							<li>Replacement character</li>
 						</ol>
 					</td>
 					<td>n/a</td>
@@ -4415,37 +5273,6 @@
 							<li>String address</li>
 							<li>Padding character</li>
 							<li>Length to which the string will be extended</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>StringReplaceChars</code><br>
-						<br>
-						Replaces all occurrances of the specified character with another character specified
-					</td>
-					<td>
-						<ol>
-							<li>String address</li>
-							<li>Character to be replaced</li>
-							<li>Replacement character</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>StringReplaceCharsInRange</code><br>
-						<br>
-						Replaces any character within the range of ASCII codes specified with the specified character
-					</td>
-					<td>
-						<ol>
-							<li>String address</li>
-							<li>Start of ASCII range</li>
-							<li>End of ASCII range</li>
-							<li>Replacement character</li>
 						</ol>
 					</td>
 					<td>n/a</td>
@@ -4626,7 +5453,7 @@
 						</ol>
 					</td>
 					<td>
-						EAX - Word count
+						ECX - Word count
 					</td>
 				</tr>
 				<tr>
@@ -4640,7 +5467,7 @@
 							<li>String address</li>
 							<li>List of characters to be used as separators (cannot include nulls)</li>
 							<li>Word number which to return</li>
-							<li>Address of string to hold the word requested</li>
+							<li>Address of string to hold the word requested (Must be large enough to hold the longest word in the string)</li>
 						</ol>
 					</td>
 					<td>n/a</td>
@@ -4654,7 +5481,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.25 - tasks.asm 32-bit public functions</caption>
+				<caption>Table A1.29 - tasks.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4744,43 +5571,78 @@
 
 			<a name="NightFunctionReference_StandardFunctionReturnCodes"><b>Standard Function Return Codes</b></a><br>
 			<table style="width:100%">
-				<caption>Table A1.26 - Standard function return codes</caption>
+				<caption>Table A1.30 - Standard function return codes</caption>
 				<col width = 10%>
-				<col width = 90%>
+				<col width = 20%>
+				<col width = 70%>
 				<tr>
-					<th><i>Code</i></th>
+					<th><i>Value</i></th>
+					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
 				<tr>
 					<td>0x0000</td>
-					<td>Success, no error</td>
+					<td>kErrNone</td>
+					<td>No error; success</td>
 				</tr>
 				<tr>
 					<td>0xF000</td>
+					<td>kErrInvalidParameter</td>
 					<td>Invalid parameter</td>
 				</tr>
 				<tr>
 					<td>0xF001</td>
+					<td>kErrValueTooLow</td>
 					<td>Value specified is too low</td>
 				</tr>
 				<tr>
 					<td>0xF002</td>
+					<td>kErrValueTooHigh</td>
 					<td>Value specified is too high</td>
 				</tr>
 				<tr>
+					<td>0xFB00</td>
+					<td>kErrDriveLetterInvalid</td>
+					<td>Invalid drive letter</td>
+				</tr>
+				<tr>
+					<td>0xFB01</td>
+					<td>kErrPathInvalid</td>
+					<td>Invalid file path</td>
+				</tr>
+				<tr>
+					<td>0xFB02</td>
+					<td>kErrPathInvalidCharacter</td>
+					<td>Path contains an invalid character</td>
+				</tr>
+				<tr>
+					<td>0xFC00</td>
+					<td>kErrInvalidPartitionNumber</td>
+					<td>Invalid partition number</td>
+				</tr>
+				<tr>
+					<td>0xFD00</td>
+					<td>kErrHandlerNotPresent</td>
+					<td>Handler not present</td>
+				</tr>
+				<tr>
 					<td>0xFE00</td>
+					<td>kErrOutOfMemory</td>
 					<td>Insufficient memory</td>
 				</tr>
 				<tr>
 					<td>0xFF00</td>
+					<td>kErrPS2AckFail</td>
 					<td>PS/2 Device failed to acknowledge</td>
 				</tr>
 				<tr>
 					<td>0xFF01</td>
+					<td>kErrPS2ControllerReadTimeout</td>
 					<td>PS/2 Controller read timeout</td>
 				</tr>
 				<tr>
 					<td>0xFF02</td>
+					<td>kErrPS2ControllerWriteTimeout</td>
 					<td>PS/2 Controller write timeout</td>
 				</tr>
 			</table>
@@ -5658,557 +6520,1131 @@
 			<table style="width:100%">
 				<caption>Table A2.2 - DOS API</caption>
 				<col width = 10%>
-				<col width = 75%>
-				<col width = 15%>
+				<col width = 70%>
+				<col width = 20%>
 				<tr>
-					<th><i>AH Register</i></th>
+					<th><i>AX Register</i></th>
 					<th><i>Name</i></th>
 					<th><i>Supporting DOS Versions</i></th>
 				</tr>
 				<tr>
-					<td>00</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/62/25.html">0000</a></td>
 					<td>Program terminate</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>01</td>
-					<td>Character input</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/63/25.html">0100</a></td>
+					<td>Read char from STDIN with echo</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>02</td>
-					<td>Character output</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/65/25.html">0200</a></td>
+					<td>Write character to STDOUT</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>03</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/66/25.html">0300</a></td>
 					<td>Auxiliary input</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>04</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/67/25.html">0400</a></td>
 					<td>Auxiliary output</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>05</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/68/25.html">0500</a></td>
 					<td>Printer output</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>06</td>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/69/25.html">
+							0600<br>
+							DL != FF
+						</a>
+					</td>
 					<td>Direct console I/O</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>07</td>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/70/25.html">
+							0600<br>
+							DL = FF
+						</a>
+					</td>
+					<td>Direct console I/O</td>
+					<td>1.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/71/25.html">0700</a></td>
 					<td>Direct console input without echo</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>08</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/72/25.html">0800</a></td>
 					<td>Console input without echo</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>09</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/73/25.html">0900</a></td>
 					<td>Display string</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>0A</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/74/25.html">0A00</a></td>
 					<td>Buffered keyboard input</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>0B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/76/25.html">0B00</a></td>
 					<td>Get input status</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>0C</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/78/25.html">0C00</a></td>
 					<td>Flush input buffer and input</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>0D</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/79/25.html">0D00</a></td>
 					<td>Disk reset</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>0E</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/81/25.html">0E00</a></td>
 					<td>Set default drive</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>0F</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/85/25.html">0F00</a></td>
 					<td>Open file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>10</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/86/25.html">1000</a></td>
 					<td>Close file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>11</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/87/25.html">1100</a></td>
 					<td>Find first file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>12</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/88/25.html">1200</a></td>
 					<td>Find next file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>13</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/89/25.html">1300</a></td>
 					<td>Delete file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>14</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/90/25.html">1400</a></td>
 					<td>Sequential read</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>15</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/91/25.html">1500</a></td>
 					<td>Sequential write</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>16</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/92/25.html">1600</a></td>
 					<td>Create or truncate file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>17</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/93/25.html">1700</a></td>
 					<td>Rename file</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>18</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/94/25.html">1800</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>19</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/99/25.html">1900</a></td>
 					<td>Get default drive</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>1A</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/00/26.html">1A00</a></td>
 					<td>Set disk transfer address</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>1B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/01/26.html">1B00</a></td>
 					<td>Get allocation info for default drive</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>1C</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/02/26.html">1C00</a></td>
 					<td>Get allocation info for specified drive</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>1D</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/03/26.html">1D00</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>1E</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/04/26.html">1E00</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>1F</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/05/26.html">1F00</a></td>
 					<td>Get disk parameter block for default drive</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>20</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/06/26.html">2000</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>21</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/09/26.html">2100</a></td>
 					<td>Random read</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>22</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/10/26.html">2200</a></td>
 					<td>Random write</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>23</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/11/26.html">2300</a></td>
 					<td>Get file size in records</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>24</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/12/26.html">2400</a></td>
 					<td>Set random record number</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>25</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/13/26.html">2500</a></td>
 					<td>Set interrupt vector</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>26</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/93/26.html">2600</a></td>
 					<td>Create PSP</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>27</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/94/26.html">2700</a></td>
 					<td>Random block read</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>28</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/95/26.html">2800</a></td>
 					<td>Random block write</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>29</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/96/26.html">2900</a></td>
 					<td>Parse filename</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>2A</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/97/26.html">2A00</a></td>
 					<td>Get date</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>2B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/98/26.html">2B00</a></td>
 					<td>Set date</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>2C</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/14/27.html">2C00</a></td>
 					<td>Get time</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>2D</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/18/27.html">2D00</a></td>
 					<td>Set time</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>2E</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/20/27.html">2E00</a></td>
 					<td>Set verify flag</td>
 					<td>1.00+</td>
 				</tr>
 				<tr>
-					<td>2F</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/21/27.html">2F00</a></td>
 					<td>Get disk transfer address</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>30</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/22/27.html">3000</a></td>
 					<td>Get DOS version</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>31</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/34/27.html">3100</a></td>
 					<td>Terminate and stay resident</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>32</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/35/27.html">3200</a></td>
 					<td>Get disk parameter block for specified drive</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>33</td>
-					<td>Get or set Ctrl-Break</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/36/27.html">3300</a></td>
+					<td>Get Ctrl-Break checking state</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>34</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/36/27.html">3301</a></td>
+					<td>Set Ctrl-Break checking state</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/37/27.html">3302</a></td>
+					<td>Get and set extended Ctrl-Break checking state</td>
+					<td>3.xx+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/38/27.html">3303</a></td>
+					<td>Get CPSW state</td>
+					<td>3.40 / 4.00</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/39/27.html">3304</a></td>
+					<td>Set CPSW state</td>
+					<td>3.40 / 4.00</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/40/27.html">3305</a></td>
+					<td>Get boot drive</td>
+					<td>4.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/41/27.html">3306</a></td>
+					<td>Get true version number</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/43/27.html">3307</a></td>
+					<td>Set / clear DOS_Flag</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/50/27.html">3400</a></td>
 					<td>Get InDOS flag pointer</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>35</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/51/27.html">3500</a></td>
 					<td>Get interrupt vector</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>36</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/62/27.html">3600</a></td>
 					<td>Get free disk space</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>37</td>
-					<td>Get or set switch character</td>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/63/27.html">3700</a></td>
+					<td>Get switch character</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>38</td>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/64/27.html">3701</a></td>
+					<td>Set switch character</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/ix/21/38.html">3800</a></td>
 					<td>Get or set country info</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>39</td>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/84/27.html">3800</a></td>
+					<td>Get country info</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/85/27.html">3801 - 38FF</a></td>
+					<td>Set country info</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/86/27.html">3900</a></td>
 					<td>Create subdirectory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>3A</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/87/27.html">3A00</a></td>
 					<td>Remove subdirectory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>3B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/88/27.html">3B00</a></td>
 					<td>Change current directory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>3C</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/89/27.html">3C00</a></td>
 					<td>Create or truncate file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>3D</td>
-					<td>Open file</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/90/27.html">3D00</a></td>
+					<td>Open existing file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>3E</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/93/27.html">3E00</a></td>
 					<td>Close file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>3F</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/94/27.html">3F00</a></td>
 					<td>Read file or device</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>40</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/02/28.html">4000</a></td>
 					<td>Write file or device</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>41</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/08/28.html">4100</a></td>
 					<td>Delete file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>42</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/10/28.html">4200</a></td>
 					<td>Move file pointer</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>43</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/ix/21/43.html">4300</a></td>
 					<td>Get or set file attributes</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>44</td>
-					<td>I/O control for devices</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/32/28.html">4400</a></td>
+					<td>IOCTL - Get device information</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>45</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/33/28.html">4401</a></td>
+					<td>IOCTL - Set device information</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/34/28.html">4402</a></td>
+					<td>IOCTL - Read from character device control channel</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/66/28.html">4403</a></td>
+					<td>IOCTL - Write to character device control channel</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/83/28.html">4404</a></td>
+					<td>IOCTL - Read from character device control channel</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/93/28.html">4405</a></td>
+					<td>IOCTL - Write to block device control channel</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/00/29.html">4406</a></td>
+					<td>IOCTL - Get input status</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/01/29.html">4407</a></td>
+					<td>IOCTL - Get output status</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/02/29.html">4408</a></td>
+					<td>IOCTL - Check if block device removable</td>
+					<td>3.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/03/29.html">4409</a></td>
+					<td>IOCTL - Check if block device remote</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/04/29.html">440A</a></td>
+					<td>IOCTL - Check if handle is remote</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/05/29.html">440B</a></td>
+					<td>IOCTL - Set sharing retry count</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/06/29.html">440C</a></td>
+					<td>IOCTL - Generic character device request</td>
+					<td>3.20+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/08/29.html">440D</a></td>
+					<td>IOCTL - Generic block device request</td>
+					<td>3.20+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/09/29.html">
+							440D<br>
+							CX = 084A
+						</a>
+				</td>
+					<td>Generic IOCTL - Lock logical volume</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/10/29.html">
+							440D<br>
+							CX = 084B
+						</a>
+				</td>
+					<td>Generic IOCTL - Lock physical volume</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/11/29.html">
+							440D<br>
+							CX = 086A
+						</a>
+				</td>
+					<td>Generic IOCTL - Unlock logical volume</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/12/29.html">
+							440D<br>
+							CX = 086B
+						</a>
+				</td>
+					<td>Generic IOCTL - Unlock physical volume</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/13/29.html">
+							440D<br>
+							CX = 086C
+						</a>
+				</td>
+					<td>Generic IOCTL - Get lock flag state</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/14/29.html">
+							440D<br>
+							CX = 086D
+						</a>
+				</td>
+					<td>Generic IOCTL - Enumerate open files</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/15/29.html">
+							440D<br>
+							CX = 086E
+						</a>
+				</td>
+					<td>Generic IOCTL - Find swap file</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/16/29.html">
+							440D<br>
+							CX = 0870
+						</a>
+				</td>
+					<td>Generic IOCTL - Get current lock state</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/17/29.html">
+							440D<br>
+							CX = 0871
+						</a>
+				</td>
+					<td>Generic IOCTL - Get first cluster</td>
+					<td>7.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/19/29.html">440E</a></td>
+					<td>IOCTL - Get logical drive map</td>
+					<td>3.20+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/20/29.html">440F</a></td>
+					<td>IOCTL - Set logical drive map</td>
+					<td>3.20+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/21/29.html">4410</a></td>
+					<td>IOCTL - Query generic IOCTL capability (Handle)</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/23/29.html">4411</a></td>
+					<td>IOCTL - Query generic IOCTL capability (Drive)</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/43/29.html">4500</a></td>
 					<td>Duplicate handle</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>46</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/44/29.html">4600</a></td>
 					<td>Redirect handle</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>47</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/45/29.html">4700</a></td>
 					<td>Get current directory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>48</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/46/29.html">4800</a></td>
 					<td>Allocate memory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>49</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/47/29.html">4900</a></td>
 					<td>Release memory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>4A</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/48/29.html">4A00</a></td>
 					<td>Reallocate memory</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>4B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/51/29.html">4B00</a></td>
 					<td>Execute program</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>4C</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/86/29.html">4C00</a></td>
 					<td>Terminate with return code</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>4D</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/88/29.html">4D00</a></td>
 					<td>Get program return code</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>4E</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/89/29.html">4E00</a></td>
 					<td>Find first file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>4F</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/91/29.html">4F00</a></td>
 					<td>Find next file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>50</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/92/29.html">5000</a></td>
 					<td>Set current PSP</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>51</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/94/29.html">5100</a></td>
 					<td>Get current PSP</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>52</td>
-					<td>Get DOS internal pointers (SYSVARS</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/95/29.html">5200</a></td>
+					<td>Get DOS internal pointers (SYSVARS)</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>53</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/97/29.html">5300</a></td>
 					<td>Create disk parameter block</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>54</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/98/29.html">5400</a></td>
 					<td>Get verify flag</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>55</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/01/30.html">5500</a></td>
 					<td>Create program PSP</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>56</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/02/30.html">5600</a></td>
 					<td>Rename file</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>57</td>
-					<td>Get or set file date and time</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/04/30.html">5700</a></td>
+					<td>Get last-written date and time</td>
 					<td>2.00+</td>
 				</tr>
 				<tr>
-					<td>58</td>
-					<td>Get or set allocation strategy</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/05/30.html">5701</a></td>
+					<td>Set last-written date and time</td>
+					<td>2.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/13/30.html">5704</a></td>
+					<td>Get last access date and time</td>
+					<td>7.00, Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/14/30.html">5705</a></td>
+					<td>Set last access date and time</td>
+					<td>7.00, Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/15/30.html">5706</a></td>
+					<td>Get creation date and time</td>
+					<td>7.00, Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/16/30.html">5707</a></td>
+					<td>Set creation date and time</td>
+					<td>7.00, Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/20/30.html">5800</a></td>
+					<td>Get memory allocation strategy</td>
 					<td>2.11+</td>
 				</tr>
 				<tr>
-					<td>59</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/20/30.html">5801</a></td>
+					<td>Set allocation strategy</td>
+					<td>2.11+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/21/30.html">5802</a></td>
+					<td>Get UMB link state</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/21/30.html">5803</a></td>
+					<td>Set UMB link state</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/24/30.html">5900</a></td>
 					<td>Get extended error info</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>5A</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/26/30.html">5A00</a></td>
 					<td>Create unique file</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>5B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/27/30.html">5B00</a></td>
 					<td>Create new file</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>5C</td>
-					<td>Lock or unlock file</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/28/30.html">5C00</a></td>
+					<td>Lock region of file</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>5D</td>
-					<td>File sharing functions</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/28/30.html">5C01</a></td>
+					<td>Unlock region of file</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>5E</td>
-					<td>Network functions</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/29/30.html">5D00</a></td>
+					<td>Server function call</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/30/30.html">5D01</a></td>
+					<td>Commit all files for specified computer/process</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/31/30.html">5D02</a></td>
+					<td>SHARE.EXE - Close file by name</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/32/30.html">5D03</a></td>
+					<td>SHARE.EXE - Close all files for specified computer</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/33/30.html">5D04</a></td>
+					<td>SHARE.EXE - Close all files for specified process</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/34/30.html">5D05</a></td>
+					<td>SHARE.EXE - Get open file list entry</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/35/30.html">5D06</a></td>
+					<td>Get address of DOS swappable data area</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>5F</td>
-					<td>Network redirection functions</td>
-					<td>3.00+</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/36/30.html">5D07</a></td>
+					<td>Get redirected printer mode</td>
+					<td>3.10+</td>
 				</tr>
 				<tr>
-					<td>60</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/37/30.html">5D08</a></td>
+					<td>Set redirected printer mode</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/38/30.html">5D09</a></td>
+					<td>Flush redirected printer output</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/39/30.html">5D0A</a></td>
+					<td>Set extended error information</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/40/30.html">5D0B</a></td>
+					<td>Get DOS swappable data areas</td>
+					<td>4.xx only</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/42/30.html">5E00</a></td>
+					<td>Network - Get machine name</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/44/30.html">
+							5E01<br>
+							CH = 00
+						</a>
+					</td>
+					<td>Network - Set machine name</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/46/30.html">5E02</a></td>
+					<td>Network - Set network printer setup string</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/47/30.html">5E03</a></td>
+					<td>Network - Get network printer setup string</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/48/30.html">5E04</a></td>
+					<td>Network - Set printer mode</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/50/30.html">5E05</a></td>
+					<td>Network - Get printer mode</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/53/30.html">5F00</a></td>
+					<td>Network - Get redirection mode</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/54/30.html">5F01</a></td>
+					<td>Network - Set redirection mode</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/55/30.html">5F02</a></td>
+					<td>Network - Get redirection list entry</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/56/30.html">5F03</a></td>
+					<td>Network - Redirect device</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/57/30.html">5F04</a></td>
+					<td>Network - Cancel redirection</td>
+					<td>3.10+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/58/30.html">5F05</a></td>
+					<td>Network - Get extended redirection list entry</td>
+					<td>4.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/62/30.html">5F07</a></td>
+					<td>Enable drive</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/64/30.html">5F08</a></td>
+					<td>Disable drive</td>
+					<td>5.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/50/31.html">6000</a></td>
 					<td>Qualify filename</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>61</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/51/31.html">6100</a></td>
 					<td>Reserved</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>62</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/53/31.html">6200</a></td>
 					<td>Get current PSP</td>
 					<td>3.00+</td>
 				</tr>
 				<tr>
-					<td>63</td>
-					<td>Get DBCS lead byte table pointer</td>
-					<td>3.00+</td>
-				</tr>
-				<tr>
-					<td>64</td>
-					<td>Set wait for external event flag</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/56/31.html">6300</a></td>
+					<td>Get double-byte character set lead byte table pointer</td>
 					<td>3.20+</td>
 				</tr>
 				<tr>
-					<td>65</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/61/31.html">6400</a></td>
+					<td>Set device driver lookahead flag</td>
+					<td>3.20+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/ix/21/65.html">6500</a></td>
 					<td>Get extended country info</td>
 					<td>3.30+</td>
 				</tr>
 				<tr>
-					<td>66</td>
-					<td>Get or set code page</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/80/31.html">6601</a></td>
+					<td>Get global code page table</td>
 					<td>3.30+</td>
 				</tr>
 				<tr>
-					<td>67</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/81/31.html">6602</a></td>
+					<td>Set global code page table</td>
+					<td>3.30+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/82/31.html">6700</a></td>
 					<td>Set handle count</td>
 					<td>3.30+</td>
 				</tr>
 				<tr>
-					<td>68</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/83/31.html">6800</a></td>
 					<td>Commit file</td>
 					<td>3.30+</td>
 				</tr>
 				<tr>
-					<td>69</td>
-					<td>Get or set media id</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/84/31.html">6900</a></td>
+					<td>Get or set disk serial number</td>
 					<td>4.00+</td>
 				</tr>
 				<tr>
-					<td>6A</td>
-					<td>Commit file</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/89/31.html">6A00</a></td>
+					<td>Commit file (Undocumented)</td>
 					<td>4.00+</td>
 				</tr>
 				<tr>
-					<td>6B</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/91/31.html">6B00</a></td>
 					<td>Reserved</td>
 					<td>4.00+</td>
 				</tr>
 				<tr>
-					<td>6C</td>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/92/31.html">6C00</a></td>
 					<td>Extended open/create file</td>
 					<td>4.00+</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/09/32.html">710D</a></td>
+					<td>Long filename support - Reset drive</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/10/32.html">7139</a></td>
+					<td>Long filename support - Create directory</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/11/32.html">713A</a></td>
+					<td>Long filename support - Remove directory</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/12/32.html">713B</a></td>
+					<td>Long filename support - Set current directory</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/13/32.html">7141</a></td>
+					<td>Long filename support - Delete file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/14/32.html">7143</a></td>
+					<td>Long filename support - Get / set file attributes</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/15/32.html">7147</a></td>
+					<td>Long filename support - Get current directory</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/16/32.html">714E</a></td>
+					<td>Long filename support - Find first file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/17/32.html">714F</a></td>
+					<td>Long filename support - Find next file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/18/32.html">7156</a></td>
+					<td>Long filename support - Move (rename) file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/19/32.html">
+							7160<br>
+							CL = 00
+						</a>
+					</td>
+					<td>Long filename support - Truename</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/20/32.html">
+							7160<br>
+							CL = 01
+						</a>
+					</td>
+					<td>Long filename support - Get short name for file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/21/32.html">
+							7160<br>
+							CL = 02
+						</a>
+					</td>
+					<td>Long filename support - Get canonical long filename or path</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/22/32.html">716C</a></td>
+					<td>Long filename support - Create / open file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/23/32.html">71A0</a></td>
+					<td>Long filename support - Get volume information</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/24/32.html">71A1</a></td>
+					<td>Long filename support - Terminate Find first / Find next</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/29/32.html">71A6</a></td>
+					<td>Long filename support - Get file information</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/30/32.html">
+							71A7<br>
+							BL = 00
+						</a>
+					</td>
+					<td>Long filename support - Time conversion</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/31/32.html">
+							71A7<br>
+							BL = 01
+						</a>
+					</td>
+					<td>Long filename support - Time conversion</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/32/32.html">71A8</a></td>
+					<td>Long filename support - Generate short filename</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/33/32.html">71A9</a></td>
+					<td>Long filename support - Server create / open file</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/34/32.html">
+							71AA<br>
+							BH = 00
+						</a>
+					</td>
+					<td>Long filename support - Create SUBST</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/35/32.html">
+							71AA<br>
+							BH = 01
+						</a>
+					</td>
+					<td>Long filename support - Terminate SUBST</td>
+					<td>Windows 95</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="http://www.delorie.com/djgpp/doc/rbinter/id/36/32.html">
+							71AA<br>
+							BH = 02
+						</a>
+					</td>
+					<td>Long filename support - Query SUBST</td>
+					<td>Windows 95</td>
 				</tr>
 			</table>
 

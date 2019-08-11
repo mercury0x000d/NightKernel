@@ -916,11 +916,11 @@ SerialSetParity:
 	;  input:
 	;	Port number
 	;	Parity code
-	;    0 - No parity
-	;    1 - Odd parity
-	;    3 - Even parity
-	;    5 - Mark parity
-	;    7 - Space parity
+	;	 0 - No parity
+	;	 1 - Odd parity
+	;	 3 - Even parity
+	;	 5 - Mark parity
+	;	 7 - Space parity
 	;
 	;  output:
 	;	EDX - Result code

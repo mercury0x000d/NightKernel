@@ -197,14 +197,8 @@ PrintRegs16:
 	;  output:
 	;	n/a
 
-	push bp
-	mov bp, sp
 
-	; push all once to save the registers
-	pusha
-	pushf
-
-	; pusha once more for printing
+	; pusha for printing
 	pusha
 
 	; get di
@@ -299,12 +293,6 @@ PrintRegs16:
 
 	push .output2$
 	call Print16
-
-	popf
-	popa
-
-	mov sp, bp
-	pop bp
 ret
 
 section .data
@@ -610,7 +598,7 @@ PrintIfConfigBits32:
 	mov ebp, esp
 
 
-	bt dword [tSystem.configBits], 1
+	bt dword [tSystem.configBits], kCBVerbose
 	jnc .NoPrint
 
 		; if we get here, we need to print
@@ -646,7 +634,7 @@ PrintRAM32:
 	;
 	;  input:
 	;	Starting address
-	;	Number of lines
+	;	Number of 16-byte lines
 	;	X position
 	;	Y position
 	;	Text color
@@ -797,17 +785,11 @@ PrintRegs32:
 	;  output:
 	;	n/a
 
-	push ebp
-	mov ebp, esp
 
-	; push all once to save the registers
-	pusha
-	pushf
-
-	; pusha once more for printing
+	; pusha for printing
 	pusha
 
-	; get di
+	; get edi
 	pop eax
 
 	; convert it to a string
@@ -818,7 +800,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get si
+	; get esi
 	pop eax
 
 	; convert it to a string
@@ -829,7 +811,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get bp
+	; get ebp
 	pop eax
 
 	; convert it to a string
@@ -840,7 +822,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get sp
+	; get esp
 	pop eax
 
 	; convert it to a string
@@ -851,7 +833,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get bx
+	; get ebx
 	pop eax
 
 	; convert it to a string
@@ -862,7 +844,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get dx
+	; get edx
 	pop eax
 
 	; convert it to a string
@@ -873,7 +855,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get cx
+	; get ecx
 	pop eax
 
 	; convert it to a string
@@ -884,7 +866,7 @@ PrintRegs32:
 	call ConvertNumberHexToString
 
 
-	; get ax
+	; get eax
 	pop eax
 
 	; convert it to a string
@@ -930,13 +912,6 @@ PrintRegs32:
 
 	mov byte [gCursorX], al
 	mov byte [gCursorY], ah
-
-
-	popf
-	popa
-
-	mov esp, ebp
-	pop ebp
 ret
 
 section .data
