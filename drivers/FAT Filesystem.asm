@@ -42,10 +42,17 @@
 
 ; 32-bit function listing:
 ; FAT16ChainDelete						Deletes the cluster chain specified
+; FAT16ChainGrow						Extends the cluster chain specified to the length specified
+; FAT16ChainLength						Returns the length in clusters of the cluster chain specified
 ; FAT16ChainRead						Reads the cluster chain specified into memory at the address specified
+; FAT16ChainResize						Resizes the cluster chain specified to the length specified
+; FAT16ChainShrink						Shortens the cluster chain specified to the length specified
 ; FAT16ChainWrite						Writes the cluster chain specified to disk
-; FAT16ClusterAvailableGet				Returns cluster stats for the partition specified
+; FAT16ClusterFreeFirstGet				Returns the first free cluster in the FAT
+; FAT16ClusterFreeTotalGet				Returns total number of free clusters for the partition specified
 ; FAT16ClusterNextGet					Determines the next cluster in the chain
+; FAT16ClusterNextSet					Sets the next cluster in the chain from the cluster specified
+; FAT16ClustersNeeded					Determines the number of clusters needed to store a file of the specified size
 ; FAT16DirEntryMatchName				Returns the address of a match for the item specified in the buffer specified
 ; FAT16FATBackup						Copies the working FAT (the first FAT) to any remaining spots in the FAT area
 ; FAT16FileCreate						Creates a new file at the path specified
@@ -56,8 +63,8 @@
 ; FAT16FileInfoSizeGet					Gets the size of the file specified
 ; FAT16FileInfoSizeSet					Sets the size of the file specified
 ; FAT16FileLoad							Loads the file specified at the address specified using FAT16 standards
+; FAT16FileStore						Stores the range of memory specified as a file at the FAT16 path specified
 ; FAT16FileWrite						Writes data from memory to the file structure on disk
-; FAT16ItemClusterCount					Returns the number of clusters in the chain specified
 ; FAT16ItemExists						Tests if the item specified already exists
 ; FAT16PartitionCacheData				Caches FAT16-specific data from sector 0 of the partition to the FS reserved section of this partiton's entry in the partitions list
 ; FAT16PathCanonicalize					Returns the proper form of the path specified according to FAT16 standards
@@ -166,13 +173,14 @@ FAT16ChainDelete:
 	%define cluster								dword [ebp + 12]
 
 	; allocate local variables
-	sub esp, 24
-	%define sectorOffset						dword [ebp - 4]
-	%define bytePosition						dword [ebp - 8]
-	%define sectorBufferPtr						dword [ebp - 12]
-	%define thisSector							dword [ebp - 16]
-	%define lastSector							dword [ebp - 20]
-	%define FATLBA								dword [ebp - 24]
+	sub esp, 28
+	%define partitionSlotPtr					dword [ebp - 4]
+	%define sectorOffset						dword [ebp - 8]
+	%define bytePosition						dword [ebp - 12]
+	%define sectorBufferPtr						dword [ebp - 16]
+	%define thisSector							dword [ebp - 20]
+	%define lastSector							dword [ebp - 24]
+	%define FATLBA								dword [ebp - 28]
 
 
 	; get the address of this partition's slot in the partitions list
@@ -282,6 +290,285 @@ FAT16ChainDelete:
 	mov esp, ebp
 	pop ebp
 ret 8
+
+
+
+
+
+
+section .text
+FAT16ChainGrow:
+	; Extends the cluster chain specified to the length specified
+	;
+	;  input:
+	;	Partition number
+	;	LBA sector number (relative to this partition) of FAT
+	;	Starting cluster for chain
+	;	New chain length
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+	%define FATLBA								dword [ebp + 12]
+	%define cluster								dword [ebp + 16]
+	%define newLength							dword [ebp + 20]
+
+	; allocate local variables
+	sub esp, 32
+	%define sectorOffset						dword [ebp - 4]
+	%define bytePosition						dword [ebp - 8]
+	%define clusterCount						dword [ebp - 12]
+	%define sectorBufferPtr						dword [ebp - 16]
+	%define thisSector							dword [ebp - 20]
+	%define lastSector							dword [ebp - 24]
+	%define newCluster							dword [ebp - 28]
+	%define lastCluster							dword [ebp - 32]
+
+
+	; allocate a sector buffer
+	push 512
+	push dword 1
+	call MemAllocate
+
+	; see if there was an error, save the returned pointer if not
+	cmp edx, kErrNone
+	jne .Exit
+	mov sectorBufferPtr, eax
+
+	; zero the vars
+	mov clusterCount, 0
+
+	; make lastSector impossibly large to guard against false positives
+	mov lastSector, 0xFFFFFFFF
+
+	.ClusterLoop:
+		inc clusterCount
+
+		; infinite loops are bad, kids
+		cmp clusterCount, 0
+		je .Exit
+
+		; get sector to be read based on the cluster number given
+		push cluster
+		call FAT16TableElementFromCluster
+		mov sectorOffset, eax
+		mov bytePosition, ebx
+
+		; calculate the sector which needs read
+		mov eax, FATLBA
+		add eax, sectorOffset
+		mov thisSector, eax
+
+		; see if this sector is the same as the one already in the buffer and skip loading if so
+		cmp lastSector, eax
+		je .LoadSkip
+			; if we get here, the sectors are different, so we need to load the new one
+
+			; update lastSector
+			mov eax, thisSector
+			mov lastSector, eax
+
+			; read the sector into the buffer
+			push sectorBufferPtr
+			push 1
+			push thisSector
+			push partitionNumber
+			call PartitionRead
+		.LoadSkip:
+
+		; save the curent value of cluster into lastCluster
+		mov eax, cluster
+		mov lastCluster, eax
+
+		; read the number of the next cluster in the chain into bx
+		mov esi, sectorBufferPtr
+		add esi, bytePosition
+		mov ebx, 0
+		mov bx, word [esi]
+		mov cluster, ebx
+
+		; see if the cluster number indicates we're at the end of the file
+		push 0xFFEF
+		push 0x0002
+		push ebx
+		call RangeCheck
+
+	; if the above call returned true, we're not yet at the end of the chain
+	cmp al, true
+	je .ClusterLoop
+
+	.GrowLoop:
+		; once we get here, we're at the end of the chain - let's start growing!
+		push partitionNumber
+		call FAT16ClusterFreeFirstGet
+		mov newCluster, eax
+
+		; check for errors
+		cmp ebx, kErrNone
+		je .NoError
+			; do error-y stuff here
+		.NoError:
+
+		; update the chain to point to the proper next cluster
+		push newCluster
+		push lastCluster
+		push partitionNumber
+		call FAT16ClusterNextSet
+
+		; terminate the chain
+		push 0xFFFF
+		push newCluster
+		push partitionNumber
+		call FAT16ClusterNextSet
+
+		; cluster = newCluster
+		mov eax, newCluster
+		mov lastCluster, eax
+
+		; see if we've processed the proper number of clusters yet
+		inc clusterCount
+		mov eax, clusterCount
+		mov ebx, newLength
+		cmp eax, ebx
+		je .GrowLoopDone
+	jmp .GrowLoop
+	
+	.GrowLoopDone:
+	; dispose of the sector buffer
+	push sectorBufferPtr
+	call MemDispose
+
+	; set the return values
+	mov edx, kErrNone
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 16
+
+
+
+
+
+section .text
+FAT16ChainLength:
+	; Returns the length in clusters of the cluster chain specified
+	;
+	;  input:
+	;	Partition number
+	;	LBA sector number (relative to this partition) of FAT
+	;	Cluster number of start of chain
+	;
+	;  output:
+	;	EAX - Chain length
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+	%define FATLBA								dword [ebp + 12]
+	%define cluster								dword [ebp + 16]
+
+	; allocate local variables
+	sub esp, 24
+	%define sectorOffset						dword [ebp - 4]
+	%define bytePosition						dword [ebp - 8]
+	%define clusterCount						dword [ebp - 12]
+	%define sectorBufferPtr						dword [ebp - 16]
+	%define thisSector							dword [ebp - 20]
+	%define lastSector							dword [ebp - 24]
+
+
+	; allocate a sector buffer
+	push 512
+	push dword 1
+	call MemAllocate
+
+	; see if there was an error
+	cmp edx, kErrNone
+	je .SectorBufferAllocateOK
+		jmp .Exit
+	.SectorBufferAllocateOK:
+	mov sectorBufferPtr, eax
+
+	; zero the cluster count
+	mov clusterCount, 0
+
+	; make lastSector impossibly large to guard against false positives
+	mov lastSector, 0xFFFFFFFF
+
+	.ClusterLoop:
+		inc clusterCount
+
+		; infinite loops are bad, kids
+		cmp clusterCount, 0
+		je .Exit
+
+		; get sector to be read based on the cluster number given
+		push cluster
+		call FAT16TableElementFromCluster
+		mov sectorOffset, eax
+		mov bytePosition, ebx
+
+		; calculate the sector which needs read
+		mov eax, FATLBA
+		add eax, sectorOffset
+		mov thisSector, eax
+
+		; see if this sector is the same as the one already in the buffer and skip loading if so
+		cmp lastSector, eax
+		je .LoadSkip
+			; if we get here, the sectors are different, so we need to load the new one
+			; update lastSector
+			mov lastSector, eax
+
+			; read the sector into the buffer
+			push sectorBufferPtr
+			push 1
+			push thisSector
+			push partitionNumber
+			call PartitionRead
+		.LoadSkip:
+
+		; read the number of the next cluster in the chain into bx
+		mov esi, sectorBufferPtr
+		add esi, bytePosition
+		mov ebx, 0
+		mov bx, word [esi]
+		mov cluster, ebx
+
+		; see if the cluster number indicates we're at the end of the file
+		push 0xFFEF
+		push 0x0002
+		push ebx
+		call RangeCheck
+
+		; if the above call returned false, we're at the end of the file
+		cmp al, false
+		je .Exit
+
+	jmp .ClusterLoop
+
+	.Exit:
+	; dispose of the sector buffer
+	push sectorBufferPtr
+	call MemDispose
+
+	mov eax, clusterCount
+	mov edx, kErrNone
+
+
+	mov esp, ebp
+	pop ebp
+ret 12
 
 
 
@@ -432,6 +719,227 @@ FAT16ChainRead:
 	mov esp, ebp
 	pop ebp
 ret 16
+
+
+
+
+
+section .text
+FAT16ChainResize:
+	; Resizes the cluster chain specified to the length specified
+	;
+	;  input:
+	;	Partition number
+	;	LBA sector number (relative to this partition) of FAT
+	;	Starting cluster for chain
+	;	New chain length
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+	%define FATLBA								dword [ebp + 12]
+	%define chainStart							dword [ebp + 16]
+	%define newLength							dword [ebp + 20]
+
+
+	; see how long the chain is now
+	push chainStart
+	push FATLBA
+	push partitionNumber
+	call FAT16ChainLength
+
+	; if current length > desired length, shrink the chain
+	cmp eax, newLength
+	jbe .NoShrink
+		push newLength
+		push chainStart
+		push FATLBA
+		push partitionNumber
+		call FAT16ChainShrink
+		jmp .ResizeDone
+	.NoShrink:
+
+	; if current length < desired length, grow the chain
+	cmp eax, newLength
+	jae .NoGrow
+		push newLength
+		push chainStart
+		push FATLBA
+		push partitionNumber
+		call FAT16ChainGrow
+	.NoGrow:
+
+
+	.ResizeDone:
+	mov edx, kErrNone
+
+
+	mov esp, ebp
+	pop ebp
+ret 16
+
+
+
+
+
+section .text
+FAT16ChainShrink:
+	; Shortens the cluster chain specified to the length specified
+	;
+	;  input:
+	;	Partition number
+	;	LBA sector number (relative to this partition) of FAT
+	;	Starting cluster for chain
+	;	New chain length
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+	%define FATLBA								dword [ebp + 12]
+	%define cluster								dword [ebp + 16]
+	%define newLength							dword [ebp + 20]
+
+	; allocate local variables
+	sub esp, 25
+	%define sectorOffset						dword [ebp - 4]
+	%define bytePosition						dword [ebp - 8]
+	%define clusterCount						dword [ebp - 12]
+	%define sectorBufferPtr						dword [ebp - 16]
+	%define thisSector							dword [ebp - 20]
+	%define lastSector							dword [ebp - 24]
+	%define sectorWriteFlag						byte [ebp - 25]
+
+
+	; allocate a sector buffer
+	push 512
+	push dword 1
+	call MemAllocate
+
+	; see if there was an error, save the returned pointer if not
+	cmp edx, kErrNone
+	jne .Exit
+	mov sectorBufferPtr, eax
+
+	; zero the vars
+	mov clusterCount, 0
+	mov sectorWriteFlag, false
+
+	; make lastSector impossibly large to guard against false positives
+	mov lastSector, 0xFFFFFFFF
+
+	.ClusterLoop:
+		inc clusterCount
+
+		; infinite loops are bad, kids
+		cmp clusterCount, 0
+		je .Exit
+
+		; get sector to be read based on the cluster number given
+		push cluster
+		call FAT16TableElementFromCluster
+		mov sectorOffset, eax
+		mov bytePosition, ebx
+
+		; calculate the sector which needs read
+		mov eax, FATLBA
+		add eax, sectorOffset
+		mov thisSector, eax
+
+		; see if this sector is the same as the one already in the buffer and skip loading if so
+		cmp lastSector, eax
+		je .LoadSkip
+			; if we get here, the sectors are different, so we need to load the new one
+
+			; write to disk if anything changed
+			call .WriteIfNecessary
+
+			; update lastSector
+			mov eax, thisSector
+			mov lastSector, eax
+
+			; read the sector into the buffer
+			push sectorBufferPtr
+			push 1
+			push thisSector
+			push partitionNumber
+			call PartitionRead
+		.LoadSkip:
+
+		; read the number of the next cluster in the chain into bx
+		mov esi, sectorBufferPtr
+		add esi, bytePosition
+		mov ebx, 0
+		mov bx, word [esi]
+		mov cluster, ebx
+
+		; see if the cluster we just read is equal to the new length
+		mov eax, clusterCount
+		cmp eax, newLength
+		jne .NotEqual
+			mov word [esi], 0xFFFF
+			mov sectorWriteFlag, true
+		.NotEqual:
+
+		; see if the cluster we just read is beyond the new length
+		cmp eax, newLength
+		jna .NotBeyond
+			mov word [esi], 0x0000
+			mov sectorWriteFlag, true
+		.NotBeyond:
+
+		; see if the cluster number indicates we're at the end of the file
+		push 0xFFEF
+		push 0x0002
+		push ebx
+		call RangeCheck
+
+		; if the above call returned false, we're at the end of the file
+		cmp al, false
+		je .Exit
+
+	jmp .ClusterLoop
+
+
+	.Exit:
+	; write to disk if anything changed
+	call .WriteIfNecessary
+
+	; dispose of the sector buffer
+	push sectorBufferPtr
+	call MemDispose
+
+	; set the return values
+	mov eax, clusterCount
+	mov edx, kErrNone
+
+
+	mov esp, ebp
+	pop ebp
+ret 16
+
+.WriteIfNecessary:
+	; see if there's anything to write back to disk
+	cmp sectorWriteFlag, true
+	jne .NoNeedToWrite
+		; there's stuff to write, so let's do it
+		push sectorBufferPtr
+		push 1
+		push thisSector
+		push partitionNumber
+		call PartitionWrite
+		mov sectorWriteFlag, false
+	.NoNeedToWrite:
+ret
 
 
 
@@ -600,7 +1108,140 @@ ret 16
 
 
 section .text
-FAT16ClusterAvailableGet:
+FAT16ClusterFreeFirstGet:
+	; Returns the first free cluster in the FAT
+	;
+	;  input:
+	;	Partition number
+	;
+	;  output:
+	;	EAX - Cluster number
+	;	EBX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+
+	; allocate local variables
+	sub esp, 28
+	%define clusterFree							dword [ebp - 4]
+	%define partitionSlotPtr					dword [ebp - 8]
+	%define sectorBufferPtr						dword [ebp - 12]
+	%define FATStart							dword [ebp - 16]
+	%define FATSectors							dword [ebp - 20]
+	%define clusterCount						dword [ebp - 24]
+	%define clustersChecked						dword [ebp - 28]
+
+
+	; get the address of this partition's slot in the partitions list
+	push partitionNumber
+	push dword [tSystem.listPartitions]
+	call LMElementAddressGet
+	mov partitionSlotPtr, esi
+
+	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
+	bt dword [tPartitionInfo.FSFlags], 0
+	jc .AlreadyCached
+		push partitionNumber
+		call FAT16PartitionCacheData
+	.AlreadyCached:
+
+	; allocate a sector buffer
+	push 512
+	push dword 1
+	call MemAllocate
+
+	; see if there was an error
+	cmp edx, kErrNone
+	je .SectorBufferAllocateOK
+		; if we get here, there was
+		mov eax, 0
+		mov ebx, edx
+		jmp .Exit
+	.SectorBufferAllocateOK:
+	mov sectorBufferPtr, eax
+
+	; zero the cluster counts
+	mov clusterFree, 0
+	mov clustersChecked, 0
+
+	; load some data from the cache so we can do our maths
+	mov esi, partitionSlotPtr
+	mov eax, dword [tPartitionInfo.FAT1]
+	mov FATStart, eax
+
+	mov eax, dword [tPartitionInfo.clusterCount]
+	; we add 2 here to compensate for the first two FAT entries which are invalid for file use
+	add eax, 2
+	mov clusterCount, eax
+
+	mov ecx, dword [tPartitionInfo.sectorsPerFAT]
+
+	.ClusterLoop:
+		mov FATSectors, ecx
+		; read the sector into the buffer
+		push sectorBufferPtr
+		push 1
+		push FATStart
+		push partitionNumber
+		call PartitionRead
+
+		; count how many free clusters there are in this sector of the FAT
+		mov ecx, 256
+		.ClusterCountLoop:
+			mov eax, 256
+			sub eax, ecx
+			shl eax, 1
+			add eax, sectorBufferPtr
+			mov bx, word [eax]
+			cmp bx, 0
+			jne .NotFree
+				; if we get here, this cluster was free
+				mov ebx, clustersChecked
+				mov clusterFree, ebx
+				jmp .ClusterCountLoopDone
+			.NotFree:
+			inc clustersChecked
+
+			; see if we've checked enough clusters yet
+			mov eax, clustersChecked
+			cmp eax, clusterCount
+			je .ClusterCountLoopDone
+		loop .ClusterCountLoop
+
+		inc FATStart
+	mov ecx, FATSectors
+	loop .ClusterLoop
+
+
+	.ClusterCountLoopDone:
+	; dispose of the sector buffer
+	push sectorBufferPtr
+	call MemDispose
+
+	; all is well that ends well
+	mov eax, clusterFree
+	cmp eax, 0
+	jne .SkipErrorSet
+		; if we get here, no free cluster was found; ergo, we set an error saying so
+		mov ebx, kErrPartitionFull
+		jmp .Exit
+	.SkipErrorSet:
+	mov ebx, kErrNone
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+
+
+section .text
+FAT16ClusterFreeTotalGet:
 	; Returns cluster stats for the partition specified
 	;
 	;  input:
@@ -801,6 +1442,153 @@ FAT16ClusterNextGet:
 	mov esp, ebp
 	pop ebp
 ret 12
+
+
+
+
+
+section .text
+FAT16ClusterNextSet:
+	; Sets the next cluster in the chain from the cluster specified
+	;
+	;  input:
+	;	Partition number
+	;	Cluster number to update
+	;	Next cluster number
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+	%define updateCluster						dword [ebp + 12]
+	%define nextCluster							dword [ebp + 16]
+
+	; allocate local variables
+	sub esp, 28
+	%define partitionSlotPtr					dword [ebp - 4]
+	%define sectorOffset						dword [ebp - 8]
+	%define bytePosition						dword [ebp - 12]
+	%define sectorBufferPtr						dword [ebp - 16]
+	%define returnValue							dword [ebp - 20]
+	%define thisSector							dword [ebp - 24]
+	%define FATStart							dword [ebp - 28]
+
+
+	; get the address of this partition's slot in the partitions list
+	push partitionNumber
+	push dword [tSystem.listPartitions]
+	call LMElementAddressGet
+	mov partitionSlotPtr, esi
+
+	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
+	bt dword [tPartitionInfo.FSFlags], 0
+	jc .AlreadyCached
+		push partitionNumber
+		call FAT16PartitionCacheData
+	.AlreadyCached:
+
+	; allocate a sector buffer
+	push 512
+	push dword 1
+	call MemAllocate
+
+	; see if there was an error
+	cmp edx, kErrNone
+	je .SectorBufferAllocateOK
+		; there was an error, so GEEEET TO DE CHOPPAAAH
+		jmp .Exit
+	.SectorBufferAllocateOK:
+	mov sectorBufferPtr, eax
+
+	; load some data from the cache so we can do our maths
+	mov esi, partitionSlotPtr
+	mov eax, dword [tPartitionInfo.FAT1]
+	mov FATStart, eax
+
+	; get sector to be read based on the cluster number given
+	push updateCluster
+	call FAT16TableElementFromCluster
+	mov sectorOffset, eax
+	mov bytePosition, ebx
+
+	; read the sector into the buffer
+	mov eax, FATStart
+	add eax, sectorOffset
+	mov thisSector, eax
+	push sectorBufferPtr
+	push 1
+	push thisSector
+	push partitionNumber
+	call PartitionRead
+
+	; read and save the number of the next cluster in the chain
+	mov esi, sectorBufferPtr
+	add esi, bytePosition
+	mov eax, nextCluster
+	mov word [esi], ax
+
+	; write the buffer back to disk
+	push sectorBufferPtr
+	push 1
+	push thisSector
+	push partitionNumber
+	call PartitionWrite
+
+	; dispose of the sector buffer
+	push sectorBufferPtr
+	call MemDispose
+
+	; load up the return value
+	mov edx, kErrNone
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 12
+
+
+
+
+
+section .text
+FAT16ClustersNeeded:
+	; Determines the number of clusters needed to store a file of the specified size
+	;
+	;  input:
+	;	Sectors per cluster
+	;	File size
+	;
+	;  output:
+	;	EAX - Clusters needed
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define sectorsPerCluster					dword [ebp + 8]
+	%define fileSize							dword [ebp + 12]
+
+
+	; calculate!
+	mov ebx, sectorsPerCluster
+	shl ebx, 9
+	mov eax, fileSize
+	div ebx
+
+	cmp edx, 0
+	je .Exit
+		inc eax
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8
 
 
 
@@ -1496,6 +2284,118 @@ ret 12
 
 
 section .text
+FAT16FileStore:
+	; Stores the range of memory specified as a file at the FAT16 path specified
+	;
+	;  input:
+	;	Partition number
+	;	Pointer to file path string (without drive letter/partition number)
+	;	Address at which file data resides
+	;	Length of file data
+	;
+	;  output:
+	;	EAX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define partitionNumber						dword [ebp + 8]
+	%define path$								dword [ebp + 12]
+	%define address								dword [ebp + 16]
+	%define length								dword [ebp + 20]
+
+	; allocate local variables
+	sub esp, 24
+																								%define partitionSlotPtr					dword [ebp - 4]
+	%define cluster								dword [ebp - 8]
+	%define size								dword [ebp - 12]
+	%define clustersRequired					dword [ebp - 16]
+	%define sectorsPerCluster					dword [ebp - 20]
+	%define dirEntryPtr							dword [ebp - 24]
+
+
+	; use the path to get the starting cluster of the cluster chain that is this file
+	push path$
+	push partitionNumber
+	call FAT16PathToDirEntry
+	mov dirEntryPtr, esi
+
+	; get the number of sectors per cluster for this partition
+	mov eax, 0
+	mov ax, word [tFATDirEntry.startingCluster]
+	mov sectorsPerCluster, eax
+
+	; see how many clusters this file will need to be stored
+	push length
+	push sectorsPerCluster
+	call FAT16ClustersNeeded
+	mov clustersRequired, eax
+
+
+
+
+	; see if there was an error
+	cmp eax, kErrNone
+	jne .AWildErrorAppears
+
+		; if we get here, that means the item already exists and we will be overwriting it
+
+
+		; we will need to modify the chain to reflect the new length
+
+		; the address of the element is held in ESI from the call to FAT16PathToDirEntry
+		; now we have to get the cluster at which the item resides
+		mov eax, 0
+		mov ax, word [tFATDirEntry.startingCluster]
+		mov cluster, eax
+
+		; and now get the size
+		mov ebx, dword [tFATDirEntry.size]
+		mov size, ebx
+
+		; dispose of the memory block we were returned
+		push edi
+		call MemDispose
+
+		jmp .WriteChain
+
+	.AWildErrorAppears:
+	; If we get here, there was an error - this could mean the item was not found, or something else. Let's figure out what it was.
+	cmp eax, kErrItemNotFound
+	jne .Exit
+	
+	; if we get here, the error was "Item Not Found" so we need to create a new cluster chain to accomodate this file
+
+
+
+
+
+mov eax, partitionNumber
+mov ebx, path$
+mov ecx, address
+mov edx, length
+jmp $
+
+	.WriteChain:
+	; write the cluster chain to disk
+	push address
+	push size
+	push cluster
+	push partitionNumber
+	call FAT16ChainWrite
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 16
+
+
+
+
+
+section .text
 FAT16FileWrite:
 	; Writes data from memory to the file structure on disk
 	;
@@ -1516,123 +2416,6 @@ FAT16FileWrite:
 	mov esp, ebp
 	pop ebp
 ret
-
-
-
-
-
-section .text
-FAT16ItemClusterCount:
-	; Returns the number of clusters in the chain specified
-	;
-	;  input:
-	;	Partition number
-	;	LBA sector number of FAT
-	;	Cluster number of start of chain
-	;
-	;  output:
-	;	EAX - Cluster count
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define partitionNumber						dword [ebp + 8]
-	%define FATLBA								dword [ebp + 12]
-	%define cluster								dword [ebp + 16]
-
-	; allocate local variables
-	sub esp, 24
-	%define sectorOffset						dword [ebp - 4]
-	%define bytePosition						dword [ebp - 8]
-	%define clusterCount						dword [ebp - 12]
-	%define sectorBufferPtr						dword [ebp - 16]
-	%define thisSector							dword [ebp - 20]
-	%define lastSector							dword [ebp - 20]
-
-
-	; allocate a sector buffer
-	push 512
-	push dword 1
-	call MemAllocate
-
-	; see if there was an error
-	cmp edx, kErrNone
-	je .SectorBufferAllocateOK
-		mov eax, edx
-		jmp .Exit
-	.SectorBufferAllocateOK:
-	mov sectorBufferPtr, eax
-
-	; zero the cluster count
-	mov clusterCount, 0
-
-	; make lastSector impossibly large to guard against false positives
-	mov lastSector, 0xFFFFFFFF
-
-	.ClusterLoop:
-		inc clusterCount
-
-		; infinite loops are bad, kids
-		cmp clusterCount, 0
-		je .Exit
-
-		; get sector to be read based on the cluster number given
-		push cluster
-		call FAT16TableElementFromCluster
-		mov sectorOffset, eax
-		mov bytePosition, ebx
-
-		; calculate the sector which needs read
-		mov eax, FATLBA
-		add eax, sectorOffset
-		mov thisSector, eax
-
-		; see if this sector is the same as the one already in the buffer and skip loading if so
-		cmp lastSector, eax
-		je .LoadSkip
-			; if we get here, the sectors are different, so we need to load the new one
-			; update lastSector
-			mov lastSector, eax
-
-			; read the sector into the buffer
-			push sectorBufferPtr
-			push 1
-			push thisSector
-			push partitionNumber
-			call PartitionRead
-		.LoadSkip:
-
-		; read the number of the next cluster in the chain into bx
-		mov esi, sectorBufferPtr
-		add esi, bytePosition
-		mov ebx, 0
-		mov bx, word [esi]
-		mov cluster, ebx
-
-		; see if the cluster number indicates we're at the end of the file
-		push 0xFFEF
-		push 0x0002
-		push ebx
-		call RangeCheck
-
-		; if the above call returned false, we're at the end of the file
-		cmp al, false
-		je .Exit
-
-	jmp .ClusterLoop
-
-	.Exit:
-	; dispose of the sector buffer
-	push sectorBufferPtr
-	call MemDispose
-
-	mov eax, clusterCount
-
-
-	mov esp, ebp
-	pop ebp
-ret 12
 
 
 
@@ -1936,6 +2719,10 @@ FAT16PathToDirEntry:
 	jne .ItemCheckGood
 		; if we get here, this path has no meat on its bones
 		mov eax, kErrPathInvalid
+		mov ebx, 0
+		mov ecx, 0
+		mov esi, 0
+		mov edi, 0
 		jmp .Exit
 	.ItemCheckGood:
 
@@ -1995,7 +2782,11 @@ FAT16PathToDirEntry:
 		cmp al, true
 		je .MatchFound
 			; if we get here, there was no match
-			mov eax, kErrPathInvalid
+			mov eax, kErrItemNotFound
+			mov ebx, 0
+			mov ecx, 0
+			mov esi, 0
+			mov edi, 0
 			jmp .Exit
 		.MatchFound:
 
@@ -2023,7 +2814,11 @@ FAT16PathToDirEntry:
 		cmp al, true
 		je .ClusterOK
 			; if we get here, the cluster indicates we've hit the end of the chain
-			mov eax, kErrPathInvalid
+			mov eax, kErrClusterChainEndUnexpected
+			mov ebx, 0
+			mov ecx, 0
+			mov esi, 0
+			mov edi, 0
 			jmp .Exit
 		.ClusterOK:
 
@@ -2039,7 +2834,7 @@ FAT16PathToDirEntry:
 		push cluster
 		push FAT1
 		push partitionNumber
-		call FAT16ItemClusterCount
+		call FAT16ChainLength
 		mul sectorsPerCluster
 		mov dirBufferSizeSectors, eax
 
@@ -2108,6 +2903,15 @@ FAT16ServiceHandler:
 		push parameter1
 		call FAT16FileLoad
 	.NotFileLoad:
+
+	cmp command, kDriverFileStore
+	jne .NotFileStore
+		push parameter4
+		push parameter3
+		push parameter2
+		push parameter1
+		call FAT16FileStore
+	.NotFileStore:
 
 	cmp command, kDriverFileInfoAccessedGet
 	jne .NotFileAccessedGet

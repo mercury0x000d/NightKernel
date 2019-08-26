@@ -957,13 +957,34 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			8/25/2019, 0.1D Update, Build 1211<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16ChainGrow()</code>, <code>FAT16ChainShrink()</code>, and <code>FAT16ChainResize()</code>.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16ItemClusterCount()</code> to <code>FAT16ChainLength()</code>.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>IDE Controller.asm</i> - Fixed an issue where <code>IDEATASectorWriteLBA28PIO()</code> was not polling after flushing the disk cache leading to intermittent sector I/O failures.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - Removed <i>ATA Controller.asm</i> and <i>partitions.asm</i> which somehow got added back into (or never got removed from) the project.</li>
+				<li>Manual: Fixed an erroneous entry in the previous version which said paging was added. It was not. Yet.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver<br>
 			<br>
 			New<br>
 			<ul>
 				<li>Kernel: <i>kernel.asm</i> - Implemented new driver handling method</li>
 				<li>Kernel: <i>kernel.asm</i>, <i>screen.asm</i> - Made use of new global defines for ConfigBits options</li>
-				<li>Kernel: <i>memory.asm</i> - Added paging.</li>
 				<li>Kernel: <i>PS/2 Controller.asm</i> - Added function info to the NKRM.</li>
 				<li>Manual: Added driver command code tables.</li>
 			</ul>
@@ -2192,6 +2213,20 @@
 						<code>FMFileLoad</code><br>
 						<br>
 						Loads the file specified at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to file path string</li>
+							<li>Address at which to load file</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMFileStore</code><br>
+						<br>
+						Stores the data at the address specified to the file specified
 					</td>
 					<td>
 						<ol>

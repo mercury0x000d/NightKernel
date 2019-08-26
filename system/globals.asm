@@ -19,7 +19,7 @@
 
 
 ; a define for use by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 1019
+%define BUILD 1211
 
 
 
@@ -186,18 +186,35 @@ section .bss
 
 ; error codes
 %define kErrNone								0x0000
+
+; function parameter errors
 %define kErrInvalidParameter					0xF000
 %define kErrValueTooLow							0xF001
 %define kErrValueTooHigh						0xF002
+
+; filesystem errors
 %define kErrDriveLetterInvalid					0xFB00
 %define kErrPathInvalid							0xFB01
 %define kErrPathInvalidCharacter				0xFB02
+%define kErrItemNotFound						0xFB03
+%define kErrClusterChainEndUnexpected			0xFB04
+
+; partition errors
 %define kErrInvalidPartitionNumber				0xFC00
+%define kErrPartitionFull						0xFC01
+
+; driver handler errors
 %define kErrHandlerNotPresent					0xFD00
+
+; memory errors
 %define kErrOutOfMemory							0xFE00
+
+; PS/2 controller errors
 %define kErrPS2AckFail							0xFF00
 %define kErrPS2ControllerReadTimeout			0xFF01
 %define kErrPS2ControllerWriteTimeout			0xFF02
+
+
 
 ; block and character driver commands
 %define kDriverInit								0x00
@@ -225,6 +242,7 @@ section .bss
 %define kDriverFileInfoModifiedGet				0xF3
 %define kDriverFileInfoSizeGet					0xF4
 %define kDriverFileLoad							0xF5
+%define kDriverFileStore						0xF6
 
 
 

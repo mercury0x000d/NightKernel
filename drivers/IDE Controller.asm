@@ -533,6 +533,12 @@ IDEATASectorWriteLBA28PIO:
 	mov al, kATACommandCacheFlush
 	out dx, al
 
+	; wait for the device to respond
+	mov edx, IOPort
+	add edx, kATARegisterCommand
+	push edx
+	call IDEWaitForReady
+
 	; if we get here, all is well!
 	mov eax, kErrNone
 

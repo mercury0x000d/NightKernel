@@ -120,7 +120,7 @@ ret 4
 
 
 section .text
-FATFileInfoAccessedGet:
+FMFileInfoAccessedGet:
 	; Returns the date of last access for the specified file
 	;
 	;  input:
@@ -604,6 +604,105 @@ FMFileLoad:
 	push pathPtr
 	push partitionNumber
 	push kDriverFileLoad
+	call handlerAddress
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+FMFileStore:
+	; Stores the data at the address specified to the file specified
+	;
+	;  input:
+	;	Pointer to file path string
+	;	Address of data for file
+	;	Length of file data
+	;
+	;  output:
+	;	EAX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define path$								dword [ebp + 8]
+	%define address								dword [ebp + 12]
+	%define length								dword [ebp + 16]
+
+	; allocate local variables
+	sub esp, 16
+	%define pathLength							dword [ebp - 4]
+	%define pathPtr								dword [ebp - 8]
+	%define partitionNumber						dword [ebp - 12]
+	%define handlerAddress						dword [ebp - 16]
+
+
+	; There's a few steps to be done here before we abstract this job out to the appropriate filesystem handler.
+	; First, we need to create a duplicate of the path on the stack for our own purposes... mwa ha ha ha!
+	push path$
+	call StringLength
+	mov pathLength, eax
+
+	inc eax
+	sub esp, eax
+	mov pathPtr, esp
+	push eax
+	push pathPtr
+	push path$
+	call MemCopy
+
+	; get the partition number referred to by this path
+	push pathPtr
+	call FMPathPartitionGet
+	mov partitionNumber, eax
+
+	; see if PartitionGetFromPath() returned an error
+	mov eax, ebx
+	cmp eax, kErrNone
+	jne .Exit
+
+	; if the partition is empty/unused, we throw an error
+	push partitionNumber
+	push dword [tSystem.listPartitions]
+	call LMSlotFreeTest
+
+	cmp edx, true
+	jne .PartitionNotUnused
+		; if we get here the partition was unused
+		mov eax, kErrInvalidPartitionNumber
+		jmp .Exit
+	.PartitionNotUnused:
+
+	; get a pointer to the partition's entry in the partitions list
+	push partitionNumber
+	push dword [tSystem.listPartitions]
+	call LMElementAddressGet
+
+	; after the above call, esi will now be pointed to the start of this partition's list entry
+	; Now we use the filesystem type to get the address of the handler for this type of FS
+	push dword [tPartitionInfo.fileSystem]
+	push dword [tSystem.listFSHandlers]
+	call LMElementAddressGet
+	mov eax, dword [esi]
+	mov handlerAddress, eax
+
+	; trim the partition specifier or drive letter off the path to simplify things
+	push pathPtr
+	call FMPathPartitionStripDrive
+
+	; and finally, farm the rest of the work out to the FS handler
+	push length
+	push address
+	push pathPtr
+	push partitionNumber
+	push kDriverFileStore
 	call handlerAddress
 
 

@@ -388,6 +388,27 @@ call TaskInit
 
 
 
+
+
+
+push dword 0x32
+push dword 0x1084
+push dword 1
+push dword 0
+call FAT16ChainResize
+jmp $
+
+
+push dword 0xbeef ; length
+push dword 0xcafe ; address
+push .path7$ ; pathptr
+call FMFileStore
+mov esi, 0xffbbffaa
+jmp $
+
+
+
+
 ; test load a file
 push 0xFF
 push 0x100000
@@ -416,6 +437,14 @@ push 10
 push 0x200000
 call PrintRAM32
 
+push 0
+call FAT16ClusterFreeFirstGet
+
+push 0xbabe
+push eax
+push 0
+call FAT16ClusterNextSet
+jmp $
 
 push .path7$
 call FMFileDelete
