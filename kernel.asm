@@ -333,7 +333,6 @@ call PS2ControllerInit
 ; set up default handlers
 push progressText12$
 call PrintIfConfigBits32
-
 push dword 0
 push dword 0
 push dword 0
@@ -388,27 +387,6 @@ call TaskInit
 
 
 
-
-
-
-push dword 0x32
-push dword 0x1084
-push dword 1
-push dword 0
-call FAT16ChainResize
-jmp $
-
-
-push dword 0xbeef ; length
-push dword 0xcafe ; address
-push .path7$ ; pathptr
-call FMFileStore
-mov esi, 0xffbbffaa
-jmp $
-
-
-
-
 ; test load a file
 push 0xFF
 push 0x100000
@@ -429,6 +407,11 @@ call FMFileLoad
 ; show if there was an error in eax from the above call
 call PrintRegs32
 
+mov dword [0x218ff4], 0x11223344
+mov dword [0x218ff8], 0x00998877
+mov dword [0x218ffC], 0xAABBCCDD
+mov eax, 0x218ff0
+
 push 0
 push 7
 push 10
@@ -436,14 +419,16 @@ push 1
 push 10
 push 0x200000
 call PrintRAM32
+jmp $
 
-push 0
-call FAT16ClusterFreeFirstGet
+push dword 0x19000 ; length
+push dword 0x200000 ; address
+push .path10$ ; pathptr
+call FMFileStore
 
-push 0xbabe
-push eax
-push 0
-call FAT16ClusterNextSet
+; show if there was an error in eax from the above call
+call PrintRegs32
+
 jmp $
 
 push .path7$
@@ -464,7 +449,7 @@ jmp $
 .path7$											db 'c:\TESTING\john.TXT', 0x00
 .path8$											db 'c:\TESTING\cbcfiles\pcworld\utils\logging.bas', 0x00
 .path9$											db 'c:\TESTING\cbcfiles\pcworld\utils', 0x00
-
+.path10$										db 'c:\TESTING\john2.TXT', 0x00
 
 
 

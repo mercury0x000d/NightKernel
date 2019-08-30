@@ -450,14 +450,12 @@
 		<p>
 			MS-DOS drivers were very similar in layout to normal MS-DOS .COM-format applications. Night follows suit and expands upon this by setting up device structures so that other applications may supersede the kernel's default handler addresses if desired.<br>
 			<br>
-			The <code>driverFlags</code> field is a bank of flags to identify attributes about this driver. Currently, the following bit definitions are supported:<br>
-			<br>
 
 			<h3>Driver Types</h3>
 			Night drivers are divided into two main categories:<br>
 			<br>
 			<b>Filesystem Driver</b><br>
-			Night will support FAT12, FAT16, and FAT32 internally, but filesystem drivers, as their name implies, provide a method for adding support for additional file systems. An exhaustive list of these codes may be found at <a href="https://www.win.tue.nl/~aeb/partitions/partition_types-1.html">this external site</a>.<br>
+			Night will support FAT file systems (FAT12, FAT16, FAT32, and eventually exFAT as well) internally, but filesystem drivers, as their name implies, provide a method for adding support for additional file systems. An exhaustive list of these codes may be found at <a href="https://www.win.tue.nl/~aeb/partitions/partition_types-1.html">this external site</a>.<br>
 			<br>
 			<b>PCI Driver</b><br>
 			Night will probe the PCI bus and run the init code of the driver only if its capabilities (determined by the fields in the table below) are appropriate for the device in question.<br>
@@ -465,7 +463,8 @@
 			<br>
 			<br>
 
-			<code>
+			The <code>driverFlags</code> field is a bank of flags to identify attributes about this driver. Currently, the following bit definitions are supported:<br>
+			<br>			<code>
 				<table style="width:100%">
 					<caption>Table 5.1 - Driver flags bit definitions</caption>
 					<col width = 10%>
@@ -957,6 +956,31 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16CalcLBAClusterToSector()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Calling <code>FAT16FileStore()</code> with the path of an already-existing file now successfully overwrites the file and correctly adjusts the number of clusters used to save the file on disk.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Optimized FAT16 info caching to happen in the service handler routine instead of in every single other one.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16ClustersNeeded()</code> to <code>FAT16CalcClustersNeeded()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16TableElementFromCluster()</code> to <code>FAT16CalcTableElementFromCluster()</code>.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed an issue where <code>FAT16ChainShrink()</code> was using <code>thisSector</code> instead of <code>lastSector</code> for disk writes.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed an issue where <code>FAT16ClustersNeeded()</code> was not calculating correctly due to edx not being set to zero prior to division.</li>
+				<li>Manual: Moved the text describing table 5.1 to accompany the table itself. What a novel idea!</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			8/25/2019, 0.1D Update, Build 1211<br>
 			<br>
 			New<br>

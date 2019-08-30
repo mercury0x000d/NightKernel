@@ -41,6 +41,9 @@
 
 
 ; 32-bit function listing:
+; FAT16CalcClustersNeeded				Determines the number of clusters needed to store a file of the specified size
+; FAT16CalcLBAClusterToSector			Returns the LBA address of the sector pointed to by the cluster number specified
+; FAT16CalcTableElementFromCluster		Translates the specified FAT table entry into offsets from the start of the FAT table
 ; FAT16ChainDelete						Deletes the cluster chain specified
 ; FAT16ChainGrow						Extends the cluster chain specified to the length specified
 ; FAT16ChainLength						Returns the length in clusters of the cluster chain specified
@@ -52,7 +55,6 @@
 ; FAT16ClusterFreeTotalGet				Returns total number of free clusters for the partition specified
 ; FAT16ClusterNextGet					Determines the next cluster in the chain
 ; FAT16ClusterNextSet					Sets the next cluster in the chain from the cluster specified
-; FAT16ClustersNeeded					Determines the number of clusters needed to store a file of the specified size
 ; FAT16DirEntryMatchName				Returns the address of a match for the item specified in the buffer specified
 ; FAT16FATBackup						Copies the working FAT (the first FAT) to any remaining spots in the FAT area
 ; FAT16FileCreate						Creates a new file at the path specified
@@ -70,7 +72,6 @@
 ; FAT16PathCanonicalize					Returns the proper form of the path specified according to FAT16 standards
 ; FAT16PathToDirEntry					Returns a buffer containing the directory entry containing the item specified by the path given
 ; FAT16ServiceHandler					The FAT16 service routine called by external applications
-; FAT16TableElementFromCluster			Translates the specified FAT table entry into offsets from the start of the FAT table
 
 ; FAT32ServiceHandler					The FAT32 service routine called by external applications
 
@@ -154,6 +155,120 @@ bits 32
 
 
 section .text
+FAT16CalcClustersNeeded:
+	; Determines the number of clusters needed to store a file of the specified size
+	;
+	;  input:
+	;	Sectors per cluster
+	;	File size
+	;
+	;  output:
+	;	EAX - Clusters needed
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define sectorsPerCluster					dword [ebp + 8]
+	%define fileSize							dword [ebp + 12]
+
+
+	; calculate!
+	mov ebx, sectorsPerCluster
+	shl ebx, 9
+	mov eax, fileSize
+	mov edx, 0
+	div ebx
+
+	cmp edx, 0
+	je .Exit
+		inc eax
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+FAT16CalcLBAClusterToSector:
+	; Returns the LBA address of the sector pointed to by the cluster number specified
+	;
+	;  input:
+	;	Cluster number
+	;	Number of sectors per cluster on the disk
+	;	LBA address of the disk's data area
+	;
+	;  output:
+	;	EAX - Sector LBA address
+
+	push ebp
+	mov ebp, esp
+
+
+	; define input parameters
+	%define cluster								dword [ebp + 8]
+	%define sectorsPerCluster					dword [ebp + 12]
+	%define dataArea							dword [ebp + 16]
+
+
+	; sector = (cluster - 2) * sectorsPerCluster + dataArea
+	mov eax, cluster
+	sub eax, 2
+	mul sectorsPerCluster
+	add eax, dataArea
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 12
+
+
+
+
+
+
+section .text
+FAT16CalcTableElementFromCluster:
+	; Translates the specified FAT table entry into offsets from the start of the FAT table
+	;
+	;  input:
+	;	FAT table entry
+	;
+	;  output:
+	;	EAX - Sector offset from start of FAT
+	;	EBX - Byte offset within that sector of the requested entry
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define element								dword [ebp + 8]
+
+
+	shl element, 1
+
+	mov eax, element
+	shr eax, 9
+
+	mov ebx, element
+	and ebx, 0x01FF
+
+
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+
+
+section .text
 FAT16ChainDelete:
 	; Deletes the cluster chain specified
 	;
@@ -189,13 +304,6 @@ FAT16ChainDelete:
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
-
 	; get the cached FAT16 info for this partition from the FS-specific area of the partitions list
 	mov esi, partitionSlotPtr
 	mov eax, [tPartitionInfo.FAT1]
@@ -222,7 +330,7 @@ FAT16ChainDelete:
 
 		; get sector to be read based on the cluster number given
 		push cluster
-		call FAT16TableElementFromCluster
+		call FAT16CalcTableElementFromCluster
 		mov sectorOffset, eax
 		mov bytePosition, ebx
 
@@ -355,7 +463,7 @@ FAT16ChainGrow:
 
 		; get sector to be read based on the cluster number given
 		push cluster
-		call FAT16TableElementFromCluster
+		call FAT16CalcTableElementFromCluster
 		mov sectorOffset, eax
 		mov bytePosition, ebx
 
@@ -514,7 +622,7 @@ FAT16ChainLength:
 
 		; get sector to be read based on the cluster number given
 		push cluster
-		call FAT16TableElementFromCluster
+		call FAT16CalcTableElementFromCluster
 		mov sectorOffset, eax
 		mov bytePosition, ebx
 
@@ -614,13 +722,6 @@ FAT16ChainRead:
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
-
 	; get the cached FAT16 info for this partition from the FS-specific area of the partitions list
 	mov esi, partitionSlotPtr
 	mov eax, [tPartitionInfo.sectorsPerCluster]
@@ -655,11 +756,11 @@ FAT16ChainRead:
 		cmp size, 0
 		je .Done
 
-		; sector = (cluster - 2) * sectorsPerCluster + dataArea
-		mov eax, cluster
-		sub eax, 2
-		mul sectorsPerCluster
-		add eax, dataArea
+		; get sector LBA from cluster number
+		push dataArea
+		push sectorsPerCluster
+		push cluster
+		call FAT16CalcLBAClusterToSector
 		mov sector, eax
 
 		; load the cluster into RAM
@@ -846,7 +947,7 @@ FAT16ChainShrink:
 
 		; get sector to be read based on the cluster number given
 		push cluster
-		call FAT16TableElementFromCluster
+		call FAT16CalcTableElementFromCluster
 		mov sectorOffset, eax
 		mov bytePosition, ebx
 
@@ -919,7 +1020,6 @@ FAT16ChainShrink:
 	call MemDispose
 
 	; set the return values
-	mov eax, clusterCount
 	mov edx, kErrNone
 
 
@@ -934,7 +1034,7 @@ ret 16
 		; there's stuff to write, so let's do it
 		push sectorBufferPtr
 		push 1
-		push thisSector
+		push lastSector
 		push partitionNumber
 		call PartitionWrite
 		mov sectorWriteFlag, false
@@ -985,13 +1085,6 @@ FAT16ChainWrite:
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
-
 	; get the cached FAT16 info for this partition from the FS-specific area of the partitions list
 	mov esi, partitionSlotPtr
 	mov eax, [tPartitionInfo.sectorsPerCluster]
@@ -1027,11 +1120,11 @@ FAT16ChainWrite:
 		cmp size, 0
 		je .Done
 
-		; sector = (cluster - 2) * sectorsPerCluster + dataArea
-		mov eax, cluster
-		sub eax, 2
-		mul sectorsPerCluster
-		add eax, dataArea
+		; get sector LBA from cluster number
+		push dataArea
+		push sectorsPerCluster
+		push cluster
+		call FAT16CalcLBAClusterToSector
 		mov sector, eax
 
 		; see how much data we'll be copying
@@ -1140,13 +1233,6 @@ FAT16ClusterFreeFirstGet:
 	push dword [tSystem.listPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
-
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
 
 	; allocate a sector buffer
 	push 512
@@ -1273,13 +1359,6 @@ FAT16ClusterFreeTotalGet:
 	push dword [tSystem.listPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
-
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
 
 	; allocate a sector buffer
 	push 512
@@ -1409,7 +1488,7 @@ FAT16ClusterNextGet:
 
 	; get sector to be read based on the cluster number given
 	push cluster
-	call FAT16TableElementFromCluster
+	call FAT16CalcTableElementFromCluster
 	mov sectorOffset, eax
 	mov bytePosition, ebx
 
@@ -1484,13 +1563,6 @@ FAT16ClusterNextSet:
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
-
 	; allocate a sector buffer
 	push 512
 	push dword 1
@@ -1511,7 +1583,7 @@ FAT16ClusterNextSet:
 
 	; get sector to be read based on the cluster number given
 	push updateCluster
-	call FAT16TableElementFromCluster
+	call FAT16CalcTableElementFromCluster
 	mov sectorOffset, eax
 	mov bytePosition, ebx
 
@@ -1550,45 +1622,6 @@ FAT16ClusterNextSet:
 	mov esp, ebp
 	pop ebp
 ret 12
-
-
-
-
-
-section .text
-FAT16ClustersNeeded:
-	; Determines the number of clusters needed to store a file of the specified size
-	;
-	;  input:
-	;	Sectors per cluster
-	;	File size
-	;
-	;  output:
-	;	EAX - Clusters needed
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define sectorsPerCluster					dword [ebp + 8]
-	%define fileSize							dword [ebp + 12]
-
-
-	; calculate!
-	mov ebx, sectorsPerCluster
-	shl ebx, 9
-	mov eax, fileSize
-	div ebx
-
-	cmp edx, 0
-	je .Exit
-		inc eax
-
-
-	.Exit:
-	mov esp, ebp
-	pop ebp
-ret 8
 
 
 
@@ -1708,13 +1741,6 @@ FAT16FATBackup:
 	push dword [tSystem.listPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
-
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
 
 	; allocate a sector buffer
 	push 512
@@ -2306,45 +2332,60 @@ FAT16FileStore:
 	%define length								dword [ebp + 20]
 
 	; allocate local variables
-	sub esp, 24
-																								%define partitionSlotPtr					dword [ebp - 4]
-	%define cluster								dword [ebp - 8]
-	%define size								dword [ebp - 12]
-	%define clustersRequired					dword [ebp - 16]
-	%define sectorsPerCluster					dword [ebp - 20]
-	%define dirEntryPtr							dword [ebp - 24]
+	sub esp, 40
+	%define cluster								dword [ebp - 4]
+	%define size								dword [ebp - 8]
+	%define clustersRequired					dword [ebp - 12]
+	%define sectorsPerCluster					dword [ebp - 16]
+	%define dirEntryPtr							dword [ebp - 20]
+	%define dirBufferPtr						dword [ebp - 24]
+	%define dirBufferCluster					dword [ebp - 28]
+	%define dirError							dword [ebp - 32]
+	%define FATLBA								dword [ebp - 36]
+	%define dataArea							dword [ebp - 40]
+
+
+	; get the address of this partition's slot in the partitions list
+	push partitionNumber
+	push dword [tSystem.listPartitions]
+	call LMElementAddressGet
+	mov partitionSlotPtr, esi
+
+	; load cached partition data
+	mov eax, [tPartitionInfo.FAT1]
+	mov FATLBA, eax
+
+	mov eax, [tPartitionInfo.dataArea]
+	mov dataArea, eax
+
+	mov eax, [tPartitionInfo.sectorsPerCluster]
+	mov sectorsPerCluster, eax
 
 
 	; use the path to get the starting cluster of the cluster chain that is this file
 	push path$
 	push partitionNumber
 	call FAT16PathToDirEntry
+	mov dirError, eax
 	mov dirEntryPtr, esi
-
-	; get the number of sectors per cluster for this partition
-	mov eax, 0
-	mov ax, word [tFATDirEntry.startingCluster]
-	mov sectorsPerCluster, eax
-
+	mov dirBufferPtr, edi
+	mov dirBufferCluster, ebx
+jmp $
 	; see how many clusters this file will need to be stored
 	push length
 	push sectorsPerCluster
-	call FAT16ClustersNeeded
+	call FAT16CalcClustersNeeded
 	mov clustersRequired, eax
 
-
-
-
-	; see if there was an error
+	; see if the item was found... or not
+	mov eax, dirError
 	cmp eax, kErrNone
 	jne .AWildErrorAppears
-
 		; if we get here, that means the item already exists and we will be overwriting it
 
+		; the address of the element is held in ESI from the call to FAT16PathToDirEntry, so we restore that pointer here
+		mov esi, dirEntryPtr
 
-		; we will need to modify the chain to reflect the new length
-
-		; the address of the element is held in ESI from the call to FAT16PathToDirEntry
 		; now we have to get the cluster at which the item resides
 		mov eax, 0
 		mov ax, word [tFATDirEntry.startingCluster]
@@ -2354,37 +2395,59 @@ FAT16FileStore:
 		mov ebx, dword [tFATDirEntry.size]
 		mov size, ebx
 
-		; dispose of the memory block we were returned
-		push edi
-		call MemDispose
+		; we will need to modify the chain to reflect the new length
+		push clustersRequired
+		push cluster
+		push FATLBA
+		push partitionNumber
+		call FAT16ChainResize
 
 		jmp .WriteChain
-
 	.AWildErrorAppears:
-	; If we get here, there was an error - this could mean the item was not found, or something else. Let's figure out what it was.
+
+
+	; If we get here, there was some sort of error. Let's exit if it's not the one we want.
 	cmp eax, kErrItemNotFound
 	jne .Exit
-	
+
 	; if we get here, the error was "Item Not Found" so we need to create a new cluster chain to accomodate this file
-
-
-
-
-
-mov eax, partitionNumber
-mov ebx, path$
-mov ecx, address
-mov edx, length
+mov edx, dirBufferPtr
 jmp $
 
+	; add the filename and info to the dir buffer
+
+
+
+	
 	.WriteChain:
 	; write the cluster chain to disk
 	push address
-	push size
+	push length
 	push cluster
 	push partitionNumber
 	call FAT16ChainWrite
 
+	; modify the dir entry to show the new size
+	mov esi, dirEntryPtr
+	mov eax, length
+	mov dword [tFATDirEntry.size], eax
+
+	; translate the cluster at which the dir entry resides into a sector address and write back to disk
+	push dataArea
+	push sectorsPerCluster
+	push dirBufferCluster
+	call FAT16CalcLBAClusterToSector
+
+	push dirBufferPtr
+	push 1
+	push eax
+	push partitionNumber
+	call PartitionWrite
+
+
+	; dispose of the memory block we were returned
+	push dirBufferPtr
+	call MemDispose
 
 	.Exit:
 	mov esp, ebp
@@ -2678,14 +2741,6 @@ FAT16PathToDirEntry:
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
-	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
-	bt dword [tPartitionInfo.FSFlags], 0
-	jc .AlreadyCached
-		push partitionNumber
-		call FAT16PartitionCacheData
-	.AlreadyCached:
-
-
 	; get the cached FAT16 info for this partition from the FS-specific area of the partitions list
 	mov esi, partitionSlotPtr
 	mov eax, [tPartitionInfo.sectorsPerCluster]
@@ -2875,7 +2930,7 @@ FAT16ServiceHandler:
 	;	Parameter 4
 	;
 	;  output:
-	;	Driver response
+	;	EDX - Driver response
 
 	push ebp
 	mov ebp, esp
@@ -2887,59 +2942,6 @@ FAT16ServiceHandler:
 	%define parameter3							dword [ebp + 20]
 	%define parameter4							dword [ebp + 24]
 
-
-	; do driver-y things here
-	cmp command, kDriverFileDelete
-	jne .NotFileDelete
-		push parameter2
-		push parameter1
-		call FAT16FileDelete
-	.NotFileDelete:
-
-	cmp command, kDriverFileLoad
-	jne .NotFileLoad
-		push parameter3
-		push parameter2
-		push parameter1
-		call FAT16FileLoad
-	.NotFileLoad:
-
-	cmp command, kDriverFileStore
-	jne .NotFileStore
-		push parameter4
-		push parameter3
-		push parameter2
-		push parameter1
-		call FAT16FileStore
-	.NotFileStore:
-
-	cmp command, kDriverFileInfoAccessedGet
-	jne .NotFileAccessedGet
-		push parameter2
-		push parameter1
-		call FAT16FileInfoAccessedGet
-	.NotFileAccessedGet:
-
-	cmp command, kDriverFileInfoCreatedGet
-	jne .NotFileCreatedGet
-		push parameter2
-		push parameter1
-		call FAT16FileInfoCreatedGet
-	.NotFileCreatedGet:
-
-	cmp command, kDriverFileInfoModifiedGet
-	jne .NotFileModifiedGet
-		push parameter2
-		push parameter1
-		call FAT16FileInfoModifiedGet
-	.NotFileModifiedGet:
-
-	cmp command, kDriverFileInfoSizeGet
-	jne .NotFileSizeGet
-		push parameter2
-		push parameter1
-		call FAT16FileInfoSizeGet
-	.NotFileSizeGet:
 
 	cmp command, kDriverInit
 	jne .NotInit
@@ -2973,47 +2975,96 @@ FAT16ServiceHandler:
 		push dword [tSystem.listFSHandlers]
 		call LMElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
+
+		jmp .Success
 	.NotInit:
 
 
+	; every function after this point expects the partition number in parameter 1,
+	; so we can optimize a bit here and make sure the partition info is cached before proceeding
+
+	; get the address of this partition's slot in the partitions list
+	push partitionNumber
+	push dword [tSystem.listPartitions]
+	call LMElementAddressGet
+	mov partitionSlotPtr, esi
+
+	; see if the FAT16-specific data from this partition has been cached yet and cache it if not
+	bt dword [tPartitionInfo.FSFlags], 0
+	jc .AlreadyCached
+		push parameter1
+		call FAT16PartitionCacheData
+	.AlreadyCached:
+
+
+	; do driver-y things here
+	cmp command, kDriverFileDelete
+	jne .NotFileDelete
+		push parameter2
+		push parameter1
+		call FAT16FileDelete
+		jmp .Success
+	.NotFileDelete:
+
+	cmp command, kDriverFileLoad
+	jne .NotFileLoad
+		push parameter3
+		push parameter2
+		push parameter1
+		call FAT16FileLoad
+		jmp .Success
+	.NotFileLoad:
+
+	cmp command, kDriverFileStore
+	jne .NotFileStore
+		push parameter4
+		push parameter3
+		push parameter2
+		push parameter1
+		call FAT16FileStore
+		jmp .Success
+	.NotFileStore:
+
+	cmp command, kDriverFileInfoAccessedGet
+	jne .NotFileAccessedGet
+		push parameter2
+		push parameter1
+		call FAT16FileInfoAccessedGet
+		jmp .Success
+	.NotFileAccessedGet:
+
+	cmp command, kDriverFileInfoCreatedGet
+	jne .NotFileCreatedGet
+		push parameter2
+		push parameter1
+		call FAT16FileInfoCreatedGet
+		jmp .Success
+	.NotFileCreatedGet:
+
+	cmp command, kDriverFileInfoModifiedGet
+	jne .NotFileModifiedGet
+		push parameter2
+		push parameter1
+		call FAT16FileInfoModifiedGet
+		jmp .Success
+	.NotFileModifiedGet:
+
+	cmp command, kDriverFileInfoSizeGet
+	jne .NotFileSizeGet
+		push parameter2
+		push parameter1
+		call FAT16FileInfoSizeGet
+		jmp .Success
+	.NotFileSizeGet:
+
+	.Success:
+	mov edx, kErrNone
+
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 20
-
-
-
-
-
-section .text
-FAT16TableElementFromCluster:
-	; Translates the specified FAT table entry into offsets from the start of the FAT table
-	;
-	;  input:
-	;	FAT table entry
-	;
-	;  output:
-	;	EAX - Sector offset from start of FAT
-	;	EBX - Byte offset within that sector of the requested entry
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define element								dword [ebp + 8]
-
-
-	shl element, 1
-
-	mov eax, element
-	shr eax, 9
-
-	mov ebx, element
-	and ebx, 0x01FF
-
-
-	mov esp, ebp
-	pop ebp
-ret 4
 
 
 
