@@ -956,6 +956,31 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			9/5/2019, 0.1D Update, Build 1397 - Start of FAT16 algorithmic improvements<br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemLoad()</code> (formerly called <code>FAT16PathToDirEntry()</code>) now implements *insert echo here* RE-CUR-SION!</li>
+				<li>Kernel: <i>files.asm</i> - Added <code>FMPathParentGet()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringSearchCharRight()</code>.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ServiceHandler()</code> no longer adds its own kErrNone prior to returning; leave that up to the function which was called.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileLoad()</code> since <code>FAT16ItemLoad()</code> has now been reworked to do everything it did, and more - like reliably loading directories as well as files! :D</li>
+				<li>Kernel: <i>files.asm</i> - <code>FMPathPartitionStripDrive()</code> now leaves the leading "/" on paths it processes (e.g. returns <i>/system/apps/program.exe</i> instead of <i>system/apps/program.exe.</i> </li>
+				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringSearchChar()</code> to <code>StringSearchCharLeft()</code>.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>strings.asm</i> - Fixed <code>StringSearchCharLeft()</code> to return null in EAX if no match is found.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+			<br>
+			<br>
+
 			8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations<br>
 			<br>
 			New<br>
@@ -2236,7 +2261,7 @@
 					<td>
 						<code>FMFileLoad</code><br>
 						<br>
-						Loads the file specified at the address specified
+						Returns a buffer containing the file specified
 					</td>
 					<td>
 						<ol>
@@ -2259,6 +2284,19 @@
 						</ol>
 					</td>
 					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMPathParentGet</code><br>
+						<br>
+						Shortens the path given to point to the parent path
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>n/a</td>
 				</tr>
 				<tr>
 					<td>
@@ -5338,9 +5376,25 @@
 				</tr>
 				<tr>
 					<td>
-						<code>StringSearchChar</code><br>
+						<code>StringSearchCharLeft</code><br>
 						<br>
-						Returns the position in the string specified of the character code specified
+						Returns the position in a string of the character code specified, starting from the beginning of the string
+					</td>
+					<td>
+						<ol>
+							<li>Address of string to be scanned</li>
+							<li>ASCII value of byte for which to search</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Position of match, or zero if no match
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>StringSearchCharRight</code><br>
+						<br>
+						Returns the position in a string of the character code specified, starting from the end of the string
 					</td>
 					<td>
 						<ol>

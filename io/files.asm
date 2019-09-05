@@ -521,11 +521,10 @@ ret 8
 
 section .text
 FMFileLoad:
-	; Loads the file specified at the address specified
+	; Returns a buffer containing the file specified
 	;
 	;  input:
 	;	Pointer to file path string
-	;	Address at which to load file
 	;
 	;  output:
 	;	EAX - Error code
@@ -535,7 +534,6 @@ FMFileLoad:
 
 	; define input parameters
 	%define path$								dword [ebp + 8]
-	%define address								dword [ebp + 12]
 
 	; allocate local variables
 	sub esp, 16
@@ -600,7 +598,7 @@ FMFileLoad:
 
 	; and finally, farm the rest of the work out to the FS handler
 	push dword 0
-	push address
+	push dword 0
 	push pathPtr
 	push partitionNumber
 	push kDriverFileLoad
@@ -716,6 +714,50 @@ ret 8
 
 
 section .text
+FMPathParentGet:
+	; Shortens the path given to point to the parent path
+	;
+	;  input:
+	;	Pointer to file path string
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define path$								dword [ebp + 8]
+
+	; allocate local variables
+	sub esp, 4
+	%define wordCount							dword [ebp - 4]
+
+
+	; get the position of the final slash in the path string
+	push 92
+	push path$
+	call StringSearchCharRight
+
+	add eax, path$
+	dec eax
+
+	mov byte [eax], 0
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 4
+
+section .data
+.seperatorSlash$								dw 0092
+
+
+
+
+
+section .text
 FMPathPartitionGet:
 	; Returns the partition number based on the path specified
 	;
@@ -741,7 +783,7 @@ FMPathPartitionGet:
 	; search for the first occurrance of the colon character (ASCII 58)
 	push 58
 	push path$
-	call StringSearchChar
+	call StringSearchCharLeft
 
 	cmp eax, 2
 	jne .NotDriveLetterBased
@@ -857,14 +899,13 @@ FMPathPartitionStripDrive:
 	; search for the first occurrance of the colon character (ASCII 58)
 	push 58
 	push path$
-	call StringSearchChar
+	call StringSearchCharLeft
 	mov colonPosition, eax
 
 	push path$
 	call StringLength
 
 	sub eax, colonPosition
-	dec eax
 
 	push eax
 	push path$

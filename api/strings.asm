@@ -1593,8 +1593,8 @@ ret 12
 
 
 section .text
-StringSearchChar:
-	; Returns the position in the string specified of the character code specified
+StringSearchCharLeft:
+	; Returns the position in a string of the character code specified, starting from the beginning of the string
 	;
 	;  input:
 	;	Address of string to be scanned
@@ -1633,12 +1633,84 @@ StringSearchChar:
 	repnz scasb
 
 	; if the zero flag is set, a match was found
-	; if it's clear, no match was found and ecx will already be 0, so we can simply exit
+	; if it's clear, no match was found and we exit
+	mov eax, 0
 	jnz .Exit
 
 	; a match was found, so update the position
 	sub stringLen, ecx
 	mov eax, stringLen
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+StringSearchCharRight:
+	; Returns the position in a string of the character code specified, starting from the end of the string
+	;
+	;  input:
+	;	Address of string to be scanned
+	;	ASCII value of byte for which to search
+	;
+	;  output:
+	;	EAX - Position of match, or zero if no match
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define stringAddress						dword [ebp + 8]
+	%define ASCIICode							dword [ebp + 12]
+
+	; allocate local variables
+	sub esp, 4
+	%define stringLen							dword [ebp - 4]
+
+
+	; get length of the main string
+	push stringAddress
+	call StringLength
+	mov ecx, eax
+
+	; exit if the string was null, save ecx if not
+	cmp ecx, 0
+	je .Exit
+	mov stringLen, ecx
+
+	; load up for the search
+	mov edi, stringAddress
+	add edi, stringLen
+	dec edi
+	mov eax, ASCIICode
+
+	; save the flags for restoring later
+	pushf
+
+	; set the direction flag temporarily to decrement instead of increment
+	std
+
+	; use the (insert echo here) MAGIC OF ASSEMBLY to search for the byte
+	repnz scasb
+
+	; if the zero flag is set, a match was found
+	; if it's clear, no match was found and we exit
+	mov eax, 0
+	jnz .Done
+
+	; a match was found, so update the position
+	mov eax, ecx
+	inc eax
+
+	.Done:
+	; restore flags
+	popf
 
 
 	.Exit:
@@ -1790,7 +1862,7 @@ StringTokenBinary:
 	; find the location of the first token character
 	push dword 0x0000005E
 	push stringAddress
-	call StringSearchChar
+	call StringSearchCharLeft
 	mov tokenPosition, eax
 
 
@@ -1908,7 +1980,7 @@ StringTokenDecimal:
 	; find the location of the first token character
 	push dword 0x0000005E
 	push stringAddress
-	call StringSearchChar
+	call StringSearchCharLeft
 	mov tokenPosition, eax
 
 
@@ -2026,7 +2098,7 @@ StringTokenHexadecimal:
 	; find the location of the first token character
 	push dword 0x0000005E
 	push stringAddress
-	call StringSearchChar
+	call StringSearchCharLeft
 	mov tokenPosition, eax
 
 
@@ -2144,7 +2216,7 @@ StringTokenOctal:
 	; find the location of the first token character
 	push dword 0x0000005E
 	push stringAddress
-	call StringSearchChar
+	call StringSearchCharLeft
 	mov tokenPosition, eax
 
 
@@ -2260,7 +2332,7 @@ StringTokenString:
 	; find the location of the first token character
 	push dword 0x0000005E
 	push stringAddress
-	call StringSearchChar
+	call StringSearchCharLeft
 	mov tokenPosition, eax
 
 

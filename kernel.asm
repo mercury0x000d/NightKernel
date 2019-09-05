@@ -385,17 +385,19 @@ call TaskInit
 
 
 
-
-
 ; test load a file
 push 0xFF
 push 0x100000
 push 0x200000
 call MemFill
 
-push 0x200000
+;push .path14$
+;push .path13$
+;push .path12$
+;push .path11$
+push .path9$
 ;push .path8$
-push .path7$
+;push .path7$
 ;push .path6$
 ;push .path5$
 ;push .path4$
@@ -405,19 +407,17 @@ push .path7$
 call FMFileLoad
 
 ; show if there was an error in eax from the above call
+pusha
 call PrintRegs32
-
-mov dword [0x218ff4], 0x11223344
-mov dword [0x218ff8], 0x00998877
-mov dword [0x218ffC], 0xAABBCCDD
-mov eax, 0x218ff0
+popa
 
 push 0
 push 7
 push 10
 push 1
-push 10
-push 0x200000
+shr ecx, 4
+push ecx
+push edi
 call PrintRAM32
 jmp $
 
@@ -450,6 +450,10 @@ jmp $
 .path8$											db 'c:\TESTING\cbcfiles\pcworld\utils\logging.bas', 0x00
 .path9$											db 'c:\TESTING\cbcfiles\pcworld\utils', 0x00
 .path10$										db 'c:\TESTING\john2.TXT', 0x00
+.path11$										db 'c:\TESTING', 0x00
+.path12$										db 'c:', 0x00
+.path13$										db 'c:\KERNEL.SYS', 0x00
+.path14$										db 'c:\TESTING\LINcoln.TXT', 0x00
 
 
 
