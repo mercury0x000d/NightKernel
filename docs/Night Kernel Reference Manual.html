@@ -956,7 +956,41 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			9/5/2019, 0.1D Update, Build 1397 - Start of FAT16 algorithmic improvements<br>
+			<b>9/20/2019, 0.1D Update, Build 2009 - FAT16 driver progress</b><br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16EntryBuild()</code></li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - In addition to everything it already cached, <code>FAT16PartitionCacheData()</code> now caches the number of bytes and sectors occupied by the root directory.</li>
+				<li>Kernel: <i>files.asm</i> - Added <code>FMItemNew()</code> to create new empty files and directories.</li>
+				<li>Kernel: The old <code>ESI</code>-based method of accessing structs has been replaced by proper <code>struc</code> statements, removing the dependence on <code>ESI</code>, allowing numerous sections of code to be greatly optimized, <i>and</i> saving many bytes of space in the process.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: File paths are no longer passed to the FM routines with drive specifiers.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ChainRead()</code> and <code>FAT16ChainWrite()</code> now handle writing to "sector 0" (the root directory) directly.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemMatch()</code> now works on its own local copy of the string it is passed instead of fouling up the caller's copy.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Increased the number of parameters which can be passed to filesystemn driver routines.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>LM_Internal_ElementAddressGet()</code> is now used instead of <code>LMElementAddressGet()</code> for speed.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed an unused local variable from <code>FAT16ItemMatch()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16CalcClustersNeeded()</code> to <code>FAT16CalcSpaceNeeded()</code>, as it now returns the number of clusters <i>and</i> sectors to store a file.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16FileInfoAccessedGet()</code>, <code>FAT16FileInfoCreatedGet()</code>, <code>FAT16FileInfoModifiedGet()</code>, <code>FAT16FileInfoSizeGet()</code>, and <code>FAT16FileStore()</code> to <code>FAT16ItemInfoAccessedGet()</code>, <code>FAT16ItemInfoCreatedGet()</code>, <code>FAT16ItemInfoModifiedGet()</code>, <code>FAT16ItemInfoSizeGet()</code>, and <code>FAT16ItemStore()</code>, respectively.</li>
+				<li>Kernel: <i>files.asm</i> - Offloaded all the path preparation work into the FAT16 driver itself, greatly condensing the code in this file's routines.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemNew()</code> no longer marks a cluster as in use until it determines the item doesn't already exist.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemNew()</code> now properly writes the cluster number on ".." entries.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed a use-without-define error in <code>FAT16ItemLoad()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed some unused local variables in various functions.</li>
+				<li>Kernel: <i>files.asm</i> - Fixed an issue in <code>FMFileStore()</code> where the stack was not cleared properly prior to return.</li>
+				<li>Kernel: <i>memory.asm</i> - <code>MemAllocate()</code> now returns proper error codes.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+			<b>9/5/2019, 0.1D Update, Build 1397 - Start of FAT16 algorithmic improvements</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -967,6 +1001,7 @@
 			Changed<br>
 			<ul>
 				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ServiceHandler()</code> no longer adds its own kErrNone prior to returning; leave that up to the function which was called.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileInfoSizeSet()</code> since this function will be handled by the item / chain writing routines.</li>
 				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileLoad()</code> since <code>FAT16ItemLoad()</code> has now been reworked to do everything it did, and more - like reliably loading directories as well as files! :D</li>
 				<li>Kernel: <i>files.asm</i> - <code>FMPathPartitionStripDrive()</code> now leaves the leading "/" on paths it processes (e.g. returns <i>/system/apps/program.exe</i> instead of <i>system/apps/program.exe.</i> </li>
 				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringSearchChar()</code> to <code>StringSearchCharLeft()</code>.</li>
@@ -978,10 +1013,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations<br>
+			<b>8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1003,10 +1036,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			8/25/2019, 0.1D Update, Build 1211<br>
+			<b>8/25/2019, 0.1D Update, Build 1211</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1025,10 +1056,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver<br>
+			<b>8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1079,10 +1108,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations<br>
+			<b>5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1111,10 +1138,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D<br>
+			<b>5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1149,10 +1174,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			4/17/2019, 0.1A Update - Preemptive Multitasking!<br>
+			<b>4/17/2019, 0.1A Update - Preemptive Multitasking!</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1194,10 +1217,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
 
-			4/5/2019, 0.19 Update - Fixes for A20, PS/2, RTC, and PIC<br>
+			<b>4/5/2019, 0.19 Update - Fixes for A20, PS/2, RTC, and PIC</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1248,9 +1269,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			3/5/2019, 0.18 Update - Bugfixes for PCI handling on real hardware<br>
+
+			<b>3/5/2019, 0.18 Update - Bugfixes for PCI handling on real hardware</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1275,9 +1295,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			3/4/2019, 0.17 Update - Memory Manager upgrades<br>
+
+			<b>3/4/2019, 0.17 Update - Memory Manager upgrades</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1307,9 +1326,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			2/19/2019, 0.16 Update - Full physical memory management implementation<br>
+
+			<b>2/19/2019, 0.16 Update - Full physical memory management implementation</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1338,9 +1356,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			2/9/2019, 0.15 Update - Start of refinements for upcoming Memory Manager additions<br>
+
+			<b>2/9/2019, 0.15 Update - Start of refinements for upcoming Memory Manager additions</b><br>
 			<br>
 			Changed<br>
 			<ul>
@@ -1352,9 +1369,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			12/26/2018, 0.14 Update - File system driver subsystem<br>
+
+			<b>12/26/2018, 0.14 Update - File system driver subsystem</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1381,9 +1397,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			7/28/2018, 0.13 Update - Full exception handling<br>
+
+			<b>7/28/2018, 0.13 Update - Full exception handling</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1408,9 +1423,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			7/6/2018, 0.12 Update - Functional ATA driver<br>
+
+			<b>7/6/2018, 0.12 Update - Functional ATA driver</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1450,14 +1464,13 @@
 			<ul>
 				<li><code>MemSearchDWord()</code> and <code>MemSearchWord()</code> now actually return values O.O</li>
 				<li><code>PrintRegs16()</code> and <code>PrintRegs32()</code> now preserve the flags register</li>
-				<li>Squashed a bug in <code>ScreenClear32()</code> which could potentially cause a triple fault depending on the value of ecx</li>
+				<li>Squashed a bug in <code>ScreenClear32()</code> which could potentially cause a triple fault depending on the value of ECX</li>
 			</ul>
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			6/10/2018, 0.11 Update - Fleshed out List Manager and PCI routines, other fixes<br>
+
+			<b>6/10/2018, 0.11 Update - Fleshed out List Manager and PCI routines, other fixes</b><br>
 			<br>
 			<ul>
 				<li>Added check for PCI controller before attempting to init the PCI bus</li>
@@ -1477,9 +1490,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			6/4/2018, 0.10 Update - Stupid little fixes<br>
+
+			<b>6/4/2018, 0.10 Update - Stupid little fixes</b><br>
 			<br>
 			<ul>
 				<li>Changed major and minor version numbers to byte size in globals.asm</li>
@@ -1488,9 +1500,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			6/4/2018, 0.10 Update - List Manager, 50-line text mode support<br>
+
+			<b>6/4/2018, 0.10 Update - List Manager, 50-line text mode support</b><br>
 			<br>
 			<ul>
 				<li>Added 50-line text mode support. Nice for viewing those beautiful diagnostic messages at boot!</li>
@@ -1523,9 +1534,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			4/25/2018, 0.0F Update - Final PCI system<br>
+
+			<b>4/25/2018, 0.0F Update - Final PCI system</b><br>
 			<br>
 			<ul>
 				<li>Added version information to kernel info screen</li>
@@ -1536,9 +1546,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			1/19/2018, 0.0E Update - Now runs on real hardware!<br>
+
+			<b>1/19/2018, 0.0E Update - Now runs on real hardware!</b><br>
 			<br>
 			<ul>
 				<li>Added automatic sequential highlighted printing to <code>PrintRegsVESA()</code> (formerly <code>RegDump()</code>) for extra ease of use</li>
@@ -1561,9 +1570,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			12/6/2017, 0.0D Update - Milestone 1<br>
+
+			<b>12/6/2017, 0.0D Update - Milestone 1</b><br>
 			<br>
 			<ul>
 				<li>Added beginning of framework for PCI support (Exelyx C code which will be rewritten in assembly)</li>
@@ -1576,9 +1584,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			12/2/2017, 0.0C Update<br>
+
+			<b>12/2/2017, 0.0C Update</b><br>
 			<br>
 			<ul>
 				<li>Changed screen.asm to vesa.asm</li>
@@ -1592,9 +1599,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			11/8/2017, 0.0B Update<br>
+
+			<b>11/8/2017, 0.0B Update</b><br>
 			<br>
 			<ul>
 				<li>Modified <code>Random()</code> to return numbers within a requested limit</li>
@@ -1610,9 +1616,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			11/3/2017, 0.0A Update<br>
+
+			<b>11/3/2017, 0.0A Update</b><br>
 			<br>
 			<ul>
 				<li>Fixed bug in <code>VESAInit()</code> where setting VESA mode fails silently if video hardware does not support VESA (The error message for the VESA init failing was being printed using VESA. Yes, that is as bad as it sounds. :) )</li>
@@ -1631,9 +1636,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			10/23/2017, 0.09 Update<br>
+
+			<b>10/23/2017, 0.09 Update</b><br>
 			<br>
 			<ul>
 				<li>Added 32-bit random number generator <code>Random()</code></li>
@@ -1644,9 +1648,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			10/21/2017, 0.08 Cleanup<br>
+
+			<b>10/21/2017, 0.08 Cleanup</b><br>
 			<br>
 			<ul>
 				<li>Split some code from hardware.asm into PIC.asm, ps2.asm and screen.asm</li>
@@ -1659,9 +1662,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			8/31/2016, 0.08 Update<br>
+
+			<b>8/31/2016, 0.08 Update</b><br>
 			<br>
 			<ul>
 				<li>Fixed a horribly insidious bug in which the correct <code>VESAPrint()</code> function pointer is not used if the address of the low byte of the <code>VESAPrint32()</code> function address happens to be 0x18</li>
@@ -1672,9 +1674,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			8/17/2016, 0.07 Update<br>
+
+			<b>8/17/2016, 0.07 Update</b><br>
 			<br>
 			<ul>
 				<li>Finished mouse support</li>
@@ -1682,9 +1683,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			8/14/2016, 0.06 Update<br>
+
+			<b>8/14/2016, 0.06 Update</b><br>
 			<br>
 			<ul>
 				<li>Fixed copyright dates</li>
@@ -1697,9 +1697,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			8/7/2016, v0.05 Update<br>
+
+			<b>8/7/2016, v0.05 Update</b><br>
 			<br>
 			<ul>
 			<li>Added 24 bit color support</li>
@@ -1711,9 +1710,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			8/6/2016, v0.04 update bugfixes<br>
+
+			<b>8/6/2016, v0.04 update bugfixes</b><br>
 			<br>
 			<ul>
 				<li>Fixed Maarten's memory code</li>
@@ -1723,9 +1721,8 @@
 			<br>
 			<br>
 			<br>
-			<br>
-			<br>
-			8/3/2016, v0.04 update<br>
+
+			<b>8/3/2016, v0.04 update</b><br>
 			<br>
 			<ul>
 				<li>Beginning of VESA support</li>
@@ -1736,9 +1733,13 @@
 				<li>Introduced system info structure</li>
 				<li>Maarten's memory code</li>
 			</ul>
+			<br>
+			<br>
+			<br>
+
+			The few versions prior to this were experimental and did nothing noteworthy.
+
 		</p>
-		<br>
-		<br>
 		<br>
 		<br>
 		<br>
@@ -2170,25 +2171,27 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileDelete</code><br>
+						<code>FMItemDelete</code><br>
 						<br>
 						Deletes the file specified
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
 						</ol>
 					</td>
-					<td>EAX - Error code</td>
+					<td>EDX - Error code</td>
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileInfoAccessedGet</code><br>
+						<code>FMItemInfoAccessedGet</code><br>
 						<br>
 						Returns the date of last access for the specified file
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
 						</ol>
 					</td>
@@ -2201,12 +2204,13 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileInfoCreatedGet</code><br>
+						<code>FMItemInfoCreatedGet</code><br>
 						<br>
 						Returns the date and time of creation for the specified file
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
 						</ol>
 					</td>
@@ -2222,12 +2226,13 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileInfoModifiedGet</code><br>
+						<code>FMItemInfoModifiedGet</code><br>
 						<br>
 						Returns the date and time of last modification for the specified file
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
 						</ol>
 					</td>
@@ -2243,47 +2248,70 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileInfoSizeGet</code><br>
+						<code>FMItemInfoSizeGet</code><br>
 						<br>
 						Returns the size in bytes of the file specified
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
 						</ol>
 					</td>
 					<td>
-						EAX - Error code<br>
-						ECX - File size
+						ECX - File size<br>
+						EDX - Error code
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileLoad</code><br>
+						<code>FMItemLoad</code><br>
 						<br>
 						Returns a buffer containing the file specified
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
-							<li>Address at which to load file</li>
 						</ol>
 					</td>
-					<td>EAX - Error code</td>
+					<td>
+						ESI - Buffer address<br>
+						EAX - Actual size of item loaded into buffer<br>
+						EBX - Starting cluster of chain which is loaded into buffer, or zero if root directory<br>
+						ECX - Buffer size in bytes<br>
+						EDX - Error code
+					</td>
 				</tr>
 				<tr>
 					<td>
-						<code>FMFileStore</code><br>
+						<code>FMItemNew</code><br>
+						<br>
+						Creates a new empty file at the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>EDX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>FMItemStore</code><br>
 						<br>
 						Stores the data at the address specified to the file specified
 					</td>
 					<td>
 						<ol>
+							<li>Partition number</li>
 							<li>Pointer to file path string</li>
 							<li>Address at which to load file</li>
+							<li>Length of file data</li>
 						</ol>
 					</td>
-					<td>EAX - Error code</td>
+					<td>EDX - Error code</td>
 				</tr>
 				<tr>
 					<td>
@@ -3419,7 +3447,7 @@
 					</td>
 					<td>
 						EAX - Address of requested block, or zero if call fails<br>
-						EDX - Result code
+						EDX - Error code
 					</td>
 				</tr>
 				<tr>
@@ -5299,6 +5327,22 @@
 						</ol>
 					</td>
 					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>StringDuplicate</code><br>
+						<br>
+						Returns a pointer to a memory buffer containing a copy of the string specified
+					</td>
+					<td>
+						<ol>
+							<li>String address</li>
+						</ol>
+					</td>
+					<td>
+						ESX - Buffer address<br>
+						EDX - Error code
+					</td>
 				</tr>
 				<tr>
 					<td>

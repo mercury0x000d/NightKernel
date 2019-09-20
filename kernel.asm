@@ -22,33 +22,17 @@
 org 0x00000600
 
 
+%include "include/kernel.inc"
+
+
+
+
 
 bits 16
-
-
-
-; constant defines
-%define true									1
-%define false									0
-%define null									0
-
-; for configbits settings - great idea, Antony!
-%define kCBDebugMode							0
-%define kCBVerbose								1
-%define kCBLines50								2
-%define kCBVMEnable								3
-
-
-
-
-
 section .text
 main:
-
-
 ; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
 cld
-
 
 ; init the stack segment
 mov ax, 0x0000
@@ -194,11 +178,11 @@ call MemInit
 push progressText0A$
 call PrintIfConfigBits32
 
-push dword [kKernelStack]
+push kKernelStack
 push dword 1
 call MemAllocate
 
-mov ebx, [kKernelStack]
+mov ebx, kKernelStack
 add eax, ebx
 mov esp, eax
 ; push a null to stop any traces which may attempt to analyze the stack later
@@ -248,79 +232,7 @@ call SetSystemCPUID
 ; allocate the system lists
 push progressText10$
 call PrintIfConfigBits32
-
-; the drives list will be 256 entries of 144 bytes each (the size of a single tDriveInfo element) plus header
-push 256 * 144 + 16
-push dword 1
-call MemAllocate
-mov [tSystem.listDrives], eax
-
-; set up the list header
-push 144
-push 256
-push eax
-call LMListInit
-
-
-; the driveLetters list will be 26 entries (A - Z) of 4 bytes each plus header
-push 26 * 4 + 16
-push dword 1
-call MemAllocate
-mov [tSystem.listDriveLetters], eax
-
-; set all elements to 0xFFFFFFFF
-push 0xFF
-push 26 * 4 + 16
-push eax
-call MemFill
-
-; set up the list header
-push 4
-push 26
-push eax
-call LMListInit
-
-
-; the FSHandler list will be 256 entries of 4 bytes each (the size of a single 32-bit address) plus header
-push 256 * 4 + 16
-push dword 1
-call MemAllocate
-mov [tSystem.listFSHandlers], eax
-
-; set up the list header
-push 4
-push 256
-push eax
-call LMListInit
-
-
-; the partitions list will be 256 entries of 128 bytes each (the size of a single tPartitionInfo element)
-; allocate memory for the list
-push 256 * 128 + 16
-push dword 1
-call MemAllocate
-mov [tSystem.listPartitions], eax
-
-; set up the list header
-push 128
-push 256
-push eax
-call LMListInit
-
-
-; the PCI handlers list will be 65536 entries of 4 bytes each (the size of a single 32-bit address)
-; allocate memory for the list
-push 65536 * 4 + 16
-push dword 1
-call MemAllocate
-mov [tSystem.listPCIHandlers], eax
-
-; set up the list header
-push 4
-push 65536
-push eax
-call LMListInit
-
+call KernelInitLists
 
 
 ; init PS/2 driver
@@ -338,8 +250,14 @@ push dword 0
 push dword 0
 push dword 0
 push dword 0
+push dword 0
+push dword 0
+push dword 0
 call FAT16ServiceHandler
 
+push dword 0
+push dword 0
+push dword 0
 push dword 0
 push dword 0
 push dword 0
@@ -385,6 +303,10 @@ call TaskInit
 
 
 
+
+
+
+;jmp .SkipFMTests
 ; test load a file
 push 0xFF
 push 0x100000
@@ -395,72 +317,190 @@ call MemFill
 ;push .path13$
 ;push .path12$
 ;push .path11$
-push .path9$
+;push .path10$
+;push .path9$
 ;push .path8$
 ;push .path7$
-;push .path6$
+push .path6$
 ;push .path5$
 ;push .path4$
 ;push .path3$
 ;push .path2$
 ;push .path1$
-call FMFileLoad
+push dword 0
+call FMItemLoad
+push esi
 
 ; show if there was an error in eax from the above call
 pusha
 call PrintRegs32
 popa
 
+
 push 0
 push 7
 push 10
 push 1
-shr ecx, 4
-push ecx
-push edi
+;shr ecx, 4
+;push ecx
+push 16
+push esi
 call PrintRAM32
-jmp $
 
-push dword 0x19000 ; length
-push dword 0x200000 ; address
-push .path10$ ; pathptr
-call FMFileStore
 
-; show if there was an error in eax from the above call
+; create the ROOTTEST folder
+push 0x10 ; directory attribute
+push .path16$
+push dword 0
+call FMItemNew
+
+pusha
 call PrintRegs32
+popa
 
-jmp $
 
-push .path7$
-call FMFileDelete
 
-; show if there was an error in eax from the above call
+; create the NEWDIR folder
+push 0x10 ; directory attribute
+push .path15$
+push dword 0
+call FMItemNew
+
+pusha
 call PrintRegs32
+popa
 
-mov eax, 0x200000
+
+; create the WHO2.TXT file
+push 0x00 ; no attribute
+push .path10$
+push dword 0
+call FMItemNew
+
+pusha
+call PrintRegs32
+popa
+
+
+pop esi
+push esi
+
+
+mov byte [esi + 117], ' '
+mov byte [esi + 118], 'E'
+mov byte [esi + 119], 'v'
+mov byte [esi + 120], 'e'
+mov byte [esi + 121], 'n'
+mov byte [esi + 122], ' '
+mov byte [esi + 123], 't'
+mov byte [esi + 124], 'h'
+mov byte [esi + 125], 'o'
+mov byte [esi + 126], 'u'
+mov byte [esi + 127], 'g'
+mov byte [esi + 128], 'h'
+mov byte [esi + 129], ' '
+mov byte [esi + 130], 't'
+mov byte [esi + 131], 'h'
+mov byte [esi + 132], 'a'
+mov byte [esi + 133], 't'
+mov byte [esi + 134], ' '
+mov byte [esi + 135], 'w'
+mov byte [esi + 136], 'o'
+mov byte [esi + 137], 'r'
+mov byte [esi + 138], 'k'
+mov byte [esi + 139], ' '
+mov byte [esi + 140], 'm'
+mov byte [esi + 141], 'a'
+mov byte [esi + 142], 'y'
+mov byte [esi + 143], ' '
+mov byte [esi + 144], 't'
+mov byte [esi + 145], 'a'
+mov byte [esi + 146], 'k'
+mov byte [esi + 147], 'e'
+mov byte [esi + 148], ' '
+mov byte [esi + 149], 'y'
+mov byte [esi + 150], 'e'
+mov byte [esi + 151], 'a'
+mov byte [esi + 152], 'r'
+mov byte [esi + 153], 's'
+mov byte [esi + 154], '.'
+
+
+
+; write data from memory to WHO2.TXT
+push 155
+push esi
+push .path10$
+;push .path6$
+push dword 0
+call FMItemStore
+
+pusha
+call PrintRegs32
+popa
+
+
+push .path10$
+push dword 0
+call FMItemInfoSizeGet
+
+pusha
+call PrintRegs32
+popa
+
+
+push .path10$
+push dword 0
+call FMItemDelete
+
+pusha
+call PrintRegs32
+popa
+
+pop esi
 jmp $
 
-.path1$											db 'c:\autoexec.bat', 0x00
-.path2$											db '00:\autoexec.bat', 0x00
-.path3$											db 'c:\TESTING\system\tools\items\code\fluff\nonsense\secret.txt', 0x00
-.path4$											db 'x:\', 0x00
-.path5$											db '00:\kernel.sys', 0x00
-.path6$											db 'c:\TESTING\who.TXT', 0x00
-.path7$											db 'c:\TESTING\john.TXT', 0x00
-.path8$											db 'c:\TESTING\cbcfiles\pcworld\utils\logging.bas', 0x00
-.path9$											db 'c:\TESTING\cbcfiles\pcworld\utils', 0x00
-.path10$										db 'c:\TESTING\john2.TXT', 0x00
-.path11$										db 'c:\TESTING', 0x00
-.path12$										db 'c:', 0x00
-.path13$										db 'c:\KERNEL.SYS', 0x00
-.path14$										db 'c:\TESTING\LINcoln.TXT', 0x00
+
+
+.path1$											db '\autoexec.bat', 0x00
+.path2$											db '\autoexec.bat', 0x00
+.path3$											db '\TESTING\system\tools\items\code\fluff\nonsense\secret.txt', 0x00
+.path4$											db '\', 0x00
+.path5$											db '\kernel.sys', 0x00
+.path6$											db '\TESTING\who.TXT', 0x00
+.path7$											db '\TESTING\john.TXT', 0x00
+.path8$											db '\TESTING\cbcfiles\pcworld\utils\logging.bas', 0x00
+.path9$											db '\TESTING\cbcfiles\pcworld\utils', 0x00
+.path10$										db '\TESTING\newdir\who2.TXT', 0x00
+.path11$										db '\TESTING', 0x00
+.path12$										db '', 0x00
+.path13$										db '\KERNEL.SYS', 0x00
+.path14$										db '\TESTING\LINcoln.TXT', 0x00
+.path15$										db '\TESTING\NEWDIR', 0x00
+.path16$										db '\roottest', 0x00
+
+
+.SkipFMTests:
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 ; skip this for now, it's just an experiment
 ; comment out the jmp to run this code
-jmp PagingDone
+;jmp PagingDone
 ; experimental paging setup
 cli
 
@@ -567,9 +607,9 @@ PageTableCreate:
 	%define PTAddress							dword [ebp - 4]
 
 	; get a chunk of RAM that's 4KiB in size and aligned on a 4096-byte boundary
-	push 4096
-	push 4096
-	push 0x01
+	push dword 4096
+	push dword 4096
+	push dword 0x01
 	call MemAllocateAligned
 	mov PTAddress, eax
 
@@ -1059,7 +1099,7 @@ progressText0B$									db 'IDTInit', 0x00
 progressText0C$									db 'Remaping PICs', 0x00
 progressText0D$									db 'Initializing RTC', 0x00
 progressText0E$									db 'Enabling interrupts', 0x00
-progressText0F$									db 'Load system data to the info struct', 0x00
+progressText0F$									db 'Building System Table', 0x00
 progressText10$									db 'Allocating list space', 0x00
 progressText11$									db 'Initializing PS/2 driver', 0x00
 progressText12$									db 'Setting up default handler addresses', 0x00
@@ -1069,6 +1109,106 @@ progressText15$									db 'Mapping partitions', 0x00
 progressText16$									db 'Initializing Task Manager', 0x00
 memE820Unsupported$								db 'Could not detect memory, function unsupported', 0x00
 name$											db 'Kernel Debug Menu', 0x00
+
+
+
+
+
+bits 32
+section .text
+KernelInitLists:
+	; Sets up the lists used by the kernel
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; the drives list will be 256 entries of tDriveInfo structs, plus header
+	push dword 256 * tDriveInfo_size + 16
+	push dword 1
+	call MemAllocate
+	mov [tSystem.listDrives], eax
+
+	; set up the list header
+	push tDriveInfo_size
+	push dword 256
+	push eax
+	call LMListInit
+
+
+
+	; the driveLetters list will be 26 entries (A - Z) of 4 bytes each plus header
+	push dword 26 * 4 + 16
+	push dword 1
+	call MemAllocate
+	mov [tSystem.listDriveLetters], eax
+
+	; set all elements to 0xFFFFFFFF
+	push dword 0xFF
+	push dword 26 * 4 + 16
+	push eax
+	call MemFill
+
+	; set up the list header
+	push dword 4
+	push dword 26
+	push eax
+	call LMListInit
+
+
+
+	; the FSHandler list will be 256 entries of 4 bytes each (the size of a single 32-bit address) plus header
+	push dword 256 * 4 + 16
+	push dword 1
+	call MemAllocate
+	mov [tSystem.listFSHandlers], eax
+
+	; set up the list header
+	push dword 4
+	push dword 256
+	push eax
+	call LMListInit
+
+
+
+	; the partitions list will be 256 entries of tPartitionInfo structs, plus header
+	; allocate memory for the list
+	push dword 256 * tPartitionInfo_size + 16
+	push dword 1
+	call MemAllocate
+	mov [tSystem.listPartitions], eax
+
+	; set up the list header
+	push dword tPartitionInfo_size
+	push dword 256
+	push eax
+	call LMListInit
+
+
+
+	; the PCI handlers list will be 65536 entries of 4 bytes each (the size of a single 32-bit address)
+	; allocate memory for the list
+	push dword 65536 * 4 + 16
+	push dword 1
+	call MemAllocate
+	mov [tSystem.listPCIHandlers], eax
+
+	; set up the list header
+	push dword 4
+	push dword 65536
+	push eax
+	call LMListInit
+
+
+	mov esp, ebp
+	pop ebp
+ret
 
 
 

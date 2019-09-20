@@ -2875,3 +2875,66 @@ StringWordGet:
 	mov esp, ebp
 	pop ebp
 ret 16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+section .text
+StringDuplicate:
+	; Returns a pointer to a memory buffer containing a copy of the string specified	
+	;
+	;  input:
+	;	String address
+	;
+	;  output:
+	;	ESX - Buffer address
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define stringAddress						dword [ebp + 8]
+
+	; allocate local variables
+	sub esp, 4
+	%define copyLength							dword [ebp - 4]
+
+
+	push stringAddress
+	call StringLength
+	inc eax
+	mov copyLength, eax
+	push eax
+	push dword 1
+	call MemAllocate
+
+	; if we in fact got a good block o' RAM, save its address
+	cmp edx, kErrNone
+	jne .Exit
+
+	; copy the path to our newly allocated block
+	push copyLength
+	push eax
+	push stringAddress
+	call MemCopy
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 4

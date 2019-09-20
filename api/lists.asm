@@ -18,11 +18,13 @@
 
 
 
-; tListInfo struct, the header used to manage lists
-%define tListInfo.signature						dword (esi + 00)
-%define tListInfo.elementSize					dword (esi + 04)
-%define tListInfo.elementCount					dword (esi + 08)
-%define tListInfo.listSize						dword (esi + 12)
+; tListInfo struct, used to manage lists
+struc tListInfo
+	.signature									resd 1
+	.elementSize								resd 1
+	.elementCount								resd 1
+	.listSize									resd 1
+endstruc
 
 
 
@@ -364,7 +366,7 @@ LMElementValidate:
 
 	; check element validity
 	mov esi, listPtr
-	mov eax, dword [tListInfo.elementCount]
+	mov eax, dword [esi + tListInfo.elementCount]
 
 	cmp elementNum, eax
 	jb .ElementValid
@@ -516,19 +518,19 @@ LMListInit:
 
 
 	; write the data to the start of the list area, starting with the signature
-	mov dword [tListInfo.signature], 'list'
+	mov dword [esi + tListInfo.signature], 'list'
 
 	; write the size of each element next
 	mov ebx, elementSize
-	mov dword [tListInfo.elementSize], ebx
+	mov dword [esi + tListInfo.elementSize], ebx
 
 	; write the total number of elements
 	mov eax, elementCount
-	mov dword [tListInfo.elementCount], eax
+	mov dword [esi + tListInfo.elementCount], eax
 
 	; write total size of list
 	mov eax, listSize
-	mov dword [tListInfo.listSize], eax
+	mov dword [esi + tListInfo.listSize], eax
 
 
 	mov esp, ebp
@@ -732,7 +734,7 @@ LM_Internal_ElementAddressGet:
 
 	; get the size of each element in this list
 	mov esi, address
-	mov eax, [tListInfo.elementSize]
+	mov eax, [esi + tListInfo.elementSize]
 
 	; calculate the new destination address
 	mul elementNum
@@ -768,7 +770,7 @@ LM_Internal_ElementCountGet:
 
 	; get the element size
 	mov esi, address
-	mov ecx, [tListInfo.elementCount]
+	mov ecx, [esi + tListInfo.elementCount]
 
 
 	mov esp, ebp
@@ -802,7 +804,7 @@ LM_Internal_ElementCountSet:
 	; set the element size
 	mov esi, address
 	mov edx, newSlotCount
-	mov [tListInfo.elementCount], edx
+	mov [esi + tListInfo.elementCount], edx
 
 
 	mov esp, ebp
@@ -898,14 +900,14 @@ LM_Internal_ElementDelete:
 
 	; update the number of elements in this list
 	mov esi, address
-	mov eax, dword [tListInfo.elementCount]
+	mov eax, dword [esi + tListInfo.elementCount]
 	dec eax
-	mov dword [tListInfo.elementCount], eax
+	mov dword [esi + tListInfo.elementCount], eax
 
 	; update the list's size field
-	mov eax, dword [tListInfo.listSize]
+	mov eax, dword [esi + tListInfo.listSize]
 	sub eax, elementSize
-	mov dword [tListInfo.listSize], eax
+	mov dword [esi + tListInfo.listSize], eax
 
 
 	mov esp, ebp
@@ -1003,9 +1005,9 @@ LM_Internal_ElementDuplicate:
 
 	; update the list's size field
 	mov esi, address
-	mov eax, dword [tListInfo.listSize]
+	mov eax, dword [esi + tListInfo.listSize]
 	add eax, elementSize
-	mov dword [tListInfo.listSize], eax
+	mov dword [esi + tListInfo.listSize], eax
 
 	mov esp, ebp
 	pop ebp
@@ -1035,7 +1037,7 @@ LM_Internal_ElementSizeGet:
 
 	; get the element size
 	mov esi, address
-	mov eax, [tListInfo.elementSize]
+	mov eax, [esi + tListInfo.elementSize]
 
 
 	mov esp, ebp
@@ -1223,7 +1225,7 @@ LM_Internal_SlotFindFirstFree:
 		inc edx
 
 	; see if we're done here
-	mov ecx, [tListInfo.elementCount]
+	mov ecx, [esi + tListInfo.elementCount]
 	cmp edx, ecx
 	jne .FindLoop
 
@@ -1263,13 +1265,13 @@ LM_Internal_SlotFreeTest:
 
 	; calculate the element's address in RAM
 	mov esi, address
-	mov eax, [tListInfo.elementSize]
+	mov eax, [esi + tListInfo.elementSize]
 	mul element
 	add eax, esi
 	add eax, 16
 
 	; set up a loop to check each byte of this element
-	mov ecx, [tListInfo.elementSize]
+	mov ecx, [esi + tListInfo.elementSize]
 	add eax, ecx
 	mov edx, true
 	.CheckElement:

@@ -16,25 +16,11 @@
 
 
 
-
-
-; a define for use by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 1397
-
-
-
+; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
+%define BUILD 2009
 
 
 section .data
-
-
-
-kKernelStack									dd 8192
-kDriverSignature$								db 'N', 0x01, 'g', 0x09, 'h', 0x09, 't', 0x05, 'D', 0x02, 'r', 0x00, 'v', 0x01, 'r', 0x05
-
-
-
-
 
 ; strucTures
 tSystem:
@@ -101,82 +87,92 @@ section .bss
 	.month										resb 1
 	.day										resb 1
 
+
+
 ; tDriveInfo, for the drives list (144 bytes)
-%define tDriveInfo.model						00				; model is 64 bytes
-%define tDriveInfo.serial						64				; serial is 32 bytes
-%define tDriveInfo.PCIClass						(esi + 96)
-%define tDriveInfo.PCISubclass					(esi + 100)
-%define tDriveInfo.PCIBus						(esi + 104)
-%define tDriveInfo.PCIDevice					(esi + 108)
-%define tDriveInfo.PCIFunction					(esi + 112)
-%define tDriveInfo.cacheAddress					(esi + 116)
-%define tDriveInfo.deviceFlags					(esi + 120)
-%define tDriveInfo.ATABasePort					(esi + 124)
-%define tDriveInfo.ATAControlPort				(esi + 128)
-%define tDriveInfo.ATADeviceNumber				(esi + 132)
-%define tDriveInfo.reserved1					(esi + 136)
-%define tDriveInfo.reserved2					(esi + 140)
+struc tDriveInfo
+	.model										resb 64
+	.serial										resb 32
+	.PCIClass									resd 1
+	.PCISubclass								resd 1
+	.PCIBus										resd 1
+	.PCIDevice									resd 1
+	.PCIFunction								resd 1
+	.cacheAddress								resd 1
+	.deviceFlags								resd 1
+	.ATABasePort								resd 1
+	.ATAControlPort								resd 1
+	.ATADeviceNumber							resd 1
+	.reserved1									resd 1
+	.reserved2									resd 1
+endstruc
 
 ; tTaskInfo struct, used to... *GASP* manage tasks (96 bytes)
-%define tTaskInfo.pageDirAddress				(esi + 00)
-%define tTaskInfo.entryPoint					(esi + 04)
-%define tTaskInfo.esp							(esi + 08)
-%define tTaskInfo.esp0							(esi + 12)
-%define tTaskInfo.stackAddress					(esi + 16)
-%define tTaskInfo.kernelStackAddress			(esi + 20)
-%define tTaskInfo.priority						(esi + 24)
-%define tTaskInfo.turnsRemaining				(esi + 25)
-%define tTaskInfo.unused						(esi + 26)
-%define tTaskInfo.switchInLow					(esi + 28)
-%define tTaskInfo.switchInHigh					(esi + 32)
-%define tTaskInfo.cycleCountLow					(esi + 36)
-%define tTaskInfo.cycleCountHigh				(esi + 40)
-%define tTaskInfo.spawnedBy						(esi + 44)
-%define tTaskInfo.taskFlags						(esi + 48)
-%define tTaskInfo.name							(esi + 64)		; name field is 16 bytes (for now, may need to expand)
+struc tTaskInfo
+	.pageDirAddress								resd 1
+	.entryPoint									resd 1
+	.esp										resd 1
+	.esp0										resd 1
+	.stackAddress								resd 1
+	.kernelStackAddress							resd 1
+	.priority									resb 1
+	.turnsRemaining								resb 1
+	.unused										resw 1
+	.switchInLow								resd 1
+	.switchInHigh								resd 1
+	.cycleCountLow								resd 1
+	.cycleCountHigh								resd 1
+	.spawnedBy									resd 1
+	.taskFlags									resd 1
+	.name										resb 44
+endstruc
 
 ; tPartitionInfo, for the partitions list (128 bytes)
-%define tPartitionInfo.PCIClass					(esi + 00)
-%define tPartitionInfo.PCISubclass				(esi + 04)
-%define tPartitionInfo.PCIBus					(esi + 08)
-%define tPartitionInfo.PCIDevice				(esi + 12)
-%define tPartitionInfo.PCIFunction				(esi + 16)
-%define tPartitionInfo.driveListNumber			(esi + 20)
-%define tPartitionInfo.startingLBA				(esi + 24)
-%define tPartitionInfo.sectorCount				(esi + 28)
-%define tPartitionInfo.fileSystem				(esi + 32)
-%define tPartitionInfo.attributes				(esi + 36)
-%define tPartitionInfo.ATABasePort				(esi + 40)
-%define tPartitionInfo.ATAControlPort			(esi + 44)
-%define tPartitionInfo.ATADeviceNumber			(esi + 48)
-%define tPartitionInfo.reserved1				(esi + 52)
-%define tPartitionInfo.reserved2				(esi + 56)
-%define tPartitionInfo.reserved3				(esi + 60)
-%define tPartitionInfo.reserved4				(esi + 64)
-%define tPartitionInfo.reserved5				(esi + 68)
-%define tPartitionInfo.reserved6				(esi + 72)
-%define tPartitionInfo.reserved7				(esi + 76)
+struc tPartitionInfo
+	.PCIClass									resd 1
+	.PCISubclass								resd 1
+	.PCIBus										resd 1
+	.PCIDevice									resd 1
+	.PCIFunction								resd 1
+	.driveListNumber							resd 1
+	.startingLBA								resd 1
+	.sectorCount								resd 1
+	.fileSystem									resd 1
+	.attributes									resd 1
+	.ATABasePort								resd 1
+	.ATAControlPort								resd 1
+	.ATADeviceNumber							resd 1
+	.reserved1									resd 1
+	.reserved2									resd 1
+	.reserved3									resd 1
+	.reserved4									resd 1
+	.reserved5									resd 1
+	.reserved6									resd 1
+	.reserved7									resd 1
+	.FSReserved00								resd 1
+	.FSReserved01								resd 1
+	.FSReserved02								resd 1
+	.FSReserved03								resd 1
+	.FSReserved04								resd 1
+	.FSReserved05								resd 1
+	.FSReserved06								resd 1
+	.FSReserved07								resd 1
+	.FSReserved08								resd 1
+	.FSReserved09								resd 1
+	.FSReserved10								resd 1
+	.FSReserved11								resd 1
+endstruc
 ; the following elements are reserved for use by the FS driver for this partition
-%define tPartitionInfo.FSReserved00				(esi + 80)
-%define tPartitionInfo.FSReserved01				(esi + 84)
-%define tPartitionInfo.FSReserved02				(esi + 88)
-%define tPartitionInfo.FSReserved03				(esi + 92)
-%define tPartitionInfo.FSReserved04				(esi + 96)
-%define tPartitionInfo.FSReserved05				(esi + 100)
-%define tPartitionInfo.FSReserved06				(esi + 104)
-%define tPartitionInfo.FSReserved07				(esi + 108)
-%define tPartitionInfo.FSReserved08				(esi + 112)
-%define tPartitionInfo.FSReserved09				(esi + 116)
-%define tPartitionInfo.FSReserved10				(esi + 120)
-%define tPartitionInfo.FSReserved11				(esi + 124)
 
 ; partition data as presented on disk
-%define tPartitionLayout.bootable				(esi + 00)
-%define tPartitionLayout.startingCHS			(esi + 01)
-%define tPartitionLayout.systemID				(esi + 04)
-%define tPartitionLayout.endingCHS				(esi + 05)
-%define tPartitionLayout.startingLBA			(esi + 08)
-%define tPartitionLayout.sectorCount			(esi + 12)
+struc tPartitionLayout
+	.bootable									resb 1
+	.startingCHS								resb 3
+	.systemID									resb 1
+	.endingCHS									resb 3
+	.startingLBA								resd 1
+	.sectorCount								resd 1
+endstruc
 
 
 
@@ -192,12 +188,20 @@ section .bss
 %define kErrValueTooLow							0xF001
 %define kErrValueTooHigh						0xF002
 
+; ELF errors
+%define kErrELFInvalidBinary					0xFA00
+%define kErrELFWrongArchitecture				0xFA01
+%define kErrELFWrongByteOrder					0xFA02
+%define kErrELFWrongCPU							0xFA03
+
 ; filesystem errors
 %define kErrDriveLetterInvalid					0xFB00
 %define kErrPathInvalid							0xFB01
 %define kErrPathInvalidCharacter				0xFB02
 %define kErrItemNotFound						0xFB03
 %define kErrClusterChainEndUnexpected			0xFB04
+%define kErrRootDirectoryFull					0xFB05
+%define kErrItemAlreadyExists					0xFB06
 
 ; partition errors
 %define kErrInvalidPartitionNumber				0xFC00
@@ -236,13 +240,14 @@ section .bss
 %define kDriverOutputUntilBusy					0x10
 
 ; file system driver commands
-%define kDriverFileDelete						0xF0
-%define kDriverFileInfoAccessedGet				0xF1
-%define kDriverFileInfoCreatedGet				0xF2
-%define kDriverFileInfoModifiedGet				0xF3
-%define kDriverFileInfoSizeGet					0xF4
-%define kDriverFileLoad							0xF5
-%define kDriverFileStore						0xF6
+%define kDriverItemDelete						0xF0
+%define kDriverItemInfoAccessedGet				0xF1
+%define kDriverItemInfoCreatedGet				0xF2
+%define kDriverItemInfoModifiedGet				0xF3
+%define kDriverItemInfoSizeGet					0xF4
+%define kDriverItemLoad							0xF5
+%define kDriverItemNew							0xF6
+%define kDriverItemStore						0xF7
 
 
 

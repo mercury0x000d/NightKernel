@@ -649,19 +649,19 @@ ret 28
 		; save ports and device number to table
 		mov ecx, IOPort
 		and ecx, 0x0000FFFF
-		mov dword [tDriveInfo.ATABasePort], ecx
+		mov dword [esi + tDriveInfo.ATABasePort], ecx
 
 		mov ecx, controlPort
 		and ecx, 0x0000FFFF
-		mov dword [tDriveInfo.ATAControlPort], ecx
+		mov dword [esi + tDriveInfo.ATAControlPort], ecx
 
 		mov ecx, currentDevice
-		mov dword [tDriveInfo.ATADeviceNumber], ecx
+		mov dword [esi + tDriveInfo.ATADeviceNumber], ecx
 
 
 		; save device type to table
 		pop eax
-		mov dword [tDriveInfo.deviceFlags], eax
+		mov dword [esi + tDriveInfo.deviceFlags], eax
 
 
 		; allocate 1 MiB cache for this drive and save the address
@@ -669,32 +669,31 @@ ret 28
 		push dword 1
 		call MemAllocate
 		mov esi, driveListSlotAddress
-		mov dword [tDriveInfo.cacheAddress], eax
+		mov dword [esi + tDriveInfo.cacheAddress], eax
 
 
 		; fill in PCI info
 		mov eax, PCIClass
-		mov dword [tDriveInfo.PCIClass], eax
+		mov dword [esi + tDriveInfo.PCIClass], eax
 
 		mov eax, PCISubclass
-		mov dword [tDriveInfo.PCISubclass], eax
+		mov dword [esi + tDriveInfo.PCISubclass], eax
 
 		mov eax, PCIBus
-		mov dword [tDriveInfo.PCIBus], eax
+		mov dword [esi + tDriveInfo.PCIBus], eax
 
 		mov eax, PCIDevice
-		mov dword [tDriveInfo.PCIDevice], eax
+		mov dword [esi + tDriveInfo.PCIDevice], eax
 
 		mov eax, PCIFunction
-		mov dword [tDriveInfo.PCIFunction], eax
+		mov dword [esi + tDriveInfo.PCIFunction], eax
 
 
 		; fill in model
-		mov esi, driveListSlotAddress
 		push 40
-		mov edi, esi
-		add edi, tDriveInfo.model
-		push edi
+		mov esi, driveListSlotAddress
+		add esi, tDriveInfo.model
+		push esi
 		mov edi, dataBlock
 		add edi, 54
 		push edi
@@ -702,11 +701,10 @@ ret 28
 
 
 		; fill in serial
-		mov esi, driveListSlotAddress
 		push 20
-		mov edi, esi
-		add edi, tDriveInfo.serial
-		push edi
+		mov esi, driveListSlotAddress
+		add esi, tDriveInfo.serial
+		push esi
 		mov edi, dataBlock
 		add edi, 20
 		push edi
@@ -1231,8 +1229,8 @@ IDEServiceHandler:
 		push bufferPtr
 		push sectorCount
 		push startSector
-		push dword [tDriveInfo.ATADeviceNumber]
-		push dword [tDriveInfo.ATABasePort]
+		push dword [esi + tDriveInfo.ATADeviceNumber]
+		push dword [esi + tDriveInfo.ATABasePort]
 		call IDEATASectorReadLBA28PIO
 
 		; save any error code to ebx
@@ -1268,8 +1266,8 @@ IDEServiceHandler:
 		push bufferPtr
 		push sectorCount
 		push startSector
-		push dword [tDriveInfo.ATADeviceNumber]
-		push dword [tDriveInfo.ATABasePort]
+		push dword [esi + tDriveInfo.ATADeviceNumber]
+		push dword [esi + tDriveInfo.ATABasePort]
 		call IDEATASectorWriteLBA28PIO
 
 		; save any error code to ebx

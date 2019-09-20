@@ -24,8 +24,6 @@ bits 32
 
 
 
-; struct definitions:
-
 ; boot sector offsets
 %define tMBR.Bootstrap							0x0000
 %define tMBR.OUID								0x01B4
@@ -75,9 +73,9 @@ DiskRead:
 	push startSector
 	push driveNumber
 	push kDriverRead
-	push dword [tDriveInfo.PCIFunction]
-	push dword [tDriveInfo.PCIDevice]
-	push dword [tDriveInfo.PCIBus]
+	push dword [esi + tDriveInfo.PCIFunction]
+	push dword [esi + tDriveInfo.PCIDevice]
+	push dword [esi + tDriveInfo.PCIBus]
 	call PCIHandlerCommand
 
 
@@ -137,7 +135,7 @@ PartitionEnumerate:
 		mov driveListCurrentElementAddr, esi
 
 		; see if this drive is a hard drive
-		cmp dword [tDriveInfo.deviceFlags], 1
+		cmp dword [esi + tDriveInfo.deviceFlags], 1
 		jne .NextPartition
 
 		; if we get here, it was a hard drive... let's discover some partitions!
@@ -154,7 +152,7 @@ PartitionEnumerate:
 		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetA
 		add esi, edi
-		mov ecx, [tPartitionLayout.systemID]
+		mov ecx, [esi + tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .checkForPartitionB
 		mov offset, edi
@@ -165,7 +163,7 @@ PartitionEnumerate:
 		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetB
 		add esi, edi
-		mov ecx, [tPartitionLayout.systemID]
+		mov ecx, [esi + tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .checkForPartitionC
 		mov offset, edi
@@ -177,7 +175,7 @@ PartitionEnumerate:
 		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetC
 		add esi, edi
-		mov ecx, [tPartitionLayout.systemID]
+		mov ecx, [esi + tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .checkForPartitionD
 		mov offset, edi
@@ -189,7 +187,7 @@ PartitionEnumerate:
 		mov esi, sectorBufferAddr
 		mov edi, tMBR.PartitionOffsetD
 		add esi, edi
-		mov ecx, [tPartitionLayout.systemID]
+		mov ecx, [esi + tPartitionLayout.systemID]
 		cmp ecx, 0
 		je .NextPartition
 		mov offset, edi
@@ -224,65 +222,50 @@ ret
 	mov partitionListCurrentElementAddr, esi
 
 	; save base port and device info (from this drive's slot in the drive list) to the slot we're writing in the partition table
-	mov esi, driveListCurrentElementAddr
-	mov eax, [tDriveInfo.ATABasePort]
-	mov ebx, [tDriveInfo.ATAControlPort]
-	mov ecx, [tDriveInfo.ATADeviceNumber]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.ATABasePort], eax
-	mov [tPartitionInfo.ATAControlPort], ebx
-	mov [tPartitionInfo.ATADeviceNumber], ecx
+	mov edi, driveListCurrentElementAddr
+	mov eax, [edi + tDriveInfo.ATABasePort]
+	mov ebx, [edi + tDriveInfo.ATAControlPort]
+	mov ecx, [edi + tDriveInfo.ATADeviceNumber]
+	mov [esi + tPartitionInfo.ATABasePort], eax
+	mov [esi + tPartitionInfo.ATAControlPort], ebx
+	mov [esi + tPartitionInfo.ATADeviceNumber], ecx
 
 	; save PCI info (from this drive's slot in the drive list) to the slot we're writing in the partition table
-	mov esi, driveListCurrentElementAddr
-	mov eax, [tDriveInfo.PCIClass]
-	mov ebx, [tDriveInfo.PCISubclass]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.PCIClass], eax
-	mov [tPartitionInfo.PCISubclass], ebx
+	mov eax, [edi + tDriveInfo.PCIClass]
+	mov ebx, [edi + tDriveInfo.PCISubclass]
+	mov [esi + tPartitionInfo.PCIClass], eax
+	mov [esi + tPartitionInfo.PCISubclass], ebx
 
-	mov esi, driveListCurrentElementAddr
-	mov eax, [tDriveInfo.PCIBus]
-	mov ebx, [tDriveInfo.PCIDevice]
-	mov ecx, [tDriveInfo.PCIFunction]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.PCIBus], eax
-	mov [tPartitionInfo.PCIDevice], ebx
-	mov [tPartitionInfo.PCIFunction], ecx
+	mov eax, [edi + tDriveInfo.PCIBus]
+	mov ebx, [edi + tDriveInfo.PCIDevice]
+	mov ecx, [edi + tDriveInfo.PCIFunction]
+	mov [esi + tPartitionInfo.PCIBus], eax
+	mov [esi + tPartitionInfo.PCIDevice], ebx
+	mov [esi + tPartitionInfo.PCIFunction], ecx
 
 	; save device flags to this entry in the partition table
-	mov esi, driveListCurrentElementAddr
 	xor ecx, ecx
-	mov cl, [tDriveInfo.deviceFlags]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.attributes], ecx
+	mov cl, [edi + tDriveInfo.deviceFlags]
+	mov [esi + tPartitionInfo.attributes], ecx
 
 	; save file system to this entry in the partition table
-	mov esi, sectorBufferAddr
-	add esi, offset
+	mov edi, sectorBufferAddr
+	add edi, offset
 	xor ecx, ecx
-	mov cl, [tPartitionLayout.systemID]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.fileSystem], ecx
+	mov cl, [edi + tPartitionLayout.systemID]
+	mov [esi + tPartitionInfo.fileSystem], ecx
 
 	; save starting LBA to this entry in the partition table
-	mov esi, sectorBufferAddr
-	add esi, offset
-	mov ecx, [tPartitionLayout.startingLBA]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.startingLBA], ecx
+	mov ecx, [edi + tPartitionLayout.startingLBA]
+	mov [esi + tPartitionInfo.startingLBA], ecx
 
 	; save sector count to this entry in the partition table
-	mov esi, sectorBufferAddr
-	add esi, offset
-	mov ecx, [tPartitionLayout.sectorCount]
-	mov esi, partitionListCurrentElementAddr
-	mov [tPartitionInfo.sectorCount], ecx
+	mov ecx, [edi + tPartitionLayout.sectorCount]
+	mov [esi + tPartitionInfo.sectorCount], ecx
 
 	; save drive list number to this entry in the partition table
-	mov esi, partitionListCurrentElementAddr
 	mov ecx, driveListCurrentElement
-	mov [tPartitionInfo.driveListNumber], ecx
+	mov [esi + tPartitionInfo.driveListNumber], ecx
 ret
 
 
@@ -387,8 +370,8 @@ PartitionRead:
 	call LMElementAddressGet
 
 	; validate the sectors requested
-	mov ebx, dword [tPartitionInfo.sectorCount]
-	mov eax, dword [tPartitionInfo.startingLBA]
+	mov ebx, dword [esi + tPartitionInfo.sectorCount]
+	mov eax, dword [esi + tPartitionInfo.startingLBA]
 	add eax, startSector
 	cmp eax, ebx
 	jae .Fail
@@ -401,13 +384,13 @@ PartitionRead:
 	push bufferPtr
 	push sectorCount
 	mov eax, startSector
-	add eax, dword [tPartitionInfo.startingLBA]
+	add eax, dword [esi + tPartitionInfo.startingLBA]
 	push eax
-	push dword [tPartitionInfo.driveListNumber]
+	push dword [esi + tPartitionInfo.driveListNumber]
 	push kDriverRead
-	push dword [tPartitionInfo.PCIFunction]
-	push dword [tPartitionInfo.PCIDevice]
-	push dword [tPartitionInfo.PCIBus]
+	push dword [esi + tPartitionInfo.PCIFunction]
+	push dword [esi + tPartitionInfo.PCIDevice]
+	push dword [esi + tPartitionInfo.PCIBus]
 	call PCIHandlerCommand
 	jmp .Exit
 
@@ -453,8 +436,8 @@ PartitionWrite:
 	call LMElementAddressGet
 
 	; validate the sectors specified
-	mov ebx, dword [tPartitionInfo.sectorCount]
-	mov eax, dword [tPartitionInfo.startingLBA]
+	mov ebx, dword [esi + tPartitionInfo.sectorCount]
+	mov eax, dword [esi + tPartitionInfo.startingLBA]
 	add eax, startSector
 	cmp eax, ebx
 	jae .Fail
@@ -467,13 +450,13 @@ PartitionWrite:
 	push bufferPtr
 	push sectorCount
 	mov eax, startSector
-	add eax, dword [tPartitionInfo.startingLBA]
+	add eax, dword [esi + tPartitionInfo.startingLBA]
 	push eax
-	push dword [tPartitionInfo.driveListNumber]
+	push dword [esi + tPartitionInfo.driveListNumber]
 	push kDriverWrite
-	push dword [tPartitionInfo.PCIFunction]
-	push dword [tPartitionInfo.PCIDevice]
-	push dword [tPartitionInfo.PCIBus]
+	push dword [esi + tPartitionInfo.PCIFunction]
+	push dword [esi + tPartitionInfo.PCIDevice]
+	push dword [esi + tPartitionInfo.PCIBus]
 	call PCIHandlerCommand
 	jmp .Exit
 

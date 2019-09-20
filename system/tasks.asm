@@ -41,10 +41,9 @@ TaskInit:
 	mov ebp, esp
 
 
-	; the task list will be 256 entries of 96 bytes each (the size of a single tTaskInfo element)
-	; 256 * 96 + 16 = 24592
+	; the task list will be 256 entries of tTaskInfo structs
 	; allocate memory for the list
-	push 24592
+	push 256 * tTaskInfo_size + 16
 	push dword 1
 	call MemAllocate
 	mov [tSystem.listTasks], eax
@@ -114,7 +113,7 @@ TaskKill:
 
 	; zero out this task's memory slot
 	push 0x00000000
-	push dword 96
+	push tTaskInfo_size
 	push esi
 	call MemFill
 
@@ -289,11 +288,11 @@ TaskNew:
 
 	; set entry point (starting EIP)
 	mov eax, dword [ebp + 8]
-	mov [tTaskInfo.entryPoint], eax
+	mov [esi + tTaskInfo.entryPoint], eax
 
 	; store the current task, to keep track of who spawns who
 	mov eax, [tSystem.currentTask]
-	mov [tTaskInfo.spawnedBy], eax
+	mov [esi + tTaskInfo.spawnedBy], eax
 
 
 	; set up paging for this task's memory space
@@ -306,11 +305,11 @@ TaskNew:
 	push taskListSlot
 	call MemAllocateAligned
 	mov esi, taskListSlotAddress
-	mov [tTaskInfo.stackAddress], eax
+	mov [esi + tTaskInfo.stackAddress], eax
 
 	; adjust this stack address to point to the other end of the stack, as the CPU will expect
 	add eax, dword [tSystem.taskStackSize]
-	mov [tTaskInfo.esp], eax
+	mov [esi + tTaskInfo.esp], eax
 
 	; allocate some memory for this task's kernel stack
 	; the task number is this task's slot number
@@ -319,7 +318,7 @@ TaskNew:
 	push taskListSlot
 	call MemAllocateAligned
 	mov esi, taskListSlotAddress
-	mov [tTaskInfo.kernelStackAddress], eax
+	mov [esi + tTaskInfo.kernelStackAddress], eax
 
 	; adjust the stack address to point to the other end of the stack, as we did with the other stack a moment ago
 	; except this time, we don't save it just yet since we will be writing to that stack now
@@ -343,12 +342,12 @@ TaskNew:
 		push dword 0x0000
 		mov codeSegment, 0x00
 		mov dataSegment, 0x00
-		bts dword [tTaskInfo.taskFlags], 2
+		bts dword [esi + tTaskInfo.taskFlags], 2
 	.NotV86:
 
 	; push the data segment for SS and user stack address
 	push dataSegment
-	push dword [tTaskInfo.esp]
+	push dword [esi + tTaskInfo.esp]
 
 	; force certain bits of the passed EFLAGS register for this task:
 	; Bit 1			Reserved			Always set
@@ -374,7 +373,7 @@ TaskNew:
 	push 0x00000000
 
 	; now save the current esp for this task
-	mov [tTaskInfo.esp0], esp
+	mov [esi + tTaskInfo.esp0], esp
 
 	; restore our original stack
 	mov esp, edx
@@ -446,19 +445,19 @@ TaskSwitch:
 
 		; calculate and save the total cycle count this task used while it held the reins
 		rdtsc
-		mov ebx, dword [tTaskInfo.switchInLow]
-		mov ecx, dword [tTaskInfo.switchInHigh]
+		mov ebx, dword [esi + tTaskInfo.switchInLow]
+		mov ecx, dword [esi + tTaskInfo.switchInHigh]
 		sub eax, ebx
 		sbb edx, ecx
-		mov dword [tTaskInfo.cycleCountLow], eax
-		mov dword [tTaskInfo.cycleCountHigh], edx
+		mov dword [esi + tTaskInfo.cycleCountLow], eax
+		mov dword [esi + tTaskInfo.cycleCountHigh], edx
 
 		; save the kernel stack pointer
-		mov [tTaskInfo.esp0], esp
+		mov [esi + tTaskInfo.esp0], esp
 
 		; reload the priority value
-		mov al, byte [tTaskInfo.priority]
-		mov byte [tTaskInfo.turnsRemaining], al
+		mov al, byte [esi + tTaskInfo.priority]
+		mov byte [esi + tTaskInfo.turnsRemaining], al
 
 
 	.SkipSaveState:
@@ -472,16 +471,16 @@ TaskSwitch:
 
 		; calculate the address of this task's slot in the Task List
 		; start with the size of a single tTaskInfo element in EAX
-		mov eax, 96
+		mov eax, tTaskInfo_size
 		mul ebx
 		lea esi, [eax + edi + 16]
 
 		; see if we have a kernel stack pointer that's not zero
-		cmp dword [tTaskInfo.esp0], 0
+		cmp dword [esi + tTaskInfo.esp0], 0
 		je .findNextTaskLoop
 
 		; see if the task is suspended
-		bt dword [tTaskInfo.taskFlags], 1
+		bt dword [esi + tTaskInfo.taskFlags], 1
 	jc .findNextTaskLoop
 
 	; by the time we get here, we know what task to execute next
@@ -492,15 +491,15 @@ TaskSwitch:
 	
 	; record the 64-bit TSC
 	rdtsc
-	mov dword [tTaskInfo.switchInLow], eax
-	mov dword [tTaskInfo.switchInHigh], edx
+	mov dword [esi + tTaskInfo.switchInLow], eax
+	mov dword [esi + tTaskInfo.switchInHigh], edx
 
 	; switch to the kernel stack of the new task
-	mov ecx, dword [tTaskInfo.esp0]
+	mov ecx, dword [esi + tTaskInfo.esp0]
 	mov esp, ecx
 
 	; adjust ECX to point to the base of the stack for future use
-	bt dword [tTaskInfo.taskFlags], 2
+	bt dword [esi + tTaskInfo.taskFlags], 2
 	jnc .NotV86
 		add ecx, 16
 	.NotV86:
@@ -509,7 +508,7 @@ TaskSwitch:
 
 	; If this is not a V86 Task, reset the segment registers.
 	; If it is, we do nothing since the CPU will automatically pop them off the stack.
-	bt dword [tTaskInfo.taskFlags], 2
+	bt dword [esi + tTaskInfo.taskFlags], 2
 	jc .LoadStateV86
 		mov ax, 0x23
 		mov ds, ax

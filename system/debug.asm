@@ -499,7 +499,7 @@ section .bss
 
 section .text
 DebugInstacrash:
-	; DebugInstacrash				Causes an instant crash
+	; Causes an instant crash
 	;
 	;  input:
 	;	n/a
@@ -528,7 +528,7 @@ ret
 
 section .text
 DebugMemoryDetails:
-	; DebugMemoryDetails			Displays memory allocation
+	; Displays memory allocation
 	;
 	;  input:
 	;	n/a
@@ -604,7 +604,7 @@ DebugMemoryDetails:
 
 		; build memory details string
 		push dword 8
-		push dword [tMemInfo.address]
+		push dword [esi + tMemInfo.address]
 		push .scratch$
 		call StringTokenHexadecimal
 
@@ -613,7 +613,7 @@ DebugMemoryDetails:
 		push esi
 
 		push dword 8
-		push dword [tMemInfo.size]
+		push dword [esi + tMemInfo.size]
 		push .scratch$
 		call StringTokenHexadecimal
 
@@ -621,7 +621,7 @@ DebugMemoryDetails:
 		pop esi
 
 		push dword 2
-		push dword [tMemInfo.task]
+		push dword [esi + tMemInfo.task]
 		push .scratch$
 		call StringTokenHexadecimal
 
@@ -868,7 +868,7 @@ section .bss
 
 section .text
 DebugPCIDevices:
-	; DebugPCIDevices				Displays all PCI devices in the system
+	; Displays all PCI devices in the system
 	;
 	;  input:
 	;	n/a
@@ -1260,7 +1260,7 @@ PCIDeviceInfo:
 
 section .text
 DebugRAMBrowser:
-	; DebugRAMBrowser				An interactive memory broswer
+	; An interactive memory broswer
 	;
 	;  input:
 	;	n/a
@@ -1585,7 +1585,7 @@ section .bss
 
 section .text
 DebugSystemInfo:
-	; DebugSystemInfo				Displays information about the system on which Night is running
+	; Displays information about the system on which Night is running
 	;
 	;  input:
 	;	n/a
@@ -1903,7 +1903,7 @@ DebugTaskBrowser:
 
 	mov esi, currentTaskSlotAddress
 	push dword 2
-	push dword [tTaskInfo.spawnedBy]
+	push dword [esi + tTaskInfo.spawnedBy]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1940,7 +1940,7 @@ DebugTaskBrowser:
 
 	mov esi, currentTaskSlotAddress
 	push dword 8
-	push dword [tTaskInfo.entryPoint]
+	push dword [esi + tTaskInfo.entryPoint]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1959,13 +1959,13 @@ DebugTaskBrowser:
 
 	mov esi, currentTaskSlotAddress
 	push dword 8
-	push dword [tTaskInfo.kernelStackAddress]
+	push dword [esi + tTaskInfo.kernelStackAddress]
 	push .scratch$
 	call StringTokenHexadecimal
 
 	mov esi, currentTaskSlotAddress
 	push dword 8
-	mov eax, dword [tTaskInfo.kernelStackAddress]
+	mov eax, dword [esi + tTaskInfo.kernelStackAddress]
 	add eax, dword [tSystem.taskKernelStackSize]
 	dec eax
 	push eax
@@ -1987,13 +1987,13 @@ DebugTaskBrowser:
 
 	mov esi, currentTaskSlotAddress
 	push dword 8
-	push dword [tTaskInfo.stackAddress]
+	push dword [esi + tTaskInfo.stackAddress]
 	push .scratch$
 	call StringTokenHexadecimal
 
 	mov esi, currentTaskSlotAddress
 	push dword 8
-	mov eax, dword [tTaskInfo.stackAddress]
+	mov eax, dword [esi + tTaskInfo.stackAddress]
 	add eax, dword [tSystem.taskStackSize]
 	dec eax
 	push eax
@@ -2015,7 +2015,7 @@ DebugTaskBrowser:
 
 	mov esi, currentTaskSlotAddress
 	push dword 2
-	push dword [tTaskInfo.priority]
+	push dword [esi + tTaskInfo.priority]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -2034,7 +2034,7 @@ DebugTaskBrowser:
 
 	mov esi, currentTaskSlotAddress
 	push dword 8
-	push dword [tTaskInfo.taskFlags]
+	push dword [esi + tTaskInfo.taskFlags]
 	push .scratch$
 	call StringTokenBinary
 
@@ -2055,13 +2055,13 @@ DebugTaskBrowser:
 
 		mov esi, currentTaskSlotAddress
 		push dword 10
-		push dword [tTaskInfo.cycleCountHigh]
+		push dword [esi + tTaskInfo.cycleCountHigh]
 		push .scratch$
 		call StringTokenDecimal
 
 		mov esi, currentTaskSlotAddress
 		push dword 10
-		push dword [tTaskInfo.cycleCountLow]
+		push dword [esi + tTaskInfo.cycleCountLow]
 		push .scratch$
 		call StringTokenDecimal
 
@@ -2097,9 +2097,9 @@ DebugTaskBrowser:
 		cmp al, 0x29							; Spacebar
 		jne .NotSpacebar
 			mov esi, currentTaskSlotAddress
-			mov al, byte [tTaskInfo.taskFlags]
+			mov al, byte [esi + tTaskInfo.taskFlags]
 			btc ax, 1
-			mov byte [tTaskInfo.taskFlags], al
+			mov byte [esi + tTaskInfo.taskFlags], al
 			jmp .PrintTaskInfo
 		.NotSpacebar:
 
@@ -2115,14 +2115,14 @@ DebugTaskBrowser:
 		cmp al, 0x7B							; -
 		jne .NotMinus
 			mov esi, currentTaskSlotAddress
-			dec byte [tTaskInfo.priority]
+			dec byte [esi + tTaskInfo.priority]
 			jmp .PrintTaskInfo
 		.NotMinus:
 		
 		cmp al, 0x79							; +
 		jne .NotPlus
 			mov esi, currentTaskSlotAddress
-			inc byte [tTaskInfo.priority]
+			inc byte [esi + tTaskInfo.priority]
 			jmp .PrintTaskInfo
 		.NotPlus:
 
@@ -2210,7 +2210,7 @@ ret 4
 
 section .text
 DebugWaitForEscape:
-	; DebugWaitForEscape			Waits for the Escape key to be pressed, then returns
+	; Waits for the Escape key to be pressed, then returns
 	;
 	;  input:
 	;	n/a

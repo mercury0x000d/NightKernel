@@ -18,10 +18,12 @@
 
 
 
-; tMemoryInfo, for the physical memory allocator to track blocks
-%define tMemInfo.address						(esi + 00)
-%define tMemInfo.size							(esi + 04)
-%define tMemInfo.task							(esi + 08)
+; introucucing the tMemInfo struct, used by the physical memory allocator to track blocks
+struc tMemInfo
+	.address									resd 1
+	.size										resd 1
+	.task										resd 1
+endstruc
 
 
 
@@ -671,7 +673,7 @@ MemAddressToBlock:
 
 		; see if the address of this block matches the one we're trying to release
 		mov eax, address
-		mov ebx, [tMemInfo.address]
+		mov ebx, [esi + tMemInfo.address]
 		cmp eax, ebx
 		jne .NextIteration
 
@@ -712,7 +714,7 @@ MemAllocate:
 	;
 	;  output:
 	;	EAX - Address of requested block, or zero if call fails
-	;	EDX - Result code
+	;	EDX - Error code
 
 	; This function implements a best-fit algorithm to fulfill memory requests. Why best-fit? Because it's better at keeping larger
 	; contiguous free blocks available and the additional overhead to implement it is no big deal to modern processors.
@@ -734,6 +736,7 @@ MemAllocate:
 	; memory manager calls would see the block as available for use, even though the calling task is using it
 	; As you can imagine, this is a Certified Very Bad Thing.
 	cmp taskNum, 0
+	mov edx, kErrInvalidParameter
 	je .Exit
 
 	push memorySize
@@ -763,13 +766,13 @@ MemAllocate:
 	call LMElementAddressGet
 
 	; save the address and size of this block for later
-	push dword [tMemInfo.address]
-	push dword [tMemInfo.size]
+	push dword [esi + tMemInfo.address]
+	push dword [esi + tMemInfo.size]
 
 	; shrink this block by the amount we're using
-	mov eax, dword [tMemInfo.size]
+	mov eax, dword [esi + tMemInfo.size]
 	sub eax, memorySize
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; see if this block's size now = 0 and delete it if necessary
 	cmp eax, 0
@@ -795,15 +798,15 @@ MemAllocate:
 	mov ecx, eax
 	add ecx, ebx
 	sub ecx, edx
-	mov dword [tMemInfo.address], ecx
+	mov dword [esi + tMemInfo.address], ecx
 
 	; set the size
 	mov eax, memorySize
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; set the requesting task field
 	mov ebx, taskNum
-	mov dword [tMemInfo.task], ebx
+	mov dword [esi + tMemInfo.task], ebx
 
 	; prepare to return address of this block
 	push ecx
@@ -817,14 +820,14 @@ MemAllocate:
 
 	; reload the address and exit
 	pop eax
-	mov edx, 0
+	mov edx, kErrNone
 	jmp .Exit
 
 
 	.Fail:
 	; If we get here, we had a problem, Houston. Fail. Fail fail. The failiest fail in Failtown fail.
 	mov eax, 0
-	mov edx, 0	; this should obviously be an error code later on
+	mov edx, kErrOutOfMemory
 
 
 	.Exit:
@@ -847,7 +850,7 @@ MemAllocateAligned:
 	;
 	;  output:
 	;	EAX - Address of requested block, or zero if call fails
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -1144,7 +1147,7 @@ MemDispose:
 	call LMElementAddressGet
 
 	; mark the block free
-	mov dword [tMemInfo.task], 0
+	mov dword [esi + tMemInfo.task], 0
 
 	; try to condense the memory list
 	push elementNum
@@ -1256,13 +1259,13 @@ MemFindMostSuitable:
 
 		; see if this block is free, 
 		; if not, we go to the next block in the loop
-		mov eax, [tMemInfo.task]
+		mov eax, [esi + tMemInfo.task]
 		cmp eax, 0
 		jne .NextIteration
 
 		; see if the size of this block is big enough to meet the request
 		; if not, we go to the next block in the loop
-		mov eax, [tMemInfo.size]
+		mov eax, [esi + tMemInfo.size]
 		mov ebx, size
 		cmp eax, ebx
 		jb .NextIteration
@@ -1354,16 +1357,16 @@ MemInit:
 	; and finally set the value we calculated into the list itself
 	mov esi, [tSystem.listMemory]
 	add esi, 16
-	mov dword [tMemInfo.address], eax
+	mov dword [esi + tMemInfo.address], eax
 
 	; now calculate the new free size
 	; new free size = initial free size - the size of the list space reserved
 	mov eax, [tSystem.memoryInitialAvailableBytes]
 	sub eax, dword [tSystem.memoryListReservedSpace]
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; and we set the task ID, which is 0 because it's free space
-	mov dword [tMemInfo.task], 0
+	mov dword [esi + tMemInfo.task], 0
 
 
 	; and exit!
@@ -1406,7 +1409,7 @@ MemMergeBlocks:
 	cmp edx, 0
 	jne .Exit
 
-	mov eax, [tMemInfo.task]
+	mov eax, [esi + tMemInfo.task]
 	cmp eax, 0
 	jne .Exit
 
@@ -1422,7 +1425,7 @@ MemMergeBlocks:
 	jne .CheckLowerBlock
 
 		; if we get here the block existed, so let's see if it is free
-		mov eax, [tMemInfo.task]
+		mov eax, [esi + tMemInfo.task]
 		cmp eax, 0
 		jne .CheckLowerBlock
 
@@ -1447,7 +1450,7 @@ MemMergeBlocks:
 	jne .Exit
 
 		; if we get here the block existed, so let's see if it is free
-		mov eax, [tMemInfo.task]
+		mov eax, [esi + tMemInfo.task]
 		cmp eax, 0
 		jne .Exit
 
@@ -1457,7 +1460,6 @@ MemMergeBlocks:
 			dec ecx
 			mov higherBlockElementNum, ecx
 			call .MemCondenseMergeBlocks
-
 
 	.Exit:
 	mov esp, ebp
@@ -1493,15 +1495,15 @@ ret 4
 	mov higherBlockAddress, esi
 
 	; get size of higher block
-	mov eax, dword [tMemInfo.size]
+	mov eax, dword [esi + tMemInfo.size]
 
 	; get size of lower block
 	mov esi, lowerBlockAddress
-	mov ebx, dword [tMemInfo.size]
+	mov ebx, dword [esi + tMemInfo.size]
 
 	; add the sizes together and write the result back into the lower block
 	add eax, ebx
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; delete the higher block
 	push higherBlockElementNum
@@ -1762,7 +1764,7 @@ MemShrinkFromBeginning:
 
 	; check that the caller didn't specify a size larger than the original block (e.g. a grow instead of a shrink)
 	mov eax, newSize
-	mov ebx, dword [tMemInfo.size]
+	mov ebx, dword [esi + tMemInfo.size]
 	cmp eax, ebx
 	jb .SizeIsValid
 		; if we get here, the size was invalid
@@ -1787,19 +1789,19 @@ MemShrinkFromBeginning:
 	; now, to set all the proper values on the original block...
 	; first, we can mark it as free
 	mov esi, elementAddress
-	mov dword [tMemInfo.task], 0
+	mov dword [esi + tMemInfo.task], 0
 
 	; calculate and set the new size
 	mov eax, newSize
-	mov ebx, dword [tMemInfo.size]
+	mov ebx, dword [esi + tMemInfo.size]
 	sub ebx, eax
 	mov newBlockSize, ebx
 	mov eax, newBlockSize
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; and while we still have esi set for the original block, let's do a bit of calculation in advance
 	; calculate the address for the new block ahead of time
-	mov ebx, dword [tMemInfo.address]
+	mov ebx, dword [esi + tMemInfo.address]
 	add ebx, eax
 	mov newBlockAddress, ebx
 
@@ -1812,11 +1814,11 @@ MemShrinkFromBeginning:
 
 	; set the size
 	mov eax, newSize
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; set the address
 	mov eax, newBlockAddress
-	mov dword [tMemInfo.address], eax
+	mov dword [esi + tMemInfo.address], eax
 
 
 	; try to condense the memory list
@@ -1886,7 +1888,7 @@ MemShrinkFromEnd:
 
 	; check that the caller didn't specify a size larger than the original block (e.g. a grow instead of a shrink)
 	mov eax, newSize
-	mov ebx, dword [tMemInfo.size]
+	mov ebx, dword [esi + tMemInfo.size]
 	cmp eax, ebx
 	jb .SizeIsValid
 		; if we get here, the size was invalid
@@ -1897,18 +1899,18 @@ MemShrinkFromEnd:
 	; calculate the new size of the block
 	mov esi, elementAddress
 	mov eax, newSize
-	mov ebx, dword [tMemInfo.size]
+	mov ebx, dword [esi + tMemInfo.size]
 	sub ebx, eax
 	mov newBlockSize, ebx
 
 	; calculate the address the cloned block will have
-	mov ebx, dword [tMemInfo.address]
+	mov ebx, dword [esi + tMemInfo.address]
 	add ebx, eax
 	mov newBlockAddress, ebx
 
 	; set the size of the original block
 	mov eax, newSize
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; clone this element
 	push elementNum
@@ -1931,14 +1933,14 @@ MemShrinkFromEnd:
 
 	; set the size of the cloned block
 	mov eax, newBlockSize
-	mov dword [tMemInfo.size], eax
+	mov dword [esi + tMemInfo.size], eax
 
 	; set the address of the cloned block
 	mov eax, newBlockAddress
-	mov dword [tMemInfo.address], eax
+	mov dword [esi + tMemInfo.address], eax
 
 	; mark the new block as free
-	mov dword [tMemInfo.task], 0
+	mov dword [esi + tMemInfo.task], 0
 
 	; try to condense the memory list
 	push elementNum
