@@ -30,3 +30,6 @@
 %define kCBVerbose								1
 %define kCBLines50								2
 %define kCBVMEnable								3
+
+; error codes
+%define kErrNone								0x0000

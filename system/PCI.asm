@@ -478,7 +478,7 @@ PCIHandlerCommand:
 	;
 	;  output:
 	;	EAX - Handler response
-	;	EBX - Error code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -526,12 +526,12 @@ PCIHandlerCommand:
 
 	; if address is zero, we abort with error
 	cmp eax, 0
-	jne .DoHandlerCall
+	jne .NoError
 		; if we get here, there was no handler
-		mov eax, kErrHandlerNotPresent
+		mov edx, kErrHandlerNotPresent
 		jmp .Exit
+	.NoError:
 
-	.DoHandlerCall:
 	; set up a call to the handler for this device
 	push parameter5
 	push parameter4

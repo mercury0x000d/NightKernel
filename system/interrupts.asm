@@ -416,6 +416,10 @@ IDTInit:
 	push dword 65536
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov dword [kIDTPtr], eax
 
 	; set the proper value into the IDT struct
@@ -423,7 +427,7 @@ IDTInit:
 
 	; set all the handler slots to the "unsupported routine" handler for sanity
 	mov ecx, 0x00000100
-	setupOneVector:
+	.SetupOneVector:
 		; preserve our counter
 		push ecx
 
@@ -436,11 +440,13 @@ IDTInit:
 
 		; restore our counter
 		pop ecx
-	loop setupOneVector
+	loop .SetupOneVector
 
 	; activate that IDT!
 	lidt [tIDT]
 
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret

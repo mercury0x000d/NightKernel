@@ -85,7 +85,7 @@ ret
 
 
 section .text
-RangeCheck:
+CheckRange:
 	; Checks that a value passed is in range
 	;
 	;  input:

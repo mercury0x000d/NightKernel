@@ -501,7 +501,7 @@
 
 			<code>
 				<table style="width:100%">
-					<caption>Table 5.2 - Driver command codes - Block and character drivers</caption>
+					<caption>Table 5.2 - Driver command codes - Block and character driver commands</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -509,71 +509,71 @@
 						<th><i>Symbol</i></th>
 					</tr>
 					<tr>
-						<td>00</td>
+						<td>0x00</td>
 						<td>kDriverInit</td>
 					</tr>
 					<tr>
-						<td>01</td>
+						<td>0x01</td>
 						<td>kDriverMediaCheck</td>
 					</tr>
 					<tr>
-						<td>02</td>
+						<td>0x02</td>
 						<td>kDriverBuildBPB</td>
 					</tr>
 					<tr>
-						<td>03</td>
+						<td>0x03</td>
 						<td>kDriverIOCTLRead</td>
 					</tr>
 					<tr>
-						<td>04</td>
+						<td>0x04</td>
 						<td>kDriverRead</td>
 					</tr>
 					<tr>
-						<td>05</td>
+						<td>0x05</td>
 						<td>kDriverNondestructiveRead</td>
 					</tr>
 					<tr>
-						<td>06</td>
+						<td>0x06</td>
 						<td>kDriverInputStatus</td>
 					</tr>
 					<tr>
-						<td>07</td>
+						<td>0x07</td>
 						<td>kDriverFlushInputBuffers</td>
 					</tr>
 					<tr>
-						<td>08</td>
+						<td>0x08</td>
 						<td>kDriverWrite</td>
 					</tr>
 					<tr>
-						<td>09</td>
+						<td>0x09</td>
 						<td>kDriverWriteVerify</td>
 					</tr>
 					<tr>
-						<td>0A</td>
+						<td>0x0A</td>
 						<td>kDriverOutputStatus</td>
 					</tr>
 					<tr>
-						<td>0B</td>
+						<td>0x0B</td>
 						<td>kDriverFlushOutputBuffers</td>
 					</tr>
 					<tr>
-						<td>0C</td>
+						<td>0x0C</td>
 						<td>kDriverIOCTLWrite</td>
 					</tr>
 					<tr>
-						<td>0D</td>
+						<td>0x0D</td>
 						<td>kDriverOpen</td>
 					</tr>
 					<tr>
-						<td>0E</td>
+						<td>0x0E</td>
 						<td>kDriverClose</td>
 					</tr>
 					<tr>
-						<td>0F</td>
+						<td>0x0F</td>
 						<td>kDriverRemovableMedia</td>
 					</tr>
 					<tr>
-						<td>10</td>
+						<td>0x10</td>
 						<td>kDriverOutputUntilBusy</td>
 					</tr>
 				</table>
@@ -584,7 +584,7 @@
 
 			<code>
 				<table style="width:100%">
-					<caption>Table 5.3 - Driver command codes - Filesystem drivers</caption>
+					<caption>Table 5.3 - Driver command codes - Filesystem driver commands</caption>
 					<col width = 10%>
 					<col width = 90%>
 					<tr>
@@ -592,24 +592,44 @@
 						<th><i>Symbol</i></th>
 					</tr>
 					<tr>
-						<td>F0</td>
+						<td>0xF0</td>
 						<td>kDriverFileLoad</td>
 					</tr>
 					<tr>
-						<td>F1</td>
+						<td>0xF1</td>
 						<td>kDriverFileInfoAccessedGet</td>
 					</tr>
 					<tr>
-						<td>F2</td>
+						<td>0xF2</td>
 						<td>kDriverFileInfoCreatedGet</td>
 					</tr>
 					<tr>
-						<td>F3</td>
+						<td>0xF3</td>
 						<td>kDriverFileInfoModifiedGet</td>
 					</tr>
 					<tr>
-						<td>F4</td>
+						<td>0xF4</td>
 						<td>kDriverFileInfoSizeGet</td>
+					</tr>
+					<tr>
+						<td>0xF5</td>
+						<td>kDriverItemLoad</td>
+					</tr>
+					<tr>
+						<td>0xF6</td>
+						<td>kDriverItemNew</td>
+					</tr>
+					<tr>
+						<td>0xF7</td>
+						<td>kDriverItemStore</td>
+					</tr>
+					<tr>
+						<td>0xF8</td>
+						<td>kDriverPartitionInfo</td>
+					</tr>
+					<tr>
+						<td>0xF9</td>
+						<td>kDriverItemCount</td>
 					</tr>
 				</table>
 			</code>
@@ -956,6 +976,38 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			<b>9/25/2019, 0.1D Update, Build 2247 - Basic FAT16 driver complete</b><br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16ItemCount()</code> to return how many items match the attributes specified in the folder specified.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16PartitionInfo()</code> to return free space on the drive</li>
+				<li>Kernel: <i>memory.asm</i> - Added a mechanism to <code>MemFindMostSuitable()</code> to track free memory as it works. This function is called in every memory allocation, so it should always maintain the current number of free bytes.</li>
+				<li>Manual: Added additional filesystem driver command codes.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - All routines which previously accepted a partition number now accept a pointer to a tPartitionInfo record instead, allowing them to be much more efficient.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Eliminated unnecessary path string copying in several functions</li>
+				<li>Kernel: <i>globals.asm</i> - <code>tPartitionInfo</code> now holds the partition number of itself as well. This is done to allow code optimizations in other functions.</li>
+				<li>Manual: Added new function error codes.</li>
+				<li>Manual: Removed <i>IDE Controller.asm</i> from the <i>Function Reference</i> section as it is a driver and its routines should never be called directly anyway.</li>
+				<li>Kernel: Combined <i>files.asm</i> and <i>disks.asm</i> into <i>storage.asm</i> and updated the NKRM accordingly.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: Improved error trapping after allocating memory in various routines.</li>
+				<li>Kernel: Worked on various files to begin establishing EDX as the standard register which holds returned error cdoes.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ChainGrow()</code> now zeroes-out all clusters which it adds onto a cluster chain.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemExists()</code> now works.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed some local variable allocations.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Plugged a memory leak in <code>FAT16ServiceHandler()</code>.</li>
+				<li>Manual: Fixed error code return registers for several functions.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
 			<b>9/20/2019, 0.1D Update, Build 2009 - FAT16 driver progress</b><br>
 			<br>
 			New<br>
@@ -1760,22 +1812,16 @@
 						<br>
 						<a href="#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_disks.asm" style="font-size: 14px">Disk and Partition Functions - disks.asm</a><br>
-						<br>
-						<a href="#NightFunctionReference_files.asm" style="font-size: 14px">File and Path Functions - files.asm</a><br>
-						<br>
 						<a href="#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
-						<br>
-					</td>
-					<td>
-						<a href="#NightFunctionReference_IDEController.asm" style="font-size: 14px">IDE Functions - IDE Controller.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
 						<br>
+					</td>
+					<td>
 						<a href="#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
@@ -1784,24 +1830,24 @@
 						<br>
 						<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
 						<br>
-					</td>
-					<td>
 						<a href="#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_PS2Controller.asm" style="font-size: 14px">PS/2 Functions - PS2 Controller.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
 						<br>
+					</td>
+					<td>
 						<a href="#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
 						<br>
+						<a href="#NightFunctionReference_storage.asm" style="font-size: 14px">Storage Manager Functions - storage.asm</a><br>
+						<br>
 						<a href="#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
 						<br>
-					</td>
-					<td>
 						<a href="#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
@@ -1811,7 +1857,7 @@
 			</table>
 			<br>
 			- Public functions are intended for calling from any other routines.<br>
-			- Internal functions are only intended to be called by the kernel internally.<br>
+			- Internal functions are intended to be called only by the kernel internally.<br>
 			<br>
 			<br>
 			<br>
@@ -2061,7 +2107,7 @@
 			<br>
 			<br>
 
-			<a name="NightFunctionReference_disks.asm"><b>Disk and Partition Handling Functions - <i>disks.asm</i></b></a><br>
+			<a name="NightFunctionReference_storage.asm"><b>Storage Manager Functions - <i>storage.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
@@ -2076,7 +2122,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>DiskRead</code><br>
+						<code>SMDiskRead</code><br>
 						<br>
 						Reads sectors from the drive specified
 					</td>
@@ -2095,83 +2141,25 @@
 				</tr>
 				<tr>
 					<td>
-						<code>PartitionEnumerate</code><br>
+						<code>SMItemCount</code><br>
 						<br>
-						Scans the drives list and discovers partitions on each drive
-					</td>
-					<td>n/a</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PartitionGetFromPath</code><br>
-						<br>
-						Returns the partition number based on the path specified
-					</td>
-					<td>
-						<ol>
-							<li>Path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Partition number<br>
-						EBX - Error code
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PartitionMap</code><br>
-						<br>
-						Maps the specified partition to the drive letter specified
+						Returns the number of items in the directory specified
 					</td>
 					<td>
 						<ol>
 							<li>Partition number</li>
-							<li>Drive number (0 = A, 1 = B, etc.)</li>
-						</ol>
-					</td>
-					<td>EAX - Error code</td>
-				</tr>
-				<tr>
-					<td>
-						<code>PartitionRead</code><br>
-						<br>
-						Reads sectors from the partition specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition list number</li>
-							<li>Start sector</li>
-							<li>Sector count</li>
-							<li>Buffer pointer</li>
+							<li>Pointer to path string</li>
+							<li>Attributes to match</li>
 						</ol>
 					</td>
 					<td>
-						EAX - Handler response<br>
-						EBX - Error code
+						EAX - Number of matching items, or zero if error<br>
+						EDX - Error code
 					</td>
-				</tr>
-			</table>
-			<br>
-			<br>
-			<br>
-
-			<a name="NightFunctionReference_files.asm"><b>File and Path Functions - <i>files.asm</i></b></a><br>
-			<br>
-			32-bit Public Function Listing:<br>
-			<table style="width:100%">
-				<caption>Table A1.5 - partitions.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemDelete</code><br>
+						<code>SMItemDelete</code><br>
 						<br>
 						Deletes the file specified
 					</td>
@@ -2185,7 +2173,23 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemInfoAccessedGet</code><br>
+						<code>SMItemExists</code><br>
+						<br>
+						Tests if the item specified already exists
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SMItemInfoAccessedGet</code><br>
 						<br>
 						Returns the date of last access for the specified file
 					</td>
@@ -2204,7 +2208,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemInfoCreatedGet</code><br>
+						<code>SMItemInfoCreatedGet</code><br>
 						<br>
 						Returns the date and time of creation for the specified file
 					</td>
@@ -2226,7 +2230,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemInfoModifiedGet</code><br>
+						<code>SMItemInfoModifiedGet</code><br>
 						<br>
 						Returns the date and time of last modification for the specified file
 					</td>
@@ -2248,7 +2252,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemInfoSizeGet</code><br>
+						<code>SMItemInfoSizeGet</code><br>
 						<br>
 						Returns the size in bytes of the file specified
 					</td>
@@ -2265,7 +2269,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemLoad</code><br>
+						<code>SMItemLoad</code><br>
 						<br>
 						Returns a buffer containing the file specified
 					</td>
@@ -2285,7 +2289,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemNew</code><br>
+						<code>SMItemNew</code><br>
 						<br>
 						Creates a new empty file at the path specified
 					</td>
@@ -2299,7 +2303,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMItemStore</code><br>
+						<code>SMItemStore</code><br>
 						<br>
 						Stores the data at the address specified to the file specified
 					</td>
@@ -2315,7 +2319,86 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMPathParentGet</code><br>
+						<code>SMPartitionEnumerate</code><br>
+						<br>
+						Scans the drives list and discovers partitions on each drive
+					</td>
+					<td>n/a</td>
+					<td>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SMPartitionGetFromPath</code><br>
+						<br>
+						Returns the partition number based on the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Partition number<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SMPartitionMap</code><br>
+						<br>
+						Maps the specified partition to the drive letter specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Drive number (0 = A, 1 = B, etc.)</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SMPartitionRead</code><br>
+						<br>
+						Reads sectors from the partition specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SMPartitionWrite</code><br>
+						<br>
+						Reads sectors from the partition specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>SMPathParentGet</code><br>
 						<br>
 						Shortens the path given to point to the parent path
 					</td>
@@ -2328,7 +2411,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMPathPartitionGet</code><br>
+						<code>SMPathPartitionGet</code><br>
 						<br>
 						Returns the partition number based on the path specified
 					</td>
@@ -2344,7 +2427,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMPathPartitionStripDrive</code><br>
+						<code>SMPathPartitionStripDrive</code><br>
 						<br>
 						Returns the path with the leading drive letter/partition specifier removed
 					</td>
@@ -2357,7 +2440,7 @@
 				</tr>
 				<tr>
 					<td>
-						<code>FMPathValidate</code><br>
+						<code>SMPathValidate</code><br>
 						<br>
 						Verifies if a path specified is valid per usual DOS rules
 					</td>
@@ -2381,7 +2464,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.6 - GDT.asm 32-bit public functions</caption>
+				<caption>Table A1.5 - GDT.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2532,7 +2615,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.7 - hardware.asm 32-bit public functions</caption>
+				<caption>Table A1.6 - hardware.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2577,173 +2660,11 @@
 			<br>
 			<br>
 
-			<a name="NightFunctionReference_IDEController.asm"><b>IDE Functions - <i>IDE Controller.asm</i></b></a><br>
-			<br>
-			32-bit Public Function Listing:<br>
-			<table style="width:100%">
-				<caption>Table A1.8 - IDE Controller.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEATAPISectorReadPIO</code><br>
-						Reads sectors from an ATAPI device<br>
-					</td>
-					<td>
-						<ol>
-							<li>I/O base port</li>
-							<li>Device number (0 or 1)</li>
-							<li>LBA address of starting sector</li>
-							<li>Number of sectors to write</li>
-							<li>Memory buffer address to which data will be written</li>
-						</ol>
-					</td>
-					<td>EAX - Error code</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEATASectorReadLBA28PIO</code><br>
-						Reads sectors from disk using LBA28<br>
-					</td>
-					<td>
-						<ol>
-							<li>I/O base port</li>
-							<li>Device number (0 or 1)</li>
-							<li>LBA address of starting sector</li>
-							<li>Number of sectors to write</li>
-							<li>Memory buffer address to which data will be written</li>
-						</ol>
-					</td>
-					<td>EAX - Error code</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEATASectorWriteLBA28PIO</code><br>
-						Writes sectors to disk using LBA28<br>
-					</td>
-					<td>
-						<ol>
-							<li>I/O base port</li>
-							<li>Device number (0 or 1)</li>
-							<li>LBA address of starting sector</li>
-							<li>Number of sectors to write</li>
-							<li>Memory buffer address from which data will be read</li>
-						</ol>
-					</td>
-					<td>EAX - Error code</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEDetectChannelDevices</code><br>
-						Checks both of the device spots on the ATA channel specified and saves their data to the drives list<br>
-					</td>
-					<td>
-						<ol>
-							<li>I/O base port</li>
-							<li>Control base port</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEDriveIdentify</code><br>
-						Returns identifying information about the device specified<br>
-					</td>
-					<td>
-						<ol>
-							<li>Buffer address for results of Identify command</li>
-							<li>ATA channel I/O base port</li>
-							<li>Device number (0 or 1)</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Device code<br>
-						&emsp;0x00 - Other<br>
-						&emsp;0x01 - PATA device<br>
-						&emsp;0x02 - SATA device<br>
-						&emsp;0x03 - ATAPI device<br>
-						&emsp;0xFF - No device found
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEInit</code><br>
-						Performs any necessary setup of the driver<br>
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-						</ol>
-					</td>
-					<td>EAX - Error code</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEInterruptHandlerPrimary</code><br>
-						Interrupt handler for ATA interrupts<br>
-					</td>
-					<td>n/a</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEInterruptHandlerSecondary</code><br>
-						Interrupt handler for ATA interrupts<br>
-					</td>
-					<td>n/a</td>
-					<td>n/a</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEServiceHandler</code><br>
-						The service routine called by external applications<br>
-						<br>
-						Note: Parameters 1 through 5 vary based on the command sent.
-					</td>
-					<td>
-						<ol>
-							<li>PCI Bus</li>
-							<li>PCI Device</li>
-							<li>PCI Function</li>
-							<li>Command code</li>
-							<li>Parameter 1</li>
-							<li>Parameter 2</li>
-							<li>Parameter 3</li>
-						</ol>
-					</td>
-					<td>EAX - driver response</td>
-				</tr>
-				<tr>
-					<td>
-						<code>IDEWaitForReady</code><br>
-						Waits for bit 7 of the passed port value to go clear, then returns<br>
-					</td>
-					<td>
-						<ol>
-							<li>Port number</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-			</table>
-			<br>
-			<br>
-			<br>
-
 			<a name="NightFunctionReference_interrupts.asm"><b>Interrupt Functions - <i>interrupts.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.9 - interrupts.asm 32-bit public functions</caption>
+				<caption>Table A1.7 - interrupts.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -2876,7 +2797,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.10 - List Manager 32-bit public functions</caption>
+				<caption>Table A1.8 - List Manager 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3118,7 +3039,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.11 - List Manager 32-bit internal functions</caption>
+				<caption>Table A1.9 - List Manager 32-bit internal functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3303,7 +3224,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.12 - Memory Manager 16-bit public functions</caption>
+				<caption>Table A1.10 - Memory Manager 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3381,7 +3302,9 @@
 						Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM, and fills in the appropriate system data structures for later use by the memory manager
 					</td>
 					<td>n/a</td>
-					<td>n/a</td>
+					<td>
+						EDX - Error code
+					</td>
 				</tr>
 			</table>
 			<br>
@@ -3390,7 +3313,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.13 - Memory Manager 32-bit public functions</caption>
+				<caption>Table A1.11 - Memory Manager 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3704,7 +3627,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.14 - Memory Manager 32-bit internal functions</caption>
+				<caption>Table A1.12 - Memory Manager 32-bit internal functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3757,7 +3680,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.15 - misc.asm 16-bit public functions</caption>
+				<caption>Table A1.13 - misc.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3782,7 +3705,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.16 - misc.asm 32-bit public functions</caption>
+				<caption>Table A1.14 - misc.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3813,7 +3736,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.17 - numbers.asm 32-bit public functions</caption>
+				<caption>Table A1.15 - numbers.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3859,7 +3782,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.18 - PCI Functions 16-bit public functions</caption>
+				<caption>Table A1.16 - PCI Functions 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3884,7 +3807,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.19 - PCI Functions 32-bit public functions</caption>
+				<caption>Table A1.17 - PCI Functions 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4185,7 +4108,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.20 - PIC.asm 32-bit public functions</caption>
+				<caption>Table A1.18 - PIC.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4265,7 +4188,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.21 - PS2 Controller.asm 32-bit public functions</caption>
+				<caption>Table A1.19 - PS2 Controller.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4518,7 +4441,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.22 - power.asm 16-bit public functions</caption>
+				<caption>Table A1.20 - power.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4563,7 +4486,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.23 - RTC.asm 32-bit public functions</caption>
+				<caption>Table A1.21 - RTC.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4608,7 +4531,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.24 - screen.asm 16-bit public functions</caption>
+				<caption>Table A1.22 - screen.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4681,7 +4604,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.25 - screen.asm 32-bit public functions</caption>
+				<caption>Table A1.23 - screen.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4794,7 +4717,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.26 - serial.asm 32-bit public functions</caption>
+				<caption>Table A1.24 - serial.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5037,7 +4960,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.27 - strings.asm 16-bit public functions</caption>
+				<caption>Table A1.25 - strings.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5081,7 +5004,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.28 - strings.asm 32-bit public functions</caption>
+				<caption>Table A1.26 - strings.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5638,7 +5561,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.29 - tasks.asm 32-bit public functions</caption>
+				<caption>Table A1.27 - tasks.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5710,6 +5633,7 @@
 					</td>
 					<td>
 						EAX - Task number
+						EDX - Error code
 					</td>
 				</tr>
 				<tr>
@@ -5728,7 +5652,7 @@
 
 			<a name="NightFunctionReference_StandardFunctionReturnCodes"><b>Standard Function Return Codes</b></a><br>
 			<table style="width:100%">
-				<caption>Table A1.30 - Standard function return codes</caption>
+				<caption>Table A1.28 - Standard function return codes</caption>
 				<col width = 10%>
 				<col width = 20%>
 				<col width = 70%>
@@ -5736,6 +5660,12 @@
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
+				</tr>
+				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>Parameter errors</i></td>
 				</tr>
 				<tr>
 					<td>0x0000</td>
@@ -5758,6 +5688,38 @@
 					<td>Value specified is too high</td>
 				</tr>
 				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>ELF executable errors</i></td>
+				</tr>
+				<tr>
+					<td>0xFA00</td>
+					<td>kErrELFInvalidBinary</td>
+					<td>The file specified does not contain the signature of an ELF binary</td>
+				</tr>
+				<tr>
+					<td>0xFA01</td>
+					<td>kErrELFWrongArchitecture</td>
+					<td>The ELF binary specified is compiled for an architecture other than the one running Night</td>
+				</tr>
+				<tr>
+					<td>0xFA02</td>
+					<td>kErrELFWrongByteOrder</td>
+					<td>The ELF binary specified is compiled for an architecture with a different byte order than the one running Night; e.g. trying to run a big-endian application on a little endian machine</td>
+				</tr>
+				<tr>
+					<td>0xFA03</td>
+					<td>kErrELFWrongCPU</td>
+					<td>The ELF binary specified is compiled for a CPU other than the one on the machine currently running Night</td>
+				</tr>
+				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>Filesystem errors</i></td>
+				</tr>
+				<tr>
 					<td>0xFB00</td>
 					<td>kErrDriveLetterInvalid</td>
 					<td>Invalid drive letter</td>
@@ -5773,9 +5735,61 @@
 					<td>Path contains an invalid character</td>
 				</tr>
 				<tr>
+					<td>0xFB03</td>
+					<td>kErrItemNotFound</td>
+					<td>The item at the specified path could not be found</td>
+				</tr>
+				<tr>
+					<td>0xFB04</td>
+					<td>kErrClusterChainEndUnexpected</td>
+					<td>The end of the cluster chain was encountered before the end of the operation</td>
+				</tr>
+				<tr>
+					<td>0xFB05</td>
+					<td>kErrRootDirectoryFull</td>
+					<td>The root directory is full; FAT16 specific.</td>
+				</tr>
+				<tr>
+					<td>0xFB06</td>
+					<td>kErrItemAlreadyExists</td>
+					<td>Item specified already exists on the partition</td>
+				</tr>
+				<tr>
+					<td>0xFB07</td>
+					<td>kErrClusterChainBad</td>
+					<td>The cluster chain specified is bad; e.g. is longer than the possible number of clusters on the drive</td>
+				</tr>
+				<tr>
+					<td>0xFB08</td>
+					<td>kErrDirectoryNotEmpty</td>
+					<td>The directory specified for deletion is not empty</td>
+				</tr>
+				<tr>
+					<td>0xFB09</td>
+					<td>kErrNotADirectory</td>
+					<td>A directory was expected, but the item specified is not a directory</td>
+				</tr>
+				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>Partition errors</i></td>
+				</tr>
+				<tr>
 					<td>0xFC00</td>
 					<td>kErrInvalidPartitionNumber</td>
 					<td>Invalid partition number</td>
+				</tr>
+				<tr>
+					<td>0xFC01</td>
+					<td>kErrPartitionFull</td>
+					<td>Partition full</td>
+				</tr>
+				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>Driver handler errors</i></td>
 				</tr>
 				<tr>
 					<td>0xFD00</td>
@@ -5783,9 +5797,21 @@
 					<td>Handler not present</td>
 				</tr>
 				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>Memory errors</i></td>
+				</tr>
+				<tr>
 					<td>0xFE00</td>
 					<td>kErrOutOfMemory</td>
 					<td>Insufficient memory</td>
+				</tr>
+				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>PS/2 Controller errors</i></td>
 				</tr>
 				<tr>
 					<td>0xFF00</td>

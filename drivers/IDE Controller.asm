@@ -298,7 +298,7 @@ IDEATASectorReadLBA28PIO:
 	;	Memory buffer address to which data will be written
 	;
 	;  output:
-	;	EAX - Result code
+	;	EDX - Result code
 
 	push ebp
 	mov ebp, esp
@@ -319,7 +319,7 @@ IDEATASectorReadLBA28PIO:
 	cmp ecx, 2
 	jb .InRange
 		; if we get here, it wasn't in range!
-		mov eax, kErrValueTooHigh
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.InRange:
 
@@ -401,7 +401,7 @@ IDEATASectorReadLBA28PIO:
 	loop .ReadSectors
 
 	; if we get here, all is well!
-	mov eax, kErrNone
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -425,7 +425,7 @@ IDEATASectorWriteLBA28PIO:
 	;	Memory buffer address from which data will be read
 	;
 	;  output:
-	;	EAX - Result code
+	;	EDX - Result code
 
 	push ebp
 	mov ebp, esp
@@ -446,7 +446,7 @@ IDEATASectorWriteLBA28PIO:
 	cmp ecx, 2
 	jb .InRange
 		; if we get here, it wasn't in range!
-		mov eax, kErrValueTooHigh
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.InRange:
 
@@ -540,7 +540,7 @@ IDEATASectorWriteLBA28PIO:
 	call IDEWaitForReady
 
 	; if we get here, all is well!
-	mov eax, kErrNone
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -566,7 +566,7 @@ IDEDetectChannelDevices:
 	;	Control base port
 	;
 	;  output:
-	;	n/a
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -592,6 +592,10 @@ IDEDetectChannelDevices:
 	push 512
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov dataBlock, eax
 
 	; now we probe all the drive slots to see what's there
@@ -610,6 +614,7 @@ IDEDetectChannelDevices:
 	call MemDispose
 
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 28
@@ -668,6 +673,10 @@ ret 28
 		push dword 1048576
 		push dword 1
 		call MemAllocate
+
+		; see if there was an error, if not save the pointer
+		cmp edx, kErrNone
+		jne .Exit
 		mov esi, driveListSlotAddress
 		mov dword [esi + tDriveInfo.cacheAddress], eax
 

@@ -18,6 +18,65 @@
 
 
 
+; ELF data typing conventions (here for reference)
+%define Elf32_Half								resw
+%define Elf32_Off								resd
+%define Elf32_Addr								resd
+%define Elf32_Word								resd
+%define	Elf32_SWord								resd
+
+struc ELF32
+	.EI_Mag0									resb 1					; signature byte 7F
+	.EI_Mag1									resb 1					; signature byte 45
+	.EI_Mag2									resb 1					; signature byte 4C
+	.EI_Mag3									resb 1					; signature byte 46
+	.EI_Class									resb 1					; 32/64 bit application
+	.EI_Data									resb 1
+	.EI_Version									resb 1					; ELF header version
+	.EI_OSABI									resb 1
+	.EI_ABIVersion								resb 1
+	.EI_Pad										resb 7
+	.E_Type										resw 1					; Object file type
+	.E_Machine									resw 1					; Machine Type
+	.E_Version									resd 1					; Object file version
+	.E_Entry									resd 1					; Virtual address to where the system transfers control
+	.E_PHOff									resd 1					; Program Header table offset
+	.E_SHOff									resd 1					; Section Header table offset
+	.E_Flags									resd 1					; Flags
+	.E_Size										resw 1					; Header size (in bytes)
+	.E_PHEntSize								resw 1					; Size of one entry in Program Header Table
+	.E_PHNum									resw 1					; Number of entries in the Program Header Table
+	.E_SHEntSize								resw 1					; Section Header size (in bytes)
+	.E_SHNum									resw 1					; Number of entries in the Section Header Table
+	.E_SHStrNdx									resw 1					; Index into the Section Header Table pointing to the Section Name String Table
+endstruc
+
+struc ProgramHeader
+	.entryPoint									resd 1
+	.programHeaderTablePtr						resd 1
+	.sectionHeaderTablePtr						resd 1
+	.imageFlags									resd 1
+	.headerSize									resw 1
+	.programHeaderTableEntrySize				resw 1
+	.programHeaderTableEntryCount				resw 1
+	.sectionHeaderTableEntrySize				resw 1
+	.sectionHeaderTableEntryCount				resw 1
+	.sectionHeaderTableNameIndex				resw 1
+endstruc
+
+struc SectionHeader
+	.entryPoint									resd 1
+	.programHeaderTablePtr						resd 1
+	.sectionHeaderTablePtr						resd 1
+	.imageFlags									resd 1
+	.headerSize									resw 1
+	.programHeaderTableEntrySize				resw 1
+	.programHeaderTableEntryCount				resw 1
+	.sectionHeaderTableEntrySize				resw 1
+	.sectionHeaderTableEntryCount				resw 1
+	.sectionHeaderTableNameIndex				resw 1
+endstruc
+
 ; Architecture Constants
 %define ELFNonSpec								0x00					; No specific architecture
 %define ELFSPARC								0x02
@@ -47,8 +106,8 @@
 %define EM_860									0x07					; Intel 80860
 %define EM_MIPS									0x08					; MIPS R53000
 
-%define EV_NONE									0x00					; Invalid version
-%define EV_CURRENT								0x01					; Current version
+%define EV_None									0x00					; Invalid version
+%define EV_Current								0x01					; Current version
 
 %define EI_Mag0									0						; File identification
 %define EI_Mag1									1						; File identification
@@ -60,7 +119,7 @@
 %define EI_Pad									7						; Start of padding bytes
 %define EI_NIdent								16						; size of e_ident[]
 
-%define ELFMagic								db 0x7F,'E','L','F'		; ELF Magic number
+%define ELFMagic								db 0x7F, 'E', 'L', 'F'	; ELF Magic number
 %define ELFMag0									equ 0x7F
 %define ELFMag1									equ 'E'
 %define ELFMag2									equ 'L'
@@ -97,23 +156,6 @@
 %define SHT_HiProc								equ 0x7FFFFFFF
 %define SHT_LoUser								equ 0x80000000
 %define SHT_HiUser								equ 0x8FFFFFFF
-
-struc ELF32
-	.elfName									resb 16					; Identification
-	.elfType									resw 1					; Object file type
-	.elfMachine									resw 1					; Machine Type
-	.elfVersion									resw 1					; Object file version
-	.elfEntry									resd 1					; Virtual address to where the system transfers control
-	.elfPhOff									resd 1					; Program Header table file offset
-	.elfShoff									resd 1					; Section Header table file offset
-	.elfFlags									resw 1					; Flags
-	.elfSize									resw 1					; Header size (in bytes)
-	.elfPhentSize								resw 1					; Size of one entry in program header table
-	.elfPhNum									resw 1					; Number of entries in the program header table
-	.elfShentSize								resw 1					; Section header size (in bytes)
-	.elfShnum									resw 1					; Number of entries in the section header table
-	.elfShstrNdx								resw 1					; Section header table index
-endstruc
 
 struc ELF32_SecHeader
 	.sh_name									resw 1					; Name of the section (index into the section header string table)

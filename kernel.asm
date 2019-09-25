@@ -76,7 +76,7 @@ mov ah, 0x01
 mov cx, 0x2707
 int 0x10
 
-; set kernel cursor location
+; set text colors
 mov byte [gTextColor], 7
 mov byte [gBackColor], 0
 
@@ -86,6 +86,16 @@ mov byte [gBackColor], 0
 push progressText01$
 call PrintIfConfigBits16
 call MemProbe
+
+; see if there was an error
+cmp edx, kErrNone
+je .MemProbeOK
+	; do a fatal error here, 16-bit style
+	mov byte [gTextColor], 0
+	mov byte [gBackColor], 4
+	push fatalE820Unsupported$
+	call Print16
+.MemProbeOK:
 
 
 
@@ -182,6 +192,13 @@ push kKernelStack
 push dword 1
 call MemAllocate
 
+; see if there was an error
+cmp edx, kErrNone
+je .StackAllocOK
+	push fatalKernelStackMemAlloc$
+	call KernelInitFail
+.StackAllocOK:
+
 mov ebx, kKernelStack
 add eax, ebx
 mov esp, eax
@@ -194,6 +211,14 @@ push 0x00000000
 push progressText0B$
 call PrintIfConfigBits32
 call IDTInit
+
+; see if there was an error
+cmp edx, kErrNone
+je .IDTAllocOK
+	push fatalIDTMemAlloc$
+	call KernelInitFail
+.IDTAllocOK:
+
 call ISRInitAll
 
 
@@ -233,6 +258,14 @@ call SetSystemCPUID
 push progressText10$
 call PrintIfConfigBits32
 call KernelInitLists
+
+; see if there was an error
+cmp edx, kErrNone
+je .ListInitOK
+	push fatalListMemAlloc$
+	call KernelInitFail
+.ListInitOK:
+
 
 
 ; init PS/2 driver
@@ -282,8 +315,7 @@ call PCIDeviceInitAll
 ; enumerate partitions
 push progressText14$
 call PrintIfConfigBits32
-call PartitionEnumerate
-
+call SMPartitionEnumerate
 
 
 ; map partitions
@@ -292,7 +324,7 @@ push progressText15$
 call PrintIfConfigBits32
 push 2
 push 0
-call PartitionMap
+call SMPartitionMap
 
 
 
@@ -303,204 +335,9 @@ call TaskInit
 
 
 
-
-
-
-;jmp .SkipFMTests
-; test load a file
-push 0xFF
-push 0x100000
-push 0x200000
-call MemFill
-
-;push .path14$
-;push .path13$
-;push .path12$
-;push .path11$
-;push .path10$
-;push .path9$
-;push .path8$
-;push .path7$
-push .path6$
-;push .path5$
-;push .path4$
-;push .path3$
-;push .path2$
-;push .path1$
-push dword 0
-call FMItemLoad
-push esi
-
-; show if there was an error in eax from the above call
-pusha
-call PrintRegs32
-popa
-
-
-push 0
-push 7
-push 10
-push 1
-;shr ecx, 4
-;push ecx
-push 16
-push esi
-call PrintRAM32
-
-
-; create the ROOTTEST folder
-push 0x10 ; directory attribute
-push .path16$
-push dword 0
-call FMItemNew
-
-pusha
-call PrintRegs32
-popa
-
-
-
-; create the NEWDIR folder
-push 0x10 ; directory attribute
-push .path15$
-push dword 0
-call FMItemNew
-
-pusha
-call PrintRegs32
-popa
-
-
-; create the WHO2.TXT file
-push 0x00 ; no attribute
-push .path10$
-push dword 0
-call FMItemNew
-
-pusha
-call PrintRegs32
-popa
-
-
-pop esi
-push esi
-
-
-mov byte [esi + 117], ' '
-mov byte [esi + 118], 'E'
-mov byte [esi + 119], 'v'
-mov byte [esi + 120], 'e'
-mov byte [esi + 121], 'n'
-mov byte [esi + 122], ' '
-mov byte [esi + 123], 't'
-mov byte [esi + 124], 'h'
-mov byte [esi + 125], 'o'
-mov byte [esi + 126], 'u'
-mov byte [esi + 127], 'g'
-mov byte [esi + 128], 'h'
-mov byte [esi + 129], ' '
-mov byte [esi + 130], 't'
-mov byte [esi + 131], 'h'
-mov byte [esi + 132], 'a'
-mov byte [esi + 133], 't'
-mov byte [esi + 134], ' '
-mov byte [esi + 135], 'w'
-mov byte [esi + 136], 'o'
-mov byte [esi + 137], 'r'
-mov byte [esi + 138], 'k'
-mov byte [esi + 139], ' '
-mov byte [esi + 140], 'm'
-mov byte [esi + 141], 'a'
-mov byte [esi + 142], 'y'
-mov byte [esi + 143], ' '
-mov byte [esi + 144], 't'
-mov byte [esi + 145], 'a'
-mov byte [esi + 146], 'k'
-mov byte [esi + 147], 'e'
-mov byte [esi + 148], ' '
-mov byte [esi + 149], 'y'
-mov byte [esi + 150], 'e'
-mov byte [esi + 151], 'a'
-mov byte [esi + 152], 'r'
-mov byte [esi + 153], 's'
-mov byte [esi + 154], '.'
-
-
-
-; write data from memory to WHO2.TXT
-push 155
-push esi
-push .path10$
-;push .path6$
-push dword 0
-call FMItemStore
-
-pusha
-call PrintRegs32
-popa
-
-
-push .path10$
-push dword 0
-call FMItemInfoSizeGet
-
-pusha
-call PrintRegs32
-popa
-
-
-push .path10$
-push dword 0
-call FMItemDelete
-
-pusha
-call PrintRegs32
-popa
-
-pop esi
-jmp $
-
-
-
-.path1$											db '\autoexec.bat', 0x00
-.path2$											db '\autoexec.bat', 0x00
-.path3$											db '\TESTING\system\tools\items\code\fluff\nonsense\secret.txt', 0x00
-.path4$											db '\', 0x00
-.path5$											db '\kernel.sys', 0x00
-.path6$											db '\TESTING\who.TXT', 0x00
-.path7$											db '\TESTING\john.TXT', 0x00
-.path8$											db '\TESTING\cbcfiles\pcworld\utils\logging.bas', 0x00
-.path9$											db '\TESTING\cbcfiles\pcworld\utils', 0x00
-.path10$										db '\TESTING\newdir\who2.TXT', 0x00
-.path11$										db '\TESTING', 0x00
-.path12$										db '', 0x00
-.path13$										db '\KERNEL.SYS', 0x00
-.path14$										db '\TESTING\LINcoln.TXT', 0x00
-.path15$										db '\TESTING\NEWDIR', 0x00
-.path16$										db '\roottest', 0x00
-
-
-.SkipFMTests:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ; skip this for now, it's just an experiment
 ; comment out the jmp to run this code
-;jmp PagingDone
+jmp PagingDone
 ; experimental paging setup
 cli
 
@@ -668,12 +505,6 @@ PagingEnable:
 ret
 
 PagingDone:
-
-
-
-
-
-
 
 
 
@@ -1107,7 +938,10 @@ progressText13$									db 'Initializing PCI devices', 0x00
 progressText14$									db 'Enumerating partitions', 0x00
 progressText15$									db 'Mapping partitions', 0x00
 progressText16$									db 'Initializing Task Manager', 0x00
-memE820Unsupported$								db 'Could not detect memory, function unsupported', 0x00
+fatalE820Unsupported$							db 'Fatal: BIOS function 0xE820 unsupported on this machine; unable to probe memory', 0x00
+fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory.', 0x00
+fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory.', 0x00
+fatalListMemAlloc$								db 'Fatal: Unable to allocate system list memory.', 0x00
 name$											db 'Kernel Debug Menu', 0x00
 
 
@@ -1116,8 +950,8 @@ name$											db 'Kernel Debug Menu', 0x00
 
 bits 32
 section .text
-KernelInitLists:
-	; Sets up the lists used by the kernel
+KernelInitFail:
+	; Prints a fatal error message and hangs
 	;
 	;  input:
 	;	n/a
@@ -1128,11 +962,59 @@ KernelInitLists:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define error$								dword [ebp + 8]
+
+
+	mov eax, 0x00000000
+
+	push dword 0x00000004
+	push dword 0x00000000
+
+	mov al, byte [gCursorY]
+	push dword eax
+
+	mov al, byte [gCursorX]
+	push dword eax
+
+	push error$
+	call Print32
+
+	; and here we hang
+	jmp $
+
+
+	; why is this here? HE'S DEAD, JIM!
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+KernelInitLists:
+	; Sets up the lists used by the kernel
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
 
 	; the drives list will be 256 entries of tDriveInfo structs, plus header
 	push dword 256 * tDriveInfo_size + 16
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov [tSystem.listDrives], eax
 
 	; set up the list header
@@ -1147,6 +1029,10 @@ KernelInitLists:
 	push dword 26 * 4 + 16
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov [tSystem.listDriveLetters], eax
 
 	; set all elements to 0xFFFFFFFF
@@ -1167,6 +1053,10 @@ KernelInitLists:
 	push dword 256 * 4 + 16
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov [tSystem.listFSHandlers], eax
 
 	; set up the list header
@@ -1182,6 +1072,10 @@ KernelInitLists:
 	push dword 256 * tPartitionInfo_size + 16
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov [tSystem.listPartitions], eax
 
 	; set up the list header
@@ -1197,6 +1091,10 @@ KernelInitLists:
 	push dword 65536 * 4 + 16
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov [tSystem.listPCIHandlers], eax
 
 	; set up the list header
@@ -1206,6 +1104,7 @@ KernelInitLists:
 	call LMListInit
 
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret
@@ -1220,11 +1119,11 @@ section .text
 %include "api/lists.asm"
 %include "api/misc.asm"
 %include "api/strings.asm"
-%include "io/files.asm"
 %include "io/serial.asm"
+%include "io/storage.asm"
 %include "system/CMOS.asm"
 %include "system/CPU.asm"
-%include "system/disks.asm"
+%include "system/exec.asm"
 %include "system/GDT.asm"
 %include "system/hardware.asm"
 %include "system/interrupts.asm"

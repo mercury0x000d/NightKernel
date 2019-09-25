@@ -44,7 +44,7 @@ Print16:
 	; Note: This function isn't as robust as its 32-bit cousin because... well... it doesn't need to be.
 	; Note: Another you-know-what.
 	; Note: No! Not another note!
-	; Note: Yes, another, and another! Until you come to your senses!
+	; Note: Yes, another! And another! Until you come to your senses!
 	;
 	;  input:
 	;	Address of string to print

@@ -35,7 +35,7 @@ TaskInit:
 	;	n/a
 	;
 	;  output:
-	;	n/a
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -46,6 +46,10 @@ TaskInit:
 	push 256 * tTaskInfo_size + 16
 	push dword 1
 	call MemAllocate
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov [tSystem.listTasks], eax
 
 	; set up the list header
@@ -71,6 +75,7 @@ TaskInit:
 	ltr ax
 
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret
@@ -259,6 +264,7 @@ TaskNew:
 	;
 	;  output:
 	;	EAX - Task number
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -304,6 +310,10 @@ TaskNew:
 	push dword [tSystem.taskStackSize]
 	push taskListSlot
 	call MemAllocateAligned
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov esi, taskListSlotAddress
 	mov [esi + tTaskInfo.stackAddress], eax
 
@@ -317,6 +327,10 @@ TaskNew:
 	push dword [tSystem.taskKernelStackSize]
 	push taskListSlot
 	call MemAllocateAligned
+
+	; see if there was an error, if not save the pointer
+	cmp edx, kErrNone
+	jne .Exit
 	mov esi, taskListSlotAddress
 	mov [esi + tTaskInfo.kernelStackAddress], eax
 
@@ -380,8 +394,10 @@ TaskNew:
 
 	; return the task number
 	mov eax, taskListSlot
+	mov edx, kErrNone
 
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 8

@@ -18,11 +18,12 @@
 
 
 
-; introucucing the tMemInfo struct, used by the physical memory allocator to track blocks
+; introducing the tMemInfo struct, used by the physical memory allocator to track blocks
 struc tMemInfo
 	.address									resd 1
 	.size										resd 1
 	.task										resd 1
+	.memFlags									resd 1
 endstruc
 
 
@@ -417,7 +418,7 @@ MemProbe:
 	;	n/a
 	;
 	;  output:
-	;	n/a
+	;	EDX - Error code
 
 	push bp
 	mov bp, sp
@@ -458,6 +459,11 @@ MemProbe:
 		mov di, bp
 		sub di, 64								; addressLow (start of buffer)
 		int 0x15
+
+		; see if there was an error
+		mov edx, kErrMemoryInitFail
+		cmp eax, 'PAMS'
+		jne .Exit
 
 		; display the memory mapping table if appropriate
 		push bx
@@ -562,8 +568,11 @@ MemProbe:
 		.SkipCheckBlock:
 		; check to see if we're done with the loop
 		cmp ebx, 0x00
-		je .Exit
+		je .Done
 	jmp .ProbeLoop
+
+	.Done:
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -1228,18 +1237,21 @@ MemFindMostSuitable:
 	%define size								dword [ebp + 8]
 
 	; allocate local variables
-	sub esp, 16
+	sub esp, 20
 	%define listIndexCounter					dword [ebp - 4]
 	%define bestCandidateSlot					dword [ebp - 8]
 	%define bestCandidateSize					dword [ebp - 12]
 	%define exitCode							dword [ebp - 16]
-
+	%define freeSpaceCounter					dword [ebp - 20]
 
 	; clear the best candidate variable
 	mov bestCandidateSlot, 0
 
 	; default to false
 	mov exitCode, false
+
+	; clear the temporary free space counter
+	mov freeSpaceCounter, 0
 
 	; set up a loop to step through all elements in the memory list
 	; get number of elements in memory list and save it to our loop index counter
@@ -1263,9 +1275,14 @@ MemFindMostSuitable:
 		cmp eax, 0
 		jne .NextIteration
 
+		; load eax with the block's size
+		mov eax, [esi + tMemInfo.size]
+
+		; update the free memory counter
+		add freeSpaceCounter, eax
+
 		; see if the size of this block is big enough to meet the request
 		; if not, we go to the next block in the loop
-		mov eax, [esi + tMemInfo.size]
 		mov ebx, size
 		cmp eax, ebx
 		jb .NextIteration
@@ -1297,6 +1314,13 @@ MemFindMostSuitable:
 	mov ecx, listIndexCounter
 	loop .MemoryListLoop
 
+	; update the system free space counter
+	; Q: Why not just update the counter itself directly?
+	; A: If this routine becomes more complex later on to the point that it may have the ability to encounter
+	; an error condition, we don't want it aborting and leaving the system counter in an undefined state.
+	mov eax, freeSpaceCounter
+	mov dword [tSystem.memoryFreeBytes], eax
+
 	; return what we found
 	mov eax, bestCandidateSlot
 	mov edx, exitCode
@@ -1327,8 +1351,8 @@ MemInit:
 	; load up the address of our big block o' RAM
 	mov esi, [tSystem.listMemory]
 
-	; create a list with a single entry of 12 bytes (the size of a memory list element)
-	push 12
+	; create a list with a single entry of the size of a tMemInfo record
+	push tMemInfo_size
 	push 1
 	push esi
 	call LMListInit

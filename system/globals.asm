@@ -17,7 +17,7 @@
 
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2009
+%define BUILD 2247
 
 
 section .data
@@ -29,7 +29,7 @@ tSystem:
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2019', 0x00
 	.versionMajor								db 0x00
 	.versionMinor								db 0x1D
-	.versionBuild								dw BUILD
+	.versionBuild								dd BUILD
 	.ticksSinceBoot								dd 0x00000000
 	.currentTask								dd 0x00000000
 	.currentTaskSlotAddress						dd 0x00000000
@@ -69,6 +69,7 @@ section .bss
 	.listTasks									resd 1
 	.memoryInstalledBytes						resd 1
 	.memoryInitialAvailableBytes				resd 1
+	.memoryFreeBytes							resd 1
 	.memoryListReservedSpace					resd 1
 	.PCIDeviceCount								resd 1
 	.PCIVersion									resd 1
@@ -142,13 +143,13 @@ struc tPartitionInfo
 	.ATABasePort								resd 1
 	.ATAControlPort								resd 1
 	.ATADeviceNumber							resd 1
+	.partitionNumber							resd 1
 	.reserved1									resd 1
 	.reserved2									resd 1
 	.reserved3									resd 1
 	.reserved4									resd 1
 	.reserved5									resd 1
 	.reserved6									resd 1
-	.reserved7									resd 1
 	.FSReserved00								resd 1
 	.FSReserved01								resd 1
 	.FSReserved02								resd 1
@@ -202,6 +203,9 @@ endstruc
 %define kErrClusterChainEndUnexpected			0xFB04
 %define kErrRootDirectoryFull					0xFB05
 %define kErrItemAlreadyExists					0xFB06
+%define kErrClusterChainBad						0xFB07
+%define kErrDirectoryNotEmpty					0xFB08
+%define kErrNotADirectory						0xFB09
 
 ; partition errors
 %define kErrInvalidPartitionNumber				0xFC00
@@ -212,6 +216,7 @@ endstruc
 
 ; memory errors
 %define kErrOutOfMemory							0xFE00
+%define kErrMemoryInitFail						0xFE01
 
 ; PS/2 controller errors
 %define kErrPS2AckFail							0xFF00
@@ -248,6 +253,9 @@ endstruc
 %define kDriverItemLoad							0xF5
 %define kDriverItemNew							0xF6
 %define kDriverItemStore						0xF7
+%define kDriverPartitionInfo					0xF8
+%define kDriverItemCount						0xF9
+%define kDriverItemExists						0xFA
 
 
 

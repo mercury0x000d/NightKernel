@@ -905,6 +905,10 @@ DebugPCIDevices:
 		push dword 1
 		call MemAllocate
 
+		; see if there was an error, if not save the pointer
+		cmp edx, kErrNone
+		jne .Exit
+
 		mov [PCIDeviceInfo.PCIClassTable], eax
 
 		; set up the list header
@@ -1214,7 +1218,7 @@ DebugPCIDevices:
 	push 0x00000000
 	call ScreenClear32
 
-
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret

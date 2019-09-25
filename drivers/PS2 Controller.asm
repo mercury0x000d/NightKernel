@@ -437,8 +437,8 @@ PS2ControllerInit:
 	call MemAllocate
 
 	; check for error
-	cmp eax, kErrNone
-	je .errorTimeout
+	cmp edx, kErrNone
+	jne .errorTimeout
 	
 	; if we get here, we got a valid memory block
 	mov [kKeyBufferAddress], eax
