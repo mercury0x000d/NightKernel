@@ -18,6 +18,21 @@
 
 
 
+; IDEATAPISectorReadPIO							Reads sectors from an ATAPI device
+; IDEATASectorReadLBA28PIO						Reads sectors from an ATA disk using LBA28 in PIO mode
+; IDEATASectorWriteLBA28PIO						Writes sectors to an ATA disk using LBA28 in PIO mode
+; IDEDetectChannelDevices						Checks both of the device spots on the ATA channel specified and saves their data to the drives list
+; IDEDriveIdentify								Returns identifying information about the device specified
+; IDEInit										Performs any necessary setup of the driver
+; IDEInterruptHandlerPrimary					Interrupt handler for ATA interrupts
+; IDEInterruptHandlerSecondary					Interrupt handler for ATA interrupts
+; IDEServiceHandler								The service routine called by external applications
+; IDEWaitForReady								Waits for bit 7 of the passed port value to go clear, then returns
+
+
+
+
+
 ; defines
 %define kATAChannelPrimary						0x00
 %define kATAChannelSecondary					0x01
@@ -110,8 +125,8 @@ IDEATAPISectorReadPIO:
 	;	Memory buffer address to which data will be written
 	;
 	;  output:
-	;	EAX - Result code
-
+	;	EDX - Error code
+; debug - check for edx usage
 	push ebp
 	mov ebp, esp
 
@@ -298,7 +313,7 @@ IDEATASectorReadLBA28PIO:
 	;	Memory buffer address to which data will be written
 	;
 	;  output:
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -425,7 +440,7 @@ IDEATASectorWriteLBA28PIO:
 	;	Memory buffer address from which data will be read
 	;
 	;  output:
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -964,7 +979,7 @@ IDEInit:
 	;	PCI Function
 	;
 	;  output:
-	;	EAX - Error code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -1052,6 +1067,10 @@ IDEInit:
 	push PCIClass
 	call IDEDetectChannelDevices
 
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
 
 	; get BAR3 for this device to find the secondary channel control port
 	push dword 0x00000007
@@ -1089,10 +1108,15 @@ IDEInit:
 	push PCIClass
 	call IDEDetectChannelDevices
 
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
 
 	; exit with return status
-	mov eax, kErrNone
+	mov edx, kErrNone
 
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1180,9 +1204,7 @@ IDEServiceHandler:
 	;	Parameter 5
 	;
 	;  output:
-	;	EAX - driver response
-	;
-	; Note: Parameters vary by operation
+	;	Varies by function
 
 	push ebp
 	mov ebp, esp

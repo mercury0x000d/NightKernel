@@ -17,7 +17,7 @@
 
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2247
+%define BUILD 2263
 
 
 section .data
@@ -28,7 +28,7 @@ tSystem:
 	.configBits									dd 00000000000000000000000000000111b
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2019', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x1D
+	.versionMinor								db 0x1E
 	.versionBuild								dd BUILD
 	.ticksSinceBoot								dd 0x00000000
 	.currentTask								dd 0x00000000

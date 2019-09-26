@@ -152,16 +152,18 @@ PCIDeviceInitAll:
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 24
+	sub esp, 32
 	%define PCIBus								dword [ebp - 4]
 	%define PCIDevice							dword [ebp - 8]
 	%define PCIFunction							dword [ebp - 12]
 	%define PCIClass							dword [ebp - 16]
 	%define PCISubclass							dword [ebp - 20]
 	%define PCIProgIf							dword [ebp - 24]
+	%define PCIVendor							dword [ebp - 28]
+	%define PCIID								dword [ebp - 32]
 
 
-	; init the values to outlandishly high numbers so that the next function will find the first device
+	; init the values to outlandishly high numbers so that the next function will find the first device, usually at 000-00-00
 	mov PCIBus, 0xFFFFFFFF
 	mov PCIDevice, 0xFFFFFFFF
 	mov PCIFunction, 0xFFFFFFFF
@@ -183,10 +185,35 @@ PCIDeviceInitAll:
 		je .End
 
 		; tell the user what we're doing next
-		push 70
+		push 80
 		push .scratch$
 		push .sendingInit$
 		call MemCopy
+
+		; get the first 32-bit register which contains the PIC Vendor and Device ID
+		push dword 0
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIRegisterRead
+
+		; separate the two from the returned register's value
+		mov ebx, 0
+		mov bx, ax
+		mov PCIVendor, ebx
+		shr eax, 16
+		mov PCIID, eax
+
+		; build the string
+		push dword 4
+		push PCIVendor
+		push .scratch$
+		call StringTokenHexadecimal
+
+		push dword 4
+		push PCIID
+		push .scratch$
+		call StringTokenHexadecimal
 
 		push dword 3
 		push PCIBus
@@ -203,6 +230,7 @@ PCIDeviceInitAll:
 		push .scratch$
 		call StringTokenDecimal
 
+		; and print it!
 		push .scratch$
 		call PrintIfConfigBits32
 
@@ -220,11 +248,11 @@ PCIDeviceInitAll:
 		call PCIHandlerCommand
 
 		; evaluate result
-		cmp eax, kErrNone
+		cmp edx, kErrNone
 		je .NextIteration
 			
 			; If we get here, there was an error. Let's see what it was.
-			cmp eax, kErrHandlerNotPresent
+			cmp edx, kErrHandlerNotPresent
 			jne .NotHandlerNotPresent
 				push .noDriver$
 				call PrintIfConfigBits32
@@ -240,7 +268,7 @@ PCIDeviceInitAll:
 ret
 
 section .data
-.sendingInit$									db 'Attempting Init for ^-^-^', 0x00
+.sendingInit$									db 'Attempting Init for device ^:^ at ^-^-^', 0x00
 .noDriver$										db 'No driver found, continuing', 0x00
 
 section .bss
@@ -477,7 +505,7 @@ PCIHandlerCommand:
 	;	Parameter 5
 	;
 	;  output:
-	;	EAX - Handler response
+	;	Varies by command
 	;	EDX - Error code
 
 	push ebp
@@ -525,12 +553,9 @@ PCIHandlerCommand:
 
 
 	; if address is zero, we abort with error
+	mov edx, kErrHandlerNotPresent
 	cmp eax, 0
-	jne .NoError
-		; if we get here, there was no handler
-		mov edx, kErrHandlerNotPresent
-		jmp .Exit
-	.NoError:
+	je .Exit
 
 	; set up a call to the handler for this device
 	push parameter5
