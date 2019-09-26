@@ -145,22 +145,20 @@ PCIDeviceInitAll:
 	;	n/a
 	;
 	;  output:
-	;	n/a
-	;
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 32
+	sub esp, 28
 	%define PCIBus								dword [ebp - 4]
 	%define PCIDevice							dword [ebp - 8]
 	%define PCIFunction							dword [ebp - 12]
 	%define PCIClass							dword [ebp - 16]
 	%define PCISubclass							dword [ebp - 20]
 	%define PCIProgIf							dword [ebp - 24]
-	%define PCIVendor							dword [ebp - 28]
-	%define PCIID								dword [ebp - 32]
+	%define PCIRegister							dword [ebp - 28]
 
 
 	; init the values to outlandishly high numbers so that the next function will find the first device, usually at 000-00-00
@@ -182,7 +180,7 @@ PCIDeviceInitAll:
 		add eax, PCIDevice
 		add eax, PCIFunction
 		cmp eax, 0x0002FFFD
-		je .End
+		je .Exit
 
 		; tell the user what we're doing next
 		push 80
@@ -196,22 +194,61 @@ PCIDeviceInitAll:
 		push PCIDevice
 		push PCIBus
 		call PCIRegisterRead
+		mov PCIRegister, eax
 
-		; separate the two from the returned register's value
-		mov ebx, 0
-		mov bx, ax
-		mov PCIVendor, ebx
-		shr eax, 16
-		mov PCIID, eax
-
-		; build the string
+		; add the Vendor and Device ID to the string
+		and eax, 0x0000FFFF
 		push dword 4
-		push PCIVendor
+		push eax
 		push .scratch$
 		call StringTokenHexadecimal
 
+		mov eax, PCIRegister
+		shr eax, 16
 		push dword 4
-		push PCIID
+		push eax
+		push .scratch$
+		call StringTokenHexadecimal
+
+		; get the third 32-bit register which contains the Class, Subclass, ProgIf, and Revision
+		push dword 2
+		push PCIFunction
+		push PCIDevice
+		push PCIBus
+		call PCIRegisterRead
+		mov PCIRegister, eax
+
+		; add the Class to the string
+		shr eax, 24
+		and eax, 0x000000FF
+		push dword 2
+		push eax
+		push .scratch$
+		call StringTokenHexadecimal
+
+		; add the Subclass to the string
+		mov eax, PCIRegister
+		shr eax, 16
+		and eax, 0x000000FF
+		push dword 2
+		push eax
+		push .scratch$
+		call StringTokenHexadecimal
+
+		; add the ProgIf to the string
+		mov eax, PCIRegister
+		shr eax, 8
+		and eax, 0x000000FF
+		push dword 2
+		push eax
+		push .scratch$
+		call StringTokenHexadecimal
+
+		; add the Revision to the string
+		mov eax, PCIRegister
+		and eax, 0x000000FF
+		push dword 2
+		push eax
 		push .scratch$
 		call StringTokenHexadecimal
 
@@ -262,13 +299,13 @@ PCIDeviceInitAll:
 	jmp .PCILoop
 
 
-	.End:
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret
 
 section .data
-.sendingInit$									db 'Attempting Init for device ^:^ at ^-^-^', 0x00
+.sendingInit$									db 'Attempting Init for device ^:^ (^-^-^-^) at ^-^-^', 0x00
 .noDriver$										db 'No driver found, continuing', 0x00
 
 section .bss
