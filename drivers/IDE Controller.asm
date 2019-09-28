@@ -126,7 +126,7 @@ IDEATAPISectorReadPIO:
 	;
 	;  output:
 	;	EDX - Error code
-; debug - check for edx usage
+
 	push ebp
 	mov ebp, esp
 
@@ -146,7 +146,7 @@ IDEATAPISectorReadPIO:
 	cmp eax, 2
 	jb .InRange
 		; if we get here, it wasn't in range!
-		mov eax, kErrValueTooHigh
+		mov edx, kErrValueTooHigh
 		jmp .Exit
 	.InRange:
 
@@ -164,6 +164,10 @@ IDEATAPISectorReadPIO:
 	add dx, kATARegisterStatus
 	push edx
 	call IDEWaitForReady
+
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
 
 	; set PIO mode
 	mov dx, bx
@@ -194,6 +198,10 @@ IDEATAPISectorReadPIO:
 	add dx, kATARegisterStatus
 	push edx
 	call IDEWaitForReady
+
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
 
 	; set the interrupt handler to something useful
 	push edi
@@ -261,7 +269,7 @@ IDEATAPISectorReadPIO:
 	call InterruptHandlerSet
 
 	; if we get here, all is well!
-	mov eax, kErrNone
+	mov edx, kErrNone
 
 
 	.Exit:
@@ -392,6 +400,10 @@ IDEATASectorReadLBA28PIO:
 	push edx
 	call IDEWaitForReady
 
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
 	; set up a loop to read the sectors
 	; add code here later to determine sector size from the drive data and modify this loop accordingly
 	mov ecx, sectorCount
@@ -411,6 +423,10 @@ IDEATASectorReadLBA28PIO:
 		add edx, kATARegisterCommand
 		push edx
 		call IDEWaitForReady
+
+		; exit if error
+		cmp edx, kErrNone
+		jne .Exit
 
 		mov ecx, sectorCount
 	loop .ReadSectors
@@ -519,6 +535,10 @@ IDEATASectorWriteLBA28PIO:
 	push edx
 	call IDEWaitForReady
 
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
 	; set up a loop to write the sectors
 	; add code here later to determine sector size from the drive data and modify this loop accordingly
 	mov ecx, sectorCount
@@ -539,6 +559,10 @@ IDEATASectorWriteLBA28PIO:
 		push edx
 		call IDEWaitForReady
 
+		; exit if error
+		cmp edx, kErrNone
+		jne .Exit
+
 		mov ecx, sectorCount
 	loop .WriteSectors
 
@@ -553,6 +577,10 @@ IDEATASectorWriteLBA28PIO:
 	add edx, kATARegisterCommand
 	push edx
 	call IDEWaitForReady
+
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
 
 	; if we get here, all is well!
 	mov edx, kErrNone
@@ -849,6 +877,10 @@ IDEDriveIdentify:
 	push edx
 	call IDEWaitForReady
 
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
 	; restore the importants
 	pop ebx
 	pop edi
@@ -914,6 +946,9 @@ IDEDriveIdentify:
 		push edx
 		call IDEWaitForReady
 
+		; exit if error
+		cmp edx, kErrNone
+		jne .Exit
 
 	.SkipATAPIIdentify:
 	; save the type of drive we determined already
@@ -1324,14 +1359,12 @@ ret 36
 section .text
 IDEWaitForReady:
 	; Waits for bit 7 of the passed port value to go clear, then returns
-	; Note: I should add a timeout value to this code eventually to avoid getting stuck in an infinite loop if
-	; something weird happens with the drive
 	;
 	;  input:
 	;	Port number
 	;
 	;  output:
-	;	n/a
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -1339,21 +1372,40 @@ IDEWaitForReady:
 	; define input parameters
 	%define IOPort								dword [ebp + 8]
 
+	; allocate local variables
+	sub esp, 4
+	%define timeout								dword [ebp - 4]
 
+
+	; set up a half-second timeout
+	mov eax, dword [tSystem.ticksSinceBoot]
+	add eax, 128
+	mov timeout, eax
+
+	; set the I/O port
 	mov edx, IOPort
 
 	.PortTestLoop:
 		in al, dx
-pusha
-call PrintRegs32
-popa
 		and al, 0x80
 		cmp al, 0
-		je .PortTestLoopDone
+		je .Success
+
+		; see if we've timed out
+		mov eax, dword [tSystem.ticksSinceBoot]
+		cmp eax, timeout	
+		ja .Timeout
 	jmp .PortTestLoop
 
-	.PortTestLoopDone:
+	.Timeout:
+	mov edx, kErrTimeout
+	jmp .Exit
 
+	.Success:
+	mov edx, kErrNone
+
+
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 4

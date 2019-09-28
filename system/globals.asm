@@ -17,7 +17,7 @@
 
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2432
+%define BUILD 2447
 
 
 section .data
@@ -184,10 +184,11 @@ endstruc
 ; error codes
 %define kErrNone								0x0000
 
-; function parameter errors
+; general function/hardware errors
 %define kErrInvalidParameter					0xF000
 %define kErrValueTooLow							0xF001
 %define kErrValueTooHigh						0xF002
+%define kErrTimeout								0xF003
 
 ; ELF errors
 %define kErrELFInvalidBinary					0xFA00

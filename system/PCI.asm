@@ -287,7 +287,7 @@ PCIDeviceInitAll:
 		; evaluate result
 		cmp edx, kErrNone
 		je .NextIteration
-			
+
 			; If we get here, there was an error. Let's see what it was.
 			cmp edx, kErrHandlerNotPresent
 			jne .NotHandlerNotPresent
