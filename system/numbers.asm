@@ -51,9 +51,19 @@ QuadAdd16:
 	mov eax, [esi]
 	add eax, [edi]
 
+	; adjust pointers
+	; an unrolled loop of INCs is used here because using a simple ADD may disrupt the flags register, and 
+	; using a PUSHF / POPF combo is just sloppy in my opinion
+	inc esi
+	inc esi
+	inc esi
+	inc esi
+	inc edi
+	inc edi
+	inc edi
+	inc edi
+
 	; now add upper 32 bits
-	add esi, 4
-	add edi, 4
 	mov ebx, [esi]
 	adc ebx, [edi]
 
@@ -214,9 +224,19 @@ QuadAdd:
 	mov eax, [esi]
 	add eax, [edi]
 
+	; adjust pointers
+	; an unrolled loop of INCs is used here because using a simple ADD may disrupt the flags register, and 
+	; using a PUSHF / POPF combo is just sloppy in my opinion
+	inc esi
+	inc esi
+	inc esi
+	inc esi
+	inc edi
+	inc edi
+	inc edi
+	inc edi
+
 	; now add upper 32 bits
-	add esi, 4
-	add edi, 4
 	mov ebx, [esi]
 	adc ebx, [edi]
 
@@ -363,3 +383,5 @@ QuadShiftRight:
 	mov esp, ebp
 	pop ebp
 ret 8
+
+; https://github.com/Chuyu-Team/VC-LTL/tree/master/src/14.10.25017/i386
