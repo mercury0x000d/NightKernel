@@ -1344,9 +1344,6 @@ IDEWaitForReady:
 
 	.PortTestLoop:
 		in al, dx
-pusha
-call PrintRegs32
-popa
 		and al, 0x80
 		cmp al, 0
 		je .PortTestLoopDone

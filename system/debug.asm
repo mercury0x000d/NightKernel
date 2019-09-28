@@ -1600,6 +1600,10 @@ DebugSystemInfo:
 	push ebp
 	mov ebp, esp
 
+	; allocate local variables
+	sub esp, 8
+	%define tempQuad							dword [ebp - 8]
+
 
 	; clear the screen first
 	push 0x00000000
@@ -1652,7 +1656,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 7
+	push dword 6
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1661,9 +1665,90 @@ DebugSystemInfo:
 	; print the CPU string
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 9
+	push dword 8
 	push dword 1
 	push tSystem.CPUIDBrand$
+	call Print32
+
+
+	; build and print the RAM strings
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 10
+	push dword 1
+	push .RAMInfo$
+	call Print32
+
+	push 80
+	push .scratch$
+	push .RAMFormat1$
+	call MemCopy
+
+	; copy tSystem.memoryInstalledBytes to our temp quadword
+	push dword 8
+	mov eax, ebp
+	sub eax, 8
+	push eax
+	push tSystem.memoryInstalledBytes
+	call MemCopy
+
+	; shift to divide by 1024 (bytes to KiB)
+	push 10
+	mov eax, ebp
+	sub eax, 8
+	push eax
+	call QuadShiftRight
+
+	push dword 0
+	push tempQuad
+	push .scratch$
+	call StringTokenDecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 11
+	push dword 1
+	push .scratch$
+	call Print32
+
+
+	push 80
+	push .scratch$
+	push .RAMFormat2$
+	call MemCopy
+
+	push dword 0
+	mov eax, dword [tSystem.memoryInitialAvailableBytes]
+	shr eax, 10
+	push eax
+	push .scratch$
+	call StringTokenDecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 12
+	push dword 1
+	push .scratch$
+	call Print32
+
+
+	push 80
+	push .scratch$
+	push .RAMFormat3$
+	call MemCopy
+
+	push dword 0
+	mov eax, dword [tSystem.memoryFreeBytes]
+	shr eax, 11
+	push eax
+	push .scratch$
+	call StringTokenDecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 13
+	push dword 1
+	push .scratch$
 	call Print32
 
 
@@ -1680,7 +1765,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 11
+	push dword 15
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1699,7 +1784,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 13
+	push dword 16
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1718,7 +1803,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 15
+	push dword 17
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1737,7 +1822,7 @@ DebugSystemInfo:
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 17
+	push dword 18
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1757,6 +1842,25 @@ DebugSystemInfo:
 	push dword 0x00000000
 	push dword 0x00000007
 	push dword 19
+	push dword 1
+	push .scratch$
+	call Print32
+
+
+	; build the Tasks List string
+	push 80
+	push .scratch$
+	push .listPCIDevicesFormat$
+	call MemCopy
+
+	push dword 8
+	push dword [tSystem.listPCIHandlers]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 20
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1795,7 +1899,11 @@ ret
 
 section .data
 .systemInfoText$								db 'System Information', 0x00
-.versionFormat$									db 'Kernel version ^.^ build ^', 0x00
+.versionFormat$									db 'Version ^.^, Build ^', 0x00
+.RAMInfo$										db 'Memory:', 0x00
+.RAMFormat1$									db 'Installed:  ^ KiB', 0x00
+.RAMFormat2$									db 'Usable:     ^ KiB', 0x00
+.RAMFormat3$									db 'Available:  ^ KiB', 0x00
 .listDriveFormat$								db 'Drive List             0x^', 0x00
 .listDriveLettersFormat$						db 'Drive Letters List     0x^', 0x00
 .listFSHandlersFormat$							db 'FS Handlers List       0x^', 0x00

@@ -17,7 +17,7 @@
 
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2275
+%define BUILD 2417
 
 
 section .data
@@ -58,6 +58,7 @@ tSystem:
 	.mouseY										dw 0x0000
 	.mouseYLimit								dw 0x0000
 	.mouseZ										dw 0x0000
+	.memoryInstalledBytes						dq 0x0000000000000000
 
 section .bss
 	.listDrives									resd 1
@@ -67,7 +68,6 @@ section .bss
 	.listPartitions								resd 1
 	.listPCIHandlers							resd 1
 	.listTasks									resd 1
-	.memoryInstalledBytes						resd 1
 	.memoryInitialAvailableBytes				resd 1
 	.memoryFreeBytes							resd 1
 	.memoryListReservedSpace					resd 1

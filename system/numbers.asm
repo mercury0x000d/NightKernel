@@ -18,6 +18,61 @@
 
 
 
+bits 16
+
+
+
+
+
+section .text
+QuadAdd16:
+	; Adds two quadwords in real mode
+	;
+	;  input:
+	;	Pointer to input QWord
+	;	Pointer to output QWord
+	;
+	;  output:
+	;	n/a
+	;
+	; Note: This 16-bit function takes doubleword pointers (not word) as input
+
+	push bp
+	mov bp, sp
+
+	; define input parameters
+	%define inPtr								dword [ebp + 4]
+	%define outPtr								dword [ebp + 8]
+
+
+	; add lower 32 bits first
+	mov esi, inPtr
+	mov edi, outPtr
+	mov eax, [esi]
+	add eax, [edi]
+
+	; now add upper 32 bits
+	add esi, 4
+	add edi, 4
+	mov ebx, [esi]
+	adc ebx, [edi]
+
+	; write the values back to memory
+	mov esi, outPtr
+	mov [esi], eax
+	add esi, 4
+	mov [esi], ebx
+
+
+	.Exit:
+	mov sp, bp
+	pop bp
+ret 8
+
+
+
+
+
 bits 32
 
 
@@ -129,3 +184,182 @@ CheckRange:
 	mov esp, ebp
 	pop ebp
 ret
+
+
+
+
+
+section .text
+QuadAdd:
+	; Adds two quadwords
+	;
+	;  input:
+	;	Pointer to input QWord
+	;	Pointer to output QWord
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define inPtr								dword [ebp + 8]
+	%define outPtr								dword [ebp + 12]
+
+
+	; add lower 32 bits first
+	mov esi, inPtr
+	mov edi, outPtr
+	mov eax, [esi]
+	add eax, [edi]
+
+	; now add upper 32 bits
+	add esi, 4
+	add edi, 4
+	mov ebx, [esi]
+	adc ebx, [edi]
+
+	; write the values back to memory
+	mov esi, outPtr
+	mov [esi], eax
+	add esi, 4
+	mov [esi], ebx
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+QuadShiftLeft:
+	; Shifts a quadword left by the specified number of places
+	;
+	;  input:
+	;	Pointer to input QWord
+	;	Number of places to shift
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define inPtr								dword [ebp + 8]
+	%define shiftPlaces							dword [ebp + 12]
+
+
+	; prep the registers
+	mov esi, inPtr
+	mov eax, [esi]
+	add esi, 4
+	mov ebx, [esi]
+	mov ecx, shiftPlaces
+
+	; if the number of places to shift is 64 or more, then we can just zero the value and leave
+	cmp cl, 64
+	jb .DoShift
+		mov eax, 0
+		mov ebx, 0
+		jmp .Done
+	.DoShift:
+
+	; depending on exactly what needs shifted, we can optimize here
+	cmp cl, 32
+	jb .FullShift
+		; if we get here, only one dword will need altered and the other can simply be zeroed
+		mov ebx, eax
+		mov eax, 0
+		and cl, 31
+		shl ebx, cl
+		jmp .Done
+	.FullShift:
+
+	; if we get here, both the high and low dwords will need altered
+	shld ebx, eax, cl
+	shl eax, cl
+
+	.Done:
+	; write the value back to memory
+	mov esi, inPtr
+	mov [esi], eax
+	add esi, 4
+	mov [esi], ebx
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+QuadShiftRight:
+	; Shifts a quadword right by the specified number of places
+	;
+	;  input:
+	;	Pointer to input QWord
+	;	Number of places to shift
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define inPtr								dword [ebp + 8]
+	%define shiftPlaces							dword [ebp + 12]
+
+
+	; prep the registers
+	mov esi, inPtr
+	mov eax, [esi]
+	add esi, 4
+	mov ebx, [esi]
+	mov ecx, shiftPlaces
+
+	; if the number of places to shift is 64 or more, then we can just zero the value and leave
+	cmp cl, 64
+	jb .DoShift
+		mov eax, 0
+		mov ebx, 0
+		jmp .Done
+	.DoShift:
+
+	; depending on exactly what needs shifted, we can optimize here
+	cmp cl, 32
+	jb .FullShift
+		; if we get here, only one dword will need altered and the other can simply be zeroed
+		mov eax, ebx
+		shr ebx, 31
+		and cl, 31
+		shr eax, cl
+		jmp .Done
+	.FullShift:
+
+	; if we get here, both the high and low dwords will need altered
+	shrd eax, ebx, cl
+	shr ebx, cl
+
+	.Done:
+	; write the value back to memory
+	mov esi, inPtr
+	mov [esi], eax
+	add esi, 4
+	mov [esi], ebx
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 8

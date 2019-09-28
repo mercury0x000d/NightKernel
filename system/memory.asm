@@ -424,12 +424,13 @@ MemProbe:
 	mov bp, sp
 
 	; allocate local variables
-	sub sp, 64
+	sub sp, 68
 	%define attributes							dword [bp - 48]
 	%define lengthHigh							dword [bp - 52]
 	%define lengthLow							dword [bp - 56]
 	%define addressHigh							dword [bp - 60]
 	%define addressLow							dword [bp - 64]
+	%define sequenceNum							dword [bp - 68]
 
 
 	; clear the string to all spaces
@@ -450,12 +451,18 @@ MemProbe:
 	push .memoryMapLabels$
 	call PrintIfConfigBits16
 
-	.SkipLabelPrinting:
-	mov ebx, 0x00000000							; set ebx index to zero to start the probing loop
+	; zero out the important stuff
+	mov sequenceNum, 0
+	mov dword [tSystem.listMemory], 0
+	mov dword [tSystem.memoryInitialAvailableBytes], 0
+	mov dword [tSystem.memoryInstalledBytes], 0
+
+
 	.ProbeLoop:
 		mov eax, 0x0000E820						; eax needs to be 0xE820
+		mov ebx, sequenceNum
 		mov ecx, 20
-		mov edx, 0x534D4150						; the magic value "SMAP"
+		mov edx, 'PAMS'							; the magic value "SMAP"
 		mov di, bp
 		sub di, 64								; addressLow (start of buffer)
 		int 0x15
@@ -465,8 +472,10 @@ MemProbe:
 		cmp eax, 'PAMS'
 		jne .Exit
 
+		; save the sequence value
+		mov sequenceNum, ebx
+
 		; display the memory mapping table if appropriate
-		push bx
 		mov eax, [tSystem.configBits]
 		and eax, 000000000000000000000000000000010b
 		cmp eax, 000000000000000000000000000000010b
@@ -538,11 +547,13 @@ MemProbe:
 		call Print16
 
 		.SkipMemoryMapPrinting:
-		pop bx
-
 		; add the size of this block to the total counter in the system struct
-		mov ecx, lengthLow
-		add dword [tSystem.memoryInstalledBytes], ecx
+		push dword tSystem.memoryInstalledBytes
+		mov eax, 0
+		mov ax, bp
+		sub ax, 56
+		push eax
+		call QuadAdd16
 
 		; test the output to see what we've just found
 		; Type 1 - Usable RAM
@@ -567,7 +578,7 @@ MemProbe:
 
 		.SkipCheckBlock:
 		; check to see if we're done with the loop
-		cmp ebx, 0x00
+		cmp sequenceNum, 0x00
 		je .Done
 	jmp .ProbeLoop
 
