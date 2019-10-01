@@ -18,13 +18,9 @@
 
 
 
-; introducing the tMemInfo struct, used by the physical memory allocator to track blocks
-struc tMemInfo
-	.address									resd 1
-	.size										resd 1
-	.task										resd 1
-	.memFlags									resd 1
-endstruc
+%include "include/boolean.inc"
+%include "include/errors.inc"
+%include "include/memory.inc"
 
 
 

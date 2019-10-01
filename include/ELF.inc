@@ -18,6 +18,12 @@
 
 
 
+; ELF errors
+%define kErrELFInvalidBinary					0xFA00
+%define kErrELFWrongArchitecture				0xFA01
+%define kErrELFWrongByteOrder					0xFA02
+%define kErrELFWrongCPU							0xFA03
+
 ; ELF data typing conventions (here for reference)
 %define Elf32_Half								resw
 %define Elf32_Off								resd

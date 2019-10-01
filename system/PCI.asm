@@ -18,7 +18,9 @@
 
 
 
-; defines
+%include "include/boolean.inc"
+%include "include/errors.inc"
+
 %define kPCIAddressPort							0x0CF8
 %define kPCIDataPort							0x0CFC
 

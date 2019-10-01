@@ -18,13 +18,9 @@
 
 
 
-; tListInfo struct, used to manage lists
-struc tListInfo
-	.signature									resd 1
-	.elementSize								resd 1
-	.elementCount								resd 1
-	.listSize									resd 1
-endstruc
+%include "include/boolean.inc"
+%include "include/errors.inc"
+%include "include/lists.inc"
 
 
 
@@ -46,7 +42,7 @@ LMElementAddressGet:
 	;
 	;  output:
 	;	ESI - Element address
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -60,26 +56,18 @@ LMElementAddressGet:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov esi, 0
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	; see if element is valid
 	push elementNum
 	push listPtr
 	call LMElementValidate
 
-	cmp edx, true
-	je .ElementValid
-		; if we get here, the element isn't valid
-		mov esi, 0
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.ElementValid:
+	;error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push listPtr
@@ -106,7 +94,7 @@ LMElementCountGet:
 	;
 	;  output:
 	;	ECX - Number of total element slots in this list
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -118,15 +106,10 @@ LMElementCountGet:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .TestPassed
+	; errror check
+	cmp edx, kErrNone
+	jne .Exit
 
-		; if we get here, the list isn't valid
-		mov ecx, 0
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-
-	.TestPassed:
 	push listPtr
 	call LM_Internal_ElementCountGet
 
@@ -151,7 +134,7 @@ LMElementCountSet:
 	;	New number of total element slots in this list
 	;
 	;  output:
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -164,12 +147,9 @@ LMElementCountSet:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push newElementCount
 	push listPtr
@@ -196,7 +176,7 @@ LMElementDelete:
 	;	Element number to be deleted
 	;
 	;  output:
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -209,23 +189,17 @@ LMElementDelete:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push listPtr
 	call LMElementValidate
 
-	cmp edx, true
-	je .ElementValid
-		; if we get here, the element isn't valid
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.ElementValid:
+	;error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push listPtr
@@ -252,7 +226,7 @@ LMElementDuplicate:
 	;	Element number to be duplicated
 	;
 	;  output:
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -265,23 +239,17 @@ LMElementDuplicate:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push listPtr
 	call LMElementValidate
 
-	cmp edx, true
-	je .ElementValid
-		; if we get here, the element isn't valid
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.ElementValid:
+	;error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push listPtr
@@ -308,7 +276,7 @@ LMElementSizeGet:
 	;
 	;  output:
 	;	EAX - List element size
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -320,12 +288,9 @@ LMElementSizeGet:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push listPtr
 	call LM_Internal_ElementSizeGet
@@ -352,9 +317,7 @@ LMElementValidate:
 	;	Element to check
 	;
 	;  output:
-	;	EDX - Result
-	;		true - the element is in range
-	;		false - the element is not in range
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -369,16 +332,13 @@ LMElementValidate:
 	mov eax, dword [esi + tListInfo.elementCount]
 
 	cmp elementNum, eax
-	jb .ElementValid
+	mov edx, kErrValueTooHigh
+	jae .Exit
 
-	mov edx, false
-	jmp .Done
-
-	.ElementValid:
-	mov edx, true
+	mov edx, kErrNone
 
 
-	.Done:
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -398,7 +358,7 @@ LMItemAddAtSlot:
 	;	New item size
 	;
 	;  output:
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -413,23 +373,17 @@ LMItemAddAtSlot:
 	push listPtr
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push slotNum
 	push listPtr
 	call LMElementValidate
 
-	cmp edx, true
-	je .ElementValid
-		; if we get here, the element isn't valid
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.ElementValid:
+	;error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push newItemSize
 	push newItemPtr
@@ -550,7 +504,7 @@ LMListSearch:
 	;
 	;  output:
 	;	ESI - Memory address of element containing the matching data
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -579,9 +533,7 @@ LMListValidate:
 	;	List address
 	;
 	;  output:
-	;	EDX - Result
-	;		true - The list header contains a valid signature
-	;		false - The list header does not contain a valid signature
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -593,18 +545,15 @@ LMListValidate:
 	; check list validity
 	mov esi, address
 	mov eax, dword [esi]
+	mov edx, kErrListInvalid
 
 	cmp eax, 'list'
-	je .ListValid
+	jne .Exit
 
-	mov edx, false
-	jmp .Done
-
-	.ListValid:
-	mov edx, true
+	mov edx, kErrNone
 
 
-	.Done:
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -622,7 +571,7 @@ LMSlotFindFirstFree:
 	;
 	;  output:
 	;	EAX - Element number of first free slot
-	;	EDX - Result code
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -634,12 +583,9 @@ LMSlotFindFirstFree:
 	push address
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push address
 	call LM_Internal_SlotFindFirstFree
@@ -680,23 +626,17 @@ LMSlotFreeTest:
 	push address
 	call LMListValidate
 
-	cmp edx, true
-	je .ListValid
-		; if we get here, the list isn't valid
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ListValid:
+	; error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push address
 	call LMElementValidate
 
-	cmp edx, true
-	je .ElementValid
-		; if we get here, the element isn't valid
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.ElementValid:
+	;error check
+	cmp edx, kErrNone
+	jne .Exit
 
 	push elementNum
 	push address
@@ -1051,6 +991,7 @@ ret 4
 section .text
 LM_Internal_ItemAddAtSlot:
 	; Adds an item to the list specified at the list slot specified
+	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -1074,18 +1015,8 @@ LM_Internal_ItemAddAtSlot:
 	mov esi, address
 	mov edx, addSlot
 
-	; check list validity
-	mov eax, dword [esi]
-	cmp eax, 'list'
-	je .ListValid
 
-	; add error handling code here later
-	mov ebp, 0xDEAD0003
-	jmp $
-
-	.ListValid:
-	; the list passed the data integrity check, so we proceed
-
+	; if we get here the list passed the data integrity check, so we proceed
 	; get the size of each element in this list
 	mov edi, address
 	push edi
@@ -1093,14 +1024,9 @@ LM_Internal_ItemAddAtSlot:
 
 	; now compare that to the given size of the new item
 	cmp newItemSize, eax
-	jle .SizeValid
+	mov edx, kErrElementSizeInvalid
 
-	; add error handling code here later
-	mov ebp, 0xDEAD0004
-	jmp $
-
-	.SizeValid:
-	; if we get here, the size is ok, so we add it to the list!
+	; if we get here the size is ok, so we add it to the list!
 	mov esi, newItemAddress
 	mov ebx, newItemSize
 
@@ -1121,7 +1047,7 @@ LM_Internal_ItemAddAtSlot:
 	push esi
 	call MemCopy
 
-
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret 16

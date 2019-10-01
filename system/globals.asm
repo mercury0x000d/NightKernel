@@ -17,7 +17,7 @@
 
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2447
+%define BUILD 2497
 
 
 section .data
@@ -165,66 +165,11 @@ struc tPartitionInfo
 endstruc
 ; the following elements are reserved for use by the FS driver for this partition
 
-; partition data as presented on disk
-struc tPartitionLayout
-	.bootable									resb 1
-	.startingCHS								resb 3
-	.systemID									resb 1
-	.endingCHS									resb 3
-	.startingLBA								resd 1
-	.sectorCount								resd 1
-endstruc
-
 
 
 
 
 ; global konstant defines
-
-; error codes
-%define kErrNone								0x0000
-
-; general function/hardware errors
-%define kErrInvalidParameter					0xF000
-%define kErrValueTooLow							0xF001
-%define kErrValueTooHigh						0xF002
-%define kErrTimeout								0xF003
-
-; ELF errors
-%define kErrELFInvalidBinary					0xFA00
-%define kErrELFWrongArchitecture				0xFA01
-%define kErrELFWrongByteOrder					0xFA02
-%define kErrELFWrongCPU							0xFA03
-
-; filesystem errors
-%define kErrDriveLetterInvalid					0xFB00
-%define kErrPathInvalid							0xFB01
-%define kErrPathInvalidCharacter				0xFB02
-%define kErrItemNotFound						0xFB03
-%define kErrClusterChainEndUnexpected			0xFB04
-%define kErrRootDirectoryFull					0xFB05
-%define kErrItemAlreadyExists					0xFB06
-%define kErrClusterChainBad						0xFB07
-%define kErrDirectoryNotEmpty					0xFB08
-%define kErrNotADirectory						0xFB09
-
-; partition errors
-%define kErrInvalidPartitionNumber				0xFC00
-%define kErrPartitionFull						0xFC01
-
-; driver handler errors
-%define kErrHandlerNotPresent					0xFD00
-
-; memory errors
-%define kErrOutOfMemory							0xFE00
-%define kErrMemoryInitFail						0xFE01
-
-; PS/2 controller errors
-%define kErrPS2AckFail							0xFF00
-%define kErrPS2ControllerReadTimeout			0xFF01
-%define kErrPS2ControllerWriteTimeout			0xFF02
-
-
 
 ; block and character driver commands
 %define kDriverInit								0x00

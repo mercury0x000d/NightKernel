@@ -18,7 +18,8 @@
 
 
 
-; globals
+%include "include/boolean.inc"
+
 section .data
 kHexDigits										db '0123456789ABCDEF'
 

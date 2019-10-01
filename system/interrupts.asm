@@ -18,7 +18,8 @@
 
 
 
-; constants
+%include "include/errors.inc"
+
 kIDTPtr											dd 0x00000000
 
 
@@ -651,9 +652,12 @@ InterruptUnimplemented:
 	mov ebp, esp
 
 	pusha
-jmp $ ; for debugging, makes sure the system hangs for now
-	push kUnsupportedInt$
+
 	call PrintRegs32
+
+	push kUnsupportedInt$
+	call KernelInitFail
+
 	call PICIntComplete
 	popa
 
@@ -1666,8 +1670,12 @@ ISR21:
 	; PS/2 Port 1
 
 	pusha
-	mov edx, 0x00000021
-	jmp $ ; for debugging, makes sure the system hangs upon exception for now
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD0021
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1684,8 +1692,12 @@ ISR22:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x00000022
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD0022
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1704,8 +1716,13 @@ ISR23:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x00000023
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD0023
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1746,8 +1763,13 @@ ISR25:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x00000025
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD0025
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1785,8 +1807,13 @@ ISR27:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x00000027
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD0027
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1826,8 +1853,12 @@ ISR29:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x00000029
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD0029
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1846,8 +1877,12 @@ ISR2A:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x0000002A
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD002A
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1866,8 +1901,12 @@ ISR2B:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x0000002B
-	jmp $ ; for debugging, makes sure the system hangs upon exception
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD002B
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1884,8 +1923,12 @@ ISR2C:
 	; PS/2 Port 2
 
 	pusha
-	mov edx, 0x0000002C
-	jmp $ ; for debugging, makes sure the system hangs upon exception for now
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD002C
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1902,8 +1945,12 @@ ISR2D:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x0000002D
-	jmp $ ; for debugging, makes sure the system hangs upon exception for now
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD002D
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1922,8 +1969,12 @@ ISR2E:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x0000002E
-	jmp $ ; for debugging, makes sure the system hangs upon exception for now
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD002E
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 
@@ -1942,8 +1993,12 @@ ISR2F:
 	mov ebp, esp
 
 	pusha
-	mov edx, 0x0000002F
-	jmp $ ; for debugging, makes sure the system hangs upon exception for now
+	; for debugging, makes sure the system hangs upon exception
+	.errorLoop:
+		mov ebp, 0xDEAD002F
+		call PrintRegs32
+	jmp .errorLoop
+
 	call PICIntComplete
 	popa
 

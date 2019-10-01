@@ -19,16 +19,21 @@
 
 
 [map all kernel.map]
-org 0x00000600
-
 
 %include "include/kernel.inc"
+%include "include/errors.inc"
 
 
 
 
 
+org 0x00000600
 bits 16
+
+
+
+
+
 section .text
 main:
 ; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
@@ -342,13 +347,8 @@ call TaskInit
 
 
 
-
-
-
-
-
-
-
+;push dword 0xFFFFFFFF
+;call PageDirNew
 
 ; skip this for now, it's just an experiment
 ; comment out the jmp to run this code
@@ -358,11 +358,11 @@ cli
 
 push 0
 call PageDirCreate
-pop dword [PDAddr]
+mov dword [PDAddr], eax
 
 push 0
 call PageTableCreate
-pop dword [PTAddr]
+mov dword [PTAddr], eax
 
 
 ; insert page table into page directory while leaving the flags alone which we just set earlier
@@ -387,8 +387,6 @@ mov eax, dword [PDAddr]
 add eax, 4			; this advances to the second entry
 mov [eax], ebx
 
-
-
 ; turn it all on!
 push dword [PDAddr]
 call PageDirLoad
@@ -397,8 +395,6 @@ call PageDirLoad
 mov eax, cr0
 or eax, 0x80000000
 mov cr0, eax
-
-
 
 ; that's it! paging is active
 
@@ -426,26 +422,29 @@ PageDirCreate:
 	sub esp, 4
 	%define PDAddress							dword [ebp - 4]
 
-	; get a chunk of RAM that's 4KiB in size and aligned on a 4096-byte boundary
-	push 4096
-	push 4096
-	push 0x01
+	; get a chunk of RAM that's 4KiB in size (enough for 1024 32-bit page directory entries) and aligned on a 4096-byte boundary
+	push dword 4096
+	push dword 4096
+	push dword 0x01
 	call MemAllocateAligned
 	mov PDAddress, eax
 
+	; set default settings on every page directory entry
 	mov ecx, 1024
-	.zeroLoop:
+	.setLoop:
+		; calculate the address of this page directory entry
 		mov eax, 4
-		mov edx, 0
 		mov ebx, ecx
 		dec ebx
+		mov edx, 0
 		mul ebx
 		add eax, PDAddress
+
+		; set this page directory entry to 0x00000002 - specifying it is to be read/write
 		mov dword [eax], 0x00000002
-	loop .zeroLoop
+	loop .setLoop
 
 	mov eax, PDAddress
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
@@ -458,7 +457,7 @@ PageTableCreate:
 	sub esp, 4
 	%define PTAddress							dword [ebp - 4]
 
-	; get a chunk of RAM that's 4KiB in size and aligned on a 4096-byte boundary
+	; get a chunk of RAM that's 4KiB in size (enough for 1024 32-bit page table entries) and aligned on a 4096-byte boundary
 	push dword 4096
 	push dword 4096
 	push dword 0x01
@@ -466,11 +465,12 @@ PageTableCreate:
 	mov PTAddress, eax
 
 	mov ecx, 1024
-	.zeroLoop:
+	.setLoop:
+		; calculate the address of this page table entry
 		mov eax, 4
-		mov edx, 0
 		mov ebx, ecx
 		dec ebx
+		mov edx, 0
 		mul ebx
 		add eax, PTAddress
 		push eax
@@ -481,10 +481,9 @@ PageTableCreate:
 
 		pop ebx
 		mov dword [ebx], eax
-	loop .zeroLoop
+	loop .setLoop
 
 	mov eax, PTAddress
-	mov dword [ebp + 8], eax
 
 	mov esp, ebp
 	pop ebp
@@ -969,7 +968,7 @@ KernelInitFail:
 	; Prints a fatal error message and hangs
 	;
 	;  input:
-	;	n/a
+	;	Error string address
 	;
 	;  output:
 	;	n/a
@@ -1002,7 +1001,7 @@ KernelInitFail:
 	; why is this here? HE'S DEAD, JIM!
 	mov esp, ebp
 	pop ebp
-ret
+ret 4
 
 
 
@@ -1144,6 +1143,7 @@ section .text
 %include "system/interrupts.asm"
 %include "system/memory.asm"
 %include "system/numbers.asm"
+%include "system/paging.asm"
 %include "system/PCI.asm"
 %include "system/PIC.asm"
 %include "system/power.asm"

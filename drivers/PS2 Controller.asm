@@ -18,13 +18,15 @@
 
 
 
-; globals
-section .bss
-kKeyBufferAddress								resd 1
+%include "include/errors.inc"
+%include "include/PS2 Controller.inc"
 
 section .data
 kKeyBufferWrite									db 0x00
 kKeyBufferRead									db 0x00
+
+section .bss
+kKeyBufferAddress								resd 1
 
 
 

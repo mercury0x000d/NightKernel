@@ -20,16 +20,8 @@
 
 %define kKernelStack							8192
 
-; constant defines
-%define true									1
-%define false									0
-%define null									0
-
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
 %define kCBVerbose								1
 %define kCBLines50								2
 %define kCBVMEnable								3
-
-; error codes
-%define kErrNone								0x0000

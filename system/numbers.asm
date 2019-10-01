@@ -18,6 +18,12 @@
 
 
 
+%include "include/boolean.inc"
+
+
+
+
+
 bits 16
 
 

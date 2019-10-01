@@ -18,11 +18,7 @@
 
 
 
-; defines
-%define kPIC1CmdPort							word 0x0020
-%define kPIC1DataPort							word 0x0021
-%define kPIC2CmdPort							word 0x00A0
-%define kPIC2DataPort							word 0x00A1
+%include "include/PIC.inc"
 
 
 
