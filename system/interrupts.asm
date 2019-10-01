@@ -1671,10 +1671,9 @@ ISR21:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD0021
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD0021
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1693,10 +1692,9 @@ ISR22:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD0022
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD0022
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1718,10 +1716,9 @@ ISR23:
 	pusha
 
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD0023
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD0023
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1765,10 +1762,9 @@ ISR25:
 	pusha
 
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD0025
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD0025
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1809,10 +1805,9 @@ ISR27:
 	pusha
 
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD0027
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD0027
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1854,10 +1849,9 @@ ISR29:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD0029
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD0029
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1878,10 +1872,9 @@ ISR2A:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD002A
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD002A
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1902,10 +1895,9 @@ ISR2B:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD002B
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD002B
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1924,10 +1916,9 @@ ISR2C:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD002C
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD002C
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1946,10 +1937,9 @@ ISR2D:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD002D
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD002D
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1970,10 +1960,9 @@ ISR2E:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD002E
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD002E
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa
@@ -1994,10 +1983,9 @@ ISR2F:
 
 	pusha
 	; for debugging, makes sure the system hangs upon exception
-	.errorLoop:
-		mov ebp, 0xDEAD002F
-		call PrintRegs32
-	jmp .errorLoop
+	mov ebp, 0xDEAD002F
+	call PrintRegs32
+	jmp $
 
 	call PICIntComplete
 	popa

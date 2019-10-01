@@ -347,8 +347,11 @@ call TaskInit
 
 
 
-;push dword 0xFFFFFFFF
-;call PageDirNew
+push dword 0xFFFFFFFF
+call PageDirNew
+
+push dword 0xFFFFFFFF
+call PageTableNew
 
 ; skip this for now, it's just an experiment
 ; comment out the jmp to run this code

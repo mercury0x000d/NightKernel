@@ -18,20 +18,15 @@
 
 
 
+%include "include/boolean.inc"
+%include "include/errors.inc"
+%include "include/storage.inc"
+
+
+
+
+
 bits 32
-
-
-
-
-
-; boot sector offsets
-%define tMBR.Bootstrap							0x0000
-%define tMBR.OUID								0x01B4
-%define tMBR.PartitionOffsetA					0x01BE
-%define tMBR.PartitionOffsetB					0x01CE
-%define tMBR.PartitionOffsetC					0x01DE
-%define tMBR.PartitionOffsetD					0x01EE
-%define tMBR.Signature							0x01FE
 
 
 

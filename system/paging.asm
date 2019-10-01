@@ -45,7 +45,7 @@ PageDirNew:
 	mov ebp, esp
 
 	; define input parameters
-	%define entryFlags							dword [ebp + 8]
+	%define inputFlags							dword [ebp + 8]
 
 	; allocate local variables
 	sub esp, 4
@@ -63,6 +63,23 @@ PageDirNew:
 	jne .Exit
 	mov pageDirPtr, eax
 
+	; load input flags and mask off address area
+	mov ebx, inputFlags
+	and ebx, 0x00000FFF
+
+	; Force default flags off. This selects the following:
+	; bit 8 - This bit is ignored anyway
+	; bit 7 - 4 KiB pages (all we support for now)
+	; bit 6 - This bit must be zero
+	; bit 0 - not present (since this is a new empty page dir and all)
+	and ebx, 11111111111111111111111100011110b
+
+	; Force default flags on. This selects the following:
+	; bit 4 - Cache disabled (for now, to simplify debugging)
+	; bit 3 - Write-through caching
+	or ebx, 00000000000000000000000000011000b
+
+
 	; start a loop which sets the flags set on each PDE
 	mov ecx, 1024
 	.PDELoop:
@@ -70,22 +87,6 @@ PageDirNew:
 		dec ecx
 		lea esi, [eax + ecx * 4]
 		inc ecx
-
-		; load flags and mask off address area
-		mov ebx, entryFlags
-		and ebx, 0x00000FFF
-
-		; Force default flags off. This selects the following:
-		; bit 8 - This bit is ignored anyway
-		; bit 7 - 4 KiB pages (all we support for now)
-		; bit 6 - This bit must be zero
-		; bit 0 - not present (since this is a new empty page dir and all)
-		and ebx, 11111111111111111111111100011110b
-
-		; Force default flags on. This selects the following:
-		; bit 4 - Cache disabled (for now, to simplify debugging)
-		; bit 3 - Write-through caching
-		or ebx, 00000000000000000000000000011000b
 
 		mov dword [esi], ebx
 	loop .PDELoop
@@ -96,7 +97,6 @@ PageDirNew:
 
 
 	.Exit:
-jmp $
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -137,6 +137,22 @@ PageTableNew:
 	jne .Exit
 	mov pageTablePtr, eax
 
+	; load flags and mask off address area
+	mov ebx, entryFlags
+	and ebx, 0x00000FFF
+
+	; Force default flags off. This selects the following:
+	; bit 8 - Global flag off; the TLB will not update its cache upon reset of CR3
+	; bit 7 - This bit must be zero (no PAT here!)
+	; bit 0 - not present (since this is a new empty page dir and all)
+	and ebx, 11111111111111111111111100011110b
+
+	; Force default flags on. This selects the following:
+	; bit 4 - Cache disabled (for now, to simplify debugging)
+	; bit 3 - Write-through caching
+	or ebx, 00000000000000000000000000011000b
+
+
 	; start a loop which sets the flags set on each PTE
 	mov ecx, 1024
 	.PTELoop:
@@ -144,21 +160,6 @@ PageTableNew:
 		dec ecx
 		lea esi, [eax + ecx * 4]
 		inc ecx
-
-		; load flags and mask off address area
-		mov ebx, entryFlags
-		and ebx, 0x00000FFF
-
-		; Force default flags off. This selects the following:
-		; bit 8 - Global flag off; the TLB will not update its cache upon reset of CR3
-		; bit 7 - This bit must be zero (no PAT here!)
-		; bit 0 - not present (since this is a new empty page dir and all)
-		and ebx, 11111111111111111111111100011110b
-
-		; Force default flags on. This selects the following:
-		; bit 4 - Cache disabled (for now, to simplify debugging)
-		; bit 3 - Write-through caching
-		or ebx, 00000000000000000000000000011000b
 
 		mov dword [esi], ebx
 	loop .PTELoop
