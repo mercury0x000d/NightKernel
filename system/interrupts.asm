@@ -1015,13 +1015,11 @@ ISR01:
 	call Debugger
 
 	; acknowledge the PIC
-	pusha
 	call PICIntComplete
-	popa
 
 	; restore DS
 	pop ds
-iret
+iretd
 
 
 
@@ -1064,7 +1062,7 @@ ISR03:
 
 	; restore DS
 	pop ds
-iret
+iretd
 
 
 
@@ -1655,9 +1653,7 @@ ISR20:
 
 	inc dword [tSystem.ticksSinceBoot]
 
-	pusha
 	call PICIntComplete
-	popa
 
 jmp TaskSwitch
 
@@ -1668,16 +1664,7 @@ jmp TaskSwitch
 section .text
 ISR21:
 	; PS/2 Port 1
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0021
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
 iretd
 
 
@@ -1687,20 +1674,11 @@ iretd
 section .text
 ISR22:
 	; Cascade - used internally by the PICs, should never fire
-	push ebp
-	mov ebp, esp
-
-	pusha
 	; for debugging, makes sure the system hangs upon exception
 	mov ebp, 0xDEAD0022
 	call PrintRegs32
 	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1710,21 +1688,7 @@ iretd
 section .text
 ISR23:
 	; Serial port 2
-	push ebp
-	mov ebp, esp
-
-	pusha
-
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0023
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1734,19 +1698,7 @@ iretd
 section .text
 ISR24:
 	; Serial port 1
-	push ebp
-	mov ebp, esp
-
-	pusha
-	;push 1
-	;call SerialGetIIR
-	;pop edx
-	;pop ecx
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1756,21 +1708,8 @@ iretd
 section .text
 ISR25:
 	; Parallel port 2
-	push ebp
-	mov ebp, esp
-
-	pusha
-
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0025
-	call PrintRegs32
-	jmp $
-
+	; we don't do anything with the LPT devices, so we just return here
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1780,16 +1719,8 @@ iretd
 section .text
 ISR26:
 	; Floppy disk
-	push ebp
-	mov ebp, esp
-
 	; the kernel does nothing directly with the floppy drives, so we can simply exit here
-	pusha
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1799,21 +1730,8 @@ iretd
 section .text
 ISR27:
 	; Parallel port 1 - Supposedly prone to misfire?
-	push ebp
-	mov ebp, esp
-
-	pusha
-
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0027
-	call PrintRegs32
-	jmp $
-
+	; we don't do anything with the LPT devices, so we just return here
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1826,14 +1744,12 @@ ISR28:
 	push ds
 	push 0x10
 	pop ds
-	pusha
 
 	call RTCInterruptHandler
 
 	; signal the end of the interrupt to the PIC
 	call PICIntComplete
 
-	popa
 	pop ds
 iretd
 
@@ -1844,20 +1760,7 @@ iretd
 section .text
 ISR29:
 	; Free for peripherals / legacy SCSI / NIC
-	push ebp
-	mov ebp, esp
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0029
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1867,20 +1770,7 @@ iretd
 section .text
 ISR2A:
 	; Free for peripherals / SCSI / NIC
-	push ebp
-	mov ebp, esp
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002A
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1890,20 +1780,7 @@ iretd
 section .text
 ISR2B:
 	; Free for peripherals / SCSI / NIC
-	push ebp
-	mov ebp, esp
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002B
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1913,16 +1790,7 @@ iretd
 section .text
 ISR2C:
 	; PS/2 Port 2
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002C
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
 iretd
 
 
@@ -1932,20 +1800,7 @@ iretd
 section .text
 ISR2D:
 	; FPU / Coprocessor / Inter-processor
-	push ebp
-	mov ebp, esp
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002D
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1955,20 +1810,7 @@ iretd
 section .text
 ISR2E:
 	; Primary ATA Hard Disk
-	push ebp
-	mov ebp, esp
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002E
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd
 
 
@@ -1978,18 +1820,5 @@ iretd
 section .text
 ISR2F:
 	; Secondary ATA Hard Disk
-	push ebp
-	mov ebp, esp
-
-	pusha
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002F
-	call PrintRegs32
-	jmp $
-
 	call PICIntComplete
-	popa
-
-	mov esp, ebp
-	pop ebp
 iretd

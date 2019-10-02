@@ -550,7 +550,7 @@ TaskSwitch:
 	pop eax
 
 	.SkipTaskSwitch:
-iret
+iretd
 
 
 

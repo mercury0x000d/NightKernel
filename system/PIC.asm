@@ -121,9 +121,11 @@ PICIntComplete:
 	;  output:
 	;	n/a
 
-	push ebp
-	mov ebp, esp
 
+	; Since it's called from within nearly all interrupt handlers, this routine has to be
+	; fast and not overwrite any registers; here we save only what's about to be changed
+	push eax
+	push edx
 
 	; set the interrupt complete bit
 	mov al, 0x20
@@ -136,9 +138,9 @@ PICIntComplete:
 	mov dx, kPIC2CmdPort
 	out dx, al
 
-
-	mov esp, ebp
-	pop ebp
+	; restore that stuff
+	pop edx
+	pop eax
 ret
 
 

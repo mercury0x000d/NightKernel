@@ -347,181 +347,20 @@ call TaskInit
 
 
 
-push dword 0xFFFFFFFF
-call PageDirNew
-
-push dword 0xFFFFFFFF
-call PageTableNew
-
-; skip this for now, it's just an experiment
-; comment out the jmp to run this code
-jmp PagingDone
-; experimental paging setup
-cli
-
-push 0
-call PageDirCreate
-mov dword [PDAddr], eax
-
-push 0
-call PageTableCreate
-mov dword [PTAddr], eax
-
-
-; insert page table into page directory while leaving the flags alone which we just set earlier
-; set up the first 4 MiB
-mov ecx, dword [PDAddr]
-mov eax, [ecx]
-and eax, 3
-mov ebx, dword [PTAddr]
-or ebx, eax
-or ebx, 1			; set the "present" bit
-mov eax, dword [PDAddr]
-mov [eax], ebx
-
-; and now point the second 4 MiB to the first
-mov ecx, dword [PDAddr]
-mov eax, [ecx]
-and eax, 3
-mov ebx, dword [PTAddr]
-or ebx, eax
-or ebx, 1			; set the "present" bit
-mov eax, dword [PDAddr]
-add eax, 4			; this advances to the second entry
-mov [eax], ebx
-
-; turn it all on!
-push dword [PDAddr]
-call PageDirLoad
-
-; enable paging
-mov eax, cr0
-or eax, 0x80000000
-mov cr0, eax
-
-; that's it! paging is active
-
-; Here we will do a test write at 0x400000 - the 4 MiB mark.
-; If all went well, a dump of RAM in the VirtualBox debugger should show the same data
-; at both address 0x000000 and 0x400000, even though we only wrote it at 0x400000.
-; How is this possible? THE MAGIC OF PAGING IS AMONG US!
-mov eax, 0x00400000
-mov dword [eax], 0xCAFEBEEF
 
 
 
-; hang here so we can survey our success!
-jmp $
-
-PDAddr									dd 0x00000000
-PTAddr									dd 0x00000000
 
 
 
-PageDirCreate:
-	push ebp
-	mov ebp, esp
-
-	sub esp, 4
-	%define PDAddress							dword [ebp - 4]
-
-	; get a chunk of RAM that's 4KiB in size (enough for 1024 32-bit page directory entries) and aligned on a 4096-byte boundary
-	push dword 4096
-	push dword 4096
-	push dword 0x01
-	call MemAllocateAligned
-	mov PDAddress, eax
-
-	; set default settings on every page directory entry
-	mov ecx, 1024
-	.setLoop:
-		; calculate the address of this page directory entry
-		mov eax, 4
-		mov ebx, ecx
-		dec ebx
-		mov edx, 0
-		mul ebx
-		add eax, PDAddress
-
-		; set this page directory entry to 0x00000002 - specifying it is to be read/write
-		mov dword [eax], 0x00000002
-	loop .setLoop
-
-	mov eax, PDAddress
-
-	mov esp, ebp
-	pop ebp
-ret
-
-PageTableCreate:
-	push ebp
-	mov ebp, esp
-
-	sub esp, 4
-	%define PTAddress							dword [ebp - 4]
-
-	; get a chunk of RAM that's 4KiB in size (enough for 1024 32-bit page table entries) and aligned on a 4096-byte boundary
-	push dword 4096
-	push dword 4096
-	push dword 0x01
-	call MemAllocateAligned
-	mov PTAddress, eax
-
-	mov ecx, 1024
-	.setLoop:
-		; calculate the address of this page table entry
-		mov eax, 4
-		mov ebx, ecx
-		dec ebx
-		mov edx, 0
-		mul ebx
-		add eax, PTAddress
-		push eax
-
-		mov eax, 0x1000
-		mul ebx
-		or eax, 3
-
-		pop ebx
-		mov dword [ebx], eax
-	loop .setLoop
-
-	mov eax, PTAddress
-
-	mov esp, ebp
-	pop ebp
-ret
-
-pusha
-call PrintRegs32
-popa
-
-PageDirLoad:
-
-	push ebp
-	mov ebp, esp
-
-	mov eax, [ebp + 8]
-	mov cr3, eax
-
-	mov esp, ebp
-	pop ebp
-ret
 
 
-PagingEnable:
-	push ebp
-	mov ebp, esp
-
-	mov eax, cr0
-	or eax, 0x80000000
-	mov cr0, eax
-
-	mov esp, ebp
-	pop ebp
-ret
-
-PagingDone:
+;push dword 0xFFFFFFFF
+;call PageDirNew
+;
+;
+;push dword 0xFFFFFFFF
+;call PageTableNew
 
 
 
