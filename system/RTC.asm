@@ -188,9 +188,6 @@ RTCInterruptHandler:
 	;  output:
 	;	n/a
 
-	push ebp
-	mov ebp, esp
-
 
 	; save everything before we go mucking about!
 	pusha
@@ -315,7 +312,7 @@ RTCInterruptHandler:
 	out 0x70, al
 	in al, 0x71
 
+	; restore all the goodies!
+	popa
 
-	mov esp, ebp
-	pop ebp
 ret

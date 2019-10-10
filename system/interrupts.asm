@@ -663,7 +663,7 @@ InterruptUnimplemented:
 
 	mov esp, ebp
 	pop ebp
-iretd
+iret
 
 section .data
 kUnsupportedInt$								db 'An unsupported interrupt has been called', 0x00
@@ -1019,7 +1019,7 @@ ISR01:
 
 	; restore DS
 	pop ds
-iretd
+iret
 
 
 
@@ -1062,7 +1062,7 @@ ISR03:
 
 	; restore DS
 	pop ds
-iretd
+iret
 
 
 
@@ -1664,8 +1664,13 @@ jmp TaskSwitch
 section .text
 ISR21:
 	; PS/2 Port 1
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD0021
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1678,8 +1683,9 @@ ISR22:
 	mov ebp, 0xDEAD0022
 	call PrintRegs32
 	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1688,8 +1694,13 @@ iretd
 section .text
 ISR23:
 	; Serial port 2
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD0023
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1698,8 +1709,12 @@ iretd
 section .text
 ISR24:
 	; Serial port 1
+	;push 1
+	;call SerialGetIIR
+	;pop edx
+	;pop ecx
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1708,9 +1723,13 @@ iretd
 section .text
 ISR25:
 	; Parallel port 2
-	; we don't do anything with the LPT devices, so we just return here
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD0025
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1721,7 +1740,7 @@ ISR26:
 	; Floppy disk
 	; the kernel does nothing directly with the floppy drives, so we can simply exit here
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1730,9 +1749,8 @@ iretd
 section .text
 ISR27:
 	; Parallel port 1 - Supposedly prone to misfire?
-	; we don't do anything with the LPT devices, so we just return here
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1751,7 +1769,7 @@ ISR28:
 	call PICIntComplete
 
 	pop ds
-iretd
+iret
 
 
 
@@ -1760,8 +1778,13 @@ iretd
 section .text
 ISR29:
 	; Free for peripherals / legacy SCSI / NIC
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD0029
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1770,8 +1793,13 @@ iretd
 section .text
 ISR2A:
 	; Free for peripherals / SCSI / NIC
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD002A
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1780,8 +1808,13 @@ iretd
 section .text
 ISR2B:
 	; Free for peripherals / SCSI / NIC
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD002B
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1790,8 +1823,13 @@ iretd
 section .text
 ISR2C:
 	; PS/2 Port 2
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD002C
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1800,8 +1838,13 @@ iretd
 section .text
 ISR2D:
 	; FPU / Coprocessor / Inter-processor
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD002D
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1810,8 +1853,13 @@ iretd
 section .text
 ISR2E:
 	; Primary ATA Hard Disk
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD002E
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret
 
 
 
@@ -1820,5 +1868,10 @@ iretd
 section .text
 ISR2F:
 	; Secondary ATA Hard Disk
+	; for debugging, makes sure the system hangs upon exception
+	mov ebp, 0xDEAD002F
+	call PrintRegs32
+	jmp $
+
 	call PICIntComplete
-iretd
+iret

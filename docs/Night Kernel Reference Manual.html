@@ -241,7 +241,9 @@
 		<p>
 			When the kernel is built, NASM will generate a map file, <i>kernel.map</i>, containing the addresses of all statically allocated structures and variables in the kernel. Any memory blocks allocated at runtime will not show here, but pointers to them can be found under the System Info option in the Debug Menu or by directly accessing the pointers in the tSystem struct.<br>
 			<br>
-			The makefile will start VirtualBox with the <i>--debug-command-line</i> option, which enables the debugger console of the virtual machine. This console allows viewing of register and memory contents, and also permits disassembling code. Some of the commands most useful for debugging Night are listed below:<br>
+			The makefile will start VirtualBox with the <i>--debug-command-line</i> option, which enables the debugger console of the virtual machine. This console allows viewing of register and memory contents, and also permits disassembling code.<br>
+			<br>
+			Some of the commands most useful for debugging Night are listed below:<br>
 			<br>
 			<table style="width:100%">
 				<caption>Table 3.1 - Useful VirtualBox Debugger commands</caption>
@@ -256,8 +258,20 @@
 					<td>Dump memory at address specified</td>
 				</tr>
 				<tr>
+					<td>dpd (address | index)</td>
+					<td>Dumps page directory entries</td>
+				</tr>
+				<tr>
+					<td>dpda (address)</td>
+					<td>Dumps memory at given address as a page directory</td>
+				</tr>
+				<tr>
+					<td>d (address)</td>
+					<td>Dump memory at address specified</td>
+				</tr>
+				<tr>
 					<td>r</td>
-					<td>Display active register set. Usually the active register set is the guest's set (e.g. Night's set), but if VirtualBox hits a Guru Meditation, the active set will be the hypervisor's registers. In this situation, use <code>rg</code> instead.</td>
+					<td>Display active register set</td>
 				</tr>
 				<tr>
 					<td>rg</td>
@@ -265,23 +279,33 @@
 				</tr>
 				<tr>
 					<td>sa (address) "string"</td>
-					<td>Search for an ASCII string.</td>
+					<td>Search for an ASCII string</td>
+				</tr>
+				<tr>
+					<td>sb (address) (byte value | byte string)</td>
+					<td>Search for one or more bytes</td>
+				</tr>
+				<tr>
+					<td>sd (address) (word value)</td>
+					<td>Search for one or more words</td>
+				</tr>
+				<tr>
+					<td>sw (address) (word value)</td>
+					<td>Search for one or more dwords</td>
 				</tr>
 				<tr>
 					<td>t</td>
 					<td>Trace (single-step) through code one instruction at a time.</td>
 				</tr>
 				<tr>
-					<td>u16 (address)</td>
-					<td>Unassemble 16-bit code at address specified</td>
-				</tr>
-				<tr>
-					<td>u32 (address)</td>
-					<td>Unassemble 32-bit code at address specified</td>
+					<td>u (address)</td>
+					<td>Unassembles code at the address specified using the default processor mode. Alternately, u16 or u32 may be used to force unassembly of 16-bit or 32-bit code, respectively.</td>
 				</tr>
 			</table>
 			<br>
-			The VirtualBox debugger has many more features as well. You can type <i>help commands</i> in the debug console for a complete list of commands available or <i>help</i> for a summary of help options.<br>
+			Usually the active register set and memory range upon which the above commands work are the guest's (e.g. Night's), but if VirtualBox hits a triple fault (Guru Meditation), these will switch to the hypervisor's. For these situations, some commands support adding a &quot;g&quot; to their ends to explicitly specify VirtualBox uses the guest's data.<br>
+			<br>
+			The VirtualBox debugger has many more features as well. You can type <i>help commands</i> in the debug console for a complete list of commands available or <i>help</i> for a summary of help options. You can even type <i>help (command name)</i> to get help on a specific command.<br>
 		</p>
 		<br>
 		<br>
@@ -976,6 +1000,29 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			<b>10/10/2019, 0.1E Update, Build 2675 - Start of paging support, memory probe bugfixes, start of 64-bit math support</b><br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: Moved all files toward a more standard format by adding <code>%include</code>s to the start of each file which needs defined structs, constants, or the like.</li>
+				<li>Kernel: <i>memory.asm</i> - Added <code>PageDirNew()</code> to create a new empty page directory.</li>
+				<li>Kernel: <i>numbers.asm</i> - Added <code>QuadAdd16()</code>, <code>QuadAdd()</code>, <code>QuadShiftLeft()</code>, and <code>QuadShiftRight()</code> to perform calculations on 64-bit values. Useful for totalling memory on machines with more than 4 GiB of RAM!</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>interrupts.asm</i> - Optimized some interrupt handling code.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Removed some stray error checking in <code>LM_Internal_ItemAddAtSlot()</code>.</li>
+				<li>Kernel: <i>lists.asm</i> - Streamlined error checking in numerous routines.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a use-without-initialization error causing <code>MemProbe()</code> to not reliably fetch proper information.</li>
+				<li>Kernel: <i>RTC.asm</i> - Fixed/improved stack handling in the ISR.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
 			<b>9/25/2019, 0.1D Update, Build 2247 - Basic FAT16 driver complete</b><br>
 			<br>
 			New<br>
@@ -1827,6 +1874,8 @@
 						<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_numbers.asm" style="font-size: 14px">Number Functions - numbers.asm</a><br>
+						<br>
+						<a href="#NightFunctionReference_paging.asm" style="font-size: 14px">Paging Support - paging.asm</a><br>
 						<br>
 						<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
 						<br>
@@ -3778,11 +3827,68 @@
 			<br>
 			<br>
 
+			<a name="NightFunctionReference_paging.asm"><b>Paging Support - <i>paging.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style="width:100%">
+				<caption>Table A1.16 - paging.asm 32-bit public functions</caption>
+				<col width = 40%>
+				<col width = 30%>
+				<col width = 30%>
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>PageMap</code><br>
+						<br>
+							Maps the specified number of physical pages to virtual pages
+					</td>
+					<td>
+						<ol>
+							<li>Starting address of physical memory range</li>
+							<li>Starting address of virtual memory range</li>
+							<li>Number of pages to be mapped</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PageDirNew</code><br>
+						<br>
+							Creates a new empty page directory
+					</td>
+					<td>Flags</td>
+					<td>
+						ESI - Address of new page directory<br>
+						EDX - Error code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>PageTableNew</code><br>
+						<br>
+							Creates a new empty page table
+					</td>
+					<td>Flags</td>
+					<td>
+						ESI - Address of new page table<br>
+						EDX - Error code
+					</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
 			<a name="NightFunctionReference_PCI.asm"><b>PCI Functions - <i>PCI.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.16 - PCI Functions 16-bit public functions</caption>
+				<caption>Table A1.17 - PCI Functions 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -3807,7 +3913,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.17 - PCI Functions 32-bit public functions</caption>
+				<caption>Table A1.18 - PCI Functions 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4110,7 +4216,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.18 - PIC.asm 32-bit public functions</caption>
+				<caption>Table A1.19 - PIC.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4190,7 +4296,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.19 - PS2 Controller.asm 32-bit public functions</caption>
+				<caption>Table A1.20 - PS2 Controller.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4443,7 +4549,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.20 - power.asm 16-bit public functions</caption>
+				<caption>Table A1.21 - power.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4488,7 +4594,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.21 - RTC.asm 32-bit public functions</caption>
+				<caption>Table A1.22 - RTC.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4533,7 +4639,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.22 - screen.asm 16-bit public functions</caption>
+				<caption>Table A1.23 - screen.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4606,7 +4712,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.23 - screen.asm 32-bit public functions</caption>
+				<caption>Table A1.24 - screen.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4719,7 +4825,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.24 - serial.asm 32-bit public functions</caption>
+				<caption>Table A1.25 - serial.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -4962,7 +5068,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.25 - strings.asm 16-bit public functions</caption>
+				<caption>Table A1.26 - strings.asm 16-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5006,7 +5112,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.26 - strings.asm 32-bit public functions</caption>
+				<caption>Table A1.27 - strings.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5563,7 +5669,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
-				<caption>Table A1.27 - tasks.asm 32-bit public functions</caption>
+				<caption>Table A1.28 - tasks.asm 32-bit public functions</caption>
 				<col width = 40%>
 				<col width = 30%>
 				<col width = 30%>
@@ -5654,7 +5760,7 @@
 
 			<a name="NightFunctionReference_StandardFunctionReturnCodes"><b>Standard Function Return Codes</b></a><br>
 			<table style="width:100%">
-				<caption>Table A1.28 - Standard function return codes</caption>
+				<caption>Table A1.29 - Standard function return codes</caption>
 				<col width = 10%>
 				<col width = 20%>
 				<col width = 70%>
@@ -5688,6 +5794,22 @@
 					<td>0xF002</td>
 					<td>kErrValueTooHigh</td>
 					<td>Value specified is too high</td>
+				</tr>
+				<tr>
+					<td colspan="3"></td>
+				</tr>
+				<tr>
+					<td colspan="3"><i>List Manager errors</i></td>
+				</tr>
+				<tr>
+					<td>0xF900</td>
+					<td>kErrListInvalid</td>
+					<td>The list address specified does not contain the "list" signature</td>
+				</tr>
+				<tr>
+					<td>0xF901</td>
+					<td>kErrElementSizeInvalid</td>
+					<td>The item being added is larger than the element size of this list</td>
 				</tr>
 				<tr>
 					<td colspan="3"></td>

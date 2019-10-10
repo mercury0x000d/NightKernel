@@ -340,40 +340,13 @@ call TaskInit
 
 
 
+; initialize paging
+push progressText17$
+call PrintIfConfigBits32
+call PagingInit
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-;push dword 0xFFFFFFFF
-;call PageDirNew
-;
-;
-;push dword 0xFFFFFFFF
-;call PageTableNew
-
-
-
-
-
-
-
-
-
-
-
-
-
+xchg bx, bx
 
 
 bt dword [tSystem.configBits], kCBDebugMode
@@ -779,7 +752,7 @@ progressText04$									db 'APMEnable', 0x00
 progressText05$									db 'LoadGDT', 0x00
 progressText06$									db 'Probing PCI controller', 0x00
 progressText07$									db 'Entering Protected Mode', 0x00
-progressText08$									db 'Enabling CPU debug featurtes', 0x00
+progressText08$									db 'Enabling CPU debug features', 0x00
 progressText09$									db 'Memory list init', 0x00
 progressText0A$									db 'Stack setup', 0x00
 progressText0B$									db 'IDTInit', 0x00
@@ -794,6 +767,7 @@ progressText13$									db 'Initializing PCI devices', 0x00
 progressText14$									db 'Enumerating partitions', 0x00
 progressText15$									db 'Mapping partitions', 0x00
 progressText16$									db 'Initializing Task Manager', 0x00
+progressText17$									db 'Initializing CPU paging features', 0x00
 fatalE820Unsupported$							db 'Fatal: BIOS function 0xE820 unsupported on this machine; unable to probe memory', 0x00
 fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory.', 0x00
 fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory.', 0x00

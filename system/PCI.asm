@@ -307,7 +307,7 @@ PCIDeviceInitAll:
 ret
 
 section .data
-.sendingInit$									db 'Attempting Init for device ^:^ (^-^-^-^) at ^-^-^', 0x00
+.sendingInit$									db 'Sending Init for device ^:^ (^-^-^-^) at ^-^-^', 0x00
 .noDriver$										db 'No driver found, continuing', 0x00
 
 section .bss

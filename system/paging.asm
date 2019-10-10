@@ -20,6 +20,7 @@
 
 ; includes
 %include "include/errors.inc"
+%include "include/paging.inc"
 
 
 
@@ -32,14 +33,117 @@ bits 32
 
 
 section .text
-PageDirNew:
-	; Creates a complete new empty page directory
+PagingInit:
+	; Initializes the CPU for paging
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+
+	; make sure the CPU supports Page Size Extensions (PSE)
+
+
+	; enable PSE
+	mov eax, cr4
+	or eax, 00000000000000000000000000010000b
+	mov cr4, eax
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+PagingMap:
+	; Maps the specified number of physical pages to virtual pages
+	;
+	;  input:
+	;	Address of Page Directory
+	;	Starting address of virtual memory range
+	;	Starting address of physical memory range
+	;	Number of pages to be mapped
+	;	Flags to be assigned to mapped pages
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define pageDirPtr							dword [ebp + 8]
+	%define virtualPtr							dword [ebp + 12]
+	%define physicalPtr							dword [ebp + 16]
+	%define pageCount							dword [ebp + 20]
+	%define inputFlags							dword [ebp + 24]
+
+	; allocate local variables
+	sub esp, 4
+	%define flagMask							dword [ebp - 4]
+
+
+	; mask the flags, and set the present bit
+	mov eax, inputFlags
+	and eax, 0x00000FFF
+	or eax, 00000000000000000000000000000001b
+	mov flagMask, eax
+
+	; set up a loop to step through the number of pages requested
+	mov eax, virtualPtr
+	mov ebx, physicalPtr
+	mov ecx, pageCount
+	mov esi, pageDirPtr
+	.PageLoop:
+
+		; calculate PDE number
+		mov edx, eax
+		shr edx, 22
+
+		; calculate the address of this PDE
+		lea edi, [esi + edx * 4]
+
+		; now update the PDE with the new address + flags
+		mov edx, ebx
+		and edx, 0xFFC00000
+		or edx, flagMask
+		mov [edi], edx
+
+		; update the values
+		add eax, 0x400000
+		add ebx, 0x400000
+	loop .PageLoop
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret 20
+
+
+
+
+
+section .text
+PagingDirNew:
+	; Creates a new empty page directory
 	;
 	;  input:
 	;	Flags
 	;
 	;  output:
 	;	ESI - Address of new page directory
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -52,7 +156,7 @@ PageDirNew:
 	%define pageDirPtr							dword [ebp - 4]
 
 
-	; get a chunk of RAM that's 4KiB in size, enough for 1024 32-bit page directory entries (PDEs), and aligned on a 4096-byte boundary
+	; get a chunk of RAM that's 4 MiB in size and aligned on a 4 MiB boundary
 	push dword 4096
 	push dword 4096
 	push dword 0x01
@@ -63,21 +167,20 @@ PageDirNew:
 	jne .Exit
 	mov pageDirPtr, eax
 
-	; load input flags and mask off address area
+	; load input flags and set flags appropriately
 	mov ebx, inputFlags
-	and ebx, 0x00000FFF
 
-	; Force default flags off. This selects the following:
+	; Force flags off to select the following:
 	; bit 8 - This bit is ignored anyway
-	; bit 7 - 4 KiB pages (all we support for now)
 	; bit 6 - This bit must be zero
 	; bit 0 - not present (since this is a new empty page dir and all)
-	and ebx, 11111111111111111111111100011110b
+	and ebx, 00000000000000000000000000011110b
 
-	; Force default flags on. This selects the following:
+	; Force flags on to select the following:
+	; bit 7 - 4 MiB pages
 	; bit 4 - Cache disabled (for now, to simplify debugging)
 	; bit 3 - Write-through caching
-	or ebx, 00000000000000000000000000011000b
+	or ebx, 00000000000000000000000010011000b
 
 
 	; start a loop which sets the flags set on each PDE
@@ -103,221 +206,75 @@ ret 4
 
 
 
+; test code
+jmp pagingdone
+; create a page dir
+push dword PDEBigPage + PDECacheDisable + PDEWriteThrough + PDEUserAccessable + PDEWritable
+call PagingDirNew
+mov [pagediraddr], esi
+
+; load the page dir address
+mov cr3, esi
 
 
-section .text
-PageTableNew:
-	; Creates a complete new empty page table
-	;
-	;  input:
-	;	Flags
-	;
-	;  output:
-	;	ESI - Address of new page table
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define entryFlags							dword [ebp + 8]
-
-	; allocate local variables
-	sub esp, 4
-	%define pageTablePtr						dword [ebp - 4]
-
-
-	; get a chunk of RAM that's 4KiB in size, enough for 1024 32-bit page table entries (PTEs), and aligned on a 4096-byte boundary
-	push dword 4096
-	push dword 4096
-	push dword 0x01
-	call MemAllocateAligned
-
-	; see if there was an error, if not save the pointer
-	cmp edx, kErrNone
-	jne .Exit
-	mov pageTablePtr, eax
-
-	; load flags and mask off address area
-	mov ebx, entryFlags
-	and ebx, 0x00000FFF
-
-	; Force default flags off. This selects the following:
-	; bit 8 - Global flag off; the TLB will not update its cache upon reset of CR3
-	; bit 7 - This bit must be zero (no PAT here!)
-	; bit 0 - not present (since this is a new empty page dir and all)
-	and ebx, 11111111111111111111111100011110b
-
-	; Force default flags on. This selects the following:
-	; bit 4 - Cache disabled (for now, to simplify debugging)
-	; bit 3 - Write-through caching
-	or ebx, 00000000000000000000000000011000b
-
-
-	; start a loop which sets the flags set on each PTE
-	mov ecx, 1024
-	.PTELoop:
-		; calculate the address of this PTE
-		dec ecx
-		lea esi, [eax + ecx * 4]
-		inc ecx
-
-		mov dword [esi], ebx
-	loop .PTELoop
-
-	; set the address and error code
-	mov esi, pageTablePtr
-	mov edx, kErrNone
-
-
-	.Exit:
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
-
-
-
-
-
-
-
-
-; experimental paging setup
-cli
-
-push 0
-call PageDirCreate
-mov dword [PDAddr], eax
-
-push 0
-call PageTableCreate
-mov dword [PTAddr], eax
-
-
-; insert page table into page directory while leaving the flags alone which we just set earlier
-; set up the first 4 MiB
-mov ecx, dword [PDAddr]
-mov eax, [ecx]
-and eax, 3
-mov ebx, dword [PTAddr]
-or ebx, eax
-or ebx, 1			; set the "present" bit
-mov eax, dword [PDAddr]
-mov [eax], ebx
-
-; and now point the second 4 MiB to the first
-mov ecx, dword [PDAddr]
-mov eax, [ecx]
-and eax, 3
-mov ebx, dword [PTAddr]
-or ebx, eax
-or ebx, 1			; set the "present" bit
-mov eax, dword [PDAddr]
-add eax, 4			; this advances to the second entry
-mov [eax], ebx
-
-; turn it all on!
-mov eax, dword [PDAddr]
-mov cr3, eax
+; map some pages
+push dword PDEBigPage + PDECacheDisable + PDEWriteThrough + PDEUserAccessable + PDEWritable
+push dword 0x400
+push dword 0x00000000
+push dword 0x00000000
+push dword [pagediraddr]
+call PagingMap
 
 ; enable paging
 mov eax, cr0
 or eax, 0x80000000
 mov cr0, eax
 
-; that's it! paging is active
-
-; Here we will do a test write at 0x400000 - the 4 MiB mark.
-; If all went well, a dump of RAM in the VirtualBox debugger should show the same data
-; at both address 0x000000 and 0x400000, even though we only wrote it at 0x400000.
-; How is this possible? THE MAGIC OF PAGING IS AMONG US!
-mov eax, 0x00400000
-mov dword [eax], 0xCAFEBEEF
-
-; hang here so we can survey our success!
+mov esi, [pagediraddr]
 jmp $
 
-PDAddr									dd 0x00000000
-PTAddr									dd 0x00000000
+push dword 0x0000009E
+push dword 1
+push dword 0x00800000
+push dword 0x10000000
+push dword [pagediraddr]
+call PagingMap
+
+push dword 0x0000009E
+push dword 1
+push dword 0xFFC00000
+push dword 0xFFC00000
+push dword [pagediraddr]
+call PagingMap
+
+
+mov esp, 0x300000
 
 
 
-PageDirCreate:
-	push ebp
-	mov ebp, esp
 
-	sub esp, 4
-	%define PDAddress							dword [ebp - 4]
+; test writing
+mov esi, 0x200000
+mov dword [esi], 0xc0de
 
-	; get a chunk of RAM that's 4KiB in size (enough for 1024 32-bit page directory entries) and aligned on a 4096-byte boundary
-	push dword 4096
-	push dword 4096
-	push dword 0x01
-	call MemAllocateAligned
-	mov PDAddress, eax
+mov esi, 0x10000000
+mov dword [esi], 0xbeef
 
-	; set default settings on every page directory entry
-	mov ecx, 1024
-	.setLoop:
-		; calculate the address of this page directory entry
-		mov eax, 4
-		mov ebx, ecx
-		dec ebx
-		mov edx, 0
-		mul ebx
-		add eax, PDAddress
-
-		; set this page directory entry to 0x00000002 - specifying it is to be read/write
-		mov dword [eax], 0x00000002
-	loop .setLoop
-
-	mov eax, PDAddress
-
-	mov esp, ebp
-	pop ebp
-ret
-
-PageTableCreate:
-	push ebp
-	mov ebp, esp
-
-	sub esp, 4
-	%define PTAddress							dword [ebp - 4]
-
-	; get a chunk of RAM that's 4KiB in size (enough for 1024 32-bit page table entries) and aligned on a 4096-byte boundary
-	push dword 4096
-	push dword 4096
-	push dword 0x01
-	call MemAllocateAligned
-	mov PTAddress, eax
-
-	mov ecx, 1024
-	.setLoop:
-		; calculate the address of this page table entry
-		mov eax, 4
-		mov ebx, ecx
-		dec ebx
-		mov edx, 0
-		mul ebx
-		add eax, PTAddress
-		push eax
-
-		mov eax, 0x1000
-		mul ebx
-		or eax, 3
-
-		pop ebx
-		mov dword [ebx], eax
-	loop .setLoop
-
-	mov eax, PTAddress
-
-	mov esp, ebp
-	pop ebp
-ret
+; disable paging
+mov eax, cr0
+;and eax, 01111111111111111111111111111111b
+mov cr0, eax
 
 
-; The maximum memory a real mode program can address is 1114096 bytes; 0x0000:0000 to 0xFFFF:FFFF.
-; This is 272 pages of 4096 bytes each.
+mov esi, [pagediraddr]
+jmp pagingdone
+
+pagediraddr  dd 0x00000000
+
+
+pagingdone:
+
+
+
+
+
