@@ -18,10 +18,14 @@
 
 
 
-%define PDEBigPage								0x80
-%define PDEAccessed								0x20
-%define PDECacheDisable							0x10
-%define PDEWriteThrough							0x08
-%define PDEUserAccessable						0x04
-%define PDEWritable								0x02
-%define PDEPresent								0x01
+; variable definitions
+%include "include/paging defines.inc"
+
+
+
+
+
+; function definitions
+extern PagingInit
+extern PagingMap
+extern PagingDirNew

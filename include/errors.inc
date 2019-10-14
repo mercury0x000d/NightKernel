@@ -18,30 +18,5 @@
 
 
 
-; error codes
-%define kErrNone								0x0000
-
-; general function/hardware errors
-%define kErrInvalidParameter					0xF000
-%define kErrValueTooLow							0xF001
-%define kErrValueTooHigh						0xF002
-%define kErrTimeout								0xF003
-
-; filesystem errors
-%define kErrDriveLetterInvalid					0xFB00
-%define kErrPathInvalid							0xFB01
-%define kErrPathInvalidCharacter				0xFB02
-%define kErrItemNotFound						0xFB03
-%define kErrClusterChainEndUnexpected			0xFB04
-%define kErrRootDirectoryFull					0xFB05
-%define kErrItemAlreadyExists					0xFB06
-%define kErrClusterChainBad						0xFB07
-%define kErrDirectoryNotEmpty					0xFB08
-%define kErrNotADirectory						0xFB09
-
-; partition errors
-%define kErrInvalidPartitionNumber				0xFC00
-%define kErrPartitionFull						0xFC01
-
-; driver handler errors
-%define kErrHandlerNotPresent					0xFD00
+; variable definitions
+%include "include/errors defines.inc"

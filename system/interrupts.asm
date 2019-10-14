@@ -18,8 +18,25 @@
 
 
 
-%include "include/errors.inc"
+%include "include/interrupts defines.inc"
 
+%include "include/errors.inc"
+%include "include/debug.inc"
+%include "include/globals.inc"
+%include "include/memory.inc"
+%include "include/misc.inc"
+%include "include/hardware.inc"
+%include "include/PIC.inc"
+%include "include/RTC.inc"
+%include "include/screen.inc"
+%include "include/strings.inc"
+%include "include/tasks.inc"
+
+
+
+
+
+section .data
 kIDTPtr											dd 0x00000000
 
 
@@ -656,14 +673,14 @@ InterruptUnimplemented:
 	call PrintRegs32
 
 	push kUnsupportedInt$
-	call KernelInitFail
+	call Fail
 
 	call PICIntComplete
 	popa
 
 	mov esp, ebp
 	pop ebp
-iret
+iretd
 
 section .data
 kUnsupportedInt$								db 'An unsupported interrupt has been called', 0x00
@@ -1019,7 +1036,7 @@ ISR01:
 
 	; restore DS
 	pop ds
-iret
+iretd
 
 
 
@@ -1062,7 +1079,7 @@ ISR03:
 
 	; restore DS
 	pop ds
-iret
+iretd
 
 
 
@@ -1670,7 +1687,7 @@ ISR21:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1685,7 +1702,7 @@ ISR22:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1700,7 +1717,7 @@ ISR23:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1714,7 +1731,7 @@ ISR24:
 	;pop edx
 	;pop ecx
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1729,7 +1746,7 @@ ISR25:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1740,7 +1757,7 @@ ISR26:
 	; Floppy disk
 	; the kernel does nothing directly with the floppy drives, so we can simply exit here
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1750,7 +1767,7 @@ section .text
 ISR27:
 	; Parallel port 1 - Supposedly prone to misfire?
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1769,7 +1786,7 @@ ISR28:
 	call PICIntComplete
 
 	pop ds
-iret
+iretd
 
 
 
@@ -1784,7 +1801,7 @@ ISR29:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1799,7 +1816,7 @@ ISR2A:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1814,7 +1831,7 @@ ISR2B:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1829,7 +1846,7 @@ ISR2C:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1844,7 +1861,7 @@ ISR2D:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1859,7 +1876,7 @@ ISR2E:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd
 
 
 
@@ -1874,4 +1891,4 @@ ISR2F:
 	jmp $
 
 	call PICIntComplete
-iret
+iretd

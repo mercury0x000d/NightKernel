@@ -18,32 +18,17 @@
 
 
 
-; defines
-; a 1 KiB stack is almost guaranteed to be too small in the future!
-%define taskStackSize							1024
-%define taskKernelStackSize						1024
+; function definitions
+%include "include/tasks defines.inc"
 
 
 
 
 
-; tTaskInfo struct, used to... *GASP* manage tasks (96 bytes)
-struc tTaskInfo
-	.pageDirAddress								resd 1
-	.entryPoint									resd 1
-	.esp										resd 1
-	.esp0										resd 1
-	.stackAddress								resd 1
-	.kernelStackAddress							resd 1
-	.priority									resb 1
-	.turnsRemaining								resb 1
-	.unused										resw 1
-	.switchInLow								resd 1
-	.switchInHigh								resd 1
-	.cycleCountLow								resd 1
-	.cycleCountHigh								resd 1
-	.spawnedBy									resd 1
-	.taskFlags									resd 1
-	.name										resb 44
-endstruc
-
+; function definitions
+extern TaskInit
+extern TaskKill
+extern TaskMemDisposeAll
+extern TaskNameSet
+extern TaskNew
+extern TaskSwitch

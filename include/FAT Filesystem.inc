@@ -18,67 +18,49 @@
 
 
 
-; FAT directory entry format
-struc tFATDirEntry
-	.name										resb 8
-	.extension									resb 3
-	.attributes									resb 1
-	.VFATCaseInfo								resb 1
-	.createTimeSeconds							resb 1
-	.createTime									resw 1
-	.createDate									resw 1
-	.lastAccessDate								resw 1
-	.extendedAttributes							resw 1
-	.lastModifiedTime							resw 1
-	.lastModifiedDate							resw 1
-	.startingCluster							resw 1
-	.size										resd 1
-endstruc
+; variable definitions
+%include "include/FAT Filesystem defines.inc"
 
-; tFAT16BPB, for the BIOS Parameter Block on a FAT16 formatted disk
-struc tFAT16BPB
-	.jump										resb 3
-	.OEM										resb 8
-	.bytesPerSector								resw 1
-	.sectorsPerCluster							resb 1
-	.reservedSectors							resw 1
-	.FATCount									resb 1
-	.rootDirectoryEntries						resw 1
-	.totalSectors								resw 1
-	.mediaDescriptor							resb 1
-	.sectorsPerFAT								resw 1
-	.sectorsPerTrack							resw 1
-	.headCount									resw 1
-	.hiddenSectors								resd 1
-	.totalSectorCountLarge						resd 1
-	.driveNumber								resb 1
-	.reserved									resb 1
-	.signature									resb 1
-	.volumeSerial								resd 1
-	.volumeLabel								resb 11
-	.FSIdentifier								resb 8
-	.bootCode									resb 448
-	.partitionSignature							resw 1
-endstruc
 
-; FAT attribute codes
-%define kFATAttributeReadOnly					0x01
-%define kFATAttributeHidden						0x02
-%define kFATAttributeSystem						0x04
-%define kFATAttributeVolumeID					0x08
-%define kFATAttributeDirectory					0x10
-%define kFATAttributeArchive					0x20
 
-; (re)defines for the FS handler space of the tPartitionInfo entry - a cache of sorts
-%define tPartitionInfo.FSFlags					tPartitionInfo.FSReserved00
-%define tPartitionInfo.sectorsPerCluster		tPartitionInfo.FSReserved01
-%define tPartitionInfo.rootDirEntries			tPartitionInfo.FSReserved02
-%define tPartitionInfo.rootDirSectorCount		tPartitionInfo.FSReserved03
-%define tPartitionInfo.rootDirSize				tPartitionInfo.FSReserved04
-%define tPartitionInfo.sectorsPerFAT			tPartitionInfo.FSReserved05
-%define tPartitionInfo.bytesPerCluster			tPartitionInfo.FSReserved06
-%define tPartitionInfo.FAT1						tPartitionInfo.FSReserved07
-%define tPartitionInfo.FAT2						tPartitionInfo.FSReserved08
-%define tPartitionInfo.rootDir					tPartitionInfo.FSReserved09
-%define tPartitionInfo.dataArea					tPartitionInfo.FSReserved10
-%define tPartitionInfo.clusterCount				tPartitionInfo.FSReserved11
+
+
+; function definitions
+extern FAT16CalcLBAClusterToSector
+extern FAT16CalcSpaceNeeded
+extern FAT16CalcTableElementFromCluster
+extern FAT16ChainDelete
+extern FAT16ChainGrow
+extern FAT16ChainLength
+extern FAT16ChainRead
+extern FAT16ChainResize
+extern FAT16ChainShrink
+extern FAT16ChainWrite
+extern FAT16ClusterFreeFirstGet
+extern FAT16ClusterFreeTotalGet
+extern FAT16ClusterNextGet
+extern FAT16ClusterNextSet
+extern FAT16EntryBuild
+extern FAT16FATBackup
+extern FAT16FileWrite
+extern FAT16ItemCount
+extern FAT16ItemDelete
+extern FAT16ItemExists
+extern FAT16ItemInfoAccessedGet
+extern FAT16ItemInfoCreatedGet
+extern FAT16ItemInfoModifiedGet
+extern FAT16ItemInfoSizeGet
+extern FAT16ItemLoad
+extern FAT16ItemMatch
+extern FAT16ItemNew
+extern FAT16ItemStore
+extern FAT16PartitionCacheData
+extern FAT16PartitionInfo
+extern FAT16PathCanonicalize
+extern FAT16ServiceHandler
+extern FAT32ServiceHandler
+extern FATDecodeDate
+extern FATDecodeTime
+extern FATEncodeDate
+extern FATEncodeFilename
+extern FATEncodeTime

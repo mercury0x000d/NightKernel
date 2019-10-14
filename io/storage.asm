@@ -18,9 +18,16 @@
 
 
 
+%include "include/storage defines.inc"
+
 %include "include/boolean.inc"
 %include "include/errors.inc"
-%include "include/storage.inc"
+%include "include/globals.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
+%include "include/numbers.inc"
+%include "include/PCI.inc"
+%include "include/strings.inc"
 
 
 

@@ -18,10 +18,34 @@
 
 
 
-%define kKernelStack							8192
+; variable definitions
+%include "include/kernel defines.inc"
 
-; for configbits settings - great idea, Antony!
-%define kCBDebugMode							0
-%define kCBVerbose								1
-%define kCBLines50								2
-%define kCBVMEnable								3
+extern tss.back_link
+extern tss.esp0
+extern tss.ss0
+extern tss.esp1
+extern tss.ss1
+extern tss.esp2
+extern tss.ss2
+extern tss.cr3
+extern tss.eip
+extern tss.eflags
+extern tss.eax
+extern tss.ecx
+extern tss.edx
+extern tss.ebx
+extern tss.esp
+extern tss.ebp
+extern tss.esi
+extern tss.edi
+extern tss.es
+extern tss.cs
+extern tss.ss
+extern tss.ds
+extern tss.fs
+extern tss.gs
+extern tss.ldt
+extern tss.trap
+extern tss.iomap_base
+extern tss.end

@@ -1000,6 +1000,22 @@
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
+			<b>//2019, 0.1E Update, Build 9999 - Start of paging support, memory probe bugfixes, start of 64-bit math support</b><br>
+			<br>
+			New<br>
+			<ul>
+				<li>Manual: Added function listings for <code>QuadAdd()</code>, <code>QuadShiftLeft()</code>, and <code>QuadShiftRight()</code></li>
+			</ul>
+			Changed<br>
+			<ul>
+			</ul>
+			Fixed<br>
+			<ul>
+			</ul>
+			<br>
+			<br>
+			<br>
+
 			<b>10/10/2019, 0.1E Update, Build 2675 - Start of paging support, memory probe bugfixes, start of 64-bit math support</b><br>
 			<br>
 			New<br>
@@ -2684,19 +2700,6 @@
 				</tr>
 				<tr>
 					<td>
-						<code>Random</code><br>
-						<br>
-						Returns a random number using the XORShift method
-					</td>
-					<td>
-						<ol>
-							<li>Number limit</li>
-						</ol>
-					</td>
-					<td>EAX - 32-bit random number between 0 and the number limit</td>
-				</tr>
-				<tr>
-					<td>
 						<code>Reboot</code><br>
 						<br>
 						Performs a warm reboot of the PC
@@ -3821,6 +3824,61 @@
 						&emsp;True - The value is in range<br>
 						&emsp;False - The value is not in range
 					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>QuadAdd</code><br>
+						<br>
+						Adds two quadwords
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to input QWord</li>
+							<li>Pointer to output QWord</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>QuadShiftLeft</code><br>
+						<br>
+						Shifts a quadword left by the specified number of places
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to QWord</li>
+							<li>Number of places to shift</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>QuadShiftRight</code><br>
+						<br>
+						Shifts a quadword right by the specified number of places
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to QWord</li>
+							<li>Number of places to shift</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+				<tr>
+					<td>
+						<code>Random</code><br>
+						<br>
+						Returns a random number using the XORShift method
+					</td>
+					<td>
+						<ol>
+							<li>Number limit</li>
+						</ol>
+					</td>
+					<td>EAX - 32-bit random number between 0 and the number limit</td>
 				</tr>
 			</table>
 			<br>

@@ -18,6 +18,14 @@
 
 
 
+%include "include/CPU defines.inc"
+
+%include "include/globals.inc"
+
+
+
+
+
 bits 32
 
 

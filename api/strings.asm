@@ -18,7 +18,15 @@
 
 
 
+%include "include/strings defines.inc"
+
 %include "include/boolean.inc"
+%include "include/memory.inc"
+%include "include/numbers.inc"
+
+
+
+
 
 section .data
 kHexDigits										db '0123456789ABCDEF'

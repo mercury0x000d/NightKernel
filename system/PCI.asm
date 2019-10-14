@@ -18,11 +18,15 @@
 
 
 
+%include "include/PCI defines.inc"
+
 %include "include/boolean.inc"
 %include "include/errors.inc"
-
-%define kPCIAddressPort							0x0CF8
-%define kPCIDataPort							0x0CFC
+%include "include/globals.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
+%include "include/screen.inc"
+%include "include/strings.inc"
 
 
 

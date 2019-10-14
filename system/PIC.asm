@@ -18,7 +18,7 @@
 
 
 
-%include "include/PIC.inc"
+%include "include/PIC defines.inc"
 
 
 

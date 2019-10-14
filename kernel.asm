@@ -18,16 +18,34 @@
 
 
 
-[map all kernel.map]
+; boy, the kernel needs a lot of headers to start! :D
+%include "include/kernel defines.inc"
 
-%include "include/kernel.inc"
+%include "include/CPU.inc"
+%include "include/debug.inc"
 %include "include/errors.inc"
+%include "include/FAT Filesystem.inc"
+%include "include/globals.inc"
+%include "include/hardware.inc"
+%include "include/IDE Controller.inc"
+%include "include/interrupts.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
+%include "include/misc.inc"
+%include "include/paging.inc"
+%include "include/PCI.inc"
+%include "include/PIC.inc"
+%include "include/PS2 Controller.inc"
+%include "include/RTC.inc"
+%include "include/screen.inc"
+%include "include/storage.inc"
+%include "include/strings.inc"
+%include "include/tasks.inc"
 
 
 
 
 
-org 0x00000600
 bits 16
 
 
@@ -112,16 +130,16 @@ call A20Enable
 
 
 ; get that good ol' APM info
-push progressText03$
-call PrintIfConfigBits16
-call SetSystemAPM
+;push progressText03$
+;call PrintIfConfigBits16
+;call SetSystemAPM
 
 
 
 ; enable the APM interface
-push progressText04$
-call PrintIfConfigBits16
-call APMEnable
+;push progressText04$
+;call PrintIfConfigBits16
+;call APMEnable
 
 
 
@@ -201,7 +219,7 @@ call MemAllocate
 cmp edx, kErrNone
 je .StackAllocOK
 	push fatalKernelStackMemAlloc$
-	call KernelInitFail
+	call Fail
 .StackAllocOK:
 
 mov ebx, kKernelStack
@@ -221,7 +239,7 @@ call IDTInit
 cmp edx, kErrNone
 je .IDTAllocOK
 	push fatalIDTMemAlloc$
-	call KernelInitFail
+	call Fail
 .IDTAllocOK:
 
 call ISRInitAll
@@ -268,7 +286,7 @@ call KernelInitLists
 cmp edx, kErrNone
 je .ListInitOK
 	push fatalListMemAlloc$
-	call KernelInitFail
+	call Fail
 .ListInitOK:
 
 
@@ -779,45 +797,6 @@ name$											db 'Kernel Debug Menu', 0x00
 
 
 bits 32
-section .text
-KernelInitFail:
-	; Prints a fatal error message and hangs
-	;
-	;  input:
-	;	Error string address
-	;
-	;  output:
-	;	n/a
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define error$								dword [ebp + 8]
-
-
-	mov eax, 0x00000000
-
-	push dword 0x00000004
-	push dword 0x00000000
-
-	mov al, byte [gCursorY]
-	push dword eax
-
-	mov al, byte [gCursorX]
-	push dword eax
-
-	push error$
-	call Print32
-
-	; and here we hang
-	jmp $
-
-
-	; why is this here? HE'S DEAD, JIM!
-	mov esp, ebp
-	pop ebp
-ret 4
 
 
 
@@ -943,32 +922,89 @@ ret
 
 
 
-section .text
-; includes for system routines
-%include "system/globals.asm"
-%include "api/lists.asm"
-%include "api/misc.asm"
-%include "api/strings.asm"
-%include "io/serial.asm"
-%include "io/storage.asm"
-%include "system/CMOS.asm"
-%include "system/CPU.asm"
-%include "system/exec.asm"
-%include "system/GDT.asm"
-%include "system/hardware.asm"
-%include "system/interrupts.asm"
-%include "system/memory.asm"
-%include "system/numbers.asm"
-%include "system/paging.asm"
-%include "system/PCI.asm"
-%include "system/PIC.asm"
-%include "system/power.asm"
-%include "system/RTC.asm"
-%include "system/tasks.asm"
-%include "video/screen.asm"
-%include "system/debug.asm"
+section .data
+gdt:
+	; Null descriptor (Offset 0x00)
+	; this is normally all zeros, but it's also a great place to tuck away the GDT header info
+	dw gdt.end - gdt - 1							; size of GDT
+	dd gdt											; base of GDT
+	dw 0x0000										; filler
 
-; includes for drivers
-%include "drivers/IDE Controller.asm"
-%include "drivers/FAT Filesystem.asm"
-%include "drivers/PS2 Controller.asm"
+	; Kernel space code (Offset 0x08)
+	.gdt1:
+	dw 0xFFFF										; limit low
+	dw 0x0000										; base low
+	db 0x00											; base middle
+	db 10011010b									; access byte
+	db 11001111b									; limit high, flags
+	db 0x00											; base high
+
+	; Kernel space data (Offset 0x10)
+	.gdt2:
+	dw 0xFFFF										; limit low
+	dw 0x0000										; base low
+	db 0x00											; base middle
+	db 10010010b									; access byte
+	db 11001111b									; limit high, flags
+	db 0x00											; base high
+
+	; User Space code (Offset 0x18)
+	.gdt3:
+	dw 0xFFFF										; limit low
+	dw 0x0000										; base low
+	db 0x00											; base middle
+	db 11111010b									; access byte
+	db 11001111b									; limit high, flags
+	db 0x00											; base high
+
+	; User Space data (Offset 0x20)
+	.gdt4:
+	dw 0xFFFF										; limit low
+	dw 0x0000										; base low
+	db 0x00											; base middle
+	db 11110010b									; access byte
+	db 11001111b									; limit high, flags
+	db 0x00											; base high
+
+	; Task State Segment (Offset 0x28)
+	; Note: the way this is set up assumes the location of the TSS is within the first 64 KiB of RAM and that it is also
+	; quite small. Neither of these things should pose a problem in the future, but it's worth noting here for sanity.
+	.gdt5:
+	dw (tss.end - tss) & 0x0000FFFF					; limit low
+	dw tss											; base low
+	db 0x00											; base middle
+	db 11101001b									; access byte
+	db 00000000b									; limit high, flags
+	db 0x00											; base high
+.end:
+
+
+tss:
+	.back_link										dd 0x00000000
+	.esp0											dd 0x00000000
+	.ss0											dd 0x00000010
+	.esp1											dd 0x00000000
+	.ss1											dd 0x00000000
+	.esp2											dd 0x00000000
+	.ss2											dd 0x00000000
+	.cr3											dd 0x00000000
+	.eip											dd 0x00000000
+	.eflags											dd 0x00000000
+	.eax											dd 0x00000000
+	.ecx											dd 0x00000000
+	.edx											dd 0x00000000
+	.ebx											dd 0x00000000
+	.esp											dd 0x00000000
+	.ebp											dd 0x00000000
+	.esi											dd 0x00000000
+	.edi											dd 0x00000000
+	.es												dd 0x00000000
+	.cs												dd 0x00000000
+	.ss												dd 0x00000000
+	.ds												dd 0x00000000
+	.fs												dd 0x00000000
+	.gs												dd 0x00000000
+	.ldt											dd 0x00000000
+	.trap											dw 0x0000
+	.iomap_base										dw 0x0000
+.end:

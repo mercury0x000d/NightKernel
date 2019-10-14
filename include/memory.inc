@@ -18,14 +18,40 @@
 
 
 
-; memory errors
-%define kErrOutOfMemory							0xFE00
-%define kErrMemoryInitFail						0xFE01
+; variable definitions
+%include "include/memory defines.inc"
 
-; introducing the tMemInfo struct, used by the physical memory allocator to track blocks
-struc tMemInfo
-	.address									resd 1
-	.size										resd 1
-	.task										resd 1
-	.memFlags									resd 1
-endstruc
+
+
+
+
+; function definitions
+extern A20Check
+extern A20Enable
+extern A20EnableBIOS
+extern A20EnableFastA20
+extern A20EnableKeyboardController
+extern A20EnablePortEE
+extern MemProbe
+extern MemAddressAlign
+extern MemAddressToBlock
+extern MemAllocate
+extern MemAllocateAligned
+extern MemCompare
+extern MemCopy
+extern MemDispose
+extern MemFill
+extern MemFindMostSuitable
+extern MemInit
+extern MemMergeBlocks
+extern MemSearchWord
+extern MemSearchDWord
+extern MemSearchString
+extern MemShrinkFromBeginning
+extern MemShrinkFromEnd
+extern MemSwapWordBytes
+extern MemSwapDwordWords
+extern Mem_Internal_MemListGrow
+extern Mem_Internal_MemListShrink
+extern PageDirInit
+extern PageDirBuildTo

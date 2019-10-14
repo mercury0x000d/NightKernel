@@ -18,7 +18,19 @@
 
 
 
+; includes
+%include "include/screen defines.inc"
+
+%include "include/globals.inc"
+%include "include/memory.inc"
+%include "include/strings.inc"
+
+
+
+
+
 section .data
+
 ; globals
 gCursorX										db 0x01
 gCursorY										db 0x01

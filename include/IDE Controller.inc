@@ -18,71 +18,19 @@
 
 
 
-%define kATAChannelPrimary						0x00
-%define kATAChannelSecondary					0x01
+; variable definitions
+%include "include/IDE Controller defines.inc"
 
-%define kATACommandReadPIO						0x20
-%define kATACommandReadPIOExt					0x24
-%define kATACommandReadDMAExt					0x25
-%define kATACommandWritePIO						0x30
-%define kATACommandWritePIOExt					0x34
-%define kATACommandWriteDMAExt					0x35
-%define	kATACommandRead_Verify					0x40
-%define	kATACommandDoDiagnostics				0x90
-%define kATACommandPacket						0xA0
-%define kATACommandIdentifyPacket				0xA1
-%define kATACommandReadDMA						0xC8
-%define kATACommandWriteDMA						0xCA
-%define	kATACommandStandbyImmediate				0xE0
-%define	kATACommandIdleImmediate				0xE1
-%define	kATACommandStandby						0xE2
-%define	kATACommandIdle							0xE3
-%define	kATACommandCheckPowerMode				0xE5
-%define	kATACommandSetSleepMode					0xE6
-%define kATACommandCacheFlush					0xE7
-%define kATACommandCacheFlushExt				0xEA
-%define kATACommandIdentify						0xEC
 
-%define kATADirectionRead						0x00
-%define kATADirectionWrite						0x01
 
-%define kATAErrorNoAddressMark					0x01
-%define kATAErrorTrackZeroNotFound				0x02
-%define kATAErrorCommandAborted					0x04
-%define kATAErrorMediaChangeRequest				0x08
-%define kATAErrorIDMarkNotFound					0x10
-%define kATAErrorMediaChanged					0x20
-%define kATAErrorUncorrectableData				0x40
-%define kATAErrorBadBlock						0x80
-
-%define kATARegisterData						0x00	; read/write
-%define kATARegisterError						0x01	; read only
-%define kATARegisterFeatures					0x01	; write only
-%define kATARegisterSecCount0					0x02	; read/write
-%define kATARegisterLBA0						0x03	; read/write
-%define kATARegisterLBA1						0x04	; read/write
-%define kATARegisterLBA2						0x05	; read/write
-%define kATARegisterLBA3						0x03	; read/write?
-%define kATARegisterLBA4						0x04	; read/write?
-%define kATARegisterLBA5						0x05	; read/write?
-%define kATARegisterHDDevSel					0x06	; read/write
-%define kATARegisterCommand						0x07	; write only
-%define kATARegisterStatus						0x07	; read only
-%define kATARegisterSecCount1					0x08	; read/write?
-%define kATARegisterControl						0x0C	; write only
-%define kATARegisterAltStatus					0x0C	; read only
-%define kATARegisterDeviceAddress				0x0D	; ?
-
-%define	kATAResultOK							0x00
-%define	kATAResultNoDrive						0x01
-%define	kATAResultError							0x02
-%define	kATAResultTimeout						0x03
-
-%define kATAStatusError							0x01
-%define kATAStatusIndex							0x02
-%define kATAStatusCorrectedData					0x04
-%define kATAStatusDataRequestReady				0x08
-%define kATAStatusDriveSeekComplete				0x10
-%define kATAStatusDriveWriteFault				0x20
-%define kATAStatusDriveReady					0x40
-%define kATAStatusBusy							0x80
+; function definitions
+extern IDEATAPISectorReadPIO
+extern IDEATASectorReadLBA28PIO
+extern IDEATASectorWriteLBA28PIO
+extern IDEDetectChannelDevices
+extern IDEDriveIdentify
+extern IDEInit
+extern IDEInterruptHandlerPrimary
+extern IDEInterruptHandlerSecondary
+extern IDEServiceHandler
+extern IDEWaitForReady

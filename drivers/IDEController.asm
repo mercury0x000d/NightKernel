@@ -33,8 +33,16 @@
 
 
 
+%include "include/IDE Controller defines.inc"
+
 %include "include/errors.inc"
-%include "include/IDE Controller.inc"
+%include "include/globals.inc"
+%include "include/interrupts.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
+%include "include/PCI.inc"
+%include "include/PIC.inc"
+%include "include/screen.inc"
 
 
 

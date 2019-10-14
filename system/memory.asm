@@ -18,9 +18,15 @@
 
 
 
+%include "include/memory defines.inc"
+
 %include "include/boolean.inc"
+%include "include/globals.inc"
 %include "include/errors.inc"
-%include "include/memory.inc"
+%include "include/lists.inc"
+%include "include/numbers.inc"
+%include "include/screen.inc"
+%include "include/strings.inc"
 
 
 

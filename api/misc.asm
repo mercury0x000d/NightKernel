@@ -18,6 +18,15 @@
 
 
 
+%include "include/misc defines.inc"
+
+%include "include/globals.inc"
+%include "include/screen.inc"
+
+
+
+
+
 bits 16
 
 
@@ -59,6 +68,50 @@ ret
 
 
 bits 32
+
+
+
+
+
+section .text
+Fail:
+	; Prints a fatal error message and hangs
+	;
+	;  input:
+	;	Error string address
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define error$								dword [ebp + 8]
+
+
+	mov eax, 0x00000000
+
+	push dword 0x00000004
+	push dword 0x00000000
+
+	mov al, byte [gCursorY]
+	push dword eax
+
+	mov al, byte [gCursorX]
+	push dword eax
+
+	push error$
+	call Print32
+
+	; and here we hang
+	jmp $
+
+
+	; why is this here? HE'S DEAD, JIM!
+	mov esp, ebp
+	pop ebp
+ret 4
 
 
 

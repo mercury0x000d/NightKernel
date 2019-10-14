@@ -18,7 +18,18 @@
 
 
 
+%include "include/debug defines.inc"
+
 %include "include/errors.inc"
+%include "include/globals.inc"
+%include "include/hardware.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
+%include "include/numbers.inc"
+%include "include/PCI.inc"
+%include "include/screen.inc"
+%include "include/strings.inc"
+%include "include/tasks.inc"
 
 
 

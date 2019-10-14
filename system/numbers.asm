@@ -18,6 +18,8 @@
 
 
 
+%include "include/numbers defines.inc"
+
 %include "include/boolean.inc"
 
 
@@ -205,6 +207,7 @@ ret
 
 
 
+
 section .text
 QuadAdd:
 	; Adds two quadwords
@@ -267,7 +270,7 @@ QuadShiftLeft:
 	; Shifts a quadword left by the specified number of places
 	;
 	;  input:
-	;	Pointer to input QWord
+	;	Pointer to QWord
 	;	Number of places to shift
 	;
 	;  output:
@@ -333,7 +336,7 @@ QuadShiftRight:
 	; Shifts a quadword right by the specified number of places
 	;
 	;  input:
-	;	Pointer to input QWord
+	;	Pointer to QWord
 	;	Number of places to shift
 	;
 	;  output:
@@ -390,4 +393,48 @@ QuadShiftRight:
 	pop ebp
 ret 8
 
-; https://github.com/Chuyu-Team/VC-LTL/tree/master/src/14.10.25017/i386
+
+
+
+
+section .text
+Random:
+	; Returns a random number using the XORShift method
+	;
+	;  input:
+	;	Number limit
+	;
+	;  output:
+	;	EAX - 32-bit random number between 0 and the number limit
+
+	push ebp
+	mov ebp, esp
+
+
+	mov ebx, dword [ebp + 8]
+
+	; use good ol' XORShift to get a random
+	mov eax, dword [.randomSeed]
+	mov edx, eax
+	shl eax, 13
+	xor eax, edx
+	mov edx, eax
+	shr eax, 17
+	xor eax, edx
+	mov edx, eax
+	shl eax, 5
+	xor eax, edx
+	mov dword [.randomSeed], eax
+
+	; use some modulo to make sure the random is below the requested number
+	mov edx, 0x00000000
+	div ebx
+	mov eax, edx
+
+
+	mov esp, ebp
+	pop ebp
+ret 4
+
+section .data
+.randomSeed										dd 0x92D68CA2

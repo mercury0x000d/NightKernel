@@ -22,8 +22,15 @@
 
 
 ; includes
+%include "include/tasks defines.inc"
+
 %include "include/errors.inc"
+%include "include/globals.inc"
+%include "include/kernel.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
 %include "include/paging.inc"
+%include "include/strings.inc"
 
 
 
@@ -552,41 +559,6 @@ TaskSwitch:
 
 	.SkipTaskSwitch:
 iretd
-
-
-
-
-
-section .data
-tss:
-.back_link						dd 0x00000000
-.esp0							dd 0x00000000
-.ss0							dd 0x00000010
-.esp1							dd 0x00000000
-.ss1							dd 0x00000000
-.esp2							dd 0x00000000
-.ss2							dd 0x00000000
-.cr3							dd 0x00000000
-.eip							dd 0x00000000
-.eflags							dd 0x00000000
-.eax							dd 0x00000000
-.ecx							dd 0x00000000
-.edx							dd 0x00000000
-.ebx							dd 0x00000000
-.esp							dd 0x00000000
-.ebp							dd 0x00000000
-.esi							dd 0x00000000
-.edi							dd 0x00000000
-.es								dd 0x00000000
-.cs								dd 0x00000000
-.ss								dd 0x00000000
-.ds								dd 0x00000000
-.fs								dd 0x00000000
-.gs								dd 0x00000000
-.ldt							dd 0x00000000
-.trap							dw 0x0000
-.iomap_base						dw 0x0000
-.end:
 
 
 

@@ -24,31 +24,44 @@ bits 16
 
 
 
-apmversion          dw  -1      ; version storage
-
+section .text
 connectAPM:
-                    mov ax,[cs:apmversion]
-                    cmp ax, -1
-                    jnz connectedAPM
+	mov ax,[cs:apmversion]
+	cmp ax, -1
+	jnz connectAPM
 
-                    push bx
-                    push cx
+	push bx
+	push cx
 
-                    mov ax, 0x5300
-                    xor bx, bx          ; device ID of System BIOS (0000h)
-                    int 0x15
+	mov ax, 0x5300
+	xor bx, bx          ; device ID of System BIOS (0000h)
+	int 0x15
 
-                    pop cx
-                    jc NoAPM1
-                    cmp bx, 0x504d      ; PM
-                    jz gotAPM
-NoAPM1:             xor ax, ax          ; NO APM
-                    jmp NoAPM2
-gotAPM:             cmp ah, 1           ; Require v1
-                    jb NoAPM1
-                    jz v1APM
-v12APM:             mov ax, 0x102       ; APM 2.x or newer as APM 1.2
-v1APM:              cmp al,2 
-                    ja v12APM
-                    push ax             ; Version
-                    mov ax, 0x5301
+	pop cx
+	jc .NoAPM1
+	cmp bx, 0x504d      ; PM
+	jz .gotAPM
+
+	.NoAPM1:
+	xor ax, ax          ; NO APM
+	jmp .NoAPM2
+	.gotAPM:
+	cmp ah, 1           ; Require v1
+	jb .NoAPM1
+	jz .v1APM
+
+	.v12APM:
+	mov ax, 0x102	; APM 2.x or newer as APM 1.2
+
+	.v1APM:
+	cmp al,2 
+	ja .v12APM
+
+	push ax             ; Version
+	mov ax, 0x5301
+
+	.NoAPM2:
+ret
+
+section .data
+apmversion				dw  -1	; version storage

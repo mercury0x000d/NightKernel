@@ -18,9 +18,11 @@
 
 
 
+%include "include/lists defines.inc"
+
 %include "include/boolean.inc"
 %include "include/errors.inc"
-%include "include/lists.inc"
+%include "include/memory.inc"
 
 
 

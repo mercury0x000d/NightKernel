@@ -1,6 +1,6 @@
 ; Night Kernel
 ; Copyright 2015 - 2019 by Mercury 0x0D
-; globals.asm is a part of the Night Kernel
+; globals.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -16,13 +16,20 @@
 
 
 
-; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2675
+
+
+%include "include/globals defines.inc"
+
+
+
 
 
 section .data
 
-; strucTures
+
+
+
+
 tSystem:
 	.configBitsHint$							db 'ConfigBits'
 	.configBits									dd 00000000000000000000000000000111b
@@ -90,121 +97,6 @@ section .bss
 
 
 
-; tDriveInfo, for the drives list (144 bytes)
-struc tDriveInfo
-	.model										resb 64
-	.serial										resb 32
-	.PCIClass									resd 1
-	.PCISubclass								resd 1
-	.PCIBus										resd 1
-	.PCIDevice									resd 1
-	.PCIFunction								resd 1
-	.cacheAddress								resd 1
-	.deviceFlags								resd 1
-	.ATABasePort								resd 1
-	.ATAControlPort								resd 1
-	.ATADeviceNumber							resd 1
-	.reserved1									resd 1
-	.reserved2									resd 1
-endstruc
-
-; tTaskInfo struct, used to... *GASP* manage tasks (96 bytes)
-struc tTaskInfo
-	.pageDirAddress								resd 1
-	.entryPoint									resd 1
-	.esp										resd 1
-	.esp0										resd 1
-	.stackAddress								resd 1
-	.kernelStackAddress							resd 1
-	.priority									resb 1
-	.turnsRemaining								resb 1
-	.unused										resw 1
-	.switchInLow								resd 1
-	.switchInHigh								resd 1
-	.cycleCountLow								resd 1
-	.cycleCountHigh								resd 1
-	.spawnedBy									resd 1
-	.taskFlags									resd 1
-	.name										resb 44
-endstruc
-
-; tPartitionInfo, for the partitions list (128 bytes)
-struc tPartitionInfo
-	.PCIClass									resd 1
-	.PCISubclass								resd 1
-	.PCIBus										resd 1
-	.PCIDevice									resd 1
-	.PCIFunction								resd 1
-	.driveListNumber							resd 1
-	.startingLBA								resd 1
-	.sectorCount								resd 1
-	.fileSystem									resd 1
-	.attributes									resd 1
-	.ATABasePort								resd 1
-	.ATAControlPort								resd 1
-	.ATADeviceNumber							resd 1
-	.partitionNumber							resd 1
-	.reserved1									resd 1
-	.reserved2									resd 1
-	.reserved3									resd 1
-	.reserved4									resd 1
-	.reserved5									resd 1
-	.reserved6									resd 1
-	.FSReserved00								resd 1
-	.FSReserved01								resd 1
-	.FSReserved02								resd 1
-	.FSReserved03								resd 1
-	.FSReserved04								resd 1
-	.FSReserved05								resd 1
-	.FSReserved06								resd 1
-	.FSReserved07								resd 1
-	.FSReserved08								resd 1
-	.FSReserved09								resd 1
-	.FSReserved10								resd 1
-	.FSReserved11								resd 1
-endstruc
-; the following elements are reserved for use by the FS driver for this partition
-
-
-
-
-
-; global konstant defines
-
-; block and character driver commands
-%define kDriverInit								0x00
-%define kDriverMediaCheck						0x01
-%define kDriverBuildBPB							0x02
-%define kDriverIOCTLRead						0x03
-%define kDriverRead								0x04
-%define kDriverNondestructiveRead				0x05
-%define kDriverInputStatus						0x06
-%define kDriverFlushInputBuffers				0x07
-%define kDriverWrite							0x08
-%define kDriverWriteVerify						0x09
-%define kDriverOutputStatus						0x0A
-%define kDriverFlushOutputBuffers				0x0B
-%define kDriverIOCTLWrite						0x0C
-%define kDriverOpen								0x0D
-%define kDriverClose							0x0E
-%define kDriverRemovableMedia					0x0F
-%define kDriverOutputUntilBusy					0x10
-
-; file system driver commands
-%define kDriverItemDelete						0xF0
-%define kDriverItemInfoAccessedGet				0xF1
-%define kDriverItemInfoCreatedGet				0xF2
-%define kDriverItemInfoModifiedGet				0xF3
-%define kDriverItemInfoSizeGet					0xF4
-%define kDriverItemLoad							0xF5
-%define kDriverItemNew							0xF6
-%define kDriverItemStore						0xF7
-%define kDriverPartitionInfo					0xF8
-%define kDriverItemCount						0xF9
-%define kDriverItemExists						0xFA
-
-
-
 
 
 ; random infos follow...
@@ -254,4 +146,3 @@ endstruc
 ; 000	05		0			8086	2415	04		01			00		01			Multimedia Controller
 ; 000	06		0			106B	003F	0C		03			10		00			USB Controller
 ; 000	07		0			8086	7113	06		80			00		08			Bridge Device
-

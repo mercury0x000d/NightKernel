@@ -18,7 +18,28 @@
 
 
 
-; PS/2 controller errors
-%define kErrPS2AckFail							0xFF00
-%define kErrPS2ControllerReadTimeout			0xFF01
-%define kErrPS2ControllerWriteTimeout			0xFF02
+; variable definitions
+%include "include/PS2 Controller defines.inc"
+
+
+
+
+
+; function definitions
+extern PS2ControllerCommand
+extern PS2ControllerInit
+extern PS2ControllerPortTest
+extern PS2ControllerWaitDataRead
+extern PS2ControllerWaitDataWrite
+extern PS2DeviceCommand
+extern PS2DeviceIdentify
+extern PS2InitKeyboard
+extern PS2InitMouse
+extern PS2InputHandlerDispatch
+extern PS2InputHandlerKeyboard
+extern PS2InputHandlerMouse
+extern PS2NewConnect
+extern PS2Port1InterruptHandler
+extern PS2Port2InterruptHandler
+extern PS2PortInitDevice
+extern PS2PortSendTo2

@@ -18,7 +18,98 @@
 
 
 
+%include "include/hardware defines.inc"
+
+
+
+
+
+section .data
+kKeyBufferWrite									db 0x00
+kKeyBufferRead									db 0x00
+
+section .bss
+kKeyBufferAddress								resd 1
+
+
+
+
+
 bits 32
+
+
+
+
+
+section .text
+KeyGet:
+	; Returns the oldest key in the key buffer, or null if it's empty
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	AL - Key pressed
+
+	push ebp
+	mov ebp, esp
+
+	mov eax, 0x00000000
+	mov ecx, 0x00000000
+	mov edx, 0x00000000
+
+	; load the buffer positions
+	mov cl, byte [kKeyBufferRead]
+	mov dl, byte [kKeyBufferWrite]
+
+	; if the read position is the same as the write position, the buffer is empty and we can exit
+	cmp dl, cl
+	je .done
+
+	; calculate the read address into esi
+	mov esi, [kKeyBufferAddress]
+	add esi, ecx
+
+	; get the byte to return into al
+	mov byte al, [esi]
+
+	; update the read position
+	inc cl
+	mov byte [kKeyBufferRead], cl
+
+
+	.done:
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
+KeyWait:
+	; Waits until a key is pressed, then returns that key
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	AL - Key code
+
+	push ebp
+	mov ebp, esp
+
+
+	.KeyLoop:
+		call KeyGet
+		cmp al, 0x00
+	je .KeyLoop
+
+
+	mov esp, ebp
+	pop ebp
+ret
 
 
 
@@ -51,52 +142,6 @@ PITInit:
 	mov esp, ebp
 	pop ebp
 ret
-
-
-
-
-
-section .text
-Random:
-	; Returns a random number using the XORShift method
-	;
-	;  input:
-	;	Number limit
-	;
-	;  output:
-	;	EAX - 32-bit random number between 0 and the number limit
-
-	push ebp
-	mov ebp, esp
-
-
-	mov ebx, dword [ebp + 8]
-
-	; use good ol' XORShift to get a random
-	mov eax, dword [.randomSeed]
-	mov edx, eax
-	shl eax, 13
-	xor eax, edx
-	mov edx, eax
-	shr eax, 17
-	xor eax, edx
-	mov edx, eax
-	shl eax, 5
-	xor eax, edx
-	mov dword [.randomSeed], eax
-
-	; use some modulo to make sure the random is below the requested number
-	mov edx, 0x00000000
-	div ebx
-	mov eax, edx
-
-
-	mov esp, ebp
-	pop ebp
-ret 4
-
-section .data
-.randomSeed										dd 0x92D68CA2
 
 
 

@@ -18,14 +18,36 @@
 
 
 
-; List Manager errors
-%define kErrListInvalid							0xF900
-%define kErrElementSizeInvalid					0xF901
+; variable definitions
+%include "include/lists defines.inc"
 
-; tListInfo struct, used to manage lists
-struc tListInfo
-	.signature									resd 1
-	.elementSize								resd 1
-	.elementCount								resd 1
-	.listSize									resd 1
-endstruc
+
+
+
+
+; function definitions
+extern LMElementAddressGet
+extern LMElementCountGet
+extern LMElementCountSet
+extern LMElementDelete
+extern LMElementDuplicate
+extern LMElementSizeGet
+extern LMElementValidate
+extern LMItemAddAtSlot
+extern LMListCompact
+extern LMListInit
+extern LMListSearch
+extern LMListValidate
+extern LMSlotFindFirstFree
+extern LMSlotFreeTest
+extern LM_Internal_ElementAddressGet
+extern LM_Internal_ElementCountGet
+extern LM_Internal_ElementCountSet
+extern LM_Internal_ElementDelete
+extern LM_Internal_ElementDuplicate
+extern LM_Internal_ElementSizeGet
+extern LM_Internal_ItemAddAtSlot
+extern LM_Internal_ListCompact
+extern LM_Internal_ListSearch
+extern LM_Internal_SlotFindFirstFree
+extern LM_Internal_SlotFreeTest

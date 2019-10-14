@@ -18,21 +18,31 @@
 
 
 
-; partition data as presented on disk
-struc tPartitionLayout
-	.bootable									resb 1
-	.startingCHS								resb 3
-	.systemID									resb 1
-	.endingCHS									resb 3
-	.startingLBA								resd 1
-	.sectorCount								resd 1
-endstruc
+; variable definitions
+%include "include/storage defines.inc"
 
-; boot sector offsets
-%define tMBR.Bootstrap							0x0000
-%define tMBR.OUID								0x01B4
-%define tMBR.PartitionOffsetA					0x01BE
-%define tMBR.PartitionOffsetB					0x01CE
-%define tMBR.PartitionOffsetC					0x01DE
-%define tMBR.PartitionOffsetD					0x01EE
-%define tMBR.Signature							0x01FE
+
+
+
+
+; function definitions
+extern SMDiskRead
+extern SMItemCount
+extern SMItemDelete
+extern SMItemExists
+extern SMItemInfoAccessedGet
+extern SMItemInfoCreatedGet
+extern SMItemInfoModifiedGet
+extern SMItemInfoSizeGet
+extern SMItemLoad
+extern SMItemNew
+extern SMItemStore
+extern SMPartitionEnumerate
+extern SMPartitionMap
+extern SMPartitionRead
+extern SMPartitionWrite
+extern SMPartitionInfo
+extern SMPathParentGet
+extern SMPathPartitionGet
+extern SMPathPartitionStripDrive
+extern SMPathValidate

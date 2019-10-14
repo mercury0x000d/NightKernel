@@ -18,6 +18,16 @@
 
 
 
+%include "include/RTC defines.inc"
+
+%include "include/globals.inc"
+%include "include/numbers.inc"
+%include "include/screen.inc"
+
+
+
+
+
 bits 32
 
 

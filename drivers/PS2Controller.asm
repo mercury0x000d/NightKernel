@@ -18,95 +18,22 @@
 
 
 
+%include "include/PS2 Controller defines.inc"
+
 %include "include/errors.inc"
-%include "include/PS2 Controller.inc"
-
-section .data
-kKeyBufferWrite									db 0x00
-kKeyBufferRead									db 0x00
-
-section .bss
-kKeyBufferAddress								resd 1
+%include "include/globals.inc"
+%include "include/hardware.inc"
+%include "include/interrupts.inc"
+%include "include/memory.inc"
+%include "include/misc.inc"
+%include "include/PIC.inc"
+%include "include/screen.inc"
 
 
 
 
 
 bits 32
-
-
-
-
-
-section .text
-KeyGet:
-	; Returns the oldest key in the key buffer, or null if it's empty
-	;
-	;  input:
-	;	n/a
-	;
-	;  output:
-	;	AL - Key pressed
-
-	push ebp
-	mov ebp, esp
-
-	mov eax, 0x00000000
-	mov ecx, 0x00000000
-	mov edx, 0x00000000
-
-	; load the buffer positions
-	mov cl, byte [kKeyBufferRead]
-	mov dl, byte [kKeyBufferWrite]
-
-	; if the read position is the same as the write position, the buffer is empty and we can exit
-	cmp dl, cl
-	je .done
-
-	; calculate the read address into esi
-	mov esi, [kKeyBufferAddress]
-	add esi, ecx
-
-	; get the byte to return into al
-	mov byte al, [esi]
-
-	; update the read position
-	inc cl
-	mov byte [kKeyBufferRead], cl
-
-
-	.done:
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-
-
-section .text
-KeyWait:
-	; Waits until a key is pressed, then returns that key
-	;
-	;  input:
-	;	n/a
-	;
-	;  output:
-	;	AL - Key code
-
-	push ebp
-	mov ebp, esp
-
-
-	.KeyLoop:
-		call KeyGet
-		cmp al, 0x00
-	je .KeyLoop
-
-
-	mov esp, ebp
-	pop ebp
-ret
 
 
 
