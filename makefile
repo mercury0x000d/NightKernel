@@ -33,18 +33,17 @@ ASMFLAGS 		:= -f elf -I$(ASMINCLUDEPATH)
 # CC 				:= $(ARCH)-$(FRMT)-gcc
 COPTIONS		:= -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs
 LD				:= ld
-LDOPTIONS		:= -T linker.ld -m elf_i386 --sort-common
+LDOPTIONS		:= -T scripts/linker.ld -m elf_i386 --sort-common
 RM				:= rm
-WARNINGS 		:= -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
-					-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
-					-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-					-Wconversion -Wstrict-prototypes
+WARNINGS 		:= -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings \
+					-Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs \
+					-Winline -Wno-long-long -Wconversion -Wstrict-prototypes
 
 
 
 
 # Get the folders together
-PROJDIRS			:= api drivers include io system video
+PROJDIRS		:= api drivers include io system video
 SRCFILES		:=  kernel.asm $(foreach DIR, $(PROJDIRS), $(wildcard $(DIR)/*.asm $(DIR)/*.c))
 ASMINCFILES		:= $(shell find $(PROJDIRS) -type f -name "*.inc")
 OBJFILES		:= $(foreach OBJECT, $(patsubst %.asm, %.o, $(patsubst %.c, %.o, $(SRCFILES))), $(OBJDIR)/$(OBJECT))
