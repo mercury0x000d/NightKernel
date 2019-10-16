@@ -18,7 +18,7 @@
 
 
 
-%include "include/interrupts defines.inc"
+%include "include/interrupts.def"
 
 %include "include/errors.inc"
 %include "include/debug.inc"

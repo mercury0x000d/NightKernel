@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/paging defines.inc"
+%include "include/paging.def"
 
 
 

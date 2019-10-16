@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/globals defines.inc"
+%include "include/globals.def"
 
 extern tSystem.configBitsHint$
 extern tSystem.configBits

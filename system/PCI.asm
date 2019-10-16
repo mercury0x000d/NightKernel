@@ -18,7 +18,7 @@
 
 
 
-%include "include/PCI defines.inc"
+%include "include/PCI.def"
 
 %include "include/boolean.inc"
 %include "include/errors.inc"

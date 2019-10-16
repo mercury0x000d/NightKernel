@@ -18,7 +18,7 @@
 
 
 
-%include "include/PS2 Controller defines.inc"
+%include "include/PS2Controller.def"
 
 %include "include/errors.inc"
 %include "include/globals.inc"

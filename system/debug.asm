@@ -18,7 +18,7 @@
 
 
 
-%include "include/debug defines.inc"
+%include "include/debug.def"
 
 %include "include/errors.inc"
 %include "include/globals.inc"

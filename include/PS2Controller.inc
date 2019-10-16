@@ -1,6 +1,6 @@
 ; Night Kernel
 ; Copyright 2015 - 2019 by mercury0x0d
-; IDE Controller.inc is a part of the Night Kernel
+; PS2 Controller.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -19,18 +19,27 @@
 
 
 ; variable definitions
-%include "include/IDE Controller defines.inc"
+%include "include/PS2Controller.def"
+
+
 
 
 
 ; function definitions
-extern IDEATAPISectorReadPIO
-extern IDEATASectorReadLBA28PIO
-extern IDEATASectorWriteLBA28PIO
-extern IDEDetectChannelDevices
-extern IDEDriveIdentify
-extern IDEInit
-extern IDEInterruptHandlerPrimary
-extern IDEInterruptHandlerSecondary
-extern IDEServiceHandler
-extern IDEWaitForReady
+extern PS2ControllerCommand
+extern PS2ControllerInit
+extern PS2ControllerPortTest
+extern PS2ControllerWaitDataRead
+extern PS2ControllerWaitDataWrite
+extern PS2DeviceCommand
+extern PS2DeviceIdentify
+extern PS2InitKeyboard
+extern PS2InitMouse
+extern PS2InputHandlerDispatch
+extern PS2InputHandlerKeyboard
+extern PS2InputHandlerMouse
+extern PS2NewConnect
+extern PS2Port1InterruptHandler
+extern PS2Port2InterruptHandler
+extern PS2PortInitDevice
+extern PS2PortSendTo2

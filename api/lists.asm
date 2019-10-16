@@ -18,7 +18,7 @@
 
 
 
-%include "include/lists defines.inc"
+%include "include/lists.def"
 
 %include "include/boolean.inc"
 %include "include/errors.inc"

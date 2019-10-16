@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/screen defines.inc"
+%include "include/screen.def"
 
 
 

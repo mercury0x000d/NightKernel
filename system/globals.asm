@@ -18,7 +18,7 @@
 
 
 
-%include "include/globals defines.inc"
+%include "include/globals.def"
 
 
 

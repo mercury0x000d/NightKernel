@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/FAT Filesystem defines.inc"
+%include "include/FATFilesystem.def"
 
 
 

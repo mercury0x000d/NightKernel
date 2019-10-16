@@ -18,7 +18,7 @@
 
 
 
-%include "include/strings defines.inc"
+%include "include/strings.def"
 
 
 

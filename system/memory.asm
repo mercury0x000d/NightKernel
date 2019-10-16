@@ -18,7 +18,7 @@
 
 
 
-%include "include/memory defines.inc"
+%include "include/memory.def"
 
 %include "include/boolean.inc"
 %include "include/globals.inc"

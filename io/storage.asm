@@ -18,7 +18,7 @@
 
 
 
-%include "include/storage defines.inc"
+%include "include/storage.def"
 
 %include "include/boolean.inc"
 %include "include/errors.inc"

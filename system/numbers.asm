@@ -18,7 +18,7 @@
 
 
 
-%include "include/numbers defines.inc"
+%include "include/numbers.def"
 
 %include "include/boolean.inc"
 

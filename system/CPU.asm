@@ -18,7 +18,7 @@
 
 
 
-%include "include/CPU defines.inc"
+%include "include/CPU.def"
 
 %include "include/globals.inc"
 

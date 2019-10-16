@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/storage defines.inc"
+%include "include/storage.def"
 
 
 

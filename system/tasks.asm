@@ -22,7 +22,7 @@
 
 
 ; includes
-%include "include/tasks defines.inc"
+%include "include/tasks.def"
 
 %include "include/errors.inc"
 %include "include/globals.inc"

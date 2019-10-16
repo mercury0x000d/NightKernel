@@ -18,7 +18,7 @@
 
 
 
-%include "include/misc defines.inc"
+%include "include/misc.def"
 
 %include "include/globals.inc"
 %include "include/screen.inc"

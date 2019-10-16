@@ -18,7 +18,7 @@
 
 
 
-%include "include/RTC defines.inc"
+%include "include/RTC.def"
 
 %include "include/globals.inc"
 %include "include/numbers.inc"

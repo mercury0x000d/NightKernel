@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/PCI defines.inc"
+%include "include/PCI.def"
 
 
 

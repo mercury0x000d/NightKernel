@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/lists defines.inc"
+%include "include/lists.def"
 
 
 

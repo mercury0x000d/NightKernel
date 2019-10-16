@@ -19,7 +19,7 @@
 
 
 ; includes
-%include "include/screen defines.inc"
+%include "include/screen.def"
 
 %include "include/globals.inc"
 %include "include/memory.inc"

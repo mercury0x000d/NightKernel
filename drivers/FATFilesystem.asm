@@ -64,7 +64,7 @@
 
 
 
-%include "include/FAT Filesystem defines.inc"
+%include "include/FATFilesystem.def"
 
 %include "include/boolean.inc"
 %include "include/errors.inc"

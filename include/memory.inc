@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/memory defines.inc"
+%include "include/memory.def"
 
 
 

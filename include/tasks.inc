@@ -19,7 +19,7 @@
 
 
 ; function definitions
-%include "include/tasks defines.inc"
+%include "include/tasks.def"
 
 
 

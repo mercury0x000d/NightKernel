@@ -34,7 +34,7 @@
 
 
 
-%include "include/IDE Controller defines.inc"
+%include "include/IDEController.def"
 
 %include "include/errors.inc"
 %include "include/globals.inc"

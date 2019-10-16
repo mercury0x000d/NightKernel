@@ -18,7 +18,7 @@
 
 
 
-%include "include/hardware defines.inc"
+%include "include/hardware.def"
 
 
 

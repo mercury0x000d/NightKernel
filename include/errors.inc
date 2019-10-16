@@ -19,4 +19,4 @@
 
 
 ; variable definitions
-%include "include/errors defines.inc"
+%include "include/errors.def"

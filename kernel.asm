@@ -19,15 +19,15 @@
 
 
 ; boy, the kernel needs a lot of headers to start! :D
-%include "include/kernel defines.inc"
+%include "include/kernel.def"
 
 %include "include/CPU.inc"
 %include "include/debug.inc"
 %include "include/errors.inc"
-%include "include/FAT Filesystem.inc"
+%include "include/FATFilesystem.inc"
 %include "include/globals.inc"
 %include "include/hardware.inc"
-%include "include/IDE Controller.inc"
+%include "include/IDEController.inc"
 %include "include/interrupts.inc"
 %include "include/lists.inc"
 %include "include/memory.inc"
@@ -35,7 +35,7 @@
 %include "include/paging.inc"
 %include "include/PCI.inc"
 %include "include/PIC.inc"
-%include "include/PS2 Controller.inc"
+%include "include/PS2Controller.inc"
 %include "include/RTC.inc"
 %include "include/screen.inc"
 %include "include/storage.inc"

@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/kernel defines.inc"
+%include "include/kernel.def"
 
 extern tss.back_link
 extern tss.esp0
