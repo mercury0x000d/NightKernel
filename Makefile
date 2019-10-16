@@ -84,7 +84,8 @@ help:
 
 
 
-print-% : ; @echo $* = $($*)
+print-%:
+	@echo $* = $($*)
 
 
 
