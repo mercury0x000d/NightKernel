@@ -54,27 +54,44 @@ CriticalError:
 	; Handles the UI portion of traps and exceptions
 	;
 	;  input:
-	;	Address of error description string		[ebp + 8]
-	;	Task number of erroneous instruction	[ebp + 12]
-	;	EDI register at time of trap			[ebp + 16]
-	;	ESI register at time of trap			[ebp + 20]
-	;	EBP register at time of trap			[ebp + 24]
-	;	ESP (original) register at time of trap	[ebp + 28]
-	;	EBX register at time of trap			[ebp + 32]
-	;	EDX register at time of trap			[ebp + 36]
-	;	ECX register at time of trap			[ebp + 40]
-	;	EAX register at time of trap			[ebp + 44]
-	;	Address of offending instruction		[ebp + 48]
-	;	Selector of offending instruction		[ebp + 52]
-	;	EFlags register at time of trap			[ebp + 56]
-	;	ESP (adjusted) register at time of trap	[ebp + 60]
-	;	SS register at time of trap				[ebp + 64]
+	;	Address of error description string
+	;	Task number of erroneous instruction
+	;	EDI register at time of trap
+	;	ESI register at time of trap
+	;	EBP register at time of trap
+	;	ESP (original) register at time of trap
+	;	EBX register at time of trap
+	;	EDX register at time of trap
+	;	ECX register at time of trap
+	;	EAX register at time of trap
+	;	Address of offending instruction
+	;	Selector of offending instruction
+	;	EFlags register at time of trap
+	;	ESP (adjusted) register at time of trap
+	;	SS register at time of trap
 	;
 	;  output:
 	;	n/a
 
 	push ebp
 	mov ebp, esp
+
+	; define input parameters
+	%define error$								dword [ebp + 8]
+	%define taskNum								dword [ebp + 12]
+	%define registerEDI							dword [ebp + 16]
+	%define registerESI							dword [ebp + 20]
+	%define registerEBP							dword [ebp + 24]
+	%define registerESP							dword [ebp + 28]
+	%define registerEBX							dword [ebp + 32]
+	%define registerEDX							dword [ebp + 36]
+	%define registerECX							dword [ebp + 40]
+	%define registerEAX							dword [ebp + 44]
+	%define errorPtr							dword [ebp + 48]
+	%define errorSelector						dword [ebp + 52]
+	%define registerEFlags						dword [ebp + 56]
+	%define registerESPTrap						dword [ebp + 60]
+	%define registerSSTrap						dword [ebp + 64]
 
 	; allocate local variables
 	sub esp, 12
@@ -84,7 +101,7 @@ CriticalError:
 
 
 	; before we do anything, let's see if this is a situation we can actually resolve without killing the task
-	mov eax, dword [ebp + 48]
+	mov eax, errorPtr
 	mov ebx, dword [eax]
 	mov bytesAtEIP, ebx
 
@@ -93,9 +110,9 @@ CriticalError:
 	jne .NotHLT
 		; Handle the hlt by modifying the eip value passed to the instruction just past the hlt.
 		; The net effect here is that the task's turn at the CPU will prematurely end.
-		mov eax, dword [ebp + 48]
+		mov eax, errorPtr
 		inc eax
-		mov dword [ebp + 48], eax
+		mov errorPtr, eax
 		jmp .Done
 	.NotHLT:
 
@@ -106,9 +123,9 @@ CriticalError:
 		and byte [tTaskInfo.taskFlags], 11111110b
 
 		; point EIP to the next instruction and return
-		mov eax, dword [ebp + 48]
+		mov eax, errorPtr
 		inc eax
-		mov dword [ebp + 48], eax
+		mov errorPtr, eax
 		jmp .Done
 	.NotCLI:
 
@@ -120,9 +137,9 @@ CriticalError:
 
 
 		; point EIP to the next instruction and return
-		mov eax, dword [ebp + 48]
+		mov eax, errorPtr
 		inc eax
-		mov dword [ebp + 48], eax
+		mov errorPtr, eax
 		jmp .Done
 	.NotSTI:
 
@@ -141,26 +158,26 @@ CriticalError:
 
 
 	; adjust the ESP we were given to its real location
-	mov eax, dword [ebp + 28]
+	mov eax, registerESP
 	add eax, 12
-	mov dword [ebp + 28], eax
+	mov registerESP, eax
 
 
 	; prep the print string
 	push 80
 	push .scratch$
-	push dword [ebp + 8]
+	push error$
 	call MemCopy
 
 
 	; build the selector and address into the error string, then print
 	push dword 4
-	push dword [ebp + 52]
+	push errorSelector
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 48]
+	push errorPtr
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -179,7 +196,7 @@ CriticalError:
 	call MemCopy
 
 	push dword 2
-	push dword [ebp + 12]
+	push taskNum
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -213,22 +230,22 @@ CriticalError:
 	call MemCopy
 
 	push dword 8
-	push dword [ebp + 44]
+	push registerEAX
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 32]
+	push registerEBX
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 40]
+	push registerECX
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 36]
+	push registerEDX
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -247,22 +264,22 @@ CriticalError:
 	call MemCopy
 
 	push dword 8
-	push dword [ebp + 24]
+	push registerEBP
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 60]
+	push registerESPTrap
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 20]
+	push registerESI
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 16]
+	push registerEDI
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -283,12 +300,12 @@ CriticalError:
 
 	; print eflags
 	push dword 8
-	push dword [ebp + 56]
+	push registerEFlags
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 32
-	push dword [ebp + 56]
+	push registerEFlags
 	push .scratch$
 	call StringTokenBinary
 
@@ -315,7 +332,7 @@ CriticalError:
 	push dword 12
 	push dword 1
 	push dword 1
-	push dword [ebp + 48]
+	push errorPtr
 	call PrintRAM32
 
 
@@ -332,7 +349,7 @@ CriticalError:
 	push dword 15
 	push dword 1
 	push 4
-	push dword [ebp + 60]
+	push registerESPTrap
 	call PrintRAM32
 
 	; print kernel stack dump
@@ -385,7 +402,7 @@ CriticalError:
 
 
 	; kill the rogue task
-	push dword [ebp + 12]
+	push taskNum
 	call TaskKill
 
 
@@ -395,6 +412,24 @@ CriticalError:
 
 
 	.Done:
+	%undef error$
+	%undef taskNum
+	%undef registerEDI
+	%undef registerESI
+	%undef registerEBP
+	%undef registerESP
+	%undef registerEBX
+	%undef registerEDX
+	%undef registerECX
+	%undef registerEAX
+	%undef errorPtr
+	%undef errorSelector
+	%undef registerEFlags
+	%undef registerESPtrap
+	%undef registerSStrap
+	%undef textColor
+	%undef backColor
+	%undef bytesAtEIP
 	mov esp, ebp
 	pop ebp
 ret 40
@@ -528,9 +563,12 @@ InterruptHandlerGetFlags:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define IDTIndex							dword [ebp + 8]
+
 
 	; calculate the address of the element in question
-	mov ebx, dword [ebp + 8]
+	mov ebx, IDTIndex
 	mov eax, 8
 	mul ebx
 	mov esi, dword [kIDTPtr]
@@ -543,7 +581,8 @@ InterruptHandlerGetFlags:
 	mov eax, 0x00000000
 	mov al, byte [esi]
 
-
+	.Exit:
+	%undef IDTIndex
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -565,24 +604,27 @@ InterruptHandlerGetSelector:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define IDTIndex							dword [ebp + 8]
+
 
 	; calculate the address of the element in question
-	mov ebx, dword [ebp + 8]
+	mov ebx, IDTIndex
 	mov eax, 8
 	mul ebx
 	mov esi, dword [kIDTPtr]
 	add esi, eax
 
-
 	; adjust the address to point to the selector
 	add esi, 2
-
 
 	; get what we came for and leave!
 	mov eax, 0x00000000
 	mov ax, word [esi]
 
 
+	.Exit:
+	%undef IDTIndex
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -607,46 +649,52 @@ InterruptHandlerSet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define IDTIndex							dword [ebp + 8]
+	%define IDTSelector							dword [ebp + 12]
+	%define IDTPtr								dword [ebp + 16]
+	%define IDTFlags							dword [ebp + 20]
+
 
 	; calculate the address of the element in question into edi
-	mov ebx, dword [ebp + 8]
+	mov ebx, IDTIndex
 	mov eax, 8
 	mov edx, 0
 	mul ebx
 	mov edi, dword [kIDTPtr]
 	add edi, eax
 
-
 	; write low word of base address
-	mov eax, dword [ebp + 16]
+	mov eax, IDTPtr
 	mov word [edi], ax
-
 
 	; write selector value
 	add edi, 2
-	mov eax, dword [ebp + 12]
+	mov eax, IDTSelector
 	mov word [edi], ax
-
 
 	; write null (reserved byte)
 	add edi, 2
 	mov al, 0x00
 	mov byte [edi], al
 
-
 	; write those flags!
 	inc edi
-	mov eax, dword [ebp + 20]
+	mov eax, IDTFlags
 	mov byte [edi], al
-
 
 	; write high word of base address
 	inc edi
-	mov eax, dword [ebp + 16]
+	mov eax, IDTPtr
 	shr eax, 16
 	mov word [edi], ax
 
 
+	.Exit:
+	%undef IDTIndex
+	%undef IDTSelector
+	%undef IDTPtr
+	%undef IDTFlags
 	mov esp, ebp
 	pop ebp
 ret

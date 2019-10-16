@@ -21,7 +21,7 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2681
+%define BUILD 2719
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
@@ -66,7 +66,7 @@
 
 
 ; global sTrucTures go here...
-; tDriveInfo, for the drives list (144 bytes)
+; tDriveInfo, for the drives list (192 bytes)
 struc tDriveInfo
 	.model										resb 64
 	.serial										resb 32
@@ -80,8 +80,20 @@ struc tDriveInfo
 	.ATABasePort								resd 1
 	.ATAControlPort								resd 1
 	.ATADeviceNumber							resd 1
-	.reserved1									resd 1
-	.reserved2									resd 1
+	.reserved00									resd 1
+	.reserved01									resd 1
+	.reserved02									resd 1
+	.reserved03									resd 1
+	.reserved04									resd 1
+	.reserved05									resd 1
+	.reserved06									resd 1
+	.reserved07									resd 1
+	.reserved08									resd 1
+	.reserved09									resd 1
+	.reserved10									resd 1
+	.reserved11									resd 1
+	.reserved12									resd 1
+	.reserved13									resd 1
 endstruc
 
 ; tPartitionInfo, for the partitions list (128 bytes)

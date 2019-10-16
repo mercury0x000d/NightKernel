@@ -134,19 +134,18 @@ Debugger:
 	; The kernel's built-in debugger
 	;
 	;  input:
-	;  input:
-	;	Task number of erroneous instruction	[ebp + 8]
-	;	EDI register at time of trap			[ebp + 12]
-	;	ESI register at time of trap			[ebp + 16]
-	;	EBP register at time of trap			[ebp + 20]
-	;	ESP register at time of trap			[ebp + 24]
-	;	EBX register at time of trap			[ebp + 28]
-	;	EDX register at time of trap			[ebp + 32]
-	;	ECX register at time of trap			[ebp + 36]
-	;	EAX register at time of trap			[ebp + 40]
-	;	Address of return point					[ebp + 44]
-	;	Selector of return point				[ebp + 48]
-	;	EFlags register at time of trap			[ebp + 52]
+	;	Task number of erroneous instruction
+	;	EDI register at time of trap
+	;	ESI register at time of trap
+	;	EBP register at time of trap
+	;	ESP register at time of trap
+	;	EBX register at time of trap
+	;	EDX register at time of trap
+	;	ECX register at time of trap
+	;	EAX register at time of trap
+	;	Address of return point
+	;	Selector of return point
+	;	EFlags register at time of trap
 	;
 	;  output:
 	;	n/a
@@ -154,6 +153,20 @@ Debugger:
 	push ebp
 	mov ebp, esp
 
+
+	; define input parameters
+	%define taskNum								dword [ebp + 8]
+	%define registerEDI							dword [ebp + 12]
+	%define registerESI							dword [ebp + 16]
+	%define registerEBP							dword [ebp + 20]
+	%define registerESP							dword [ebp + 24]
+	%define registerEBX							dword [ebp + 28]
+	%define registerEDX							dword [ebp + 32]
+	%define registerECX							dword [ebp + 36]
+	%define registerEAX							dword [ebp + 40]
+	%define returnPtr							dword [ebp + 44]
+	%define returnSelector						dword [ebp + 48]
+	%define registerEFlags						dword [ebp + 52]
 
 	; allocate local variables
 	sub esp, 12
@@ -178,9 +191,9 @@ Debugger:
 
 
 	; adjust the ESP we were given to its real location
-	mov eax, dword [ebp + 24]
+	mov eax, registerESP
 	add eax, 12
-	mov dword [ebp + 24], eax
+	mov registerESP, eax
 
 
 	; prep the print string
@@ -192,17 +205,17 @@ Debugger:
 
 	; build the task number, selector, and address into the error string, then print
 	push dword 2
-	push dword [ebp + 8]
+	push taskNum
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 4
-	push dword [ebp + 48]
+	push returnSelector
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 8
-	push dword [ebp + 44]
+	push returnPtr
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -223,12 +236,12 @@ Debugger:
 
 	; print eflags
 	push dword 8
-	push dword [ebp + 52]
+	push registerEFlags
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 32
-	push dword [ebp + 52]
+	push registerEFlags
 	push .scratch$
 	call StringTokenBinary
 
@@ -256,7 +269,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 40]
+	push registerEAX
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -276,7 +289,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 28]
+	push registerEBX
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -296,7 +309,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 36]
+	push registerECX
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -316,7 +329,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 32]
+	push registerEDX
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -336,7 +349,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 16]
+	push registerESI
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -356,7 +369,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 12]
+	push registerEDI
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -376,7 +389,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 20]
+	push registerEBP
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -396,7 +409,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 24]
+	push registerESP
 	call PrintRAM32
 
 	call .CursorAdjust
@@ -416,7 +429,7 @@ Debugger:
 	push cursorY
 	push dword 1
 	push dword 1
-	push dword [ebp + 44]
+	push returnPtr
 	call PrintRAM32
 
 	; print exit text
@@ -457,9 +470,9 @@ Debugger:
 		call DebugTraceDisable
 
 		; we also need to clear the trap bit of the copy of EFLAGS we have on the stack
-		mov eax, dword [ebp + 52]
+		mov eax, registerEFlags
 		and eax, 11111111111111111111111011111111b
-		mov dword [ebp + 52], eax
+		mov registerEFlags, eax
 
 		; clear screen to black
 		push 0x00000000
@@ -471,26 +484,43 @@ Debugger:
 
 
 	; restore registers the way they were at entry
-	mov edi, [ebp + 12]
-	mov	esi, [ebp + 16]
-	mov ebx, [ebp + 28]
-	mov edx, [ebp + 32]
-	mov ecx, [ebp + 36]
-	mov eax, [ebp + 40]
+	mov edi, registerEDI
+	mov	esi, registerESI
+	mov ebx, registerEBX
+	mov edx, registerEDX
+	mov ecx, registerECX
+	mov eax, registerEAX
+	jmp .Exit
+
+	.CursorAdjust:
+		inc cursorY
+		cmp byte [kMaxLines], 25
+		je .CursorAdjustSkip
+			; if we get here, we're using 50-line mode, so lets skip an extra line to make things prettier
+			inc cursorY
+		.CursorAdjustSkip:
+	ret
 
 
+	.Exit
+	%undef taskNum
+	%undef registerEDI
+	%undef registerESI
+	%undef registerEBP
+	%undef registerESP
+	%undef registerEBX
+	%undef registerEDX
+	%undef registerECX
+	%undef registerEAX
+	%undef returnPtr
+	%undef returnSelector
+	%undef EFlags
+	%undef textColor
+	%undef backColor
+	%undef cursorY
 	mov esp, ebp
 	pop ebp
 ret 36
-
-.CursorAdjust:
-	inc cursorY
-	cmp byte [kMaxLines], 25
-	je .CursorAdjustSkip
-		; if we get here, we're using 50-line mode, so lets skip an extra line to make things prettier
-		inc cursorY
-	.CursorAdjustSkip:
-ret
 
 section .data
 .debuggerStart$									db 'Debugger entered during task 0x^ with return point ^:^', 0x00
@@ -667,6 +697,8 @@ DebugMemoryDetails:
 	call ScreenClear32
 
 
+	.Exit:
+	%undef cursorY
 	mov esp, ebp
 	pop ebp
 ret
@@ -855,8 +887,10 @@ DebugMenu:
 
 		hlt
 	jmp .DebugLoop
-	.Exit:
 
+
+	.Exit:
+	%undef cursorY
 	mov esp, ebp
 	pop ebp
 ret
@@ -1236,6 +1270,16 @@ DebugPCIDevices:
 	call ScreenClear32
 
 	.Exit:
+	%undef cursorY
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef vendor
+	%undef device
+	%undef class
+	%undef subclass
+	%undef progif
+	%undef revision
 	mov esp, ebp
 	pop ebp
 ret
@@ -1494,25 +1538,30 @@ DebugRAMBrowser:
 
 	jmp .displayLoop
 
-	.DisplayLoopDone:
 
+	.HandleHexDigit:
+		push .JumpString$
+		call StringCharAppend
+
+		push dword 8
+		push .JumpString$
+		call StringTruncateLeft
+	jmp .displayLoop
+
+
+	.DisplayLoopDone:
 	; clear the screen and exit!
 	push 0x00000000
 	call ScreenClear32
 
 
+	.Exit:
+	%undef numLines
+	%undef scrollAmount
+	%undef superScrollAmount
 	mov esp, ebp
 	pop ebp
 ret
-
-.HandleHexDigit:
-	push .JumpString$
-	call StringCharAppend
-
-	push dword 8
-	push .JumpString$
-	call StringTruncateLeft
-jmp .displayLoop
 
 section .data
 .startAddress									dd 0x00000000
@@ -1541,15 +1590,22 @@ DebugStackTrace:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define stackAddress						dword [ebp + 8]
+	%define XPos								dword [ebp + 12]
+	%define YPos								dword [ebp + 16]
+	%define textColor							dword [ebp + 20]
+	%define backColor							dword [ebp + 24]
+
 
 	; set the starting point of our trace
-	mov eax, dword [ebp + 8]
+	mov eax, stackAddress
 	mov ebx, [eax]
 
 	.TraceLoop:
 		; see if we're done
 		cmp ebx, 0
-		je .done
+		je .Exit
 
 		; prep the print string
 		push 80
@@ -1557,17 +1613,13 @@ DebugStackTrace:
 		push .traceFormat$
 		call MemCopy
 
-
 		; load the previous stack frame's eip into edx
 		mov edx, [ebx + 4]							
-
 
 		; load the previous stack frame's ebp into ebx
 		mov ebx, [ebx + 0]							
 
-
 		pusha
-
 
 		; print the address we found
 		push dword 32
@@ -1575,21 +1627,26 @@ DebugStackTrace:
 		push .scratch$
 		call StringTokenHexadecimal
 
-
 		; print the string we just built
 		mov eax, 0x00000000
 
-		push dword [ebp + 24]
-		push dword [ebp + 20]
-		push dword [ebp + 16]
-		push dword [ebp + 12]
+		push backColor
+		push textColor
+		push YPos
+		push XPos
 		push .scratch$
 		call Print32
 
 		popa
 	jmp	.TraceLoop
 
-	.done:
+
+	.Exit:
+	%undef stackAddress
+	%undef XPos
+	%undef YPos
+	%undef textColor
+	%undef backColor
 	mov esp, ebp
 	pop ebp
 ret 20
@@ -1910,6 +1967,8 @@ DebugSystemInfo:
 	call ScreenClear32
 
 
+	.Exit:
+	%undef tempQuad
 	mov esp, ebp
 	pop ebp
 ret
@@ -2264,6 +2323,9 @@ DebugTaskBrowser:
 	call ScreenClear32
 
 
+	.Exit:
+	%undef currentTaskSlotAddress
+	%undef currentTask
 	mov esp, ebp
 	pop ebp
 ret
@@ -2302,9 +2364,12 @@ DebugVBoxLogWrite:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define strPtr								dword [ebp + 8]
+
 
 	; get the address of the string
-	mov esi, [ebp + 8]
+	mov esi, strPtr
 	
 	; get the string's length
 	push esi
@@ -2329,6 +2394,8 @@ DebugVBoxLogWrite:
 	loop .logWriteLoop
 
 
+	.Exit:
+	%undef strPtr
 	mov esp, ebp
 	pop ebp
 ret 4

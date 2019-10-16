@@ -115,6 +115,9 @@ FAT16CalcLBAClusterToSector:
 
 
 	.Exit:
+	%undef cluster
+	%undef sectorsPerCluster
+	%undef dataArea
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -169,6 +172,8 @@ FAT16CalcSpaceNeeded:
 
 
 	.Exit:
+	%undef sectorsPerCluster
+	%undef fileSize
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -204,6 +209,8 @@ FAT16CalcTableElementFromCluster:
 	and ebx, 0x01FF
 
 
+	.Exit:
+	%undef element
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -330,6 +337,14 @@ FAT16ChainDelete:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef partitionNumber
+	%undef bytePosition
+	%undef sectorBufferPtr
+	%undef thisSector
+	%undef lastSector
+	%undef FATLBA
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -543,6 +558,22 @@ FAT16ChainGrow:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef newLength
+	%undef bytePosition
+	%undef clusterCount
+	%undef sectorBufferPtr
+	%undef clusterBufferPtr
+	%undef thisSector
+	%undef lastSector
+	%undef newCluster
+	%undef lastCluster
+	%undef partitionNumber
+	%undef FATLBA
+	%undef dataArea
+	%undef sectorsPerCluster
+	%undef bytesPerCluster
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -666,6 +697,15 @@ FAT16ChainLength:
 	mov edx, kErrNone
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef bytePosition
+	%undef clusterCount
+	%undef sectorBufferPtr
+	%undef thisSector
+	%undef lastSector
+	%undef FATLBA
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -831,6 +871,17 @@ FAT16ChainRead:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef dataArea
+	%undef sectorsPerCluster
+	%undef rootDirLBA
+	%undef rootDirSectorCount
+	%undef bytesPerCluster
+	%undef bufferPtr
+	%undef bufferSize
+	%undef bufferPtrOffset
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -886,6 +937,9 @@ FAT16ChainResize:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef chainStart
+	%undef newLength
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -943,7 +997,7 @@ FAT16ChainShrink:
 
 	; see if there was an error, save the returned pointer if not
 	cmp edx, kErrNone
-	jne .Exit
+	jne .Done
 	mov sectorBufferPtr, eax
 
 	; zero the vars
@@ -958,7 +1012,7 @@ FAT16ChainShrink:
 
 		; infinite loops are bad, kids
 		cmp clusterCount, 0
-		je .Exit
+		je .Done
 
 		; get sector to be read based on the cluster number given
 		push cluster
@@ -1021,12 +1075,27 @@ FAT16ChainShrink:
 
 		; if the above call returned false, we're at the end of the file
 		cmp al, false
-		je .Exit
+		je .Done
 
 	jmp .ClusterLoop
 
 
-	.Exit:
+	.WriteIfNecessary:
+		; see if there's anything to write back to disk
+		cmp sectorWriteFlag, true
+		jne .NoNeedToWrite
+			; there's stuff to write, so let's do it
+			push sectorBufferPtr
+			push 1
+			push lastSector
+			push partitionNumber
+			call SMPartitionWrite
+			mov sectorWriteFlag, false
+		.NoNeedToWrite:
+	ret
+
+
+	.Done:
 	; write to disk if anything changed
 	call .WriteIfNecessary
 
@@ -1038,23 +1107,22 @@ FAT16ChainShrink:
 	mov edx, kErrNone
 
 
+	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef newLength
+	%undef sectorOffset
+	%undef bytePosition
+	%undef clusterCount
+	%undef sectorBufferPtr
+	%undef thisSector
+	%undef lastSector
+	%undef partitionNumber
+	%undef FATLBA
+	%undef sectorWriteFlag
 	mov esp, ebp
 	pop ebp
 ret 12
-
-.WriteIfNecessary:
-	; see if there's anything to write back to disk
-	cmp sectorWriteFlag, true
-	jne .NoNeedToWrite
-		; there's stuff to write, so let's do it
-		push sectorBufferPtr
-		push 1
-		push lastSector
-		push partitionNumber
-		call SMPartitionWrite
-		mov sectorWriteFlag, false
-	.NoNeedToWrite:
-ret
 
 
 
@@ -1199,6 +1267,19 @@ FAT16ChainWrite:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef bufferPtr
+	%undef bufferSize
+	%undef dataArea
+	%undef sectorsPerCluster
+	%undef rootDirLBA
+	%undef rootDirSectorCount
+	%undef bytesPerCluster
+	%undef bufferPtrOffset
+	%undef clustersNeeded
+	%undef sectorsNeeded
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1321,6 +1402,14 @@ FAT16ClusterFreeFirstGet:
 	mov edx, kErrNone
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef clusterFree
+	%undef sectorBufferPtr
+	%undef FATLBA
+	%undef FATSectors
+	%undef clusterCount
+	%undef clustersChecked
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1438,6 +1527,14 @@ FAT16ClusterFreeTotalGet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef clustersFree
+	%undef sectorBufferPtr
+	%undef FATLBA
+	%undef FATSectors
+	%undef clusterCount
+	%undef clustersChecked
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1522,6 +1619,13 @@ FAT16ClusterNextGet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef cluster
+	%undef bytePosition
+	%undef sectorBufferPtr
+	%undef returnValue
+	%undef partitionNumber
+	%undef FATLBA
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1614,6 +1718,14 @@ FAT16ClusterNextSet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef updateCluster
+	%undef nextCluster
+	%undef bytePosition
+	%undef sectorBufferPtr
+	%undef thisSector
+	%undef FATLBA
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1737,6 +1849,19 @@ FAT16EntryBuild:
 
 
 	.Exit:
+	%undef entryPtr
+	%undef entryName
+	%undef entryAttributes
+	%undef entryCreateSeconds
+	%undef entryCreateTime
+	%undef entryCreateDate
+	%undef entryLastAccessDate
+	%undef entryLastModifiedTime
+	%undef entryLastModifiedDate
+	%undef entryStartingCluster
+	%undef entrySize
+	%undef itemPtr
+	%undef item$
 	mov esp, ebp
 	pop ebp
 ret 44
@@ -1838,6 +1963,12 @@ FAT16FATBackup:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef FATLBA
+	%undef BackupFATLBA
+	%undef sectorsPerFAT
+	%undef sectorBufferPtr
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1950,6 +2081,10 @@ FAT16ItemCount:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef attributes
+	%undef itemCount
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -2093,6 +2228,15 @@ FAT16ItemDelete:
 	mov edx, kErrNone
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef cluster
+	%undef dirBufferPtr
+	%undef dirBufferCluster
+	%undef dirBufferSize
+	%undef item$
+	%undef parentPath$
+	%undef matchPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2120,9 +2264,10 @@ FAT16ItemExists:
 	%define path$								dword [ebp + 12]
 
 	; allocate local variables
-	sub esp, 8
+	sub esp, 12
 	%define errorReturned						dword [ebp - 4]
 	%define item$								dword [ebp - 8]
+	%define dirBufferPtr						dword [ebp - 12]
 
 
 	; get the parent path of this item
@@ -2140,6 +2285,7 @@ FAT16ItemExists:
 	push path$
 	push partitionSlotPtr
 	call FAT16ItemLoad
+	mov dirBufferPtr, esi
 
 	; if there was an error, we don't need to go any further
 	cmp edx, kErrNone
@@ -2160,8 +2306,11 @@ FAT16ItemExists:
 	mov edx, errorReturned
 
 
-
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef errorReturned
+	%undef item$
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2245,6 +2394,11 @@ FAT16ItemInfoAccessedGet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef bufferPtr
+	%undef outputDate
+	%undef itemPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2287,11 +2441,6 @@ FAT16ItemInfoCreatedGet:
 	%define itemPtr								dword [ebp - 20]
 	%define seconds								byte [ebp - 21]
 
-
-	; get the cached FAT16 info for this partition from the FS-specific area of the partitions list
-	mov esi, partitionSlotPtr
-	mov eax, [esi + tPartitionInfo.partitionNumber]
-	mov partitionNumber, eax
 
 	; turn path$ into its parent path
 	push path$
@@ -2355,6 +2504,14 @@ FAT16ItemInfoCreatedGet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef bufferPtr
+	%undef outputDate
+	%undef outputTime
+	%undef lastModTime
+	%undef itemPtr
+	%undef seconds
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2382,7 +2539,6 @@ FAT16ItemInfoModifiedGet:
 
 	push ebp
 	mov ebp, esp
-
 
 	; define input parameters
 	%define partitionSlotPtr					dword [ebp + 8]
@@ -2455,6 +2611,13 @@ FAT16ItemInfoModifiedGet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef bufferPtr
+	%undef outputDate
+	%undef outputTime
+	%undef lastModTime
+	%undef itemPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2483,9 +2646,10 @@ FAT16ItemInfoSizeGet:
 	%define path$								dword [ebp + 12]
 
 	; allocate local variables
-	sub esp, 8
+	sub esp, 12
 	%define size								dword [ebp - 4]
 	%define itemPtr								dword [ebp - 8]
+	%define bufferPtr							dword [ebp - 12]
 
 
 	; turn path$ into its parent path
@@ -2522,7 +2686,7 @@ FAT16ItemInfoSizeGet:
 	mov size, eax
 
 	; dispose of the memory block we were returned
-	push edi
+	push bufferPtr
 	call MemDispose
 
 	; load the return value and exit
@@ -2530,6 +2694,10 @@ FAT16ItemInfoSizeGet:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef size
+	%undef itemPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2689,6 +2857,15 @@ FAT16ItemLoad:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef dirBufferPtr
+	%undef cluster
+	%undef size
+	%undef parentPath$
+	%undef item$
+	%undef rootDirSize
+	%undef attributes
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2785,6 +2962,11 @@ FAT16ItemMatch:
 
 
 	.Exit:
+	%undef inputPath$
+	%undef bufferPtr
+	%undef bufferSize
+	%undef path$
+	%undef bufferEnd
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -2956,14 +3138,14 @@ FAT16ItemNew:
 	mov createDate, eax
 
 	; build the entry
-	push size
+	push dword 0
 	push cluster
 	push createDate
 	push createTime
 	push createDate
 	push createDate
 	push createTime
-	push 0
+	push dword 0
 	push attributes
 	push item$
 	push newEntryPtr
@@ -3068,6 +3250,19 @@ FAT16ItemNew:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef attributes
+	%undef cluster
+	%undef bytesPerCluster
+	%undef parentPath$
+	%undef item$
+	%undef dirBufferPtr
+	%undef dirBufferCluster
+	%undef dirBufferSize
+	%undef newEntryPtr
+	%undef createDate
+	%undef createTime
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -3236,6 +3431,17 @@ FAT16ItemStore:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef path$
+	%undef address
+	%undef length
+	%undef cluster
+	%undef sectorsPerCluster
+	%undef item$
+	%undef dirBufferPtr
+	%undef dirBufferCluster
+	%undef dirBufferSize
+	%undef matchPtr
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -3376,6 +3582,9 @@ FAT16PartitionCacheData:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef sectorBufferPtr
+	%undef partitionNumber
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -3433,6 +3642,8 @@ FAT16PartitionInfo:
 
 
 	.Exit:
+	%undef partitionSlotPtr
+	%undef clustersFree
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -3469,6 +3680,8 @@ FAT16PathCanonicalize:
 	call StringCharReplace
 
 
+	.Exit:
+	%undef path$
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -3684,7 +3897,18 @@ FAT16ServiceHandler:
 		jmp .Exit
 	.NotItemStore:
 
+
 	.Exit:
+	%undef command
+	%undef parameter1
+	%undef parameter2
+	%undef parameter3
+	%undef parameter4
+	%undef parameter5
+	%undef parameter6
+	%undef parameter7
+	%undef copyLength
+	%undef pathClone$
 	mov esp, ebp
 	pop ebp
 ret 32
@@ -3740,6 +3964,15 @@ FAT32ServiceHandler:
 	.NotInit:
 
 
+	.Exit:
+	%undef command
+	%undef parameter1
+	%undef parameter2
+	%undef parameter3
+	%undef parameter4
+	%undef parameter5
+	%undef parameter6
+	%undef parameter7
 	mov esp, ebp
 	pop ebp
 ret 32
@@ -3799,6 +4032,11 @@ FATDecodeDate:
 	mov ah, day
 
 
+	.Exit:
+	%undef numeric
+	%undef month
+	%undef day
+	%undef year
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -3859,6 +4097,11 @@ FATDecodeTime:
 	mov al, seconds
 
 
+	.Exit:
+	%undef numeric
+	%undef hours
+	%undef minutes
+	%undef seconds
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -3945,6 +4188,10 @@ FATEncodeDate:
 
 
 	.Exit:
+	%undef month
+	%undef day
+	%undef year
+	%undef numeric
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -4033,6 +4280,9 @@ FATEncodeFilename:
 
 
 	.Exit:
+	%undef path$
+	%undef nameScratchPtr
+	%undef extScratchPtr
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -4122,6 +4372,10 @@ FATEncodeTime:
 
 
 	.Exit:
+	%undef hours
+	%undef minutes
+	%undef seconds
+	%undef numeric
 	mov esp, ebp
 	pop ebp
 ret 12

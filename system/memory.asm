@@ -349,36 +349,41 @@ A20EnableKeyboardController:
 
 	call .ReadyWait
 
+	jmp .Exit
 
+
+	.OutputWait:
+		; set up a loop to read from the keyboard's controller until output is available
+
+		; "Good things come to those who wait... and death comes to those who wait too long!"
+		; With that in mind, we better set a timeout on this operation so that we don't
+		; get stuck in any nasty infinite loops
+		mov cx, 0xC000
+		.OutputTimeoutLoop:
+			in al, 0x64
+			test al, 00000001b
+			jnz .OutputAvailable
+		loop .OutputTimeoutLoop
+		.OutputAvailable:
+	ret
+
+
+	.ReadyWait:
+		; set up a loop to read from the keyboard's controller until it is ready
+		; If we wanted an infinite loop, we'd visit Cupertino.
+		mov cx, 0xC000
+		.ReadyTimeoutLoop:
+			in al, 0x64
+			test al, 00000010b
+			jnz .Ready
+		loop .ReadyTimeoutLoop
+		.Ready:
+	ret
+
+
+	.Exit:
 	mov sp, bp
 	pop bp
-ret
-
-.OutputWait:
-	; set up a loop to read from the keyboard's controller until output is available
-
-	; "Good things come to those who wait... and death comes to those who wait too long!"
-	; With that in mind, we better set a timeout on this operation so that we don't
-	; get stuck in any nasty infinite loops
-	mov cx, 0xC000
-	.OutputTimeoutLoop:
-		in al, 0x64
-		test al, 00000001b
-		jnz .OutputAvailable
-	loop .OutputTimeoutLoop
-	.OutputAvailable:
-ret
-
-.ReadyWait:
-	; set up a loop to read from the keyboard's controller until it is ready
-	; If we wanted an infinite loop, we'd visit Cupertino.
-	mov cx, 0xC000
-	.ReadyTimeoutLoop:
-		in al, 0x64
-		test al, 00000010b
-		jnz .Ready
-	loop .ReadyTimeoutLoop
-	.Ready:
 ret
 
 
@@ -589,6 +594,12 @@ MemProbe:
 
 
 	.Exit:
+	%undef attributes
+	%undef lengthHigh
+	%undef lengthLow
+	%undef addressHigh
+	%undef addressLow
+	%undef sequenceNum
 	mov sp, bp
 	pop bp
 ret
@@ -642,6 +653,8 @@ MemAddressAlign:
 
 
 	.Exit:
+	%undef address
+	%undef alignment
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -718,6 +731,8 @@ MemAddressToBlock:
 
 
 	.Exit:
+	%undef address
+	%undef loopCounter
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -853,6 +868,9 @@ MemAllocate:
 
 
 	.Exit:
+	%undef taskNum
+	%undef memorySize
+	%undef currentBestCandidate
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1000,6 +1018,14 @@ MemAllocateAligned:
 
 
 	.Exit:
+	%undef taskNum
+	%undef memorySize
+	%undef alignment
+	%undef blockAddress
+	%undef blockAddressAligned
+	%undef blockLeadingSize
+	%undef blockTrailingSize
+	%undef blockRequestedSize
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1048,6 +1074,9 @@ MemCompare:
 
 
 	.Exit:
+	%undef region1Ptr
+	%undef region2Ptr
+	%undef length
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1125,6 +1154,9 @@ MemCopy:
 
 
 	.Exit:
+	%undef source
+	%undef dest
+	%undef length
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1177,6 +1209,8 @@ MemDispose:
 
 
 	.Exit:
+	%undef address
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1222,6 +1256,9 @@ MemFill:
 
 
 	.Exit:
+	%undef address
+	%undef length
+	%undef value
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1339,6 +1376,13 @@ MemFindMostSuitable:
 	mov edx, exitCode
 
 
+	.Exit:
+	%undef size
+	%undef listIndexCounter
+	%undef bestCandidateSlot
+	%undef bestCandidateSize
+	%undef exitCode
+	%undef freeSpaceCounter
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1497,64 +1541,72 @@ MemMergeBlocks:
 			dec ecx
 			mov higherBlockElementNum, ecx
 			call .MemCondenseMergeBlocks
+	jmp .Exit
+
+
+	.MemCondenseMergeBlocks:
+		; make sure the elements are in the proper order
+		mov esi, lowerBlockElementNum
+		mov edi, higherBlockElementNum
+
+		cmp esi, edi
+		jb .SkipRegisterSwap
+			; swap the registers
+			xchg esi, edi
+		.SkipRegisterSwap:
+
+		mov lowerBlockElementNum, esi
+		mov higherBlockElementNum, edi
+
+
+		; get and save the address of the lower block
+		push esi
+		push dword [tSystem.listMemory]
+		call LMElementAddressGet
+		mov lowerBlockAddress, esi
+
+		; get and save the address of the higher block
+		mov esi, higherBlockElementNum
+		push esi
+		push dword [tSystem.listMemory]
+		call LMElementAddressGet
+		mov higherBlockAddress, esi
+
+		; get size of higher block
+		mov eax, dword [esi + tMemInfo.size]
+
+		; get size of lower block
+		mov esi, lowerBlockAddress
+		mov ebx, dword [esi + tMemInfo.size]
+
+		; add the sizes together and write the result back into the lower block
+		add eax, ebx
+		mov dword [esi + tMemInfo.size], eax
+
+		; delete the higher block
+		push higherBlockElementNum
+		call Mem_Internal_MemListShrink
+
+		; check for failure
+		cmp edx, true
+		je .AllGood
+
+			; there was a failure, add code to handle it here
+			; this is probably safe to ignore since we are using all good blocks here
+
+		.AllGood:
+	ret
+
 
 	.Exit:
+	%undef elementNum
+	%undef lowerBlockElementNum
+	%undef higherBlockElementNum
+	%undef lowerBlockAddress
+	%undef higherBlockAddress
 	mov esp, ebp
 	pop ebp
 ret 4
-
-.MemCondenseMergeBlocks:
-	; make sure the elements are in the proper order
-	mov esi, lowerBlockElementNum
-	mov edi, higherBlockElementNum
-
-	cmp esi, edi
-	jb .SkipRegisterSwap
-		; swap the registers
-		xchg esi, edi
-	.SkipRegisterSwap:
-
-	mov lowerBlockElementNum, esi
-	mov higherBlockElementNum, edi
-
-
-	; get and save the address of the lower block
-	push esi
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-	mov lowerBlockAddress, esi
-
-	; get and save the address of the higher block
-	mov esi, higherBlockElementNum
-	push esi
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-	mov higherBlockAddress, esi
-
-	; get size of higher block
-	mov eax, dword [esi + tMemInfo.size]
-
-	; get size of lower block
-	mov esi, lowerBlockAddress
-	mov ebx, dword [esi + tMemInfo.size]
-
-	; add the sizes together and write the result back into the lower block
-	add eax, ebx
-	mov dword [esi + tMemInfo.size], eax
-
-	; delete the higher block
-	push higherBlockElementNum
-	call Mem_Internal_MemListShrink
-
-	; check for failure
-	cmp edx, true
-	je .AllGood
-
-		; there was a failure, add code to handle it here
-		; this is probably safe to ignore since we are using all good blocks here
-
-	.AllGood:
-ret
 
 
 
@@ -1603,6 +1655,9 @@ MemSearchWord:
 
 
 	.Exit:
+	%undef searchStart
+	%undef searchLength
+	%undef searchWord
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1654,6 +1709,9 @@ MemSearchDWord:
 
 
 	.Exit:
+	%undef searchStart
+	%undef searchLength
+	%undef searchDWord
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1746,6 +1804,9 @@ MemSearchString:
 
 
 	.Exit:
+	%undef searchStart
+	%undef searchLength
+	%undef stringPtr
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1869,6 +1930,12 @@ MemShrinkFromBeginning:
 
 
 	.Exit:
+	%undef blockAddress
+	%undef newSize
+	%undef elementNum
+	%undef elementAddress
+	%undef newBlockAddress
+	%undef newBlockSize
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1988,6 +2055,12 @@ MemShrinkFromEnd:
 
 
 	.Exit:
+	%undef blockAddress
+	%undef newSize
+	%undef elementNum
+	%undef elementAddress
+	%undef newBlockAddress
+	%undef newBlockSize
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2026,6 +2099,9 @@ MemSwapWordBytes:
 	loop .SwapLoop
 
 
+	.Exit:
+	%undef sourcePtr
+	%undef wordCount
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2064,6 +2140,9 @@ MemSwapDwordWords:
 	loop .SwapLoop
 
 
+	.Exit:
+	%undef sourcePtr
+	%undef dwordCount
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2114,6 +2193,8 @@ Mem_Internal_MemListGrow:
 
 
 	.Exit:
+	%undef element
+	%undef blockAddress
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -2164,70 +2245,8 @@ Mem_Internal_MemListShrink:
 
 
 	.Exit:
+	%undef element
+	%undef blockAddress
 	mov esp, ebp
 	pop ebp
 ret 4
-
-
-
-
-
-
-
-
-
-
-
-
-PageDirInit:
-	; 
-	;
-	;  input:
-	;	
-	;
-	;  output:
-	;	
-
-	push ebp
-	mov ebp, esp
-
-	; allocate local variables
-	sub esp, 4
-	%define something							dword [ebp - 4]
-
-
-
-
-
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-
-
-PageDirBuildTo:
-	; Builds up an existing page directory to the amount of memory specified
-	;
-	;  input:
-	;	Page directory address
-	;	Amount of memory to which the directory will be built
-	;
-	;  output:
-	;	n/a
-
-	push ebp
-	mov ebp, esp
-
-	; allocate local variables
-	sub esp, 4
-	%define something							dword [ebp - 4]
-
-
-
-
-
-	mov esp, ebp
-	pop ebp
-ret

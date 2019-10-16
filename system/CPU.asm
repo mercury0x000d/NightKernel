@@ -62,7 +62,7 @@ SetSystemCPUID:
 	mov eax, 0x80000000
 	cpuid
 	cmp eax, 0x80000004
-	jnae .done
+	jnae .Exit
 	mov [tSystem.CPUIDLargestExtendedQuery], eax
 
 	mov eax, 0x80000002
@@ -99,7 +99,7 @@ SetSystemCPUID:
 	mov [esi], edx
 
 
-	.done:
+	.Exit:
 	mov esp, ebp
 	pop ebp
 ret

@@ -64,6 +64,7 @@ PCIProbe:
 	mov dword [tSystem.PCIVersion], ebx
 
 
+	.Exit:
 	mov sp, bp
 	pop bp
 ret
@@ -126,7 +127,7 @@ PCICalculateNext:
 
 	.BusCheck:
 	cmp eax, 255
-	jbe .Done
+	jbe .Exit
 
 	; if we get here, adjustment is needed
 	mov eax, 0x0000FFFF
@@ -134,7 +135,10 @@ PCICalculateNext:
 	mov ecx, 0x0000FFFF
 
 
-	.Done:
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -306,6 +310,13 @@ PCIDeviceInitAll:
 
 
 	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef PCIClass
+	%undef PCISubclass
+	%undef PCIProgIf
+	%undef PCIRegister
 	mov esp, ebp
 	pop ebp
 ret
@@ -363,6 +374,9 @@ PCIFunctionCheck:
 
 
 	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -435,6 +449,12 @@ PCIFunctionCountGet:
 	; and we exit!
 	mov eax, PCIDeviceCount
 
+
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef PCIDeviceCount
 	mov esp, ebp
 	pop ebp
 ret
@@ -461,26 +481,9 @@ PCIFunctionNextGet:
 	mov ebp, esp
 
 	; define input parameters
-	%define startingPCIBus						dword [ebp + 8]
-	%define startingPCIDevice					dword [ebp + 12]
-	%define startingPCIFunction					dword [ebp + 16]
-
-	; define local variables
-	sub esp, 12
-	%define PCIBus								dword [ebp - 4]
-	%define PCIDevice							dword [ebp - 8]
-	%define PCIFunction							dword [ebp - 12]
-
-
-	; init locals
-	mov eax, startingPCIBus
-	mov PCIBus, eax
-
-	mov ebx, startingPCIDevice
-	mov PCIDevice, ebx
-
-	mov ecx, startingPCIFunction
-	mov PCIFunction, ecx
+	%define PCIBus								dword [ebp + 8]
+	%define PCIDevice							dword [ebp + 12]
+	%define PCIFunction							dword [ebp + 16]
 
 
 	; start the scanning loop
@@ -524,6 +527,9 @@ PCIFunctionNextGet:
 
 
 	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -614,6 +620,15 @@ PCIHandlerCommand:
 
 
 	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef commandCode
+	%undef parameter1
+	%undef parameter2
+	%undef parameter3
+	%undef parameter4
+	%undef parameter5
 	mov esp, ebp
 	pop ebp
 ret 36
@@ -656,6 +671,9 @@ PCIHandlerGet:
 	mov eax, dword [esi]
 
 
+	.Exit:
+	%undef PCIClass
+	%undef PCISubclass
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -701,6 +719,10 @@ PCIHandlerSet:
 	mov dword [esi], eax
 
 
+	.Exit:
+	%undef PCIClass
+	%undef PCISubclass
+	%undef handlerPtr
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -739,6 +761,10 @@ PCIInfoClassGet:
 	shr eax, 24
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -777,6 +803,10 @@ PCIInfoDeviceGet:
 	shr eax, 16
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -816,6 +846,10 @@ PCIInfoProgIfGet:
 	and eax, 0x000000FF
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -854,6 +888,10 @@ PCIInfoRevisionGet:
 	and eax, 0x000000FF
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -893,6 +931,10 @@ PCIInfoSubclassGet:
 	and eax, 0x000000FF
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -931,6 +973,10 @@ PCIInfoVendorGet:
 	and eax, 0x0000FFFF
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -996,6 +1042,11 @@ PCIRegisterRead:
 	in eax, dx
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef PCIRegister
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1063,6 +1114,11 @@ PCIRegisterReadAll:
 	loop .ReadLoop
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef PCIStructPtr
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1132,6 +1188,12 @@ PCIRegisterWrite:
 	out dx, eax
 
 
+	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef PCIRegister
+	%undef registerValue
 	mov esp, ebp
 	pop ebp
 ret 20

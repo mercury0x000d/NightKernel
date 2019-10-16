@@ -83,6 +83,8 @@ QuadAdd16:
 
 
 	.Exit:
+	%undef inPtr
+	%undef outPtr
 	mov sp, bp
 	pop bp
 ret 8
@@ -149,6 +151,10 @@ BCDToDecimal:
 	mov eax, accumulatedValue
 	mov [ebp + 8], eax
 
+
+	.Exit:
+	%undef accumulatedValue
+	%undef magnitude
 	mov esp, ebp
 	pop ebp
 ret
@@ -199,6 +205,9 @@ CheckRange:
 
 
 	.Exit:
+	%undef testValue
+	%undef lowerBound
+	%undef upperBound
 	mov esp, ebp
 	pop ebp
 ret
@@ -257,6 +266,8 @@ QuadAdd:
 
 
 	.Exit:
+	%undef inPtr
+	%undef outPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -323,6 +334,8 @@ QuadShiftLeft:
 
 
 	.Exit:
+	%undef inPtr
+	%undef shiftPlaces
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -389,6 +402,8 @@ QuadShiftRight:
 
 
 	.Exit:
+	%undef inPtr
+	%undef shiftPlaces
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -410,8 +425,11 @@ Random:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define numLimit							dword [ebp + 8]
 
-	mov ebx, dword [ebp + 8]
+
+	mov ebx, numLimit
 
 	; use good ol' XORShift to get a random
 	mov eax, dword [.randomSeed]
@@ -432,6 +450,8 @@ Random:
 	mov eax, edx
 
 
+	.Exit:
+	%undef numLimit
 	mov esp, ebp
 	pop ebp
 ret 4

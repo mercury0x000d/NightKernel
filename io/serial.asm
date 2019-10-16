@@ -831,6 +831,9 @@ SerialSetBaud:
 
 
 	.Exit:
+	%undef divisorLatchLow
+	%undef divisorLatchHigh
+	%undef lineControl
 	mov esp, ebp
 	pop ebp
 ret 8

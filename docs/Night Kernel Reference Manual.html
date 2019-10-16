@@ -2,43 +2,43 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html">
 		<title>Night Kernel Reference Manual</title>
+
+		<style>
+			caption
+			{
+				padding: 10px;
+				caption-side: bottom ;
+				font:8pt arial;
+			}
+
+			table, th, td
+			{
+				border: 1px solid lightgray;
+				border-collapse: collapse;
+			}
+
+			th, td
+			{
+				padding: 4px;
+				vertical-align: top;
+			}
+
+			th
+			{
+				text-align: left;
+			}
+
+			ol
+			{
+				padding-left: 15;
+			}
+
+			ul
+			{
+				margin-top: 0px;
+			}
+		</style>
 	</head>
-
-	<style>
-		caption
-		{
-			padding: 10px;
-			caption-side: bottom ;
-			font:8pt arial;
-		}
-
-		table, th, td
-		{
-			border: 1px solid lightgray;
-			border-collapse: collapse;
-		}
-
-		th, td
-		{
-			padding: 4px;
-			vertical-align: top;
-		}
-
-		th
-		{
-			text-align: left;
-		}
-
-		ol
-		{
-			padding-left: 15;
-		}
-
-		ul
-		{
-			margin-top: 0px;
-		}
-	</style>
 
 	<body>
 		<h1 align="center">Night Kernel Reference Manual</h1>
@@ -49,35 +49,35 @@
 			<br>
 			<b>Index</b><br>
 			<br>
-			<a href="#About">Section 0 - About the Night Kernel</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#About">Section 0 - About the Night Kernel</a><br>
 			<br>
-			<a href="#Building">Section 1 - Building and Running the Kernel</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Building">Section 1 - Building and Running the Kernel</a><br>
 			<br>
-			<a href="#DebugMenu">Section 2 - The Kernel Debug Menu</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#DebugMenu">Section 2 - The Kernel Debug Menu</a><br>
 			<br>
-			<a href="#Debugging">Section 3 - Debugging the Night Kernel</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Debugging">Section 3 - Debugging the Night Kernel</a><br>
 			<br>
-			<a href="#Conventions">Section 4 - Coding Conventions Used in Night</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Conventions">Section 4 - Coding Conventions Used in Night</a><br>
 			<br>
-			<a href="#Drivers">Section 5 - The Night Kernel Driver Model</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Drivers">Section 5 - The Night Kernel Driver Model</a><br>
 			<br>
-			<a href="#Config">Section 6 - Setting Options with ConfigBits</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Config">Section 6 - Setting Options with ConfigBits</a><br>
 			<br>
-			<a href="#Lists">Section 7 - The List Manager</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Lists">Section 7 - The List Manager</a><br>
 			<br>
-			<a href="#MemoryManagement">Section 8 - Memory Management in Night</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#MemoryManagement">Section 8 - Memory Management in Night</a><br>
 			<br>
-			<a href="#Multitasking">Section 9 - Multitasking, Night Style</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Multitasking">Section 9 - Multitasking, Night Style</a><br>
 			<br>
 			________________________________<br>
 			<br>
-			<a href="#Changelog">Appendix 0 - Version History</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Changelog">Appendix 0 - Version History</a><br>
 			<br>
-			<a href="#NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a><br>
 			<br>
-			<a href="#DOSFunctionReference">Appendix 2 - DOS Functions Reference</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#DOSFunctionReference">Appendix 2 - DOS Functions Reference</a><br>
 			<br>
-			<a href="#License">GNU General Public License</a><br>
+			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#License">GNU General Public License</a><br>
 			<br>
 		</p>
 		<br>
@@ -99,9 +99,9 @@
 			<br>
 			<b>Days before the Night:</b><br>
 			<br>
-			Although the Night project itself began in June of 2015, its roots go back much further. Its creator originally got the idea to build a custom operating system from scratch after the lackluster release of Microsoft's Windows 95. Initially, this idea manifest as a simple shell with the goal of bringing multitasking and other modern features to older hardware... and &quotolder hardware&quot is no joke - the original project featured character graphics and was coded in IBM BASICA on a PC XT!<br>
+			Although the Night project itself began in June of 2015, its roots go back much further. Its creator originally got the idea to build a custom operating system from scratch after the lackluster release of Microsoft's Windows 95. Initially, this idea manifest as a simple shell with the goal of bringing multitasking and other modern features to older hardware... and "older hardware" is no joke - the original project featured character graphics and was coded in IBM BASICA on a PC XT!<br>
 			<br>
-			After a subsequent upgrade to a 80486 machine, the project - then known simply as &quotPCOS&quot - evolved as well. The next version was the first to feature color graphics (albeit in only 16 shades), a rudimentary UI and windowing toolkit, and mouse control. It was initially coded with QBASIC but quickly migrated to Visual BASIC as it outgrew the former language. As the project continued, it naturally became desirable to add true preemptive multitasking. Alas, the problem with that is that running multiple simultaneous DOS programs at once, reliably, under a mere shell would be much too complex to be feasible.<br>
+			After a subsequent upgrade to a 80486 machine, the project - then known simply as "PCOS" - evolved as well. The next version was the first to feature color graphics (albeit in only 16 shades), a rudimentary UI and windowing toolkit, and mouse control. It was initially coded with QBASIC but quickly migrated to Visual BASIC as it outgrew the former language. As the project continued, it naturally became desirable to add true preemptive multitasking. Alas, the problem with that is that running multiple simultaneous DOS programs at once, reliably, under a mere shell would be much too complex to be feasible.<br>
 			<br>
 			After a series of code refinements and feature enhancements pressed the limits of the development rig in use at the time, hardware was upgraded once again, this time to a 667 MHz Celeron machine. The project's source code was migrated to PowerBASIC, and the added processing power of the new PC made possible the incorporation of a virtual machine of sorts which would allow applications compiled for it to run concurrently. The result was a tech demo featuring multiple applications coded in an Assembly language designed especially for the virtual machine, all running under a preemptive scheduler. In time, the project - which had by now taken on the name <i>Exelyx</i> - grew to have not only its own assembler, but a BASIC-to-assembly-bytecode converter as well.<br>
 			<br>
@@ -124,11 +124,7 @@
 		<hr>
 		<h2><a name="Building">Section 1 - Building and Running the Kernel</a></h2>
 		<p>
-<<<<<<< Updated upstream
-			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt these directions to whatever other compatible environment you like. The sole applications needed are an assembler, NASM, and a small utility called <a href="https://github.com/m44rtn/xenops">Xenops</a> which makes it easy to update build numbers automatically. If you'd rather not use Xenops, Night can be built without its convenience, but you will need to modify the makefile. There are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch without the need to download additional modules.<br>
-=======
 			Before we begin, keep in mind these directions are written based on a small variety of Linux-based workstations used by the Night developers. This is not to say, however, that this is the only way to build the kernel; you can adapt these directions to whatever other compatible environment you like. There are no pre-made libraries used in the creation of the Night Kernel; the repo contains all the code necessary to build the kernel from scratch using the NASM assembler without the need to download additional modules.<br>
->>>>>>> Stashed changes
 			<br>
 			<br>
 			<br>
@@ -151,27 +147,27 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 1.1 - Make options</caption>
-				<col width = 10%>
-				<col width = 90%>
-				<tr>
+				<colgroup><col width="10%">
+				<col width="90%">
+				</colgroup><tbody><tr>
 					<th><i>Rule</i></th>
 					<th><i>Result</i></th>
 				</tr>
 				<tr>
 					<td>build</td>
 					<td>Assembles the kernel using NASM. After assembling, you will have a file called <i>kernel.sys</i> in the <i>builds</i> directory which can be copied over top of the existing FreeDOS kernel on any bootable FreeDOS disk.
-				</tr>
+				</td></tr>
 				<tr>
 					<td>imagecd</td>
-					<td>Copies the built <i>kernel.sys</i> to the CD image. The CD image will be created if it does not already exist.</i></td> 
+					<td>Copies the built <i>kernel.sys</i> to the CD image. The CD image will be created if it does not already exist.</td> 
 				</tr>
 				<tr>
 					<td>imagehd</td>
-					<td>Mounts the virtual disk image <i>night.vdi</i> and copies <i>kernel.sys</i> to it. You will be prompted for your root password as a normal function of this option.</i></td> 
+					<td>Mounts the virtual disk image <i>night.vdi</i> and copies <i>kernel.sys</i> to it. You will be prompted for your root password as a normal function of this option.</td> 
 				</tr>
 				<tr>
 					<td>run</td>
-					<td>Runs the kernel in a VirtualBox virtual machine.</i></td>
+					<td>Runs the kernel in a VirtualBox virtual machine.</td>
 				</tr>
 				<tr>
 					<td>allcd</td>
@@ -181,7 +177,7 @@
 					<td>allhd</td>
 					<td>Builds Night, mounts the included disk image and copies to it the newly build kernel, then launches the virtual machine.</td>
 				</tr>
-			</table>
+			</tbody></table>
 		</p>
 		<br>
 		<br>
@@ -198,9 +194,9 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 2.1 - Debug Menu selection summary</caption>
-				<col width = 10%>
-				<col width = 90%>
-				<tr>
+				<colgroup><col width="10%">
+				<col width="90%">
+				</colgroup><tbody><tr>
 					<th><i>Menu Selection</i></th>
 					<th><i>Description</i></th>
 				</tr>
@@ -228,7 +224,7 @@
 					<td>Reboot</td>
 					<td>Reboots the machine.</td>
 				</tr>
-			</table>
+			</tbody></table>
 		</p>
 		<br>
 		<br>
@@ -247,9 +243,9 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 3.1 - Useful VirtualBox Debugger commands</caption>
-				<col width = 30%>
-				<col width = 70%>
-				<tr>
+				<colgroup><col width="30%">
+				<col width="70%">
+				</colgroup><tbody><tr>
 					<th><i>Command</i></th>
 					<th><i>Description</i></th>
 				</tr>
@@ -301,9 +297,9 @@
 					<td>u (address)</td>
 					<td>Unassembles code at the address specified using the default processor mode. Alternately, u16 or u32 may be used to force unassembly of 16-bit or 32-bit code, respectively.</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
-			Usually the active register set and memory range upon which the above commands work are the guest's (e.g. Night's), but if VirtualBox hits a triple fault (Guru Meditation), these will switch to the hypervisor's. For these situations, some commands support adding a &quot;g&quot; to their ends to explicitly specify VirtualBox uses the guest's data.<br>
+			Usually the active register set and memory range upon which the above commands work are the guest's (e.g. Night's), but if VirtualBox hits a triple fault (Guru Meditation), these will switch to the hypervisor's. For these situations, some commands support adding a "g" to their ends to explicitly specify VirtualBox uses the guest's data.<br>
 			<br>
 			The VirtualBox debugger has many more features as well. You can type <i>help commands</i> in the debug console for a complete list of commands available or <i>help</i> for a summary of help options. You can even type <i>help (command name)</i> to get help on a specific command.<br>
 		</p>
@@ -323,7 +319,7 @@
 			<br>
 			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from the Memory Manager:<br>
 			<code>
-				<p style="background-color: DimGray">
+				</code></p><p style="background-color: DimGray"><code>
 					<br>
 					<span style="color: Turquoise">&nbsp; section</span> <span style="color: Chartreuse">.text</span><br>
 					<span style="color: Chartreuse">&nbsp; MemAllocateAligned:</span><br>
@@ -340,7 +336,7 @@
 						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;EDX - Result code<br>
 					</span>
 					<br>
-				</p>
+				</code></p><code>
 			</code>
 			Every function in Night begins by stating it is part of the <i>.text</i> section of the final binary image, so that the assembler knows to group this function in with the rest of the runnable code. Following this designation is the function label, which in this case is <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, what it expects for input on the stack, what it returns as output, and in what registers that output is returned.<br>
 			<br>
@@ -447,6 +443,22 @@
 					<br>
 					<span style="color: Chartreuse">&nbsp;&nbsp;&nbsp;&nbsp; .Exit:</span><br>
 
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">taskNum</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">memorySize</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">alignment</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">blockAddress</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">blockAddressAligned</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">blockLeadingSize</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">blockTrailingSize</span><br>
+
+					<span style="color: Turquoise">&nbsp;&nbsp;&nbsp;&nbsp; %undef</span> <span style="color: Chartreuse">blockRequestedSize</span><br>
+
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">esp</span><span style="color: White">,</span> <span style="color: Orange">ebp</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; pop</span> <span style="color: Orange">ebp</span><br>
@@ -455,14 +467,18 @@
 					<br>
 				</p>
 			</code>
-			And finally, it's time to exit! The <code>mov</code> and <code>pop</code> lines comprise the standard exit procedure for nearly all functions in the Night kernel. In short, they undo the entry procedure performed at the start of this function and restore the stack to the state it was prior.<br>
+			And finally, it's time to exit!<br>
+			<br>
+			The series of <code>%undef</code> statements remove from the preprocessor's memory the variable names we <code>%define</code>d earlier. Why is this done? Consider a scenario in which a variable exists in another function later on in the same file, has the same name as a variable in this function, and was accidentally never <code>%define</code>d in its own function. Such a variable name would point to the last existing definition of that name - the one in this function. This essentially would allow functions to alter variables in other functions which, as bad as that is on its own, would be especially nightmarish if one of these functions called the other in a nested fashion.<br>
+			<br>
+			The <code>mov</code> and <code>pop</code> lines comprise the standard exit procedure for nearly all functions in the Night kernel. In short, they undo the entry procedure performed at the start of this function and restore the stack to the state it was prior.<br>
 			<br>
 			The <code>ret 12</code> instruction will not only return to the caller, but also takes an additional twelve bytes off the stack. Why twelve bytes? The answer lies in the number of input parameters passed to this function. <code>MemAllocateAligned</code> takes three double-word parameters as input, and we can clear out the space they use (in essence popping them all back off the stack in one fell swoop) by specifying the total size at the end of the <code>ret</code> instruction. By the same token, if a function instead takes no parameters, a simple <code>ret</code> could be used since there would be no parameter space on the stack of which to be rid.<br>
 			<br>
 			<br>
 			<br>
 			P.S.: If you're using <i>Sublime Text</i> as your code editor of choice, install <a href="https://github.com/Nessphoro/sublimeassembly">Nessphoro's NASM x86 Assembly</a> package to get the fancy color coding shown above. :)<br>
-		</p>
+		<p></p>
 		<br>
 		<br>
 		<br>
@@ -475,7 +491,7 @@
 			MS-DOS drivers were very similar in layout to normal MS-DOS .COM-format applications. Night follows suit and expands upon this by setting up device structures so that other applications may supersede the kernel's default handler addresses if desired.<br>
 			<br>
 
-			<h3>Driver Types</h3>
+			</p><h3>Driver Types</h3>
 			Night drivers are divided into two main categories:<br>
 			<br>
 			<b>Filesystem Driver</b><br>
@@ -491,9 +507,9 @@
 			<br>			<code>
 				<table style="width:100%">
 					<caption>Table 5.1 - Driver flags bit definitions</caption>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="90%">
+					</colgroup><tbody><tr>
 						<th><i>Bit</i></th>
 						<th><i>Description</i></th>
 					</tr>
@@ -517,7 +533,7 @@
 						<td>31</td>
 						<td>PCI driver</td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 			<br>
 			<br>
@@ -526,9 +542,9 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 5.2 - Driver command codes - Block and character driver commands</caption>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="90%">
+					</colgroup><tbody><tr>
 						<th><i>Value</i></th>
 						<th><i>Symbol</i></th>
 					</tr>
@@ -600,7 +616,7 @@
 						<td>0x10</td>
 						<td>kDriverOutputUntilBusy</td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 			<br>
 			<br>
@@ -609,9 +625,9 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 5.3 - Driver command codes - Filesystem driver commands</caption>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="90%">
+					</colgroup><tbody><tr>
 						<th><i>Value</i></th>
 						<th><i>Symbol</i></th>
 					</tr>
@@ -655,13 +671,13 @@
 						<td>0xF9</td>
 						<td>kDriverItemCount</td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 			<br>
 			<br>
 			<br>
 
-		</p>
+		<p></p>
 		<br>
 		<br>
 		<br>
@@ -676,9 +692,9 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 6.1 - Configbits options</caption>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="90%">
+					</colgroup><tbody><tr>
 						<th><i>Bit</i></th>
 						<th><i>Description</i></th>
 					</tr>
@@ -702,7 +718,7 @@
 						<td>04 - 31</td>
 						<td>Reserved</td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 		</p>
 		<br>
@@ -721,10 +737,10 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 7.1 - List Manager header format</caption>
-					<col width = 10%>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="10%">
+					<col width="90%">
+					</colgroup><tbody><tr>
 						<th><i>Offset</i></th>
 						<th><i>Name</i></th>
 						<th><i>Description</i></th>
@@ -753,7 +769,7 @@
 						<td>0x10</td>
 						<td colspan="2"><i>List data</i></td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 		</p>
 		<br>
@@ -770,10 +786,10 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 8.1 - Format of a Memory List element</caption>
-					<col width = 10%>
-					<col width = 10%>
-					<col width = 90%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="10%">
+					<col width="90%">
+					</colgroup><tbody><tr>
 						<th><i>Offset</i></th>
 						<th><i>Name</i></th>
 						<th><i>Description</i></th>
@@ -793,7 +809,7 @@
 						<td>task</td>
 						<td>The task number which allocated this block. A zero in this field means the block is free for use, ergo memory requests specifying zero as the allocating task will be rejected.</td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 			<br>
 			Although most versions of MS-DOS support First-Fit, Best-Fit, and Last-Fit allocation strategies, Night currently uses Best-Fit exclusively. Memory requests are fulfilled from the top-down, meaning that the first block allocated will be located at the end of the memory area and subsequent allocations will grow downwards toward the Memory List, much like stack operation.<br>
@@ -832,11 +848,11 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 9.1 - The tTaskInfo structure</caption>
-					<col width = 10%>
-					<col width = 20%>
-					<col width = 10%>
-					<col width = 60%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="20%">
+					<col width="10%">
+					<col width="60%">
+					</colgroup><tbody><tr>
 						<th><i>Offset</i></th>
 						<th><i>Name</i></th>
 						<th><i>Size</i></th>
@@ -944,7 +960,7 @@
 						<td>32 bytes</td>
 						<td>The task's name; 31 characters with an added null byte at the end.</td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 			<br>
 			<br>
@@ -952,10 +968,10 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 9.2 - Task flags definitions</caption>
-					<col width = 10%>
-					<col width = 15%>
-					<col width = 75%>
-					<tr>
+					<colgroup><col width="10%">
+					<col width="15%">
+					<col width="75%">
+					</colgroup><tbody><tr>
 						<th><i>Bit</i></th>
 						<th><i>Name</i></th>
 						<th><i>Description</i></th>
@@ -981,7 +997,7 @@
 						<td>Reserved</td>
 						<td></td>
 					</tr>
-				</table>
+				</tbody></table>
 			</code>
 			<br>
 			<br>
@@ -999,18 +1015,36 @@
 		<hr>
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
-			<ul></ul>
-			<b>//2019, 0.1E Update, Build 9999 - Start of paging support, memory probe bugfixes, start of 64-bit math support</b><br>
+			</p><ul></ul>
+			<b>10/15/2019, 0.1E Update, Build 2718 - Code integrity improvements</b><br>
 			<br>
-			New<br>
-			<ul>
-				<li>Manual: Added function listings for <code>QuadAdd()</code>, <code>QuadShiftLeft()</code>, and <code>QuadShiftRight()</code></li>
-			</ul>
 			Changed<br>
 			<ul>
+				<li>Kernel: All <code>%define</code> statements now have matching <code>%undef</code> statements to make undefined references able to be caught immediately instead of inadvertently pointing to a value in another function.</li>
 			</ul>
 			Fixed<br>
 			<ul>
+				<li>Kernel: Bugs in various files regarding variable scope, code layout, and efficiency.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+			<b>10/14/2019, 0.1E Update, Build 2681 - Incorporated Antony's changes from Linker branch</b><br>
+			<br>
+			Changed<br>
+			<ul>
+				<li>Kernel: Instead of having NASM build the whole kernel by using <code>%include</code> statements, NASM now builds each individual file separately and then used LD to link them together. Modularity FTW!</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+			<b>10/10/2019, 0.1E Update, Build 2681 - Incorporated Anotony's changes from Linker branch</b><br>
+			<br>
+			Changed<br>
+			<ul>
+				<li>Kernel: Instead of having NASM build the whole kernel by using <code>%include</code> statements, NASM now builds each individual file separately and then used LD to link them together. Modularity FTW!</li>
 			</ul>
 			<br>
 			<br>
@@ -1745,7 +1779,7 @@
 				<li>Added boot logo</li>
 				<li>Added <code>TimerWait()</code></li>
 				<li>Added the beginnings of a debug menu (debug.asm)</li>
-				<li>Beautification of teh codez1! (Tabs > spaces, kids.)</li>
+				<li>Beautification of teh codez1! (Tabs &gt; spaces, kids.)</li>
 				<li>Added GPL License.txt since this is kiiiiinda an open-source project and all</li>
 			</ul>
 			<br>
@@ -1854,7 +1888,7 @@
 
 			The few versions prior to this were experimental and did nothing noteworthy.
 
-		</p>
+		<p></p>
 		<br>
 		<br>
 		<br>
@@ -1863,63 +1897,63 @@
 		<h2><a name="NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a></h2>
 		<p>
 			<table style="width:100%" rules="none">
-				<col width = 25%>
-				<col width = 25%>
-				<col width = 25%>
-				<col width = 25%>
-				<tr>
+				<colgroup><col width="25%">
+				<col width="25%">
+				<col width="25%">
+				<col width="25%">
+				</colgroup><tbody><tr>
 					<td>
-						<a href="#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
 						<br>
 					</td>
 					<td>
-						<a href="#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_numbers.asm" style="font-size: 14px">Number Functions - numbers.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_numbers.asm" style="font-size: 14px">Number Functions - numbers.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_paging.asm" style="font-size: 14px">Paging Support - paging.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_paging.asm" style="font-size: 14px">Paging Support - paging.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_PS2Controller.asm" style="font-size: 14px">PS/2 Functions - PS2 Controller.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_PS2Controller.asm" style="font-size: 14px">PS/2 Functions - PS2 Controller.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
 						<br>
 					</td>
 					<td>
-						<a href="#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_storage.asm" style="font-size: 14px">Storage Manager Functions - storage.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_storage.asm" style="font-size: 14px">Storage Manager Functions - storage.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
 						<br>
-						<a href="#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
+						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
 						<br>
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			- Public functions are intended for calling from any other routines.<br>
 			- Internal functions are intended to be called only by the kernel internally.<br>
@@ -1932,10 +1966,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.1 - CMOS.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -1969,7 +2003,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -1979,10 +2013,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.2 - CPU.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -1996,7 +2030,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -2006,10 +2040,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.3 - CPU.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -2167,7 +2201,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -2177,10 +2211,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.4 - partitions.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -2520,7 +2554,7 @@
 						&emsp;False - The path is not valid
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -2530,10 +2564,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.5 - GDT.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -2671,7 +2705,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -2681,10 +2715,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.6 - hardware.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -2707,7 +2741,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -2717,10 +2751,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.7 - interrupts.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -2840,7 +2874,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -2850,10 +2884,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.8 - List Manager 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3085,17 +3119,17 @@
 						&emsp;False - Element not empty
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.9 - List Manager 32-bit internal functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3267,7 +3301,7 @@
 						&emsp;False - Element not empty
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3277,10 +3311,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.10 - Memory Manager 16-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3358,7 +3392,7 @@
 						EDX - Error code
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3366,10 +3400,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.11 - Memory Manager 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3672,7 +3706,7 @@
 						n/a
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3680,10 +3714,10 @@
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.12 - Memory Manager 32-bit internal functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3723,7 +3757,7 @@
 						&emsp;False - Shrink was unsuccessful
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3733,10 +3767,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.13 - misc.asm 16-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3750,7 +3784,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3758,10 +3792,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.14 - misc.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3779,7 +3813,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3789,10 +3823,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.15 - numbers.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3880,7 +3914,7 @@
 					</td>
 					<td>EAX - 32-bit random number between 0 and the number limit</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3890,10 +3924,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.16 - paging.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3937,7 +3971,7 @@
 						EDX - Error code
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3947,10 +3981,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.17 - PCI Functions 16-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -3964,7 +3998,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -3972,10 +4006,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.18 - PCI Functions 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4265,7 +4299,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4275,10 +4309,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.19 - PIC.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4287,7 +4321,7 @@
 					<td>
 						<code>PICInit</code><br>
 						<br>
-						Initializes & remaps both PICs
+						Initializes &amp; remaps both PICs
 					</td>
 					<td>n/a</td>
 					<td>n/a</td>
@@ -4345,7 +4379,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4355,10 +4389,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.20 - PS2 Controller.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4598,7 +4632,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4608,10 +4642,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.21 - power.asm 16-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4643,7 +4677,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4653,10 +4687,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.22 - RTC.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4688,7 +4722,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4698,10 +4732,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.23 - screen.asm 16-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4763,7 +4797,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4771,10 +4805,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.24 - screen.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -4874,7 +4908,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -4884,10 +4918,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.25 - serial.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -5117,7 +5151,7 @@
 						EDX - Result code
 					</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -5127,10 +5161,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.26 - strings.asm 16-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -5163,7 +5197,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -5171,10 +5205,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.27 - strings.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -5718,7 +5752,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -5728,10 +5762,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.28 - tasks.asm 32-bit public functions</caption>
-				<col width = 40%>
-				<col width = 30%>
-				<col width = 30%>
-				<tr>
+				<colgroup><col width="40%">
+				<col width="30%">
+				<col width="30%">
+				</colgroup><tbody><tr>
 					<th>Name / Description</th>
 					<th>Stack Input</th>
 					<th>Register Output</th>
@@ -5811,7 +5845,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
@@ -5819,10 +5853,10 @@
 			<a name="NightFunctionReference_StandardFunctionReturnCodes"><b>Standard Function Return Codes</b></a><br>
 			<table style="width:100%">
 				<caption>Table A1.29 - Standard function return codes</caption>
-				<col width = 10%>
-				<col width = 20%>
-				<col width = 70%>
-				<tr>
+				<colgroup><col width="10%">
+				<col width="20%">
+				<col width="70%">
+				</colgroup><tbody><tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
@@ -6010,7 +6044,7 @@
 					<td>kErrPS2ControllerWriteTimeout</td>
 					<td>PS/2 Controller write timeout</td>
 				</tr>
-			</table>
+			</tbody></table>
 		</p>
 		<br>
 		<br>
@@ -6025,16 +6059,16 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table A2.1 - DOS Interrupt Handler Address Table</caption>
-				<col width = 5%>
-				<col width = 15%>
-				<col width = 15%>
-				<col width = 15%>
-				<col width = 50%>
-				<tr>
+				<colgroup><col width="5%">
+				<col width="15%">
+				<col width="15%">
+				<col width="15%">
+				<col width="50%">
+				</colgroup><tbody><tr>
 					<th><i>Interrupt Vector</i></th>
 					<th><i>Handler Address - VirtualBox BIOS</i></th>
 					<th><i>Handler Address - FreeDOS Kernel Build 2042</i></th>
-					<th><i>Handler Address - FreeDOS Kernel Build 2042 & COMMAND.COM</i></th>
+					<th><i>Handler Address - FreeDOS Kernel Build 2042 &amp; COMMAND.COM</i></th>
 					<th><i>Description</i></th>
 				</tr>
 				<tr>
@@ -6877,17 +6911,17 @@
 					<td>0070:00E9</td>
 					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
 				</tr>
-			</table>
+			</tbody></table>
 			<br>
 			<br>
 			<br>
 
 			<table style="width:100%">
 				<caption>Table A2.2 - DOS API</caption>
-				<col width = 10%>
-				<col width = 70%>
-				<col width = 20%>
-				<tr>
+				<colgroup><col width="10%">
+				<col width="70%">
+				<col width="20%">
+				</colgroup><tbody><tr>
 					<th><i>AX Register</i></th>
 					<th><i>Name</i></th>
 					<th><i>Supporting DOS Versions</i></th>
@@ -8011,7 +8045,7 @@
 					<td>Long filename support - Query SUBST</td>
 					<td>Windows 95</td>
 				</tr>
-			</table>
+			</tbody></table>
 
 		</p>
 		<br>
@@ -8249,7 +8283,5 @@
 			<br>
 			END OF TERMS AND CONDITIONS<br>
 		</p>
-
-
 	</body>
 </html>

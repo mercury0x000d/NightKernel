@@ -205,6 +205,8 @@ TaskMemDisposeAll:
 	loop .DisposeLoop
 
 
+	.Exit:
+	%undef slotCounter
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -227,6 +229,10 @@ TaskNameSet:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define taskNum								dword [ebp + 8]
+	%define taskNamePtr							dword [ebp + 12]
+
 	; allocate local variables
 	sub esp, 8
 	%define strLength							dword [ebp - 4]
@@ -234,7 +240,7 @@ TaskNameSet:
 
 
 	; make sure the task number is valid and get its slot address
-	mov eax, dword [ebp + 8]
+	mov eax, taskNum
 	and eax, 0x000000FF
 	push eax
 	push dword [tSystem.listTasks]
@@ -242,7 +248,7 @@ TaskNameSet:
 	mov taskSlotAddress, esi
 
 	; get and save the length of the string specified
-	push dword [ebp + 12]
+	push taskNamePtr
 	call StringLength
 	mov strLength, eax
 
@@ -257,10 +263,15 @@ TaskNameSet:
 	mov esi, taskSlotAddress
 	add esi, 64
 	push esi
-	push dword [ebp + 12]
+	push taskNamePtr
 	call MemCopy
 
 
+	.Exit:
+	%undef taskNum
+	%undef taskNamePtr
+	%undef strLength
+	%undef taskSlotAddress
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -413,6 +424,10 @@ TaskNew:
 
 
 	.Exit:
+	%undef taskListSlot
+	%undef taskListSlotAddress
+	%undef codeSegment
+	%undef dataSegment
 	mov esp, ebp
 	pop ebp
 ret 8

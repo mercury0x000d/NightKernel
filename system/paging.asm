@@ -128,6 +128,12 @@ PagingMap:
 
 
 	.Exit:
+	%undef pageDirPtr
+	%undef virtualPtr
+	%undef physicalPtr
+	%undef pageCount
+	%undef inputFlags
+	%undef flagMask
 	mov esp, ebp
 	pop ebp
 ret 20
@@ -202,6 +208,8 @@ PagingDirNew:
 
 
 	.Exit:
+	%undef inputFlags
+	%undef pageDirPtr
 	mov esp, ebp
 	pop ebp
 ret 4

@@ -21,7 +21,8 @@
 ; IDEATAPISectorReadPIO							Reads sectors from an ATAPI device
 ; IDEATASectorReadLBA28PIO						Reads sectors from an ATA disk using LBA28 in PIO mode
 ; IDEATASectorWriteLBA28PIO						Writes sectors to an ATA disk using LBA28 in PIO mode
-; IDEDetectChannelDevices						Checks both of the device spots on the ATA channel specified and saves their data to the drives list
+; IDEDetectChannelDevice						Checks both of the device spots on the ATA channel specified and saves their data to the drives list
+; IDEDeviceInfoLoad								Loads data for the device at the ATA Channel specified and saves its data to the drives list
 ; IDEDriveIdentify								Returns identifying information about the device specified
 ; IDEInit										Performs any necessary setup of the driver
 ; IDEInterruptHandlerPrimary					Interrupt handler for ATA interrupts
@@ -214,6 +215,11 @@ IDEATAPISectorReadPIO:
 
 
 	.Exit:
+	%undef IOPort
+	%undef deviceNumber
+	%undef LBAAddress
+	%undef sectorCount
+	%undef bufferPtr
 	mov esp, ebp
 	pop ebp
 ret 20
@@ -377,6 +383,11 @@ IDEATASectorReadLBA28PIO:
 
 
 	.Exit:
+	%undef IOPort
+	%undef deviceNumber
+	%undef LBAAddress
+	%undef sectorCount
+	%undef bufferPtr
 	mov esp, ebp
 	pop ebp
 ret 20
@@ -528,6 +539,11 @@ IDEATASectorWriteLBA28PIO:
 
 
 	.Exit:
+	%undef IOPort
+	%undef deviceNumber
+	%undef LBAAddress
+	%undef sectorCount
+	%undef bufferPtr
 	mov esp, ebp
 	pop ebp
 ret 20
@@ -537,7 +553,7 @@ ret 20
 
 
 section .text
-IDEDetectChannelDevices:
+IDEDetectChannelDevice:
 	; Checks both of the device spots on the ATA channel specified and saves their data to the drives list
 	;
 	;  input:
@@ -548,6 +564,7 @@ IDEDetectChannelDevices:
 	;	PCI Function
 	;	I/O base port
 	;	Control base port
+	;	Device number
 	;
 	;  output:
 	;	EDX - Error code
@@ -563,12 +580,12 @@ IDEDetectChannelDevices:
 	%define PCIFunction							dword [ebp + 24]
 	%define IOPort								dword [ebp + 28]
 	%define controlPort							dword [ebp + 32]
+	%define deviceNum							dword [ebp + 36]
 
 	; allocate local variables
-	sub esp, 12
+	sub esp, 8
 	%define dataBlock							dword [ebp - 4]		; pointer to 512 byte buffer used by identify function
 	%define driveListSlotAddress				dword [ebp - 8]
-	%define currentDevice						dword [ebp - 12]
 
 
 	; allocate a sector's worth of RAM
@@ -582,29 +599,9 @@ IDEDetectChannelDevices:
 	jne .Exit
 	mov dataBlock, eax
 
-	; now we probe all the drive slots to see what's there
-	; check drive 0 on this channel
-	mov currentDevice, 0
-	call .Probe
 
-
-	; check drive 1 on this channel
-	mov currentDevice, 1
-	call .Probe
-
-
-	; release memory
-	push dataBlock
-	call MemDispose
-
-
-	.Exit:
-	mov esp, ebp
-	pop ebp
-ret 28
-
-.Probe:
-	push currentDevice
+	; now probe the device and see what's there
+	push deviceNum
 	mov ecx, IOPort
 	and ecx, 0x0000FFFF
 	push ecx
@@ -644,7 +641,7 @@ ret 28
 		and ecx, 0x0000FFFF
 		mov dword [esi + tDriveInfo.ATAControlPort], ecx
 
-		mov ecx, currentDevice
+		mov ecx, deviceNum
 		mov dword [esi + tDriveInfo.ATADeviceNumber], ecx
 
 
@@ -704,7 +701,29 @@ ret 28
 		call MemCopy
 
 	.NoDevice:
-ret
+
+	; release memory
+	push dataBlock
+	call MemDispose
+
+	; no errors here!
+	mov edx, kErrNone
+
+
+	.Exit:
+	%undef PCIClass
+	%undef PCISubclass
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef IOPort
+	%undef controlPort
+	%undef deviceNum
+	%undef dataBlock
+	%undef driveListSlotAddress
+	mov esp, ebp
+	pop ebp
+ret 32
 
 
 
@@ -937,6 +956,9 @@ IDEDriveIdentify:
 
 
 	.Exit:
+	%undef bufferPtr
+	%undef IOPort
+	%undef deviceNumber
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -967,9 +989,11 @@ IDEInit:
 	%define commandCode							dword [ebp + 20]
 
 	; allocate local variables
-	sub esp, 8
+	sub esp, 16
 	%define PCIClass							dword [ebp - 4]
 	%define PCISubclass							dword [ebp - 8]
+	%define IOBasePort							dword [ebp - 12]
+	%define ControlBasePort						dword [ebp - 16]
 
 
 	; announce ourselves!
@@ -1019,7 +1043,7 @@ IDEInit:
 	jne .SkipAdjust2
 	mov ax, 0x03F6
 	.SkipAdjust2:
-	push eax
+	mov ControlBasePort, eax
 
 
 	; get BAR0 for this device to find the primary channel IO port
@@ -1034,14 +1058,32 @@ IDEInit:
 	jne .SkipAdjust1
 	mov ax, 0x01F0
 	.SkipAdjust1:
-	push eax
+	mov IOBasePort, eax
 
+	push dword 0
+	push ControlBasePort
+	push IOBasePort
 	push PCIFunction
 	push PCIDevice
 	push PCIBus
 	push PCISubclass
 	push PCIClass
-	call IDEDetectChannelDevices
+	call IDEDetectChannelDevice
+
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
+
+	push dword 1
+	push ControlBasePort
+	push IOBasePort
+	push PCIFunction
+	push PCIDevice
+	push PCIBus
+	push PCISubclass
+	push PCIClass
+	call IDEDetectChannelDevice
 
 	; exit if error
 	cmp edx, kErrNone
@@ -1060,7 +1102,7 @@ IDEInit:
 	jne .SkipAdjust4
 	mov ax, 0x0376
 	.SkipAdjust4:
-	push eax
+	mov ControlBasePort, eax
 
 
 	; get BAR2 for this device to find the secondary channel IO port
@@ -1075,14 +1117,32 @@ IDEInit:
 	jne .SkipAdjust3
 	mov ax, 0x0170
 	.SkipAdjust3:
-	push eax
+	mov IOBasePort, eax
 
+	push dword 0
+	push ControlBasePort
+	push IOBasePort
 	push PCIFunction
 	push PCIDevice
 	push PCIBus
 	push PCISubclass
 	push PCIClass
-	call IDEDetectChannelDevices
+	call IDEDetectChannelDevice
+
+	; exit if error
+	cmp edx, kErrNone
+	jne .Exit
+
+
+	push dword 1
+	push ControlBasePort
+	push IOBasePort
+	push PCIFunction
+	push PCIDevice
+	push PCIBus
+	push PCISubclass
+	push PCIClass
+	call IDEDetectChannelDevice
 
 	; exit if error
 	cmp edx, kErrNone
@@ -1093,6 +1153,14 @@ IDEInit:
 	mov edx, kErrNone
 
 	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef commandCode
+	%undef PCIClass
+	%undef PCISubclass
+	%undef IOBasePort
+	%undef ControlBasePort
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1190,6 +1258,10 @@ IDEServiceHandler:
 	%define PCIDevice							dword [ebp + 12]
 	%define PCIFunction							dword [ebp + 16]
 	%define commandCode							dword [ebp + 20]
+	%define parameter1							dword [ebp + 24]
+	%define parameter2							dword [ebp + 28]
+	%define parameter3							dword [ebp + 32]
+	%define parameter4							dword [ebp + 36]
 
 
 	; work that command!
@@ -1216,13 +1288,13 @@ IDEServiceHandler:
 	cmp eax, kDriverRead
 	jne .NotDriverRead
 		; defines for input parameters for this command
-		%define driveNumber							dword [ebp + 24]
-		%define startSector							dword [ebp + 28]
-		%define sectorCount							dword [ebp + 32]
-		%define bufferPtr							dword [ebp + 36]
+		%define driveNumber							parameter1
+		%define startSector							parameter2
+		%define sectorCount							parameter3
+		%define bufferPtr							parameter4
 
 
-		push driveNumber
+		push parameter1
 		push dword [tSystem.listDrives]
 		call LMElementAddressGet
 
@@ -1233,9 +1305,9 @@ IDEServiceHandler:
 			jmp .Exit
 		.NoReadError:
 
-		push bufferPtr
-		push sectorCount
-		push startSector
+		push parameter4
+		push parameter3
+		push parameter2
 		push dword [esi + tDriveInfo.ATADeviceNumber]
 		push dword [esi + tDriveInfo.ATABasePort]
 		call IDEATASectorReadLBA28PIO
@@ -1253,10 +1325,10 @@ IDEServiceHandler:
 	cmp eax, kDriverWrite
 	jne .NotDriverWrite
 		; defines for input parameters for this command
-		%define driveNumber							dword [ebp + 24]
-		%define startSector							dword [ebp + 28]
-		%define sectorCount							dword [ebp + 32]
-		%define bufferPtr							dword [ebp + 36]
+		%define driveNumber							parameter1
+		%define startSector							parameter2
+		%define sectorCount							parameter3
+		%define bufferPtr							parameter4
 
 
 		push driveNumber
@@ -1288,6 +1360,18 @@ IDEServiceHandler:
 
 
 	.Exit:
+	%undef PCIBus
+	%undef PCIDevice
+	%undef PCIFunction
+	%undef commandCode
+	%undef parameter1
+	%undef parameter2
+	%undef parameter3
+	%undef parameter4
+	%undef driveNumber
+	%undef startSector
+	%undef sectorCount
+	%undef bufferPtr
 	; EAX will be set by whatever function was called and therefore does not need explicitly set here
 	mov esp, ebp
 	pop ebp
@@ -1347,6 +1431,64 @@ IDEWaitForReady:
 
 
 	.Exit:
+	%undef IOPort
+	%undef timeout
 	mov esp, ebp
 	pop ebp
 ret 4
+
+
+
+
+
+; %00000000dffd4ff0: 6c 69 73 74 90 00 00 00-00 01 00 00 10 90 00 00  list............
+; %00000000dffd5000: 56 42 4f 58 20 48 41 52-44 44 49 53 4b 20 20 20  VBOX HARDDISK   
+; %00000000dffd5010: 20 20 20 20 20 20 20 20-20 20 20 20 20 20 20 20                  
+; %00000000dffd5020: 20 20 20 20 20 20 20 20-00 00 00 00 00 00 00 00          ........
+; %00000000dffd5030: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5040: 56 42 65 32 34 34 63 64-37 65 2d 64 31 36 35 62  VBe244cd7e-d165b
+; VBoxDbg> d
+; %00000000dffd5050: 63 33 63 20 00 00 00 00-00 00 00 00 00 00 00 00  c3c ............
+; %00000000dffd5060: 01 00 00 00 01 00 00 00-00 00 00 00 01 00 00 00  ................
+; %00000000dffd5070: 01 00 00 00 48 c8 e8 df-01 00 00 00 f0 01 00 00  ....H...........
+; %00000000dffd5080: f6 03 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5090: 56 42 4f 58 20 43 44 2d-52 4f 4d 20 20 20 20 20  VBOX CD-ROM     
+; %00000000dffd50a0: 20 20 20 20 20 20 20 20-20 20 20 20 20 20 20 20                  
+; VBoxDbg> d
+; %00000000dffd50b0: 20 20 20 20 20 20 20 20-00 00 00 00 00 00 00 00          ........
+; %00000000dffd50c0: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd50d0: 56 42 32 2d 30 31 37 30-30 33 37 36 20 20 20 20  VB2-01700376    
+; %00000000dffd50e0: 20 20 20 20 00 00 00 00-00 00 00 00 00 00 00 00      ............
+; %00000000dffd50f0: 01 00 00 00 01 00 00 00-00 00 00 00 01 00 00 00  ................
+; %00000000dffd5100: 01 00 00 00 48 c6 d8 df-03 00 00 00 70 01 00 00  ....H.......p...
+; VBoxDbg> d
+; %00000000dffd5110: 76 03 00 00 00 00 00 00-00 00 00 00 00 00 00 00  v...............
+; %00000000dffd5120: 56 42 4f 58 20 43 44 2d-52 4f 4d 20 20 20 20 20  VBOX CD-ROM     
+; %00000000dffd5130: 20 20 20 20 20 20 20 20-20 20 20 20 20 20 20 20                  
+; %00000000dffd5140: 20 20 20 20 20 20 20 20-00 00 00 00 00 00 00 00          ........
+; %00000000dffd5150: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5160: 56 42 33 2d 30 31 37 30-30 33 37 36 20 20 20 20  VB3-01700376    
+; VBoxDbg> d
+; %00000000dffd5170: 20 20 20 20 00 00 00 00-00 00 00 00 00 00 00 00      ............
+; %00000000dffd5180: 01 00 00 00 01 00 00 00-00 00 00 00 01 00 00 00  ................
+; %00000000dffd5190: 01 00 00 00 48 c6 c8 df-03 00 00 00 70 01 00 00  ....H.......p...
+; %00000000dffd51a0: 76 03 00 00 01 00 00 00-00 00 00 00 00 00 00 00  v...............
+; %00000000dffd51b0: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd51c0: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; VBoxDbg> d
+; %00000000dffd51d0: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd51e0: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd51f0: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5200: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5210: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5220: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; VBoxDbg> d
+; %00000000dffd5230: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5240: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5250: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5260: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5270: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+; %00000000dffd5280: 00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+
+
+

@@ -67,8 +67,12 @@ Print16:
 	push bp
 	mov bp, sp
 
-	; allocate variables
+	; define input parameters
+	%define stringPtr							word [bp + 4]
+
+	; allocate local variables
 	sub sp, 1
+	%define scratchByte							byte [bp - 1]
 
 
 	; see if we need to scroll the output
@@ -83,11 +87,9 @@ Print16:
 		and eax, 0x000000FF
 		push dword eax
 		call ScreenScroll16
-
 	.SkipScroll:
 
-
-	mov si, [ebp + 4]
+	mov si, stringPtr
 	
 	; preserve es
 	push es
@@ -100,7 +102,7 @@ Print16:
 
 	rol bl, 4
 	or cl, bl
-	mov [bp - 1], cl
+	mov scratchByte, cl
 
 	; set up the segment
 	mov ax, 0xB800
@@ -136,7 +138,7 @@ Print16:
 	mov di, bx
 
 	; load the color attribute to bl
-	mov bl, [bp - 1]
+	mov bl, scratchByte
 
 	.loopBegin:
 		lodsb
@@ -163,6 +165,9 @@ Print16:
 	pop es
 
 
+	.Exit:
+	%undef stringPtr
+	%undef scratchByte
 	mov sp, bp
 	pop bp
 ret 2
@@ -184,13 +189,18 @@ PrintIfConfigBits16:
 	push bp
 	mov bp, sp
 
-	bt dword [tSystem.configBits], 1
-	jnc .NoPrint
+	; define input parameters
+	%define stringPtr							word [bp + 4]
 
-	push word [bp + 4]
+
+	bt dword [tSystem.configBits], 1
+	jnc .Exit
+
+	push stringPtr
 	call Print16
 
-	.NoPrint:
+	.Exit:
+	%undef stringPtr
 	mov sp, bp
 	pop bp
 ret 2
@@ -417,6 +427,8 @@ ScreenScroll16:
 	mov byte [gCursorY], al
 
 
+	.Exit:
+	%undef lineCount
 	mov sp, bp
 	pop bp
 ret 2
@@ -588,6 +600,12 @@ Print32:
 	mov ah, cursorY
 
 
+	.Exit:
+	%undef cursorX
+	%undef cursorY
+	%undef textColor
+	%undef backColor
+	%undef tempByte
 	mov esp, ebp
 	pop ebp
 ret 20
@@ -659,30 +677,28 @@ PrintRAM32:
 	mov ebp, esp
 
 
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define lineCount							dword [ebp + 12]
+	%define XPos								dword [ebp + 16]
+	%define YPos								dword [ebp + 20]
+	%define frontColor							dword [ebp + 24]
+	%define backColor							dword [ebp + 28]
+
 	; allocate local variables
-	sub esp, 20
-	%define cursorX								dword [ebp - 4]
-	%define cursorY								dword [ebp - 8]
-	%define currentByte							dword [ebp - 12]
-	%define lineCounter							dword [ebp - 16]
-	%define byteCounter							dword [ebp - 20]
+	sub esp, 4
+	%define byteCounter							dword [ebp - 4]
 
 	; load parameters into local variables
-	mov eax, dword [ebp + 16]
-	mov cursorX, eax
+	mov eax, address
+	mov address, eax
 
-	mov eax, dword [ebp + 20]
-	mov cursorY, eax
-
-	mov eax, dword [ebp + 8]
-	mov currentByte, eax
-
-	mov ecx, dword [ebp + 12]
+	mov ecx, lineCount
 
 
 	.LineLoop:
 		; update the line counter
-		mov lineCounter, ecx
+		mov lineCount, ecx
 
 
 		; prep the print strings
@@ -703,7 +719,7 @@ PrintRAM32:
 
 		; write the starting address for this line to the string
 		push dword 8
-		push currentByte
+		push address
 		push .scratch$
 		call StringTokenHexadecimal
 
@@ -715,7 +731,7 @@ PrintRAM32:
 
 			; load a byte from RAM
 			mov eax, 0x00000000
-			mov esi, currentByte
+			mov esi, address
 			lodsb
 
 			; see if this byte is in printable range
@@ -742,7 +758,7 @@ PrintRAM32:
 			call StringTokenHexadecimal
 
 			; increment the byte counter
-			inc currentByte
+			inc address
 
 			mov ecx, byteCounter
 		loop .BytesLoad
@@ -756,22 +772,31 @@ PrintRAM32:
 
 
 		; print the string we just built
-		push dword [ebp + 28]
-		push dword [ebp + 24]
-		push dword cursorY
+		push backColor
+		push frontColor
+		push YPos
 		push dword 1
 		push .scratch$
 		call Print32
 
 		xor ebx, ebx
 		mov bl, ah
-		mov cursorY, ebx
+		mov YPos, ebx
 
-		mov ecx, lineCounter
+		mov ecx, lineCount
 	dec ecx
 	cmp ecx, 0
 	jne .LineLoop
 
+
+	.Exit:
+	%undef address
+	%undef lineCount
+	%undef XPos
+	%undef YPos
+	%undef frontColor
+	%undef backColor
+	%undef byteCounter
 	mov esp, ebp
 	pop ebp
 ret 24
@@ -947,6 +972,10 @@ ScreenClear32:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define clearColor							dword [ebp + 8]
+
+
 	; see how many bytes make up this screen mode
 	mov cx, word [kBytesPerScreen]
 
@@ -957,7 +986,7 @@ ScreenClear32:
 	shr ecx, 1
 
 	; set up the word we're writing
-	mov ebx, dword [ebp + 8]
+	mov ebx, clearColor
 	xor ax, ax
 	mov ah, bl
 	shl ah, 4
@@ -970,6 +999,8 @@ ScreenClear32:
 	; reset the cursor position
 	call CursorHome
 
+	.Exit:
+	%undef clearColor
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -991,16 +1022,15 @@ ScreenScroll32:
 	push ebp
 	mov ebp, esp
 
-	; allocate local variables
-	sub esp, 4
-	%define lineCount							dword [ebp - 4]
+	; define input parameters
+	%define lineCount							dword [ebp + 8]
 
 
-	mov ecx, dword [ebp + 8]
+	mov ecx, lineCount
 
 	.ScrollLoop:
 		; preserve the line counter
-		mov lineCount, ecx
+		mov edx, ecx
 
 		; get how many bytes we have per screen full of info
 		mov ecx, 0x00000000
@@ -1026,10 +1056,12 @@ ScreenScroll32:
 		loop .copyLoop
 
 		; restore line counter
-		mov ecx, lineCount
+		mov ecx, edx
 	loop .ScrollLoop
 
 
+	.Exit:
+	%undef lineCount
 	mov esp, ebp
 	pop ebp
 ret 4

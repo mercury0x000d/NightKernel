@@ -393,7 +393,7 @@ PS2ControllerInit:
 	push dword 2
 	call PS2DeviceCommand
 
-	jmp .Done
+	jmp .Exit
 
 
 	.errorTimeout:
@@ -403,7 +403,47 @@ PS2ControllerInit:
 		; throw an error message
 		push .errorTimeout$
 		call PrintIfConfigBits32
-	jmp .Done
+	jmp .Exit
+
+
+	.EvaluateTestResult:
+		; evaluate the test result
+		cmp al, 00
+		jne .NotOK
+			push .portTestOK$
+			jmp .EvaluateDone
+		.NotOK:
+
+		cmp al, 01
+		jne .Not01
+			push .portTestError1$
+			jmp .EvaluateDone
+		.Not01:
+
+		cmp al, 02
+		jne .Not02
+			push .portTestError2$
+			jmp .EvaluateDone
+		.Not02:
+
+		cmp al, 03
+		jne .Not03
+			push .portTestError3$
+			jmp .EvaluateDone
+		.Not03:
+
+		cmp al, 04
+		jne .Not04
+			push .portTestError4$
+			jmp .EvaluateDone
+		.Not04:
+
+		; if we get here, the controller reported an error for which we have no definition
+		push .portTestErrorUndefined$
+
+		.EvaluateDone:
+		call PrintIfConfigBits32
+	ret
 
 
 	.errorTestFail:
@@ -414,48 +454,11 @@ PS2ControllerInit:
 		push .errorTestFail$
 		call PrintIfConfigBits32
 
-	.Done:
+	.Exit:
+	%undef IRQFlags
+	%undef configRegister
 	mov esp, ebp
 	pop ebp
-ret
-
-.EvaluateTestResult:
-	; evaluate the test result
-	cmp al, 00
-	jne .NotOK
-		push .portTestOK$
-		jmp .EvaluateDone
-	.NotOK:
-
-	cmp al, 01
-	jne .Not01
-		push .portTestError1$
-		jmp .EvaluateDone
-	.Not01:
-
-	cmp al, 02
-	jne .Not02
-		push .portTestError2$
-		jmp .EvaluateDone
-	.Not02:
-
-	cmp al, 03
-	jne .Not03
-		push .portTestError3$
-		jmp .EvaluateDone
-	.Not03:
-
-	cmp al, 04
-	jne .Not04
-		push .portTestError4$
-		jmp .EvaluateDone
-	.Not04:
-
-	; if we get here, the controller reported an error for which we have no definition
-	push .portTestErrorUndefined$
-
-	.EvaluateDone:
-	call PrintIfConfigBits32
 ret
 
 section .data
@@ -627,9 +630,14 @@ PS2DeviceCommand:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+	%define commandByte							dword [ebp + 12]
+	%define dataByte							dword [ebp + 16]
+
 
 	; select port 2 if necessary
-	push dword [ebp + 8]
+	push portNum
 	call PS2PortSendTo2
 
 	; wait until ready to write
@@ -638,7 +646,7 @@ PS2DeviceCommand:
 	jne .TimeoutWrite
 
 	; send command
-	mov eax, dword [ebp + 12]
+	mov eax, commandByte
 	out 0x60, al
 
 
@@ -657,7 +665,7 @@ PS2DeviceCommand:
 		cmp al, 0xFA
 		jne .NoAck
 
-		push dword [ebp + 8]
+		push portNum
 		call PS2PortSendTo2
 
 		; wait until ready to write
@@ -666,7 +674,7 @@ PS2DeviceCommand:
 		jne .TimeoutWrite
 
 		; write the data byte for this command
-		mov eax, [ebp + 16]
+		mov eax, dataByte
 		out 0x60, al
 
 		; wait until ready to read
@@ -702,9 +710,9 @@ PS2DeviceCommand:
 		jne .TimeoutWrite
 
 		; write the data byte for this command
-		push dword [ebp + 8]
+		push portNum
 		call PS2PortSendTo2
-		mov eax, [ebp + 16]
+		mov eax, dataByte
 		out 0x60, al
 
 		; wait until ready to read
@@ -743,7 +751,7 @@ PS2DeviceCommand:
 
 
 		; select port 2 if needed
-		push dword [ebp + 8]
+		push portNum
 		call PS2PortSendTo2
 
 		; wait until ready to write
@@ -752,7 +760,7 @@ PS2DeviceCommand:
 		jne .TimeoutWrite
 
 		; write the data byte for this command
-		mov eax, [ebp + 16]
+		mov eax, dataByte
 		out 0x60, al
 
 		; wait until ready to read
@@ -801,44 +809,50 @@ PS2DeviceCommand:
 	; Looks like all is well!
 	jmp .Success
 
+
+	.StandardSingleByteRead:
+		; wait until ready to read
+		call PS2ControllerWaitDataRead
+		cmp eax, 0
+		jne .TimeoutRead
+
+		; read a byte
+		mov eax, 0x00000000
+		in al, 0x60
+	ret
+
+
 	.NoAck:
-	; device failed to ack
-	mov eax, 0
-	mov ebx, kErrPS2AckFail
-	jmp .Done
+		; device failed to ack
+		mov eax, 0
+		mov ebx, kErrPS2AckFail
+	jmp .Exit
 
 
 	.TimeoutRead:
-	; read timeout occurred
-	mov eax, 0
-	mov ebx, kErrPS2ControllerReadTimeout
-	jmp .Done
+		; read timeout occurred
+		mov eax, 0
+		mov ebx, kErrPS2ControllerReadTimeout
+	jmp .Exit
 
 
 	.TimeoutWrite:
-	; write timeout occurred
-	mov eax, 0
-	mov ebx, kErrPS2ControllerWriteTimeout
+		; write timeout occurred
+		mov eax, 0
+		mov ebx, kErrPS2ControllerWriteTimeout
+	jmp .Exit
 
 	.Success:
 	; signify no error
 	mov ebx, kErrNone
 
-	.Done:
+	.Exit:
+	%undef portNum
+	%undef commandByte
+	%undef dataByte
 	mov esp, ebp
 	pop ebp
 ret 12
-
-.StandardSingleByteRead:
-	; wait until ready to read
-	call PS2ControllerWaitDataRead
-	cmp eax, 0
-	jne .TimeoutRead
-
-	; read a byte
-	mov eax, 0x00000000
-	in al, 0x60
-ret
 
 
 
@@ -858,6 +872,9 @@ PS2DeviceIdentify:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+
 	; allocate local variables
 	sub esp, 4
 	%define IDBytes								dword [ebp - 4]
@@ -870,7 +887,7 @@ PS2DeviceIdentify:
 	; send Identify command
 	push dword 0
 	push dword 0xF2
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for ack
@@ -884,7 +901,7 @@ PS2DeviceIdentify:
 		; make sure we're ready to read, and handle the result accordingly
 		call PS2ControllerWaitDataRead
 		cmp eax, 0
-		jne .IDLoopDone
+		jne .Success
 	
 		; get a byte of identification
 		in al, 0x60
@@ -897,34 +914,36 @@ PS2DeviceIdentify:
 	jmp .IDLoop
 
 
-	.IDLoopDone:
-		; all done, and no error!
-		mov eax, IDBytes
-		mov ebx, kErrNone
-	jmp .Done
-
-
 	.NoAck:
 		; the device failed to ack
 		mov eax, 0
 		mov ebx, kErrPS2AckFail
-	jmp .Done
+	jmp .Exit
 
 
 	.TimeoutRead:
 		; read timeout occurred
 		mov eax, 0
 		mov ebx, kErrPS2ControllerReadTimeout
-	jmp .Done
+	jmp .Exit
 
 
 	.TimeoutWrite:
 		; hmm... could this be a <WRITE TIMEOUT>?
 		mov eax, 0
 		mov ebx, kErrPS2ControllerWriteTimeout
+	jmp .Exit
 
 
-	.Done:
+	.Success:
+	; all done, and no error!
+	mov eax, IDBytes
+	mov ebx, kErrNone
+
+
+	.Exit:
+	%undef portNum
+	%undef IDBytes
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -947,59 +966,63 @@ PS2InitKeyboard:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+
 
 	; disable data reporting
 	push dword 0
 	push dword 0xF5
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; set autorepeat delay and rate to fastest available
 	push dword 0
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; set scan code set to 2
 	push dword 2
 	push dword 0xF0
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; illuminate all LEDs (remember, bit 7 must be zero!)
 	push dword 0x0F
 	push dword 0xED
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; enable data reporting
 	push dword 0
 	push dword 0xF4
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 
-	.Done:
+	.Exit:
+	%undef portNum
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1021,6 +1044,9 @@ PS2InitMouse:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+
 
 	; start out with normal 3-byte packets for a normal 3-button mouse with no wheel
 	mov byte [tSystem.mousePacketByteSize], 3
@@ -1031,57 +1057,57 @@ PS2InitMouse:
 	; disable data reporting
 	push dword 0
 	push dword 0xF5
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 
 	; use default settings
 	push dword 0
 	push dword 0xF6
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 
 	; attempt to promote mouse from 0x00 (Standard Mouse) to 0x03 (Wheel Mouse)
 	push dword 200
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	push dword 100
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	push dword 80
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; get device ID
-	push dword [ebp + 8]
+	push portNum
 	call PS2PortSendTo2
 	push dword 0
 	call PS2DeviceIdentify
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; if the promotion didn't happen, then proceed as usual
@@ -1100,43 +1126,43 @@ PS2InitMouse:
 	; Attempt to promote mouse from 0x03 (Wheel Mouse) to 0x04 (5-Button Mouse)
 	push dword 200
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	push dword 200
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	push dword 80
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; get device ID
-	push dword [ebp + 8]
+	push portNum
 	call PS2PortSendTo2
 	push dword 0
 	call PS2DeviceIdentify
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; see if the promotion happened
@@ -1155,23 +1181,23 @@ PS2InitMouse:
 	; set the sample rate (for real this time)
 	push dword 80
 	push dword 0xF3
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; enable data reporting
 	push dword 0
 	push dword 0xF4
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceCommand
 
 	; check for error
 	cmp ebx, kErrNone
-	jne .Done
+	jne .Exit
 
 
 	; limit mouse horizontally (I guess 640 pixels by default should work?)
@@ -1199,23 +1225,27 @@ PS2InitMouse:
 	mov byte [tSystem.mousePacketByte2], 0
 	mov byte [tSystem.mousePacketByte3], 0
 
+	jmp .Exit
 
-	.Done:
+
+	.UpdateDeviceID:
+		cmp portNum, 1
+		jne .NotPort1
+			mov word [tSystem.PS2ControllerDeviceID1], ax
+		.NotPort1:
+
+		cmp portNum, 2
+		jne .NotPort2
+			mov word [tSystem.PS2ControllerDeviceID2], ax
+		.NotPort2:
+	ret
+
+
+	.Exit:
+	%undef portNum
 	mov esp, ebp
 	pop ebp
 ret 4
-
-.UpdateDeviceID:
-	cmp dword [ebp + 8], 1
-	jne .NotPort1
-		mov word [tSystem.PS2ControllerDeviceID1], ax
-	.NotPort1:
-
-	cmp dword [ebp + 8], 2
-	jne .NotPort2
-		mov word [tSystem.PS2ControllerDeviceID2], ax
-	.NotPort2:
-ret
 
 
 
@@ -1236,56 +1266,63 @@ PS2InputHandlerDispatch:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define deviceID							dword [ebp + 8]
+	%define handlerData							dword [ebp + 12]
+
 
 	; load the device ID
-	mov eax, dword [ebp + 8]
-
+	mov eax, deviceID
 
 	; load the data
-	push dword [ebp + 12]
+	push handlerData
 
 
 	cmp ax, 0xFFFF
 	jne .NotFFFF
 		call PS2InputHandlerKeyboard
-		jmp .Done
+		jmp .Exit
 	.NotFFFF:
 
 	cmp ax, 0xFF00
 	jne .NotFF00
 		call PS2InputHandlerMouse
-		jmp .Done
+		jmp .Exit
 	.NotFF00:
 
 	cmp ax, 0xFF03
 	jne .NotFF03
 		call PS2InputHandlerMouse
-		jmp .Done
+		jmp .Exit
 	.NotFF03:
 
 	cmp ax, 0xFF04
 	jne .NotFF04
 		call PS2InputHandlerMouse
-		jmp .Done
+		jmp .Exit
 	.NotFF04:
 
 	cmp ax, 0xAB41
 	jne .NotAB41
 		call PS2InputHandlerKeyboard
-		jmp .Done
+		jmp .Exit
 	.NotAB41:
 
 	cmp ax, 0xABC1
 	jne .NotABC1
 		call PS2InputHandlerKeyboard
-		jmp .Done
+		jmp .Exit
 	.NotABC1:
 
 	cmp ax, 0xAB83
-	jne .Done
+	jne .Exit
 		call PS2InputHandlerKeyboard
+	.NotAB83:
 
-	.Done:
+
+	.Exit:
+	%undef deviceID
+	%undef handlerData
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1307,9 +1344,12 @@ PS2InputHandlerKeyboard:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define inputByte							dword [ebp + 8]
+
 
 	; get the input byte
-	mov eax, dword [ebp + 8]
+	mov eax, inputByte
 
 
 ;--------------------------------------------------------------------------------
@@ -1323,7 +1363,7 @@ cmp al, 0xF0
 je .Adjust
 
 cmp al, 0xE0
-je .Done
+je .Exit
 
 cmp byte [.tempLastByte], 0xF0
 jne .NotF0
@@ -1347,7 +1387,7 @@ jne .NotF0
 	cmp dl, dh
 	je .skipIncrement
 		mov [kKeyBufferWrite], dl
-		jmp .Done
+		jmp .Exit
 	.skipIncrement:
 
 ;--------------------------------------------------------------------------------
@@ -1356,7 +1396,8 @@ mov byte [.tempLastByte], al
 ;--------------------------------------------------------------------------------
 
 
-	.Done:
+	.Exit:
+	%undef inputByte
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1381,9 +1422,12 @@ PS2InputHandlerMouse:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define inputByte							dword [ebp + 8]
+
 
 	; get the input byte
-	mov eax, dword [ebp + 8]
+	mov eax, inputByte
 
 
 	; add this byte to the mouse packet
@@ -1399,7 +1443,7 @@ PS2InputHandlerMouse:
 	cmp cl, dl
 	je .ProcessPacket
 		inc byte [tSystem.mousePacketByteCount]
-		jmp .Done
+		jmp .Exit
 	.ProcessPacket:
 
 	; if we get here, we have a whole packet
@@ -1439,8 +1483,17 @@ PS2InputHandlerMouse:
 		; see if the mouse position would be beyond the right side of the screen, correct if necessary
 		mov ax, [tSystem.mouseXLimit]
 		cmp ebx, eax
-	jae .mouseXPositiveAdjust
+		jae .mouseXPositiveAdjust
+	jmp .mouseXDone
 
+	.mouseXNegativeAdjust:
+		mov bx, 0x00000000
+	jmp .mouseXDone
+
+	.mouseXPositiveAdjust:
+		mov bx, word [tSystem.mouseXLimit]
+		dec bx
+	jmp .mouseXDone
 
 	.mouseXDone:
 		mov word [tSystem.mouseX], bx
@@ -1463,6 +1516,15 @@ PS2InputHandlerMouse:
 		mov ax, [tSystem.mouseYLimit]
 		cmp ebx, eax
 		jae .mouseYPositiveAdjust
+	jmp .mouseYDone
+
+	.mouseYNegativeAdjust:
+		mov bx, 0x00000000
+	jmp .mouseYDone
+
+	.mouseYPositiveAdjust:
+		mov bx, word [tSystem.mouseYLimit]
+		dec bx
 	jmp .mouseYDone
 	
 	.mouseYPositive:
@@ -1512,7 +1574,7 @@ PS2InputHandlerMouse:
 	; see if we're using a wheel mouse and act accordingly
 	mov al, byte [tSystem.mouseWheelPresent]
 	cmp al, 0
-	je .Done
+	je .Exit
 
 	; if we get here, we have a wheel and need to process the Z axis
 	mov eax, 0x00000000
@@ -1536,28 +1598,12 @@ PS2InputHandlerMouse:
 	.mouseZDone:
 	mov word [tSystem.mouseZ], bx
 
-	.Done:
+
+	.Exit:
+	%undef inputByte
 	mov esp, ebp
 	pop ebp
 ret 4
-
-.mouseXNegativeAdjust:
-	mov bx, 0x00000000
-jmp .mouseXDone
-
-.mouseXPositiveAdjust:
-	mov bx, word [tSystem.mouseXLimit]
-	dec bx
-jmp .mouseXDone
-
-.mouseYNegativeAdjust:
-	mov bx, 0x00000000
-jmp .mouseYDone
-
-.mouseYPositiveAdjust:
-	mov bx, word [tSystem.mouseYLimit]
-	dec bx
-jmp .mouseYDone
 
 
 
@@ -1576,6 +1622,9 @@ PS2NewConnect:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+
 
 	; This is a "just-in-case" since mice love to throw their IDs around...
 	in al, 0x60
@@ -1592,26 +1641,26 @@ PS2NewConnect:
 
 
 	; now that we have a timer interrupt firing, we get and save the device ID
-	push dword [ebp + 8]
+	push portNum
 	call PS2DeviceIdentify
 	; We don't care about checking for errors here.
 	; If it timed out, the device ID will be 0xFFFF anyway to indicate no device.
 
 
 	; save the device ID to the appropriate spot
-	cmp dword [ebp + 8], 1
+	cmp portNum, 1
 	jne .Not1
 		mov word [tSystem.PS2ControllerDeviceID1], ax
 	.Not1:
 
-	cmp dword [ebp + 8], 2
+	cmp portNum, 2
 	jne .Not2
 		mov word [tSystem.PS2ControllerDeviceID2], ax
 	.Not2:
 
 
 	; init the device
-	push dword [ebp + 8]
+	push portNum
 	call PS2PortInitDevice
 
 
@@ -1620,6 +1669,8 @@ PS2NewConnect:
 	call PICIRQEnableAll
 
 
+	.Exit:
+	%undef portNum
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1783,62 +1834,68 @@ PS2PortInitDevice:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+
 
 	; load the device ID into ax
 	mov ax, [tSystem.PS2ControllerDeviceID1]
-	cmp dword [ebp + 8], 2
+	cmp portNum, 2
 	jne .NotPort2
 		mov ax, [tSystem.PS2ControllerDeviceID2]
 	.NotPort2:
 
 	cmp ax, 0xFFFF
 	jne .NotFFFF
-		push dword [ebp + 8]
+		push portNum
 		call PS2InitKeyboard
-		jmp .Done
+		jmp .Exit
 	.NotFFFF:
 
 	cmp ax, 0xFF00
 	jne .NotFF00
-		push dword [ebp + 8]
+		push portNum
 		call PS2InitMouse
-		jmp .Done
+		jmp .Exit
 	.NotFF00:
 
 	cmp ax, 0xFF03
 	jne .NotFF03
-		push dword [ebp + 8]
+		push portNum
 		call PS2InitMouse
-		jmp .Done
+		jmp .Exit
 	.NotFF03:
 
 	cmp ax, 0xFF04
 	jne .NotFF04
-		push dword [ebp + 8]
+		push portNum
 		call PS2InitMouse
-		jmp .Done
+		jmp .Exit
 	.NotFF04:
 
 	cmp ax, 0xAB41
 	jne .NotAB41
-		push dword [ebp + 8]
+		push portNum
 		call PS2InitKeyboard
-		jmp .Done
+		jmp .Exit
 	.NotAB41:
 
 	cmp ax, 0xABC1
 	jne .NotABC1
-		push dword [ebp + 8]
+		push portNum
 		call PS2InitKeyboard
-		jmp .Done
+		jmp .Exit
 	.NotABC1:
 
 	cmp ax, 0xAB83
-	jne .Done
-		push dword [ebp + 8]
+	jne .Exit
+		push portNum
 		call PS2InitKeyboard
+	.NotAB83:
 
-	.Done:
+
+	.Exit:
+	%undef portNum
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1860,9 +1917,12 @@ PS2PortSendTo2:
 	push ebp
 	mov ebp, esp
 
+	; define input parameters
+	%define portNum								dword [ebp + 8]
 
-	cmp dword [ebp + 8], 2
-	jne .Done
+
+	cmp portNum, 2
+	jne .Exit
 
 
 	; If we get here, we're dealing with device 2. Let's tell the controller so.
@@ -1871,7 +1931,8 @@ PS2PortSendTo2:
 	call PS2ControllerCommand
 
 
-	.Done:
+	.Exit:
+	%undef portNum
 	mov esp, ebp
 	pop ebp
 ret 4

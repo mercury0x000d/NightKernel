@@ -79,6 +79,8 @@ LMElementAddressGet:
 
 
 	.Exit:
+	%undef listPtr
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -119,6 +121,7 @@ LMElementCountGet:
 
 
 	.Exit:
+	%undef listPtr
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -161,6 +164,8 @@ LMElementCountSet:
 
 
 	.Exit:
+	%undef listPtr
+	%undef newElementCount
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -211,6 +216,8 @@ LMElementDelete:
 
 
 	.Exit:
+	%undef listPtr
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -261,6 +268,8 @@ LMElementDuplicate:
 
 
 	.Exit:
+	%undef listPtr
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -302,6 +311,7 @@ LMElementSizeGet:
 
 
 	.Exit:
+	%undef listPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -341,6 +351,8 @@ LMElementValidate:
 
 
 	.Exit:
+	%undef listPtr
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -397,6 +409,10 @@ LMItemAddAtSlot:
 
 
 	.Exit:
+	%undef listPtr
+	%undef slotNum
+	%undef newItemPtr
+	%undef newItemSize
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -426,6 +442,8 @@ LMListCompact:
 	call LM_Internal_ListCompact
 
 
+	.Exit:
+	%undef listPtr
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -489,6 +507,11 @@ LMListInit:
 	mov dword [esi + tListInfo.listSize], eax
 
 
+	.Exit:
+	%undef address
+	%undef elementCount
+	%undef elementSize
+	%undef listSize
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -519,6 +542,8 @@ LMListSearch:
 	call LM_Internal_ListSearch
 
 
+	.Exit:
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -556,6 +581,7 @@ LMListValidate:
 
 
 	.Exit:
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -596,6 +622,7 @@ LMSlotFindFirstFree:
 
 
 	.Exit:
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -646,6 +673,8 @@ LMSlotFreeTest:
 
 
 	.Exit:
+	%undef address
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -684,6 +713,8 @@ LM_Internal_ElementAddressGet:
 
 
 	.Exit:
+	%undef address
+	%undef elementNum
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -715,6 +746,8 @@ LM_Internal_ElementCountGet:
 	mov ecx, [esi + tListInfo.elementCount]
 
 
+	.Exit:
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -749,6 +782,9 @@ LM_Internal_ElementCountSet:
 	mov [esi + tListInfo.elementCount], edx
 
 
+	.Exit:
+	%undef address
+	%undef newSlotCount
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -852,6 +888,12 @@ LM_Internal_ElementDelete:
 	mov dword [esi + tListInfo.listSize], eax
 
 
+	.Exit:
+	%undef address
+	%undef element
+	%undef elementSize
+	%undef elementCount
+	%undef loopCounter
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -951,6 +993,13 @@ LM_Internal_ElementDuplicate:
 	add eax, elementSize
 	mov dword [esi + tListInfo.listSize], eax
 
+
+	.Exit:
+	%undef address
+	%undef element
+	%undef elementSize
+	%undef elementCount
+	%undef loopCounter
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -982,6 +1031,8 @@ LM_Internal_ElementSizeGet:
 	mov eax, [esi + tListInfo.elementSize]
 
 
+	.Exit:
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1050,6 +1101,10 @@ LM_Internal_ItemAddAtSlot:
 	call MemCopy
 
 	.Exit:
+	%undef address
+	%undef addSlot
+	%undef newItemAddress
+	%undef newItemSize
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1147,7 +1202,7 @@ LM_Internal_SlotFindFirstFree:
 		jne .ElementNotEmpty
 
 		; if we get here, the element was empty
-		jmp .Exit
+		jmp .Done
 
 		.ElementNotEmpty:
 		inc edx
@@ -1157,10 +1212,12 @@ LM_Internal_SlotFindFirstFree:
 	cmp edx, ecx
 	jne .FindLoop
 
-
-	.Exit:
+	.Done:
 	mov eax, edx
 
+
+	.Exit:
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1222,6 +1279,8 @@ LM_Internal_SlotFreeTest:
 
 
 	.Exit:
+	%undef address
+	%undef element
 	mov esp, ebp
 	pop ebp
 ret 8

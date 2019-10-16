@@ -83,6 +83,10 @@ ConvertByteToHexString16:
 	mov al, [si]
 	mov byte[di], al
 
+
+	.Exit:
+	%undef number
+	%undef stringAddress
 	mov sp, bp
 	pop bp
 ret 4
@@ -159,6 +163,10 @@ ConvertWordToHexString16:
 	mov byte[di], al
 	inc di
 
+
+	.Exit:
+	%undef number
+	%undef stringAddress
 	mov sp, bp
 	pop bp
 ret 4
@@ -218,9 +226,12 @@ ConvertNumberBinaryToString:
 		dec esi														; move to the next position in the buffer
 		cmp eax, 0
 		jz .Exit													; if ax=0, end of the procedure
-		jmp .DecodeLoop												; else repeat
-	.Exit:
+	jmp .DecodeLoop												; else repeat
 
+
+	.Exit:
+	%undef number
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -274,9 +285,12 @@ ConvertNumberDecimalToString:
 		dec esi														; move to the next position in the buffer
 		cmp eax, 0
 		jz .Exit													; if ax=0, end of the procedure
-		jmp .DecodeLoop												; else repeat
-	.Exit:
+	jmp .DecodeLoop												; else repeat
 
+
+	.Exit:
+	%undef number
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -373,6 +387,9 @@ ConvertNumberHexToString:
 	inc edi
 
 
+	.Exit:
+	%undef number
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -430,6 +447,8 @@ ConvertNumberOctalToString:
 
 
 	.Exit:
+	%undef number
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -523,6 +542,12 @@ ConvertStringBinaryToNumber:
 	.Done:
 	mov eax, accumulator
 
+
+	.Exit:
+	%undef stringAddress
+	%undef strLen
+	%undef accumulator
+	%undef magnitude
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -611,14 +636,18 @@ ConvertStringDecimalToNumber:
 	loop .DecodeLoop
 	jmp .Done
 
-
 	.Error:
 	mov accumulator, 0
-
 
 	.Done:
 	mov eax, accumulator
 
+
+	.Exit:
+	%undef stringAddress
+	%undef strLen
+	%undef accumulator
+	%undef magnitude
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -729,14 +758,18 @@ ConvertStringHexToNumber:
 	loop .DecodeLoop
 	jmp .Done
 
-
 	.Error:
 	mov accumulator, 0
-
 	
 	.Done:
 	mov eax, accumulator
 
+
+	.Exit:
+	%undef stringAddress
+	%undef strLen
+	%undef accumulator
+	%undef magnitude
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -822,14 +855,18 @@ ConvertStringOctalToNumber:
 	loop .DecodeLoop
 	jmp .Done
 
-
 	.Error:
 	mov accumulator, 0
-
 	
 	.Done:
 	mov eax, accumulator
 
+
+	.Exit:
+	%undef stringAddress
+	%undef strLen
+	%undef accumulator
+	%undef magnitude
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -861,7 +898,7 @@ StringCaseLower:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .StringLoopDone
+		je .Exit
 
 		cmp al, 65
 		jb .NotInRange
@@ -876,8 +913,10 @@ StringCaseLower:
 		.NotInRange:
 		inc ecx
 	jmp .StringLoop
-	.StringLoopDone:
 
+
+	.Exit:
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -909,7 +948,7 @@ StringCaseUpper:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .StringLoopDone
+		je .Exit
 
 		cmp al, 97
 		jb .NotInRange
@@ -924,8 +963,10 @@ StringCaseUpper:
 		.NotInRange:
 		inc ecx
 	jmp .StringLoop
-	.StringLoopDone:
 
+
+	.Exit:
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -967,6 +1008,10 @@ StringCharAppend:
 	mov al, 0
 	stosb
 
+
+	.Exit:
+	%undef stringAddress
+	%undef ASCIICode
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1000,7 +1045,7 @@ StringCharDelete:
 	; test for null string for efficiency
 	mov byte al, [ecx]
 	cmp al, 0x00
-	je .StringTrimDone
+	je .Exit
 
 	; calculate source string position
 	add ecx, edx
@@ -1016,14 +1061,17 @@ StringCharDelete:
 
 		; test if this is the end of the string
 		cmp al, 0x00
-		je .StringTrimDone
+		je .Exit
 
 		; that wasn't the end, so we increment the pointers and do the next character
 		inc edx
 		inc ecx
 	jmp .StringShiftLoop
-	.StringTrimDone:
 
+
+	.Exit:
+	%undef stringAddress
+	%undef removePos
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1087,6 +1135,8 @@ StringCharGet:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef charPosition
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1140,6 +1190,9 @@ StringCharPrepend:
 	stosb
 
 
+	.Exit:
+	%undef stringAddress
+	%undef ASCIICode
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1177,7 +1230,7 @@ StringCharReplace:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .StringLoopDone
+		je .Exit
 
 		cmp al, bl
 		jne .NoMatch
@@ -1188,9 +1241,12 @@ StringCharReplace:
 		.NoMatch:
 		inc ecx
 	jmp .StringLoop
-	.StringLoopDone:
 
 
+	.Exit:
+	%undef stringAddress
+	%undef removeChar
+	%undef replacementChar
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1255,6 +1311,10 @@ StringCharReplaceRange:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef rangeStart
+	%undef rangeEnd
+	%undef replacementChar
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1289,15 +1349,17 @@ StringFill:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .StringLoopDone
+		je .Exit
 
 		mov [ecx], bl
 
 		inc ecx
 	jmp .StringLoop
-	.StringLoopDone:
 
 
+	.Exit:
+	%undef stringAddress
+	%undef fillCharacter
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1415,6 +1477,11 @@ StringInsert:
 
 
 	.Exit:
+	%undef mainAddress
+	%undef insertAddress
+	%undef position
+	%undef mainLength
+	%undef insertLength
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1454,6 +1521,8 @@ StringLength:
 	mov eax, edi
 
 
+	.Exit:
+	%undef stringAddress
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1529,6 +1598,10 @@ StringPadLeft:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef paddingChar
+	%undef newLength
+	%undef strLen
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1593,6 +1666,10 @@ StringPadRight:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef paddingChar
+	%undef newLength
+	%undef strLen
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1652,6 +1729,9 @@ StringSearchCharLeft:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef ASCIICode
+	%undef stringLen
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1723,6 +1803,9 @@ StringSearchCharRight:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef ASCIICode
+	%undef stringLen
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1765,7 +1848,7 @@ StringSearchCharList:
 
 	; exit if the string was null, save eax if not
 	cmp eax, 0
-	je .Exit
+	je .Done
 	mov mainStrLen, eax
 
 	; get length of the list string
@@ -1774,7 +1857,7 @@ StringSearchCharList:
 
 	; exit if the string was null, save eax if not
 	cmp eax, 0
-	je .Exit
+	je .Done
 	mov listStrLen, eax
 
 	; this loop cycles through all characters of the list string
@@ -1814,18 +1897,22 @@ StringSearchCharList:
 		inc esi
 	loop .scanLoop
 
-
-	.Exit:
+	.Done:
 	; see if the return value is still 0xFFFFFFFF and make it zero if so
 	cmp returnValue, 0xFFFFFFFF
 	jne .NoAdjust
 	mov returnValue, 0
 
-
 	.NoAdjust:
 	mov eax, returnValue
 
 
+	.Exit:
+	%undef stringAddress
+	%undef charListAddress
+	%undef mainStrLen
+	%undef listStrLen
+	%undef returnValue
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1865,7 +1952,7 @@ StringTokenBinary:
 	push stringAddress
 	call StringLength
 	cmp eax, 0
-	je .Done
+	je .Exit
 
 
 	; find the location of the first token character
@@ -1877,7 +1964,7 @@ StringTokenBinary:
 
 	; if the token location is 0, then no token was found... so we exit
 	cmp tokenPosition, 0
-	je .Done
+	je .Exit
 
 
 	; calculate the address of our string buffer
@@ -1943,7 +2030,12 @@ StringTokenBinary:
 	call StringInsert
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef numberValue
+	%undef trim
+	%undef tokenPosition
+	%undef bufferAddress
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -1983,7 +2075,7 @@ StringTokenDecimal:
 	push stringAddress
 	call StringLength
 	cmp eax, 0
-	je .Done
+	je .Exit
 
 
 	; find the location of the first token character
@@ -1995,7 +2087,7 @@ StringTokenDecimal:
 
 	; if the token location is 0, then no token was found... so we exit
 	cmp tokenPosition, 0
-	je .Done
+	je .Exit
 
 
 	; calculate the address of our string buffer
@@ -2061,7 +2153,12 @@ StringTokenDecimal:
 	call StringInsert
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef numberValue
+	%undef trim
+	%undef tokenPosition
+	%undef bufferAddress
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -2101,7 +2198,7 @@ StringTokenHexadecimal:
 	push stringAddress
 	call StringLength
 	cmp eax, 0
-	je .Done
+	je .Exit
 
 
 	; find the location of the first token character
@@ -2113,7 +2210,7 @@ StringTokenHexadecimal:
 
 	; if the token location is 0, then no token was found... so we exit
 	cmp tokenPosition, 0
-	je .Done
+	je .Exit
 
 
 	; calculate the address of our string buffer
@@ -2179,7 +2276,12 @@ StringTokenHexadecimal:
 	call StringInsert
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef numberValue
+	%undef trim
+	%undef tokenPosition
+	%undef bufferAddress
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -2219,7 +2321,7 @@ StringTokenOctal:
 	push stringAddress
 	call StringLength
 	cmp eax, 0
-	je .Done
+	je .Exit
 
 
 	; find the location of the first token character
@@ -2231,7 +2333,7 @@ StringTokenOctal:
 
 	; if the token location is 0, then no token was found... so we exit
 	cmp tokenPosition, 0
-	je .Done
+	je .Exit
 
 
 	; calculate the address of our string buffer
@@ -2297,7 +2399,12 @@ StringTokenOctal:
 	call StringInsert
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef numberValue
+	%undef trim
+	%undef tokenPosition
+	%undef bufferAddress
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -2335,7 +2442,7 @@ StringTokenString:
 	push stringAddress
 	call StringLength
 	cmp eax, 0
-	je .Done
+	je .Exit
 
 
 	; find the location of the first token character
@@ -2347,7 +2454,7 @@ StringTokenString:
 
 	; if the token location is 0, then no token was found... so we exit
 	cmp tokenPosition, 0
-	je .Done
+	je .Exit
 
 
 	; if the trim value is less than the maximum possible length of the string, then truncate as directed
@@ -2373,7 +2480,11 @@ StringTokenString:
 	call StringInsert
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef numberValue
+	%undef trim
+	%undef tokenPosition
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -2416,7 +2527,7 @@ StringTrimLeft:
 
 		; if this was the last byte of the string, then exit the loop
 		cmp al, 0x00
-		je .Done
+		je .Exit
 
 		inc ecx
 	jmp .StringLoop
@@ -2426,7 +2537,7 @@ StringTrimLeft:
 
 	; but first, a test... if ecx = edx then there's no shifting necessary and we can exit right away
 	cmp ecx, edx
-	je .Done
+	je .Exit
 
 	.StringShiftLoop:
 		; load a char from the source position
@@ -2435,7 +2546,7 @@ StringTrimLeft:
 
 		; test if this is the end of the string
 		cmp al, 0x00
-		je .Done
+		je .Exit
 
 		; that wasn't the end, so we increment the pointers and do the next character
 		inc edx
@@ -2443,7 +2554,9 @@ StringTrimLeft:
 	jmp .StringShiftLoop
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef trim
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2487,7 +2600,7 @@ StringTrimRight:
 		mov byte al, [ecx]
 
 		cmp al, 0x00
-		je .Done
+		je .Exit
 
 		cmp al, bl
 		jne .Truncate
@@ -2500,7 +2613,9 @@ StringTrimRight:
 	mov byte [ecx], 0
 
 
-	.Done:
+	.Exit:
+	%undef stringAddress
+	%undef trim
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2557,6 +2672,9 @@ StringTruncateLeft:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef newLength
+	%undef strLength
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2609,6 +2727,9 @@ StringTruncateRight:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef newLength
+	%undef strLength
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2731,6 +2852,15 @@ StringWordCount:
 
 
 	.Exit:
+	%undef stringAddress
+	%undef sepList
+	%undef mainStrLen
+	%undef listStrLen
+	%undef wordCount
+	%undef lastType
+	%undef currentByteTemp
+	%undef nonSeparator
+	%undef isSeperator
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -2756,6 +2886,7 @@ StringWordGet:
 	mov ebp, esp
 
 	; define input parameters
+	; defines for this function
 	%define stringAddress						dword [ebp + 8]
 	%define sepList								dword [ebp + 12]
 	%define wordNum								dword [ebp + 16]
@@ -2881,6 +3012,17 @@ StringWordGet:
 		stosb
 
 	.Exit:
+	%undef stringAddress
+	%undef sepList
+	%undef wordNum
+	%undef destStr
+	%undef mainStrLen
+	%undef listStrLen
+	%undef wordCount
+	%undef lastType
+	%undef currentByteTemp
+	%undef nonSeparator
+	%undef isSeperator
 	mov esp, ebp
 	pop ebp
 ret 16

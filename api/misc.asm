@@ -109,6 +109,8 @@ Fail:
 
 
 	; why is this here? HE'S DEAD, JIM!
+	.Exit:
+	%undef error$
 	mov esp, ebp
 	pop ebp
 ret 4

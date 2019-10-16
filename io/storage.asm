@@ -83,6 +83,10 @@ SMDiskRead:
 
 	; time to exit
 	.LoopDone:
+	%undef driveNumber
+	%undef startSector
+	%undef sectorCount
+	%undef bufferPtr
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -150,6 +154,10 @@ SMItemCount:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef attributes
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -214,6 +222,9 @@ SMItemDelete:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -278,6 +289,9 @@ SMItemExists:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -345,6 +359,9 @@ SMItemInfoAccessedGet:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -416,6 +433,10 @@ SMItemInfoCreatedGet:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef address
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -486,6 +507,9 @@ SMItemInfoModifiedGet:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -551,6 +575,9 @@ SMItemInfoSizeGet:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -619,6 +646,9 @@ SMItemLoad:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -685,6 +715,10 @@ SMItemNew:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef attributes
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -753,6 +787,11 @@ SMItemStore:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef path$
+	%undef address
+	%undef length
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -879,77 +918,86 @@ SMPartitionEnumerate:
 
 	jmp .DriveListLoop
 
+
+	.BuildPartitionEntry:
+		; get first free slot in the partition list
+		push dword [tSystem.listPartitions]
+		call LMSlotFindFirstFree
+		mov partitionListCurrentElement, eax
+
+		; get the starting address of that specific slot into esi and save it for later
+		push eax
+		push dword [tSystem.listPartitions]
+		call LMElementAddressGet
+		mov partitionListCurrentElementAddr, esi
+
+		; fill in the partition number
+		mov eax, partitionListCurrentElement
+		mov [esi + tPartitionInfo.partitionNumber], eax
+
+		; save base port and device info (from this drive's slot in the drive list) to the slot we're writing in the partition table
+		mov edi, driveListCurrentElementAddr
+		mov eax, [edi + tDriveInfo.ATABasePort]
+		mov ebx, [edi + tDriveInfo.ATAControlPort]
+		mov ecx, [edi + tDriveInfo.ATADeviceNumber]
+		mov [esi + tPartitionInfo.ATABasePort], eax
+		mov [esi + tPartitionInfo.ATAControlPort], ebx
+		mov [esi + tPartitionInfo.ATADeviceNumber], ecx
+
+		; save PCI info (from this drive's slot in the drive list) to the slot we're writing in the partition table
+		mov eax, [edi + tDriveInfo.PCIClass]
+		mov ebx, [edi + tDriveInfo.PCISubclass]
+		mov [esi + tPartitionInfo.PCIClass], eax
+		mov [esi + tPartitionInfo.PCISubclass], ebx
+
+		mov eax, [edi + tDriveInfo.PCIBus]
+		mov ebx, [edi + tDriveInfo.PCIDevice]
+		mov ecx, [edi + tDriveInfo.PCIFunction]
+		mov [esi + tPartitionInfo.PCIBus], eax
+		mov [esi + tPartitionInfo.PCIDevice], ebx
+		mov [esi + tPartitionInfo.PCIFunction], ecx
+
+		; save device flags to this entry in the partition table
+		xor ecx, ecx
+		mov cl, [edi + tDriveInfo.deviceFlags]
+		mov [esi + tPartitionInfo.attributes], ecx
+
+		; save file system to this entry in the partition table
+		mov edi, sectorBufferAddr
+		add edi, offset
+		xor ecx, ecx
+		mov cl, [edi + tPartitionLayout.systemID]
+		mov [esi + tPartitionInfo.fileSystem], ecx
+
+		; save starting LBA to this entry in the partition table
+		mov ecx, [edi + tPartitionLayout.startingLBA]
+		mov [esi + tPartitionInfo.startingLBA], ecx
+
+		; save sector count to this entry in the partition table
+		mov ecx, [edi + tPartitionLayout.sectorCount]
+		mov [esi + tPartitionInfo.sectorCount], ecx
+
+		; save drive list number to this entry in the partition table
+		mov ecx, driveListCurrentElement
+		mov [esi + tPartitionInfo.driveListNumber], ecx
+	ret
+
+
 	; time to exit
 	.LoopDone:
 	mov edx, kErrNone
 
 
 	.Exit:
+	%undef sectorBufferAddr
+	%undef driveListElementCount
+	%undef driveListCurrentElement
+	%undef driveListCurrentElementAddr
+	%undef partitionListCurrentElementAddr
+	%undef offset
+	%undef partitionListCurrentElement
 	mov esp, ebp
 	pop ebp
-ret
-
-.BuildPartitionEntry:
-	; get first free slot in the partition list
-	push dword [tSystem.listPartitions]
-	call LMSlotFindFirstFree
-	mov partitionListCurrentElement, eax
-
-	; get the starting address of that specific slot into esi and save it for later
-	push eax
-	push dword [tSystem.listPartitions]
-	call LMElementAddressGet
-	mov partitionListCurrentElementAddr, esi
-
-	; fill in the partition number
-	mov eax, partitionListCurrentElement
-	mov [esi + tPartitionInfo.partitionNumber], eax
-
-	; save base port and device info (from this drive's slot in the drive list) to the slot we're writing in the partition table
-	mov edi, driveListCurrentElementAddr
-	mov eax, [edi + tDriveInfo.ATABasePort]
-	mov ebx, [edi + tDriveInfo.ATAControlPort]
-	mov ecx, [edi + tDriveInfo.ATADeviceNumber]
-	mov [esi + tPartitionInfo.ATABasePort], eax
-	mov [esi + tPartitionInfo.ATAControlPort], ebx
-	mov [esi + tPartitionInfo.ATADeviceNumber], ecx
-
-	; save PCI info (from this drive's slot in the drive list) to the slot we're writing in the partition table
-	mov eax, [edi + tDriveInfo.PCIClass]
-	mov ebx, [edi + tDriveInfo.PCISubclass]
-	mov [esi + tPartitionInfo.PCIClass], eax
-	mov [esi + tPartitionInfo.PCISubclass], ebx
-
-	mov eax, [edi + tDriveInfo.PCIBus]
-	mov ebx, [edi + tDriveInfo.PCIDevice]
-	mov ecx, [edi + tDriveInfo.PCIFunction]
-	mov [esi + tPartitionInfo.PCIBus], eax
-	mov [esi + tPartitionInfo.PCIDevice], ebx
-	mov [esi + tPartitionInfo.PCIFunction], ecx
-
-	; save device flags to this entry in the partition table
-	xor ecx, ecx
-	mov cl, [edi + tDriveInfo.deviceFlags]
-	mov [esi + tPartitionInfo.attributes], ecx
-
-	; save file system to this entry in the partition table
-	mov edi, sectorBufferAddr
-	add edi, offset
-	xor ecx, ecx
-	mov cl, [edi + tPartitionLayout.systemID]
-	mov [esi + tPartitionInfo.fileSystem], ecx
-
-	; save starting LBA to this entry in the partition table
-	mov ecx, [edi + tPartitionLayout.startingLBA]
-	mov [esi + tPartitionInfo.startingLBA], ecx
-
-	; save sector count to this entry in the partition table
-	mov ecx, [edi + tPartitionLayout.sectorCount]
-	mov [esi + tPartitionInfo.sectorCount], ecx
-
-	; save drive list number to this entry in the partition table
-	mov ecx, driveListCurrentElement
-	mov [esi + tPartitionInfo.driveListNumber], ecx
 ret
 
 
@@ -1017,6 +1065,9 @@ SMPartitionMap:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef driveNumber
+	%undef driveSlotAddress
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1083,6 +1134,10 @@ SMPartitionRead:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef startSector
+	%undef sectorCount
+	%undef bufferPtr
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1149,6 +1204,10 @@ SMPartitionWrite:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef startSector
+	%undef sectorCount
+	%undef bufferPtr
 	mov esp, ebp
 	pop ebp
 ret 16
@@ -1211,6 +1270,8 @@ SMPartitionInfo:
 
 
 	.Exit:
+	%undef partitionNumber
+	%undef partitionSlotPtr
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1252,6 +1313,8 @@ SMPathParentGet:
 
 
 	.Exit:
+	%undef path$
+	%undef wordCount
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1373,6 +1436,9 @@ SMPathPartitionGet:
 
 
 	.Exit:
+	%undef path$
+	%undef partitionSlotPtr
+	%undef driveLetter
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1419,6 +1485,8 @@ SMPathPartitionStripDrive:
 
 
 	.Exit:
+	%undef path$
+	%undef colonPosition
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1450,6 +1518,8 @@ SMPathValidate:
 
 
 
+	.Exit:
+	%undef path$
 	mov esp, ebp
 	pop ebp
 ret 4
