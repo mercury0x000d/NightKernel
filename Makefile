@@ -26,6 +26,8 @@ OBJDIR			:= builds/obj
 OUTPUTDIR		:= builds
 ASMINCLUDEPATH	:= ./include
 TARGET			:= $(OUTPUTDIR)/KERNEL.SYS
+ISO_OUTPUT		:= $(OUTPUTDIR)/NIGHT.ISO
+SCRIPTDIR		:= ./scripts/iso
 
 # Compilers
 ASM				:= nasm
@@ -48,7 +50,7 @@ SRCFILES		:=  kernel.asm $(foreach DIR, $(PROJDIRS), $(wildcard $(DIR)/*.asm $(D
 ASMINCFILES		:= $(shell find $(PROJDIRS) -type f -name "*.inc")
 OBJFILES		:= $(foreach OBJECT, $(patsubst %.asm, %.o, $(patsubst %.c, %.o, $(SRCFILES))), $(OBJDIR)/$(OBJECT))
 LOOPDEVICE		:= /dev/loop0
-
+SCRIPTS 		:= $(shell find $(SCRIPTDIR) -type f -name "*.bat")
 
 
 # General make rules
@@ -81,6 +83,8 @@ help:
 	$(info TARGET = $(TARGET))
 	$(info LOOPDEVICE = $(LOOPDEVICE))
 	$(info LINKER = $(LD) $(LDOPTIONS))
+	$(info SCRIPTDIR = $(SCRIPTDIR))
+	$(info SCRIPTS = $(SCRIPTS))
 
 
 
@@ -104,3 +108,6 @@ vm: $(TARGET)
 	sudo umount ./VBoxDisk
 	$(RM) -r VBoxDisk
 	sudo losetup -d /dev/loop0
+
+iso: $(TARGET)
+	mkisofs $(TARGET) $(SCRIPTS) -o $(ISO_OUTPUT)
