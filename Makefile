@@ -96,6 +96,11 @@ print-%:
 run:
 	virtualbox --startvm "Night" --debug-command-line --start-running
 
+# Virtualbox 6.0+ use a different way of launching the vm from command line, this is it:
+run_new:
+	vboxmanage startvm "Night" -E VBOX_GUI_DBG_ENABLED=true
+	# A good thing to mention about it is that it is possible to launch the debug-command-line but it also launches the monitor with it (that ugly window with stuff),
+	# to prevent this this does not that. However, it does enable the debug menu so you can launch the debug-comand-line from there.
 
 
 vm: $(TARGET)

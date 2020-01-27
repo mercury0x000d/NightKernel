@@ -57,3 +57,20 @@ global TaskMemDisposeAll
 global TaskNameSet
 global TaskNew
 global TaskSwitch
+
+global tTaskInfo.pageDirAddress
+global tTaskInfo.entryPoint
+global tTaskInfo.esp
+global tTaskInfo.esp0
+global tTaskInfo.stackAddress
+global tTaskInfo.kernelStackAddress
+global tTaskInfo.priority
+global tTaskInfo.turnsRemaining
+global tTaskInfo.unused
+global tTaskInfo.switchInLow
+global tTaskInfo.switchInHigh
+global tTaskInfo.cycleCountLow
+global tTaskInfo.cycleCountHigh
+global tTaskInfo.spawnedBy
+global tTaskInfo.taskFlags
+global tTaskInfo.name

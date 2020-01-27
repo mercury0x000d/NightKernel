@@ -16,12 +16,12 @@
 
 
 
-
-
-; global konstant defines
+; this part is duplicated: it's in globals.inc and globals.def becuase multiple files use
+; the defines and some files use the .inc and others the .def
+; this is ugly, the whole system needs to be changed because it's just a mess
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2722
+%define BUILD 2723
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
@@ -60,10 +60,6 @@
 %define kDriverPartitionInfo					0xF8
 %define kDriverItemCount						0xF9
 %define kDriverItemExists						0xFA
-
-
-
-
 
 ; global sTrucTures go here...
 ; tDriveInfo, for the drives list (192 bytes)
@@ -200,3 +196,64 @@ global tSystem.seconds
 global tSystem.year
 global tSystem.month
 global tSystem.day
+
+
+global tDriveInfo.model					
+global tDriveInfo.serial										
+global tDriveInfo.PCIClass									
+global tDriveInfo.PCISubclass								
+global tDriveInfo.PCIBus										
+global tDriveInfo.PCIDevice									
+global tDriveInfo.PCIFunction								
+global tDriveInfo.cacheAddress								
+global tDriveInfo.deviceFlags								
+global tDriveInfo.ATABasePort								
+global tDriveInfo.ATAControlPort								
+global tDriveInfo.ATADeviceNumber							
+global tDriveInfo.reserved00									
+global tDriveInfo.reserved01									
+global tDriveInfo.reserved02									
+global tDriveInfo.reserved03									
+global tDriveInfo.reserved04									
+global tDriveInfo.reserved05									
+global tDriveInfo.reserved06									
+global tDriveInfo.reserved07									
+global tDriveInfo.reserved08									
+global tDriveInfo.reserved09									
+global tDriveInfo.reserved10									
+global tDriveInfo.reserved11									
+global tDriveInfo.reserved12									
+global tDriveInfo.reserved13									
+
+global tPartitionInfo.PCIClass
+global tPartitionInfo.PCISubclass
+global tPartitionInfo.PCIBus
+global tPartitionInfo.PCIDevice
+global tPartitionInfo.PCIFunction
+global tPartitionInfo.driveListNumber
+global tPartitionInfo.startingLBA
+global tPartitionInfo.sectorCount
+global tPartitionInfo.fileSystem
+global tPartitionInfo.attributes
+global tPartitionInfo.ATABasePort
+global tPartitionInfo.ATAControlPort
+global tPartitionInfo.ATADeviceNumber
+global tPartitionInfo.partitionNumber
+global tPartitionInfo.reserved1
+global tPartitionInfo.reserved2
+global tPartitionInfo.reserved3
+global tPartitionInfo.reserved4
+global tPartitionInfo.reserved5
+global tPartitionInfo.reserved6
+global tPartitionInfo.FSReserved00
+global tPartitionInfo.FSReserved01
+global tPartitionInfo.FSReserved02
+global tPartitionInfo.FSReserved03
+global tPartitionInfo.FSReserved04
+global tPartitionInfo.FSReserved05
+global tPartitionInfo.FSReserved06
+global tPartitionInfo.FSReserved07
+global tPartitionInfo.FSReserved08
+global tPartitionInfo.FSReserved09
+global tPartitionInfo.FSReserved10
+global tPartitionInfo.FSReserved11

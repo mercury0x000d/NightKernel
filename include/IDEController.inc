@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/IDEController.def"
+
 
 
 

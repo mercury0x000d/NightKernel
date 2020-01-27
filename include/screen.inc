@@ -18,10 +18,6 @@
 
 
 
-; variable definitions
-%include "include/screen.def"
-
-
 
 
 

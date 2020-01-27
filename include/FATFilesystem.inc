@@ -16,15 +16,6 @@
 
 
 
-
-
-; variable definitions
-%include "include/FATFilesystem.def"
-
-
-
-
-
 ; function definitions
 extern FAT16CalcLBAClusterToSector
 extern FAT16CalcSpaceNeeded

@@ -19,11 +19,6 @@
 
 
 ; variable definitions
-%include "include/PCI.def"
-
-
-
-
 
 ; function definitions
 extern PCIProbe

@@ -14,15 +14,10 @@
 
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
-
-
-
-
-; variable definitions
-%include "include/memory.def"
-
-
-
+extern tMemInfo.address
+extern tMemInfo.size
+extern tMemInfo.task
+extern tMemInfo.memFlags
 
 
 ; function definitions

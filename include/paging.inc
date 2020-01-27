@@ -18,13 +18,6 @@
 
 
 
-; variable definitions
-%include "include/paging.def"
-
-
-
-
-
 ; function definitions
 extern PagingInit
 extern PagingMap

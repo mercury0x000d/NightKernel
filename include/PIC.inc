@@ -18,13 +18,6 @@
 
 
 
-; variable definitions
-%include "include/PIC.def"
-
-
-
-
-
 ; function definitions
 extern PICInit
 extern PICIntComplete

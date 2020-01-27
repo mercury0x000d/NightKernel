@@ -19,10 +19,6 @@
 
 
 ; variable definitions
-%include "include/storage.def"
-
-
-
 
 
 ; function definitions

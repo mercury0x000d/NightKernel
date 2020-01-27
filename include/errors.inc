@@ -16,7 +16,6 @@
 
 
 
-
-
-; variable definitions
-%include "include/errors.def"
+; apparantly, the .def file only uses defines and files only include errors.inc
+; FIXME: ^
+%include "errors.def"

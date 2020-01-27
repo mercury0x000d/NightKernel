@@ -15,15 +15,22 @@
 ; See the included file <GPL License.txt> for the complete text of the GPL License by which this program is covered.
 
 
-
-
-
-; function definitions
-%include "include/tasks.def"
-
-
-
-
+extern tTaskInfo.pageDirAddress
+extern tTaskInfo.entryPoint
+extern tTaskInfo.esp
+extern tTaskInfo.esp0
+extern tTaskInfo.stackAddress
+extern tTaskInfo.kernelStackAddress
+extern tTaskInfo.priority
+extern tTaskInfo.turnsRemaining
+extern tTaskInfo.unused
+extern tTaskInfo.switchInLow
+extern tTaskInfo.switchInHigh
+extern tTaskInfo.cycleCountLow
+extern tTaskInfo.cycleCountHigh
+extern tTaskInfo.spawnedBy
+extern tTaskInfo.taskFlags
+extern tTaskInfo.name
 
 ; function definitions
 extern TaskInit

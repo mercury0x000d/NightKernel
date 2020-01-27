@@ -19,10 +19,6 @@
 
 
 ; variable definitions
-%include "include/interrupts.def"
-
-
-
 
 
 ; function definitions

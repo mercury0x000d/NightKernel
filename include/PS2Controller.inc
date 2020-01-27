@@ -19,11 +19,6 @@
 
 
 ; variable definitions
-%include "include/PS2Controller.def"
-
-
-
-
 
 ; function definitions
 extern PS2ControllerCommand

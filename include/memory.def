@@ -68,3 +68,8 @@ global Mem_Internal_MemListGrow
 global Mem_Internal_MemListShrink
 global PageDirInit
 global PageDirBuildTo
+
+global tMemInfo.address
+global tMemInfo.size
+global tMemInfo.task
+global tMemInfo.memFlags
