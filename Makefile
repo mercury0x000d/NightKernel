@@ -53,6 +53,7 @@ LOOPDEVICE		:= /dev/loop0
 
 # General make rules
 build : $(TARGET)
+	./scripts/xenops --file "include/globalsDefines.inc"
 $(OBJDIR)/%.o : %.asm
 	@mkdir -p $(@D)
 	$(info ==== .asm($<) -> .o($@) rule)

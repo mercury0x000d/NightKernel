@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; FAT Filesystem.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -64,7 +64,7 @@
 
 
 
-%include "include/FATFilesystem.def"
+%include "include/FATFilesystemDefines.inc"
 
 %include "include/boolean.inc"
 %include "include/errors.inc"
@@ -315,7 +315,7 @@ FAT16ChainDelete:
 		push 0xFFEF
 		push 0x0002
 		push ebx
-		call CheckRange
+		call RangeCheck
 
 		; if the above call returned false, we're at the end of the file
 		cmp al, false
@@ -486,7 +486,7 @@ FAT16ChainGrow:
 		push 0xFFEF
 		push 0x0002
 		push ebx
-		call CheckRange
+		call RangeCheck
 
 	; if the above call returned true, we're not yet at the end of the chain
 	cmp al, true
@@ -680,7 +680,7 @@ FAT16ChainLength:
 		push 0xFFEF
 		push 0x0002
 		push ebx
-		call CheckRange
+		call RangeCheck
 
 		; if the above call returned false, we're at the end of the file
 		cmp al, false
@@ -831,7 +831,7 @@ FAT16ChainRead:
 		push 0xFFEF
 		push 0x0002
 		push cluster
-		call CheckRange
+		call RangeCheck
 		cmp al, true
 		jne .Done
 
@@ -1071,7 +1071,7 @@ FAT16ChainShrink:
 		push 0xFFEF
 		push 0x0002
 		push ebx
-		call CheckRange
+		call RangeCheck
 
 		; if the above call returned false, we're at the end of the file
 		cmp al, false
@@ -1257,7 +1257,7 @@ FAT16ChainWrite:
 		push 0xFFEF
 		push 0x0002
 		push cluster
-		call CheckRange
+		call RangeCheck
 		cmp al, true
 		jne .Done
 	jmp .ChainWriteLoop
@@ -3115,24 +3115,24 @@ FAT16ItemNew:
 
 	; encode the creation time
 	mov eax, 0
-	mov al, [tSystem.seconds]
+	mov al, [tSystem.RTCSeconds]
 	push eax
-	mov al, [tSystem.minutes]
+	mov al, [tSystem.RTCMinutes]
 	push eax
-	mov al, [tSystem.hours]
+	mov al, [tSystem.RTCHours]
 	push eax
 	call FATEncodeTime
 	mov createTime, eax
 
 	; encode the creation date
 	mov eax, 0
-	mov al, [tSystem.year]
+	mov al, [tSystem.RTCYear]
 	add eax, 2000
 	push eax
 	mov eax, 0
-	mov al, [tSystem.day]
+	mov al, [tSystem.RTCDay]
 	push eax
-	mov al, [tSystem.month]
+	mov al, [tSystem.RTCMonth]
 	push eax
 	call FATEncodeDate
 	mov createDate, eax
@@ -3368,11 +3368,11 @@ FAT16ItemStore:
 
 	; update the time
 	mov eax, 0
-	mov al, [tSystem.seconds]
+	mov al, [tSystem.RTCSeconds]
 	push eax
-	mov al, [tSystem.minutes]
+	mov al, [tSystem.RTCMinutes]
 	push eax
-	mov al, [tSystem.hours]
+	mov al, [tSystem.RTCHours]
 	push eax
 	call FATEncodeTime
 	mov esi, matchPtr
@@ -3380,13 +3380,13 @@ FAT16ItemStore:
 
 	; update the date
 	mov eax, 0
-	mov al, [tSystem.year]
+	mov al, [tSystem.RTCYear]
 	add eax, 2000
 	push eax
 	mov eax, 0
-	mov al, [tSystem.day]
+	mov al, [tSystem.RTCDay]
 	push eax
-	mov al, [tSystem.month]
+	mov al, [tSystem.RTCMonth]
 	push eax
 	call FATEncodeDate
 	mov esi, matchPtr
@@ -4140,21 +4140,21 @@ FATEncodeDate:
 	push 12
 	push 1
 	push month
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	jne .Fail
 
 	push 31
 	push 1
 	push day
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	jne .Fail
 
 	push 2107
 	push 1980
 	push year
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	jne .Fail
 
@@ -4324,21 +4324,21 @@ FATEncodeTime:
 	push 23
 	push 0
 	push hours
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	jne .Fail
 
 	push 59
 	push 0
 	push minutes
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	jne .Fail
 
 	push 59
 	push 0
 	push seconds
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	jne .Fail
 

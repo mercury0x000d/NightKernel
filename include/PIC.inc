@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
+; Copyright 2015 - 2020 by mercury0x0d
 ; PIC.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/PIC.def"
+%include "include/PICDefines.inc"
 
 
 

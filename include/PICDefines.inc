@@ -1,6 +1,6 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
-; CPU defines.inc is a part of the Night Kernel
+; Copyright 2015 - 2020 by mercury0x0d
+; PIC defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -18,5 +18,20 @@
 
 
 
+; variable definitions
+%define kPIC1CmdPort							word 0x0020
+%define kPIC1DataPort							word 0x0021
+%define kPIC2CmdPort							word 0x00A0
+%define kPIC2DataPort							word 0x00A1
+
+
+
+
+
 ; declare functions as global
-global SetSystemCPUID
+global PICInit
+global PICIntComplete
+global PICIRQDisable
+global PICIRQDisableAll
+global PICIRQEnable
+global PICIRQEnableAll

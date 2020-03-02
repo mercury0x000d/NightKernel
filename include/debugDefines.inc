@@ -1,6 +1,6 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by mercury0x0d
-; PS2 Controller defines.inc is a part of the Night Kernel
+; Copyright 2015 - 2020 by mercury0x0d
+; debug defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -18,30 +18,18 @@
 
 
 
-; PS/2 controller errors
-%define kErrPS2AckFail							0xFF00
-%define kErrPS2ControllerReadTimeout			0xFF01
-%define kErrPS2ControllerWriteTimeout			0xFF02
-
-
-
-
-
 ; declare functions as global
-global PS2ControllerCommand
-global PS2ControllerInit
-global PS2ControllerPortTest
-global PS2ControllerWaitDataRead
-global PS2ControllerWaitDataWrite
-global PS2DeviceCommand
-global PS2DeviceIdentify
-global PS2InitKeyboard
-global PS2InitMouse
-global PS2InputHandlerDispatch
-global PS2InputHandlerKeyboard
-global PS2InputHandlerMouse
-global PS2NewConnect
-global PS2Port1InterruptHandler
-global PS2Port2InterruptHandler
-global PS2PortInitDevice
-global PS2PortSendTo2
+global DebugCPUFeaturesEnable
+global DebugTraceDisable
+global DebugTraceEnable
+global Debugger
+global DebugInstacrash
+global DebugMemoryDetails
+global DebugMenu
+global DebugPCIDevices
+global DebugRAMBrowser
+global DebugStackTrace
+global DebugSystemInfo
+global DebugTaskBrowser
+global DebugVBoxLogWrite
+global DebugWaitForEscape

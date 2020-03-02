@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; globals.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/globals.def"
+%include "include/globalsDefines.inc"
 
 extern tSystem.configBitsHint$
 extern tSystem.configBits
@@ -43,29 +43,35 @@ extern tSystem.APMVersionMinor
 extern tSystem.APMFeatures
 extern tSystem.mouseButtonCount
 extern tSystem.mouseButtons
-extern tSystem.mousePacketByteSize
-extern tSystem.mousePacketByteCount
 extern tSystem.mousePacketByte0
 extern tSystem.mousePacketByte1
 extern tSystem.mousePacketByte2
 extern tSystem.mousePacketByte3
+extern tSystem.mousePacketByteSize
+extern tSystem.mousePacketByteCount
 extern tSystem.mouseWheelPresent
 extern tSystem.mouseX
 extern tSystem.mouseXLimit
 extern tSystem.mouseY
 extern tSystem.mouseYLimit
 extern tSystem.mouseZ
-extern tSystem.memoryInstalledBytes
+extern tSystem.bitfieldPagesAllocated
+extern tSystem.bitfieldPagesReserved
+extern tSystem.bitfieldSize
+extern tSystem.BIOSMemMapShadowPtr
+extern tSystem.BIOSMemMapShadowEntries
+extern tSystem.BIOSMemMapShadowSize
+extern tSystem.memoryManagementSpace
+extern tSystem.memoryKiBInstalled
+extern tSystem.memoryKiBUsable
+extern tSystem.memoryInitialAvailableBytes
+extern tSystem.memoryKiBFree
 extern tSystem.listDrives
 extern tSystem.listDriveLetters
 extern tSystem.listFSHandlers
-extern tSystem.listMemory
 extern tSystem.listPartitions
 extern tSystem.listPCIHandlers
 extern tSystem.listTasks
-extern tSystem.memoryInitialAvailableBytes
-extern tSystem.memoryFreeBytes
-extern tSystem.memoryListReservedSpace
 extern tSystem.PCIDeviceCount
 extern tSystem.PCIVersion
 extern tSystem.PCICapabilities
@@ -76,9 +82,11 @@ extern tSystem.PS2ControllerDeviceID1
 extern tSystem.PS2ControllerDeviceID2
 extern tSystem.RTCUpdateHandlerAddress
 extern tSystem.RTCStatusRegisterB
-extern tSystem.hours
-extern tSystem.minutes
-extern tSystem.seconds
-extern tSystem.year
-extern tSystem.month
-extern tSystem.day
+extern tSystem.RTCHours
+extern tSystem.RTCMinutes
+extern tSystem.RTCSeconds
+extern tSystem.RTCYear
+extern tSystem.RTCMonth
+extern tSystem.RTCDay
+
+extern tSystem.listMemory

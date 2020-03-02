@@ -1,6 +1,6 @@
 ; Night Kernel
-; Copyright 1995 - 2018 by mercury0x0d
-; kernel defines.inc is a part of the Night Kernel
+; Copyright 2015 - 2020 by mercury0x0d
+; PS2 Controller defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -18,45 +18,30 @@
 
 
 
-%define kKernelStack							8192
+; PS/2 controller errors
+%define kErrPS2AckFail							0xFF00
+%define kErrPS2ControllerReadTimeout			0xFF01
+%define kErrPS2ControllerWriteTimeout			0xFF02
 
 
 
 
 
 ; declare functions as global
-global main
-
-
-
-
-
-; declare variables as global
-global tss.back_link
-global tss.esp0
-global tss.ss0
-global tss.esp1
-global tss.ss1
-global tss.esp2
-global tss.ss2
-global tss.cr3
-global tss.eip
-global tss.eflags
-global tss.eax
-global tss.ecx
-global tss.edx
-global tss.ebx
-global tss.esp
-global tss.ebp
-global tss.esi
-global tss.edi
-global tss.es
-global tss.cs
-global tss.ss
-global tss.ds
-global tss.fs
-global tss.gs
-global tss.ldt
-global tss.trap
-global tss.iomap_base
-global tss.end
+global PS2ControllerCommand
+global PS2ControllerInit
+global PS2ControllerPortTest
+global PS2ControllerWaitDataRead
+global PS2ControllerWaitDataWrite
+global PS2DeviceCommand
+global PS2DeviceIdentify
+global PS2InitKeyboard
+global PS2InitMouse
+global PS2InputHandlerDispatch
+global PS2InputHandlerKeyboard
+global PS2InputHandlerMouse
+global PS2NewConnect
+global PS2Port1InterruptHandler
+global PS2Port2InterruptHandler
+global PS2PortInitDevice
+global PS2PortSendTo2

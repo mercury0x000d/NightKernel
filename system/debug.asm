@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; debug.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,7 +18,7 @@
 
 
 
-%include "include/debug.def"
+%include "include/debugDefines.inc"
 
 %include "include/errors.inc"
 %include "include/globals.inc"
@@ -502,7 +502,7 @@ Debugger:
 	ret
 
 
-	.Exit
+	.Exit:
 	%undef taskNum
 	%undef registerEDI
 	%undef registerESI
@@ -1758,12 +1758,12 @@ DebugSystemInfo:
 	push .RAMFormat1$
 	call MemCopy
 
-	; copy tSystem.memoryInstalledBytes to our temp quadword
+	; copy tSystem.memoryKiBInstalled to our temp quadword
 	push dword 8
 	mov eax, ebp
 	sub eax, 8
 	push eax
-	push tSystem.memoryInstalledBytes
+	push tSystem.memoryKiBInstalled
 	call MemCopy
 
 	; shift to divide by 1024 (bytes to KiB)
@@ -1812,7 +1812,8 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-	mov eax, dword [tSystem.memoryFreeBytes]
+; DEBUG - commented out pending compatibility with new memory handling method
+;	mov eax, dword [tSystem.memoryFreeBytes]
 	shr eax, 11
 	push eax
 	push .scratch$

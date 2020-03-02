@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; strings.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,7 +18,7 @@
 
 
 
-%include "include/strings.def"
+%include "include/stringsDefines.inc"
 
 %include "include/boolean.inc"
 %include "include/memory.inc"
@@ -225,8 +225,8 @@ ConvertNumberBinaryToString:
 		mov [esi], dl
 		dec esi														; move to the next position in the buffer
 		cmp eax, 0
-		jz .Exit													; if ax=0, end of the procedure
-	jmp .DecodeLoop												; else repeat
+		jz .Exit													; if ax = 0, end of the procedure
+	jmp .DecodeLoop													; else repeat
 
 
 	.Exit:
@@ -284,8 +284,8 @@ ConvertNumberDecimalToString:
 		mov [esi], dl
 		dec esi														; move to the next position in the buffer
 		cmp eax, 0
-		jz .Exit													; if ax=0, end of the procedure
-	jmp .DecodeLoop												; else repeat
+		jz .Exit													; if ax = 0, end of the procedure
+	jmp .DecodeLoop													; else repeat
 
 
 	.Exit:
@@ -442,7 +442,7 @@ ConvertNumberOctalToString:
 		mov [esi], dl
 		dec esi														; move to the next position in the buffer
 		cmp eax, 0
-		jz .Exit													; if ax=0, end of the procedure
+		jz .Exit													; if ax = 0, end of the procedure
 	jmp .DecodeLoop													; else repeat
 
 
@@ -1112,7 +1112,7 @@ StringCharGet:
 	push eax
 	push 1
 	push charPosition
-	call CheckRange
+	call RangeCheck
 
 	cmp al, false
 	jne .RangeOK

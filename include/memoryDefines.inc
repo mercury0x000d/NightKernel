@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by mercury0x0d
+; Copyright 2015 - 2020 by mercury0x0d
 ; memory defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -34,6 +34,12 @@ struc tMemInfo
 	.memFlags									resd 1
 endstruc
 
+struc tBIOSMemMapEntry
+	.address									resq 1
+	.length										resq 1
+	.type										resd 1
+endstruc
+
 
 
 
@@ -45,7 +51,7 @@ global A20EnableBIOS
 global A20EnableFastA20
 global A20EnableKeyboardController
 global A20EnablePortEE
-global MemProbe
+global MemMapCopy
 global MemAddressAlign
 global MemAddressToBlock
 global MemAllocate

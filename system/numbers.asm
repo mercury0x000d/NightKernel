@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; numbers.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,76 +18,9 @@
 
 
 
-%include "include/numbers.def"
+%include "include/numbersDefines.inc"
 
 %include "include/boolean.inc"
-
-
-
-
-
-bits 16
-
-
-
-
-
-section .text
-QuadAdd16:
-	; Adds two quadwords in real mode
-	;
-	;  input:
-	;	Pointer to input QWord
-	;	Pointer to output QWord
-	;
-	;  output:
-	;	n/a
-	;
-	; Note: This 16-bit function takes doubleword pointers (not word) as input
-
-	push bp
-	mov bp, sp
-
-	; define input parameters
-	%define inPtr								dword [ebp + 4]
-	%define outPtr								dword [ebp + 8]
-
-
-	; add lower 32 bits first
-	mov esi, inPtr
-	mov edi, outPtr
-	mov eax, [esi]
-	add eax, [edi]
-
-	; adjust pointers
-	; an unrolled loop of INCs is used here because using a simple ADD may disrupt the flags register, and 
-	; using a PUSHF / POPF combo is just sloppy in my opinion
-	inc esi
-	inc esi
-	inc esi
-	inc esi
-	inc edi
-	inc edi
-	inc edi
-	inc edi
-
-	; now add upper 32 bits
-	mov ebx, [esi]
-	adc ebx, [edi]
-
-	; write the values back to memory
-	mov esi, outPtr
-	mov [esi], eax
-	add esi, 4
-	mov [esi], ebx
-
-
-	.Exit:
-	%undef inPtr
-	%undef outPtr
-	mov sp, bp
-	pop bp
-ret 8
 
 
 
@@ -164,7 +97,7 @@ ret
 
 
 section .text
-CheckRange:
+RangeCheck:
 	; Checks that a value passed is in range
 	;
 	;  input:

@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by mercury0x0d
+; Copyright 2015 - 2020 by mercury0x0d
 ; lists defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -21,6 +21,7 @@
 ; List Manager errors
 %define kErrListInvalid							0xF900
 %define kErrElementSizeInvalid					0xF901
+%define kErrBitfieldInvalid						0xF902
 
 
 
@@ -39,6 +40,16 @@ endstruc
 
 
 ; declare functions as global
+global LMBitfieldInit
+global LMBitfieldValidate
+global LMBitfieldElementValidate
+global LMBitClear
+global LMBitClearRange
+global LMBitFlip
+global LMBitFlipRange
+global LMBitGet
+global LMBitSet
+global LMBitSetRange
 global LMElementAddressGet
 global LMElementCountGet
 global LMElementCountSet
@@ -64,3 +75,7 @@ global LM_Internal_ListCompact
 global LM_Internal_ListSearch
 global LM_Internal_SlotFindFirstFree
 global LM_Internal_SlotFreeTest
+
+
+
+

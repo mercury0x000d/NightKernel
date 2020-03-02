@@ -1,6 +1,6 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by mercury0x0d
-; debug defines.inc is a part of the Night Kernel
+; Copyright 1995 - 2020 by mercury0x0d
+; hardware defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
@@ -18,18 +18,18 @@
 
 
 
+; declare variables as global
+global kKeyBufferWrite
+global kKeyBufferRead
+global kKeyBufferAddress
+
+
+
+
+
 ; declare functions as global
-global DebugCPUFeaturesEnable
-global DebugTraceDisable
-global DebugTraceEnable
-global Debugger
-global DebugInstacrash
-global DebugMemoryDetails
-global DebugMenu
-global DebugPCIDevices
-global DebugRAMBrowser
-global DebugStackTrace
-global DebugSystemInfo
-global DebugTaskBrowser
-global DebugVBoxLogWrite
-global DebugWaitForEscape
+global KeyGet
+global KeyWait
+global PITInit
+global Random
+global Reboot

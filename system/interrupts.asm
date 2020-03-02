@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; interrupts.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,7 +18,7 @@
 
 
 
-%include "include/interrupts.def"
+%include "include/interruptsDefines.inc"
 
 %include "include/errors.inc"
 %include "include/debug.inc"

@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by mercury0x0d
+; Copyright 2015 - 2020 by mercury0x0d
 ; lists.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,13 +19,23 @@
 
 
 ; variable definitions
-%include "include/lists.def"
+%include "include/listsDefines.inc"
 
 
 
 
 
 ; function definitions
+extern LMBitfieldInit
+extern LMBitfieldValidate
+extern LMBitfieldElementValidate
+extern LMBitClear
+extern LMBitClearRange
+extern LMBitFlip
+extern LMBitFlipRange
+extern LMBitGet
+extern LMBitSet
+extern LMBitSetRange
 extern LMElementAddressGet
 extern LMElementCountGet
 extern LMElementCountSet

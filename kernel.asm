@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; kernel.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,7 +19,7 @@
 
 
 ; boy, the kernel needs a lot of headers to start! :D
-%include "include/kernel.def"
+%include "include/kernelDefines.inc"
 
 %include "include/CPU.inc"
 %include "include/debug.inc"
@@ -105,10 +105,15 @@ mov byte [gBackColor], 0
 
 
 
-; init and probe RAM
+; copy the BIOS memory map to 9000:0 for later parsing
 push progressText01$
 call PrintIfConfigBits16
-call MemProbe
+
+mov bx, 0x8000
+mov es, bx
+call MemMapCopy
+xor bx, bx
+mov es, bx
 
 ; see if there was an error
 cmp edx, kErrNone
@@ -119,6 +124,10 @@ je .MemProbeOK
 	push fatalE820Unsupported$
 	call Print16
 .MemProbeOK:
+
+; save the returned size of the memory map
+and eax, 0x0000FFFF
+mov dword [tSystem.BIOSMemMapShadowEntries], eax
 
 
 
@@ -188,7 +197,8 @@ mov ax, 0x0010
 mov ds, ax
 mov es, ax
 mov ss, ax
-mov esp, 0x0009FB00
+mov esp, 0x0009fb00
+
 
 
 
@@ -364,7 +374,7 @@ call PrintIfConfigBits32
 call PagingInit
 
 
-xchg bx, bx
+
 
 
 bt dword [tSystem.configBits], kCBDebugMode
@@ -482,7 +492,7 @@ jmp InfiniteLoop
 section .text
 Task1:
 	; see if a second has passed
-	mov al, byte [tSystem.seconds]
+	mov al, byte [tSystem.RTCSeconds]
 	cmp byte [.lastSecond], al
 	mov byte [.lastSecond], al
 	jne .PrintStuff
@@ -499,42 +509,42 @@ Task1:
 	; build the date and time info string
 	push dword 2
 	mov eax, 0x00000000
-	mov al, byte [tSystem.month]
+	mov al, byte [tSystem.RTCMonth]
 	push eax
 	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
-	mov al, byte [tSystem.day]
+	mov al, byte [tSystem.RTCDay]
 	push eax
 	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
-	mov al, byte [tSystem.year]
+	mov al, byte [tSystem.RTCYear]
 	push eax
 	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
-	mov al, byte [tSystem.hours]
+	mov al, byte [tSystem.RTCHours]
 	push eax
 	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
-	mov al, byte [tSystem.minutes]
+	mov al, byte [tSystem.RTCMinutes]
 	push eax
 	push .scratch1$
 	call StringTokenDecimal
 
 	push dword 2
 	mov eax, 0x00000000
-	mov al, byte [tSystem.seconds]
+	mov al, byte [tSystem.RTCSeconds]
 	push eax
 	push .scratch1$
 	call StringTokenDecimal
@@ -633,7 +643,7 @@ Task3:
 		.NoOverflow:
 
 		; see if a second has passed
-		mov al, byte [tSystem.seconds]
+		mov al, byte [tSystem.RTCSeconds]
 		cmp byte [.lastSecond], al
 		mov byte [.lastSecond], al
 	je Task3
@@ -763,7 +773,7 @@ section .data
 
 
 section .data
-progressText01$									db 'Probing BIOS memory map', 0x00
+progressText01$									db 'Shadowing BIOS memory map', 0x00
 progressText02$									db 'Beginning A20 enable procedure', 0x00
 progressText03$									db 'SetSystemAPM', 0x00
 progressText04$									db 'APMEnable', 0x00

@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; disks.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,7 +18,7 @@
 
 
 
-%include "include/storage.def"
+%include "include/storageDefines.inc"
 
 %include "include/boolean.inc"
 %include "include/errors.inc"
@@ -1031,7 +1031,7 @@ SMPartitionMap:
 	push 255
 	push 0
 	push partitionNumber
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	je .PartitionIsInRange
 		mov eax, kErrValueTooHigh
@@ -1042,7 +1042,7 @@ SMPartitionMap:
 	push 25
 	push 0
 	push driveNumber
-	call CheckRange
+	call RangeCheck
 	cmp al, true
 	je .DriveLetterIsInRange
 		mov eax, kErrInvalidParameter
@@ -1378,7 +1378,7 @@ SMPathPartitionGet:
 		push 90
 		push 65
 		push driveLetter
-		call CheckRange
+		call RangeCheck
 		cmp al, true
 		je .LetterInRange
 			mov ebx, kErrDriveLetterInvalid

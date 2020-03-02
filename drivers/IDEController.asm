@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; IDE Controller.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -34,7 +34,7 @@
 
 
 
-%include "include/IDEController.def"
+%include "include/IDEControllerDefines.inc"
 
 %include "include/errors.inc"
 %include "include/globals.inc"
@@ -1166,7 +1166,7 @@ IDEInit:
 ret 12
 
 section .data
-.driverIntro$									db 'IDE Controller Driver, 2018 - 2019 by Mercury0x0D', 0x00
+.driverIntro$									db 'IDE Controller Driver, 2020 - 2020 by Mercury0x0D', 0x00
 
 
 

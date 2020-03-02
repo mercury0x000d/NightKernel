@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; globals.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -18,7 +18,7 @@
 
 
 
-%include "include/globals.def"
+%include "include/globalsDefines.inc"
 
 
 
@@ -33,7 +33,7 @@ section .data
 tSystem:
 	.configBitsHint$							db 'ConfigBits'
 	.configBits									dd 00000000000000000000000000000111b
-	.copyright$									db 'Night Kernel, Copyright 2015 - 2019', 0x00
+	.copyright$									db 'Night Kernel, Copyright 2015 - 2020', 0x00
 	.versionMajor								db 0x00
 	.versionMinor								db 0x1E
 	.versionBuild								dd BUILD
@@ -53,31 +53,37 @@ tSystem:
 	.APMFeatures								dw 0x0000
 	.mouseButtonCount							db 0x00
 	.mouseButtons								db 0x00
-	.mousePacketByteSize						db 0x00
-	.mousePacketByteCount						db 0x00
 	.mousePacketByte0							db 0x00
 	.mousePacketByte1							db 0x00
 	.mousePacketByte2							db 0x00
 	.mousePacketByte3							db 0x00
+	.mousePacketByteSize						db 0x00
+	.mousePacketByteCount						db 0x00
 	.mouseWheelPresent							db 0x00
 	.mouseX										dw 0x0000
 	.mouseXLimit								dw 0x0000
 	.mouseY										dw 0x0000
 	.mouseYLimit								dw 0x0000
 	.mouseZ										dw 0x0000
-	.memoryInstalledBytes						dq 0x0000000000000000
 
 section .bss
+	.bitfieldPagesAllocated						resd 1
+	.bitfieldPagesReserved						resd 1
+	.bitfieldSize								resd 1
+	.BIOSMemMapShadowPtr						resd 1
+	.BIOSMemMapShadowEntries					resd 1
+	.BIOSMemMapShadowSize						resd 1
+	.memoryManagementSpace						resd 1
+	.memoryKiBInstalled							resd 1
+	.memoryKiBUsable							resd 1
+	.memoryInitialAvailableBytes				resd 1
+	.memoryKiBFree								resd 1
 	.listDrives									resd 1
 	.listDriveLetters							resd 1
 	.listFSHandlers								resd 1
-	.listMemory									resd 1
 	.listPartitions								resd 1
 	.listPCIHandlers							resd 1
 	.listTasks									resd 1
-	.memoryInitialAvailableBytes				resd 1
-	.memoryFreeBytes							resd 1
-	.memoryListReservedSpace					resd 1
 	.PCIDeviceCount								resd 1
 	.PCIVersion									resd 1
 	.PCICapabilities							resd 1
@@ -88,14 +94,15 @@ section .bss
 	.PS2ControllerDeviceID2						resw 1
 	.RTCUpdateHandlerAddress					resd 1
 	.RTCStatusRegisterB							resb 1
-	.hours										resb 1
-	.minutes									resb 1
-	.seconds									resb 1
-	.year										resb 1
-	.month										resb 1
-	.day										resb 1
+	.RTCHours									resb 1
+	.RTCMinutes									resb 1
+	.RTCSeconds									resb 1
+	.RTCYear									resb 1
+	.RTCMonth									resb 1
+	.RTCDay										resb 1
 
 
+.listMemory										resd 1
 
 
 

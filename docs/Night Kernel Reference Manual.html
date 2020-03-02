@@ -49,35 +49,37 @@
 			<br>
 			<b>Index</b><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#About">Section 0 - About the Night Kernel</a><br>
+			<a href="#About">Section 0 - About the Night Kernel</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Building">Section 1 - Building and Running the Kernel</a><br>
+			<a href="#Building">Section 1 - Building and Running the Kernel</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#DebugMenu">Section 2 - The Kernel Debug Menu</a><br>
+			<a href="#DebugMenu">Section 2 - The Kernel Debug Menu</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Debugging">Section 3 - Debugging the Night Kernel</a><br>
+			<a href="#Debugging">Section 3 - Debugging the Night Kernel</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Conventions">Section 4 - Coding Conventions Used in Night</a><br>
+			<a href="#Conventions">Section 4 - Coding Conventions Used in Night</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Drivers">Section 5 - The Night Kernel Driver Model</a><br>
+			<a href="#Drivers">Section 5 - The Night Kernel Driver Model</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Config">Section 6 - Setting Options with ConfigBits</a><br>
+			<a href="#Config">Section 6 - Setting Options with ConfigBits</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Lists">Section 7 - The List Manager</a><br>
+			<a href="#Lists">Section 7 - The List Manager</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#MemoryManagement">Section 8 - Memory Management in Night</a><br>
+			<a href="#MemoryManagement">Section 8 - Memory Management in Night</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Multitasking">Section 9 - Multitasking, Night Style</a><br>
+			<a href="#Multitasking">Section 9 - Multitasking, Night Style</a><br>
+			<br>
+			<a href="#SystemStruct">Section 10 - The System Struct</a><br>
 			<br>
 			________________________________<br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#Changelog">Appendix 0 - Version History</a><br>
+			<a href="#Changelog">Appendix 0 - Version History</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a><br>
+			<a href="#NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#DOSFunctionReference">Appendix 2 - DOS Functions Reference</a><br>
+			<a href="#DOSFunctionReference">Appendix 2 - DOS Functions Reference</a><br>
 			<br>
-			<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#License">GNU General Public License</a><br>
+			<a href="#License">GNU General Public License</a><br>
 			<br>
 		</p>
 		<br>
@@ -147,37 +149,47 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 1.1 - Make options</caption>
-				<colgroup><col width="10%">
-				<col width="90%">
-				</colgroup><tbody><tr>
-					<th><i>Rule</i></th>
-					<th><i>Result</i></th>
+				<tr>
+					<th width="10%"><i>Rule</i></th>
+					<th width="90%"><i>Function</i></th>
 				</tr>
 				<tr>
 					<td>build</td>
-					<td>Assembles the kernel using NASM. After assembling, you will have a file called <i>kernel.sys</i> in the <i>builds</i> directory which can be copied over top of the existing FreeDOS kernel on any bootable FreeDOS disk.
-				</td></tr>
-				<tr>
-					<td>imagecd</td>
-					<td>Copies the built <i>kernel.sys</i> to the CD image. The CD image will be created if it does not already exist.</td> 
+					<td>
+						Assembles the individual source files using NASM and links them into the kernel binary. After assembling, you will have a file called <i>kernel.sys</i> in the <i>builds</i> directory which can be copied over top of the existing FreeDOS kernel on any bootable FreeDOS disk.
+					</td>
 				</tr>
 				<tr>
-					<td>imagehd</td>
-					<td>Mounts the virtual disk image <i>night.vdi</i> and copies <i>kernel.sys</i> to it. You will be prompted for your root password as a normal function of this option.</td> 
+					<td>clean</td>
+					<td>
+						Deletes all the temporary and output files related to the build process.
+					</td>
+				</tr>
+				<tr>
+					<td>help</td>
+					<td>
+						Displays targets.
+					</td>
+				</tr>
+				<tr>
+					<td>print</td>
+					<td>
+						Prints the value of the token specified.
+					</td>
 				</tr>
 				<tr>
 					<td>run</td>
-					<td>Runs the kernel in a VirtualBox virtual machine.</td>
+					<td>
+						Runs the kernel in a VirtualBox virtual machine.
+					</td>
 				</tr>
 				<tr>
-					<td>allcd</td>
-					<td>Builds Night, copies the kernel to the CD image, then launches the virtual machine. You must have the VM configured to boot from the CD image, which will be created if it does not already exist.</td>
+					<td>vm</td>
+					<td>
+						Copies the kernel binary to the VDI image.
+					</td>
 				</tr>
-				<tr>
-					<td>allhd</td>
-					<td>Builds Night, mounts the included disk image and copies to it the newly build kernel, then launches the virtual machine.</td>
-				</tr>
-			</tbody></table>
+			</table>
 		</p>
 		<br>
 		<br>
@@ -194,37 +206,45 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 2.1 - Debug Menu selection summary</caption>
-				<colgroup><col width="10%">
-				<col width="90%">
-				</colgroup><tbody><tr>
-					<th><i>Menu Selection</i></th>
-					<th><i>Description</i></th>
+				<tr>
+					<th width="10%"><i>Menu Selection</i></th>
+					<th width="90%"><i>Description</i></th>
 				</tr>
 				<tr>
 					<td>System Info</td>
-					<td>Provides details about the system, including the kernel version, CPU description, and the addresses of various data lists the kernel maintains.</td>
+					<td>
+						Provides details about the system, including the kernel version, CPU description, and the addresses of various data lists the kernel maintains.
+					</td>
 				</tr>
 				<tr>
 					<td>PCI Devices</td>
-					<td>Details the PCI devices detected on the system and allows browsing of the PCI register information for each using the Page Up and Page Down keys.</td>
+					<td>
+						Details the PCI devices detected on the system and allows browsing of the PCI register information for each using the Page Up and Page Down keys.
+					</td>
 				</tr>
 				<tr>
 					<td>Memory Details</td>
-					<td>Provides a dump of the memory list used to track both free and allocated physical RAM.</td>
+					<td>
+						Provides a dump of the memory list used to track both free and allocated physical RAM.
+					</td>
 				</tr>
 				<tr>
 					<td>RAM Browser</td>
-					<td>An interactive memory browser. Use the Plus and Minus keys on the number pad to scroll through memory addresses or use Page Up or Page down to jump by larger chunks. Typing a hexadecimal address and pressing enter will jump instantly to that memory location. Keep in mind that some modern systems have protected ranges of RAM used by UEFI or SMM/TPM software which are not permitted to be read. Accessing these with the RAM Browser can cause a triple-fault and reset the system.</td>
+					<td>
+						An interactive memory browser. Use the Plus and Minus keys on the number pad to scroll through memory addresses or use Page Up or Page down to jump by larger chunks. Typing a hexadecimal address and pressing enter will jump instantly to that memory location. Keep in mind that some modern systems have protected ranges of RAM used by UEFI or SMM/TPM software which are not permitted to be read. Accessing these with the RAM Browser can cause a triple-fault and reset the system.
+					</td>
 				</tr>
 				<tr>
 					<td>Task Browser</td>
-					<td>Allows browsing of all slots in the Task List. Use Page Up and Page Down to change the task number, the Plus and Minus keys on the number pad to adjust the priority of running tasks, Spacebar to toggle a task's suspended state, or Enter to kill the task entirely. Keep in mind there is nothing preventing the Debug Menu itself from being suspended or killed, leaving no way to interact with the kernel until the system is restarted.</td>
+					<td>
+						Allows browsing of all slots in the Task List. Use Page Up and Page Down to change the task number, the Plus and Minus keys on the number pad to adjust the priority of running tasks, Spacebar to toggle a task's suspended state, or Enter to kill the task entirely. Keep in mind there is nothing preventing the Debug Menu itself from being suspended or killed, leaving no way to interact with the kernel until the system is restarted.
+					</td>
 				</tr>
 				<tr>
 					<td>Reboot</td>
 					<td>Reboots the machine.</td>
 				</tr>
-			</tbody></table>
+			</table>
 		</p>
 		<br>
 		<br>
@@ -243,61 +263,83 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table 3.1 - Useful VirtualBox Debugger commands</caption>
-				<colgroup><col width="30%">
-				<col width="70%">
-				</colgroup><tbody><tr>
-					<th><i>Command</i></th>
-					<th><i>Description</i></th>
+				<tr>
+					<th width="30%"><i>Command</i></th>
+					<th width="70%"><i>Description</i></th>
 				</tr>
 				<tr>
 					<td>d (address)</td>
-					<td>Dump memory at address specified</td>
+					<td>
+						Dump memory at address specified
+					</td>
 				</tr>
 				<tr>
 					<td>dpd (address | index)</td>
-					<td>Dumps page directory entries</td>
+					<td>
+						Dumps page directory entries
+					</td>
 				</tr>
 				<tr>
 					<td>dpda (address)</td>
-					<td>Dumps memory at given address as a page directory</td>
+					<td>
+						Dumps memory at given address as a page directory
+					</td>
 				</tr>
 				<tr>
 					<td>d (address)</td>
-					<td>Dump memory at address specified</td>
+					<td>
+						Dump memory at address specified
+					</td>
 				</tr>
 				<tr>
 					<td>r</td>
-					<td>Display active register set</td>
+					<td>
+						Display active register set
+					</td>
 				</tr>
 				<tr>
 					<td>rg</td>
-					<td>Display guest register set</td>
+					<td>
+						Display guest register set
+					</td>
 				</tr>
 				<tr>
 					<td>sa (address) "string"</td>
-					<td>Search for an ASCII string</td>
+					<td>
+						Search for an ASCII string
+					</td>
 				</tr>
 				<tr>
 					<td>sb (address) (byte value | byte string)</td>
-					<td>Search for one or more bytes</td>
+					<td>
+						Search for one or more bytes
+					</td>
 				</tr>
 				<tr>
 					<td>sd (address) (word value)</td>
-					<td>Search for one or more words</td>
+					<td>
+						Search for one or more words
+					</td>
 				</tr>
 				<tr>
 					<td>sw (address) (word value)</td>
-					<td>Search for one or more dwords</td>
+					<td>
+						Search for one or more dwords
+					</td>
 				</tr>
 				<tr>
 					<td>t</td>
-					<td>Trace (single-step) through code one instruction at a time.</td>
+					<td>
+						Trace (single-step) through code one instruction at a time.
+					</td>
 				</tr>
 				<tr>
 					<td>u (address)</td>
-					<td>Unassembles code at the address specified using the default processor mode. Alternately, u16 or u32 may be used to force unassembly of 16-bit or 32-bit code, respectively.</td>
+					<td>
+						Unassembles code at the address specified using the default processor mode. Alternately, u16 or u32 may be used to force unassembly of 16-bit or 32-bit code, respectively.
+					</td>
 				</tr>
-			</tbody></table>
+			</table>
 			<br>
 			Usually the active register set and memory range upon which the above commands work are the guest's (e.g. Night's), but if VirtualBox hits a triple fault (Guru Meditation), these will switch to the hypervisor's. For these situations, some commands support adding a "g" to their ends to explicitly specify VirtualBox uses the guest's data.<br>
 			<br>
@@ -318,8 +360,9 @@
 			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readibility than comparable C code.<br>
 			<br>
 			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from the Memory Manager:<br>
+
 			<code>
-				</code></p><p style="background-color: DimGray"><code>
+				<p style="background-color: DimGray">
 					<br>
 					<span style="color: Turquoise">&nbsp; section</span> <span style="color: Chartreuse">.text</span><br>
 					<span style="color: Chartreuse">&nbsp; MemAllocateAligned:</span><br>
@@ -336,8 +379,9 @@
 						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;EDX - Result code<br>
 					</span>
 					<br>
-				</code></p><code>
+				</p>
 			</code>
+
 			Every function in Night begins by stating it is part of the <i>.text</i> section of the final binary image, so that the assembler knows to group this function in with the rest of the runnable code. Following this designation is the function label, which in this case is <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, what it expects for input on the stack, what it returns as output, and in what registers that output is returned.<br>
 			<br>
 			<br>
@@ -351,6 +395,7 @@
 					<br>
 				</p>
 			</code>
+
 			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can more directly access parameters passed to this function and use local variables in the function as well. This is the standard entry procedure for every Night function which accepts input parameters or uses internal variables.<br>
 			<br>
 			<br>
@@ -369,6 +414,7 @@
 					<br>
 				</p>
 			</code>
+
 			Now that EBP has been preserved and set, offsets from it may be defined to represent parameters passed to this function. Values pushed onto the stack by the caller begin at <code>[EBP + 8]</code> and ascend from there. Since all of Night's functions expect 32-bit parameters, this means that the first parameter passed will live at <code>[EBP + 8]</code>, the second at <code>[EBP + 12]</code>, the third at <code>[EBP + 16]</code>, and so on. As for <code>[EBP + 0]</code> and <code>[EBP + 4]</code>, those stack locations are where the saved <code>EBP</code> register and the return address, respectively, live.<br>
 			<br>
 			Using <code>define</code> directives essentially tells NASM, "Every time you see <code><i>memorySize</i></code> in the code below, go ahead and substitute it with <code><i>dword [ebp + 12]</i></code>". Note that these directives are not <i>technically</i> required (using a bare reference like <code>dword [ebp + 12]</code> in the code directly is perfectly valid) but using them makes the code much easier for us humans to read.<br>
@@ -395,6 +441,7 @@
 					<br>
 				</p>
 			</code>
+
 			Variables local to this function can be represented in a manner similar to that of parameters. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined.<br>
 			<br>
 			A handy mnemonic for remembering which EBP references are which is that <i>locals</i> are <i>lower</i> than EBP, and <i>parameters</i> are <i>positive</i>.<br>
@@ -406,7 +453,7 @@
 				<p style="background-color: DimGray">
 					<br>
 					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; make sure alignment is 2 or greater to avoid both wasted time (1) and division by zero errors (0)</span><br>
-			
+
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; cmp</span> <span style="color: Chartreuse">alignment</span><span style="color: White">,</span> <span style="color: Fuchsia">2</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; jb</span> <span style="color: Chartreuse">.Exit</span><br>
@@ -415,6 +462,7 @@
 					<br>
 				</p>
 			</code>
+
 			Next in this function is an example of how passed parameters are accessed. As mentioned earlier, using <code>cmp dword [ebp + 12], 2</code> here would be totally acceptable by NASM, but thanks to the <code>define</code>s we set in place earlier, we can make the code much more easy to read. This code performs a simple check on the <code>alignment</code> passed and exits if it is below two.<br>
 			<br>
 			<br>
@@ -426,13 +474,14 @@
 					<span style="color: White">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</span><br>
 					<br>
 					<span style="color: LightGray">&nbsp;&nbsp;&nbsp;&nbsp; ; set the return values and exit</span><br>
-			
+
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">edx</span><span style="color: White">,</span> <span style="color: Chartreuse">kErrNone</span><br>
 
 					<span style="color: DeepPink">&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style="color: Orange">eax</span><span style="color: White">,</span> <span style="color: Chartreuse">blockAddress</span><br>
 					<br>
 				</p>
 			</code>
+
 			And now, skipping ahead to the end, the work of this function is complete. Remember those registers mentioned above in the function descrption? This is where they get set prior to exiting the function.<br>
 			<br>
 			<br>
@@ -467,6 +516,7 @@
 					<br>
 				</p>
 			</code>
+
 			And finally, it's time to exit!<br>
 			<br>
 			The series of <code>%undef</code> statements remove from the preprocessor's memory the variable names we <code>%define</code>d earlier. Why is this done? Consider a scenario in which a variable exists in another function later on in the same file, has the same name as a variable in this function, and was accidentally never <code>%define</code>d in its own function. Such a variable name would point to the last existing definition of that name - the one in this function. This essentially would allow functions to alter variables in other functions which, as bad as that is on its own, would be especially nightmarish if one of these functions called the other in a nested fashion.<br>
@@ -478,7 +528,7 @@
 			<br>
 			<br>
 			P.S.: If you're using <i>Sublime Text</i> as your code editor of choice, install <a href="https://github.com/Nessphoro/sublimeassembly">Nessphoro's NASM x86 Assembly</a> package to get the fancy color coding shown above. :)<br>
-		<p></p>
+		</p>
 		<br>
 		<br>
 		<br>
@@ -491,7 +541,7 @@
 			MS-DOS drivers were very similar in layout to normal MS-DOS .COM-format applications. Night follows suit and expands upon this by setting up device structures so that other applications may supersede the kernel's default handler addresses if desired.<br>
 			<br>
 
-			</p><h3>Driver Types</h3>
+			<h3>Driver Types</h3>
 			Night drivers are divided into two main categories:<br>
 			<br>
 			<b>Filesystem Driver</b><br>
@@ -504,14 +554,13 @@
 			<br>
 
 			The <code>driverFlags</code> field is a bank of flags to identify attributes about this driver. Currently, the following bit definitions are supported:<br>
-			<br>			<code>
+			<br>
+			<code>
 				<table style="width:100%">
 					<caption>Table 5.1 - Driver flags bit definitions</caption>
-					<colgroup><col width="10%">
-					<col width="90%">
-					</colgroup><tbody><tr>
-						<th><i>Bit</i></th>
-						<th><i>Description</i></th>
+					<tr>
+						<th width="10%"><i>Bit</i></th>
+						<th width="90%"><i>Description</i></th>
 					</tr>
 					<tr>
 						<td>00</td>
@@ -533,7 +582,7 @@
 						<td>31</td>
 						<td>PCI driver</td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 			<br>
 			<br>
@@ -542,11 +591,9 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 5.2 - Driver command codes - Block and character driver commands</caption>
-					<colgroup><col width="10%">
-					<col width="90%">
-					</colgroup><tbody><tr>
-						<th><i>Value</i></th>
-						<th><i>Symbol</i></th>
+					<tr>
+						<th width="10%"><i>Value</i></th>
+						<th width="90%"><i>Symbol</i></th>
 					</tr>
 					<tr>
 						<td>0x00</td>
@@ -616,7 +663,7 @@
 						<td>0x10</td>
 						<td>kDriverOutputUntilBusy</td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 			<br>
 			<br>
@@ -625,11 +672,9 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 5.3 - Driver command codes - Filesystem driver commands</caption>
-					<colgroup><col width="10%">
-					<col width="90%">
-					</colgroup><tbody><tr>
-						<th><i>Value</i></th>
-						<th><i>Symbol</i></th>
+					<tr>
+						<th width="10%"><i>Value</i></th>
+						<th width="90%"><i>Symbol</i></th>
 					</tr>
 					<tr>
 						<td>0xF0</td>
@@ -671,13 +716,12 @@
 						<td>0xF9</td>
 						<td>kDriverItemCount</td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 			<br>
 			<br>
 			<br>
-
-		<p></p>
+		</p>
 		<br>
 		<br>
 		<br>
@@ -692,11 +736,9 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 6.1 - Configbits options</caption>
-					<colgroup><col width="10%">
-					<col width="90%">
-					</colgroup><tbody><tr>
-						<th><i>Bit</i></th>
-						<th><i>Description</i></th>
+					<tr>
+						<th width="10%"><i>Bit</i></th>
+						<th width="90%"><i>Description</i></th>
 					</tr>
 					<tr>
 						<td>00</td>
@@ -712,13 +754,13 @@
 					</tr>
 					<tr>
 						<td>03</td>
-						<td>Enable virtual memory (Allows paging to disk)</td>
+						<td>Enable paging to disk</td>
 					</tr>
 					<tr>
 						<td>04 - 31</td>
 						<td>Reserved</td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 		</p>
 		<br>
@@ -730,47 +772,89 @@
 		<hr>
 		<h2><a name="Lists">Section 7 - The List Manager</a></h2>
 		<p>
-			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A list, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceeded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
+			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A <i>list</i>, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceeded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
 			<br>
-			Lists are structured as follows:<br>
+			<b>List or bitfield?</b><br>
+			The List Manager is versatile enough to handle data of varying sizes with ease, however handling multi-byte data differs enough from handling boolean data that the List Manager offers a separate structure known as a <i>bitfield</i>, which is simply an array of boolean values. This can be used to store a vast amount of flags or other true/false values.<br>
+			<br>
+			The structure of lists and bitfields is detailed below.<br>
 			<br>
 			<code>
 				<table style="width:100%">
-					<caption>Table 7.1 - List Manager header format</caption>
-					<colgroup><col width="10%">
-					<col width="10%">
-					<col width="90%">
-					</colgroup><tbody><tr>
-						<th><i>Offset</i></th>
-						<th><i>Name</i></th>
-						<th><i>Description</i></th>
+					<caption>Table 7.1 - List header format</caption>
+					<tr>
+						<th width="10%"><i>Offset</i></th>
+						<th width="10%"><i>Name</i></th>
+						<th width="80%"><i>Description</i></th>
 					</tr>
 					<tr>
 						<td>0x00</td>
 						<td>signature</td>
-						<td>A string, <i>"list"</i>, identifying the beginning of a list structure</td>
+						<td>
+							A string (<i>"list"</i>) identifying the beginning of a List Manager list.
+						</td>
 					</tr>
 					<tr>
 						<td>0x04</td>
 						<td>elementSize</td>
-						<td>Size in bytes of each element in this list</td>
+						<td>Size in bytes of each element in this list.</td>
 					</tr>
 					<tr>
 						<td>0x08</td>
 						<td>elementCount</td>
-						<td>Total number of elements in this list</td>
+						<td>Total number of elements in this list.</td>
 					</tr>
 					<tr>
 						<td>0x0C</td>
 						<td>listSize</td>
-						<td>Total size of this list (header and data space) in bytes</td>
+						<td>Total size of this list (header and data space) in bytes.</td>
 					</tr>
 					<tr>
 						<td>0x10</td>
 						<td colspan="2"><i>List data</i></td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
+			<br>
+			<code>
+				<table style="width:100%">
+					<caption>Table 7.2 - Bitfield header format</caption>
+					<tr>
+						<th width="10%"><i>Offset</i></th>
+						<th width="10%"><i>Name</i></th>
+						<th width="80%"><i>Description</i></th>
+					</tr>
+					<tr>
+						<td>0x00</td>
+						<td>signature</td>
+						<td>
+							A string (<i>"bits"</i>) identifying the beginning of a List Manager bitfield.
+						</td>
+					</tr>
+					<tr>
+						<td>0x04</td>
+						<td>clearCount</td>
+						<td>Number of clear bits in this bitfield. Initially, all bits are clear.</td>
+					</tr>
+					<tr>
+						<td>0x08</td>
+						<td>elementCount</td>
+						<td>Total number of bits in this bitfield.</td>
+					</tr>
+					<tr>
+						<td>0x0C</td>
+						<td>listSize</td>
+						<td>Total size of this bitfield (header and data space) in bytes.</td>
+					</tr>
+					<tr>
+						<td>0x10</td>
+						<td colspan="2"><i>List data</i></td>
+					</tr>
+				</table>
+			</code>
+			<br>
+			<br>
+			<br>
 		</p>
 		<br>
 		<br>
@@ -786,13 +870,10 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 8.1 - Format of a Memory List element</caption>
-					<colgroup><col width="10%">
-					<col width="10%">
-					<col width="90%">
-					</colgroup><tbody><tr>
-						<th><i>Offset</i></th>
-						<th><i>Name</i></th>
-						<th><i>Description</i></th>
+					<tr>
+						<th width="10%"><i>Offset</i></th>
+						<th width="10%"><i>Name</i></th>
+						<th width="80%"><i>Description</i></th>
 					</tr>
 					<tr>
 						<td>0x00</td>
@@ -809,7 +890,7 @@
 						<td>task</td>
 						<td>The task number which allocated this block. A zero in this field means the block is free for use, ergo memory requests specifying zero as the allocating task will be rejected.</td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 			<br>
 			Although most versions of MS-DOS support First-Fit, Best-Fit, and Last-Fit allocation strategies, Night currently uses Best-Fit exclusively. Memory requests are fulfilled from the top-down, meaning that the first block allocated will be located at the end of the memory area and subsequent allocations will grow downwards toward the Memory List, much like stack operation.<br>
@@ -848,15 +929,11 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 9.1 - The tTaskInfo structure</caption>
-					<colgroup><col width="10%">
-					<col width="20%">
-					<col width="10%">
-					<col width="60%">
-					</colgroup><tbody><tr>
-						<th><i>Offset</i></th>
-						<th><i>Name</i></th>
-						<th><i>Size</i></th>
-						<th><i>Description</i></th>
+					<tr>
+						<th width="10%"><i>Offset</i></th>
+						<th width="20%"><i>Name</i></th>
+						<th width="10%"><i>Size</i></th>
+						<th width="60%"><i>Description</i></th>
 					</tr>
 					<tr>
 						<td>0x00</td>
@@ -960,7 +1037,7 @@
 						<td>32 bytes</td>
 						<td>The task's name; 31 characters with an added null byte at the end.</td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 			<br>
 			<br>
@@ -968,13 +1045,10 @@
 			<code>
 				<table style="width:100%">
 					<caption>Table 9.2 - Task flags definitions</caption>
-					<colgroup><col width="10%">
-					<col width="15%">
-					<col width="75%">
-					</colgroup><tbody><tr>
-						<th><i>Bit</i></th>
-						<th><i>Name</i></th>
-						<th><i>Description</i></th>
+					<tr>
+						<th width="10%"><i>Bit</i></th>
+						<th width="15%"><i>Name</i></th>
+						<th width="75%"><i>Description</i></th>
 					</tr>
 
 					<tr>
@@ -997,7 +1071,7 @@
 						<td>Reserved</td>
 						<td></td>
 					</tr>
-				</tbody></table>
+				</table>
 			</code>
 			<br>
 			<br>
@@ -1013,9 +1087,389 @@
 		<br>
 
 		<hr>
+		<h2><a name="SystemStruct">Section 10 - The System Struct</a></h2>
+		<p>
+			Night tracks system information in the <code>tSystem</code> structure. Its fields are specified below.<br>
+			<br>
+			<br>
+			<br>
+			<code>
+				<table style="width:100%">
+					<caption>Table 10.1 - The tSystem structure</caption>
+					<tr>
+						<th width="20%"><i>Name</i></th>
+						<th width="10%"><i>Size</i></th>
+						<th width="70%"><i>Description</i></th>
+					</tr>
+					<tr>
+						<td>APMFeatures</td>
+						<td>Word</td>
+						<td>A word describing features of the machine's APM interface.</td>
+					</tr>
+					<tr>
+						<td>APMVersionMajor</td>
+						<td>Byte</td>
+						<td>Major APM interface version.</td>
+					</tr>
+					<tr>
+						<td>APMVersionMinor</td>
+						<td>Byte</td>
+						<td>Minor APM interface version.</td>
+					</tr>
+					<tr>
+						<td>BIOSMemMapShadowEntries</td>
+						<td>DWord</td>
+						<td>The total count of entries in the shadowed BIOS memory map.</td>
+					</tr>
+					<tr>
+						<td>BIOSMemMapShadowPtr</td>
+						<td>DWord</td>
+						<td>Pointer to the shadowed BIOS memory map.</td>
+					</tr>
+					<tr>
+						<td>BIOSMemMapShadowSize</td>
+						<td>DWord</td>
+						<td>The total amount of space occupied by the shadowed BIOS memory map.</td>
+					</tr>
+					<tr>
+						<td>bitfieldPagesAllocated</td>
+						<td>DWord</td>
+						<td>Pointer to the bitfield of allocated memory pages.</td>
+					</tr>
+					<tr>
+						<td>bitfieldPagesReserved</td>
+						<td>DWord</td>
+						<td>Pointer to the bitfield of reserved memory pages.</td>
+					</tr>
+					<tr>
+						<td>bitfieldSize</td>
+						<td>DWord</td>
+						<td>The size of each of the two memory management bitfields.</td>
+					</tr>
+					<tr>
+						<td>configBits</td>
+						<td>DWord</td>
+						<td>A dword describing various feature choices in the kernel. See <a href="#Config">Section 6 - Setting Options with ConfigBits</a> for more information.</td>
+					</tr>
+					<tr>
+						<td>configBitsHint$</td>
+						<td>10 Bytes</td>
+						<td>A string (<i>"configBits"</i>) which preceeds the configBits area.</td>
+					</tr>
+					<tr>
+						<td>copyright$</td>
+						<td>36 Bytes</td>
+						<td>The copyright string of the Night kernel.</td>
+					</tr>
+					<tr>
+						<td>CPUIDBrand$</td>
+						<td>64 Bytes</td>
+						<td>The CPU brand string as retrieved by the CPUID instruction.</td>
+					</tr>
+					<tr>
+						<td>CPUIDLargestBasicQuery</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>CPUIDLargestExtendedQuery</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>CPUIDVendor$</td>
+						<td>16 Bytes</td>
+						<td>The CPU vendor string as retrieved by the CPUID instruction.</td>
+					</tr>
+					<tr>
+						<td>currentTask</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>currentTaskSlotAddress</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>listDriveLetters</td>
+						<td>DWord</td>
+						<td>Pointer to the list of drive letters.</td>
+					</tr>
+					<tr>
+						<td>listDrives</td>
+						<td>DWord</td>
+						<td>Pointer to the list of drives.</td>
+					</tr>
+					<tr>
+						<td>listFSHandlers</td>
+						<td>DWord</td>
+						<td>Pointer to the list of file system handlers.</td>
+					</tr>
+					<tr>
+						<td>listPartitions</td>
+						<td>DWord</td>
+						<td>Pointer to the list of partitions.</td>
+					</tr>
+					<tr>
+						<td>listPCIHandlers</td>
+						<td>DWord</td>
+						<td>Pointer to the list of PCI device handlers.</td>
+					</tr>
+					<tr>
+						<td>listTasks</td>
+						<td>DWord</td>
+						<td>Pointer to the list of tasks.</td>
+					</tr>
+					<tr>
+						<td>memoryInitialAvailableBytes</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>memoryKiBFree</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>memoryKiBInstalled</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>memoryKiBUsable</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>memoryManagementSpace</td>
+						<td>DWord</td>
+						<td>The total amount of space occupied by the two memory management bitfields and the shadowed BIOS memory map.</td>
+					</tr>
+					<tr>
+						<td>mouseButtonCount</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseButtons</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mousePacketByte0</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mousePacketByte1</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mousePacketByte2</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mousePacketByte3</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mousePacketByteCount</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mousePacketByteSize</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseWheelPresent</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseX</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseXLimit</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseY</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseYLimit</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>mouseZ</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>multicoreAvailable</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PCICapabilities</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PCIDeviceCount</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PCIVersion</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PS2ControllerConfig</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PS2ControllerDeviceID1</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PS2ControllerDeviceID2</td>
+						<td>Word</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PS2ControllerPort1Status</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>PS2ControllerPort2Status</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>RTCStatusRegisterB</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>RTCUpdateHandlerAddress</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>RTCHours</td>
+						<td>Byte</td>
+						<td>The <i>hours</i> value of the current time.</td>
+					</tr>
+					<tr>
+						<td>RTCMinutes</td>
+						<td>Byte</td>
+						<td>The <i>minutes</i> value of the current time.</td>
+					</tr>
+					<tr>
+						<td>RTCSeconds</td>
+						<td>Byte</td>
+						<td>The <i>seconds</i> value of the current time.</td>
+					</tr>
+					<tr>
+						<td>RTCMonth</td>
+						<td>Byte</td>
+						<td>The <i>month</i> value of the current date.</td>
+					</tr>
+					<tr>
+						<td>RTCDay</td>
+						<td>Byte</td>
+						<td>The <i>day</i> value of the current date.</td>
+					</tr>
+					<tr>
+						<td>RTCYear</td>
+						<td>Byte</td>
+						<td>The <i>year</i> value of the current date.</td>
+					</tr>
+					<tr>
+						<td>taskingEnable</td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>taskKernelStackSize</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>taskStackSize</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>ticksSinceBoot</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>versionBuild</td>
+						<td>DWord</td>
+						<td>The build number of the Night kernel.</td>
+					</tr>
+					<tr>
+						<td>versionMajor</td>
+						<td>Byte</td>
+						<td>The major verison number of the Night kernel.</td>
+					</tr>
+					<tr>
+						<td>versionMinor</td>
+						<td>Byte</td>
+						<td>The minor verison number of the Night kernel.</td>
+					</tr>
+				</table>
+			</code>
+			<br>
+			<br>
+			<br>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<hr>
 		<h2><a name="Changelog">Appendix 0 - Version History</a></h2>
 		<p>
-			</p><ul></ul>
+			<ul></ul>
+			<b>//2020, 0.1F Update, Build 9000 - Paging support, revamped memory management, List Manager improvements</b><br>
+			<br>
+			New<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
+			</ul>
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>memory.asm</i> - Memory is now tracked at the kernel level with a pair of bitfields as opposed to a list, eliminating potential lag during memory mangement under extreme load conditions.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Manual: Bugs in various HTML elements. Thanks, GitKraken. :/</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
 			<b>10/15/2019, 0.1E Update, Build 2718 - Code integrity improvements</b><br>
 			<br>
 			Changed<br>
@@ -1034,7 +1488,7 @@
 			<br>
 			Changed<br>
 			<ul>
-				<li>Kernel: Instead of having NASM build the whole kernel by using <code>%include</code> statements, NASM now builds each individual file separately and then used LD to link them together. Modularity FTW!</li>
+				<li>Kernel: Instead of having NASM build the whole kernel by using <code>%include</code> statements, NASM now builds each individual file separately and then uses LD to link them together. Modularity FTW!</li>
 			</ul>
 			<br>
 			<br>
@@ -1878,7 +2332,7 @@
 
 			The few versions prior to this were experimental and did nothing noteworthy.
 
-		<p></p>
+		</p>
 		<br>
 		<br>
 		<br>
@@ -1887,63 +2341,59 @@
 		<h2><a name="NightFunctionReference">Appendix 1 - Night Kernel Function Reference</a></h2>
 		<p>
 			<table style="width:100%" rules="none">
-				<colgroup><col width="25%">
-				<col width="25%">
-				<col width="25%">
-				<col width="25%">
-				</colgroup><tbody><tr>
+				<tr>
 					<td>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a><br>
+						<a href="#NightFunctionReference_CMOS.asm" style="font-size: 14px">CMOS Functions - CMOS.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a><br>
+						<a href="#NightFunctionReference_CPU.asm" style="font-size: 14px">CPU Functions - CPU.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
+						<a href="#NightFunctionReference_debug.asm" style="font-size: 14px">Debug Functions - debug.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
+						<a href="#NightFunctionReference_GDT.asm" style="font-size: 14px">GDT Functions - GDT.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
+						<a href="#NightFunctionReference_hardware.asm" style="font-size: 14px">Hardware Functions - hardware.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
+						<a href="#NightFunctionReference_interrupts.asm" style="font-size: 14px">Interrupt Functions - interrupts.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
+						<a href="#NightFunctionReference_lists.asm" style="font-size: 14px">List Manager Functions - lists.asm</a><br>
 						<br>
 					</td>
 					<td>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
+						<a href="#NightFunctionReference_memory.asm" style="font-size: 14px">Memory Manager Functions - memory.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
+						<a href="#NightFunctionReference_misc.asm" style="font-size: 14px">Miscellaneous Functions - misc.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_numbers.asm" style="font-size: 14px">Number Functions - numbers.asm</a><br>
+						<a href="#NightFunctionReference_numbers.asm" style="font-size: 14px">Number Functions - numbers.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_paging.asm" style="font-size: 14px">Paging Support - paging.asm</a><br>
+						<a href="#NightFunctionReference_paging.asm" style="font-size: 14px">Paging Support - paging.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
+						<a href="#NightFunctionReference_PCI.asm" style="font-size: 14px">PCI Functions - PCI.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
+						<a href="#NightFunctionReference_PIC.asm" style="font-size: 14px">PIC Functions - PIC.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_PS2Controller.asm" style="font-size: 14px">PS/2 Functions - PS2 Controller.asm</a><br>
+						<a href="#NightFunctionReference_PS2Controller.asm" style="font-size: 14px">PS/2 Functions - PS2 Controller.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
+						<a href="#NightFunctionReference_power.asm" style="font-size: 14px">Power Functions - power.asm</a><br>
 						<br>
 					</td>
 					<td>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
+						<a href="#NightFunctionReference_RTC.asm" style="font-size: 14px">RTC Functions - RTC.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
+						<a href="#NightFunctionReference_screen.asm" style="font-size: 14px">Screen Interface Functions - screen.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
+						<a href="#NightFunctionReference_serial.asm" style="font-size: 14px">Serial Communications Functions - serial.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_storage.asm" style="font-size: 14px">Storage Manager Functions - storage.asm</a><br>
+						<a href="#NightFunctionReference_storage.asm" style="font-size: 14px">Storage Manager Functions - storage.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
+						<a href="#NightFunctionReference_strings.asm" style="font-size: 14px">String Functions - strings.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
+						<a href="#NightFunctionReference_tasks.asm" style="font-size: 14px">Task Management Functions - tasks.asm</a><br>
 						<br>
-						<a href="file:///home/mercury/GitHub/NightKernel/docs/Night%20Kernel%20Reference%20Manual.html#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
+						<a href="#NightFunctionReference_StandardFunctionReturnCodes" style="font-size: 14px">Standard Function Return Codes</a><br>
 						<br>
 					</td>
 				</tr>
-			</tbody></table>
+			</table>
 			<br>
 			- Public functions are intended for calling from any other routines.<br>
 			- Internal functions are intended to be called only by the kernel internally.<br>
@@ -1956,13 +2406,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.1 - CMOS.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -1993,7 +2440,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
-			</tbody></table>
+			</table>
 			<br>
 			<br>
 			<br>
@@ -2003,13 +2450,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.2 - CPU.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -2020,7 +2464,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
-			</tbody></table>
+			</table>
 			<br>
 			<br>
 			<br>
@@ -2030,13 +2474,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.3 - CPU.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -2201,13 +2642,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.4 - partitions.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -2554,13 +2992,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.5 - GDT.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -2705,13 +3140,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.6 - hardware.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -2741,13 +3173,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.7 - interrupts.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -2803,11 +3232,11 @@
 				<tr>
 					<td>
 						<code>InterruptHandlerGetFlags</code><br>
-						<br>
 						Returns the flags for the specified interrupt number
 					</td>
 					<td>
 						<ol>
+						<br>
 							<li>IDT index</li>
 						</ol>
 					</td>
@@ -2874,13 +3303,173 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.8 - List Manager 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitfieldInit</code><br>
+						<br>
+						Creates a new bitfield from the parameters specified at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Number of bits</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitfieldValidate</code><br>
+						<br>
+						Tests the bitfield specified for the 'bits' signature at the beginning
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitfieldElementValidate</code><br>
+						<br>
+						Tests the element specified to be sure it not outside the bounds of the list
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Element number</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitClear</code><br>
+						<br>
+						Clears the bit specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitClearRange</code><br>
+						<br>
+						Clears the range of bits specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit range start</li>
+							<li>Bit range end</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitFlip</code><br>
+						<br>
+						Flips (toggles) the bit specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitFlipRange</code><br>
+						<br>
+						Flips (toggles) the range of bits specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit range start</li>
+							<li>Bit range end</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitGet</code><br>
+						<br>
+						Returns the bit specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code<br>
+						Carry Flag - Value of the bit specified
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitSet</code><br>
+						<br>
+						Sets the bit specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>LMBitSetRange</code><br>
+						<br>
+						Sets the range of bits specified within the bitfield at the address specified
+					</td>
+					<td>
+						<ol>
+							<li>Bitfield address</li>
+							<li>Bit range start</li>
+							<li>Bit range end</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Result code
+					</td>
 				</tr>
 				<tr>
 					<td>
@@ -2988,7 +3577,7 @@
 					<td>
 						<ol>
 							<li>List address</li>
-							<li>Element to check</li>
+							<li>Element number</li>
 						</ol>
 					</td>
 					<td>
@@ -3116,13 +3705,10 @@
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.9 - List Manager 32-bit internal functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3301,13 +3887,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.10 - Memory Manager 16-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3373,12 +3956,13 @@
 				</tr>
 				<tr>
 					<td>
-						<code>MemProbe</code><br>
+						<code>MemMapCopy</code><br>
 						<br>
-						Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM, and fills in the appropriate system data structures for later use by the memory manager
+						Copies the BIOS memory map to the segment specified by ES
 					</td>
 					<td>n/a</td>
 					<td>
+						EAX - Bytes copied<br>
 						EDX - Error code
 					</td>
 				</tr>
@@ -3390,13 +3974,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.11 - Memory Manager 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3557,7 +4138,7 @@
 					<td>
 						<code>MemInit</code><br>
 						<br>
-						Inititlizes the Memory Manager
+						Initializes the memory bitfields
 					</td>
 					<td>
 						n/a
@@ -3704,13 +4285,10 @@
 			32-bit Internal Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.12 - Memory Manager 32-bit internal functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3757,13 +4335,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.13 - misc.asm 16-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3782,13 +4357,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.14 - misc.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3813,13 +4385,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.15 - numbers.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3914,13 +4483,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.16 - paging.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3971,13 +4537,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.17 - PCI Functions 16-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -3996,13 +4559,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.18 - PCI Functions 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4299,13 +4859,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.19 - PIC.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4379,13 +4936,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.20 - PS2 Controller.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4632,13 +5186,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.21 - power.asm 16-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4677,13 +5228,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.22 - RTC.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4722,13 +5270,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.23 - screen.asm 16-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4795,13 +5340,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.24 - screen.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -4908,13 +5450,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.25 - serial.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -5151,13 +5690,10 @@
 			16-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.26 - strings.asm 16-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -5195,13 +5731,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.27 - strings.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -5752,13 +6285,10 @@
 			32-bit Public Function Listing:<br>
 			<table style="width:100%">
 				<caption>Table A1.28 - tasks.asm 32-bit public functions</caption>
-				<colgroup><col width="40%">
-				<col width="30%">
-				<col width="30%">
-				</colgroup><tbody><tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
+				<tr>
+					<th width="60%">Name / Description</th>
+					<th width="20%">Stack Input</th>
+					<th width="20%">Register Output</th>
 				</tr>
 				<tr>
 					<td>
@@ -5886,12 +6416,17 @@
 				<tr>
 					<td>0xF900</td>
 					<td>kErrListInvalid</td>
-					<td>The list address specified does not contain the "list" signature</td>
+					<td>The list at the address specified does not contain the "list" signature</td>
 				</tr>
 				<tr>
 					<td>0xF901</td>
 					<td>kErrElementSizeInvalid</td>
 					<td>The item being added is larger than the element size of this list</td>
+				</tr>
+				<tr>
+					<td>0xF902</td>
+					<td>kErrBitfieldInvalid</td>
+					<td>The bitfield at the address specified does not contain the "bits" signature</td>
 				</tr>
 				<tr>
 					<td colspan="3"></td>
@@ -6014,6 +6549,11 @@
 					<td>Insufficient memory</td>
 				</tr>
 				<tr>
+					<td>0xFE01</td>
+					<td>kErrMemoryInitFail</td>
+					<td>Initialization of the memory management system failed.</td>
+				</tr>
+				<tr>
 					<td colspan="3"></td>
 				</tr>
 				<tr>
@@ -6049,17 +6589,12 @@
 			<br>
 			<table style="width:100%">
 				<caption>Table A2.1 - DOS Interrupt Handler Address Table</caption>
-				<colgroup><col width="5%">
-				<col width="15%">
-				<col width="15%">
-				<col width="15%">
-				<col width="50%">
-				</colgroup><tbody><tr>
-					<th><i>Interrupt Vector</i></th>
-					<th><i>Handler Address - VirtualBox BIOS</i></th>
-					<th><i>Handler Address - FreeDOS Kernel Build 2042</i></th>
-					<th><i>Handler Address - FreeDOS Kernel Build 2042 &amp; COMMAND.COM</i></th>
-					<th><i>Description</i></th>
+				<tr>
+					<th width="5%"><i>Interrupt Vector</i></th>
+					<th width="15%"><i>Handler Address - VirtualBox BIOS</i></th>
+					<th width="15%"><i>Handler Address - FreeDOS Kernel Build 2042</i></th>
+					<th width="15%"><i>Handler Address - FreeDOS Kernel Build 2042 &amp; COMMAND.COM</i></th>
+					<th width="50%"><i>Description</i></th>
 				</tr>
 				<tr>
 					<td>00</td>
@@ -6901,20 +7436,17 @@
 					<td>0070:00E9</td>
 					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
 				</tr>
-			</tbody></table>
+			</table>
 			<br>
 			<br>
 			<br>
 
 			<table style="width:100%">
 				<caption>Table A2.2 - DOS API</caption>
-				<colgroup><col width="10%">
-				<col width="70%">
-				<col width="20%">
-				</colgroup><tbody><tr>
-					<th><i>AX Register</i></th>
-					<th><i>Name</i></th>
-					<th><i>Supporting DOS Versions</i></th>
+				<tr>
+					<th width="10%"><i>AX Register</i></th>
+					<th width="70%"><i>Name</i></th>
+					<th width="20%"><i>Supporting DOS Versions</i></th>
 				</tr>
 				<tr>
 					<td><a href="http://www.delorie.com/djgpp/doc/rbinter/id/62/25.html">0000</a></td>
@@ -8035,8 +8567,7 @@
 					<td>Long filename support - Query SUBST</td>
 					<td>Windows 95</td>
 				</tr>
-			</tbody></table>
-
+			</table>
 		</p>
 		<br>
 		<br>

@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; globals defines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -21,7 +21,7 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2722
+%define BUILD 2995
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
@@ -161,29 +161,35 @@ global tSystem.APMVersionMinor
 global tSystem.APMFeatures
 global tSystem.mouseButtonCount
 global tSystem.mouseButtons
-global tSystem.mousePacketByteSize
-global tSystem.mousePacketByteCount
 global tSystem.mousePacketByte0
 global tSystem.mousePacketByte1
 global tSystem.mousePacketByte2
 global tSystem.mousePacketByte3
+global tSystem.mousePacketByteSize
+global tSystem.mousePacketByteCount
 global tSystem.mouseWheelPresent
 global tSystem.mouseX
 global tSystem.mouseXLimit
 global tSystem.mouseY
 global tSystem.mouseYLimit
 global tSystem.mouseZ
-global tSystem.memoryInstalledBytes
+global tSystem.bitfieldPagesAllocated
+global tSystem.bitfieldPagesReserved
+global tSystem.bitfieldSize
+global tSystem.BIOSMemMapShadowPtr
+global tSystem.BIOSMemMapShadowEntries
+global tSystem.BIOSMemMapShadowSize
+global tSystem.memoryManagementSpace
+global tSystem.memoryKiBInstalled
+global tSystem.memoryKiBUsable
+global tSystem.memoryInitialAvailableBytes
+global tSystem.memoryKiBFree
 global tSystem.listDrives
 global tSystem.listDriveLetters
 global tSystem.listFSHandlers
-global tSystem.listMemory
 global tSystem.listPartitions
 global tSystem.listPCIHandlers
 global tSystem.listTasks
-global tSystem.memoryInitialAvailableBytes
-global tSystem.memoryFreeBytes
-global tSystem.memoryListReservedSpace
 global tSystem.PCIDeviceCount
 global tSystem.PCIVersion
 global tSystem.PCICapabilities
@@ -194,9 +200,11 @@ global tSystem.PS2ControllerDeviceID1
 global tSystem.PS2ControllerDeviceID2
 global tSystem.RTCUpdateHandlerAddress
 global tSystem.RTCStatusRegisterB
-global tSystem.hours
-global tSystem.minutes
-global tSystem.seconds
-global tSystem.year
-global tSystem.month
-global tSystem.day
+global tSystem.RTCHours
+global tSystem.RTCMinutes
+global tSystem.RTCSeconds
+global tSystem.RTCYear
+global tSystem.RTCMonth
+global tSystem.RTCDay
+
+global tSystem.listMemory

@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by mercury0x0d
+; Copyright 2015 - 2020 by mercury0x0d
 ; memory.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,7 +19,7 @@
 
 
 ; variable definitions
-%include "include/memory.def"
+%include "include/memoryDefines.inc"
 
 
 
@@ -32,7 +32,7 @@ extern A20EnableBIOS
 extern A20EnableFastA20
 extern A20EnableKeyboardController
 extern A20EnablePortEE
-extern MemProbe
+extern MemMapCopy
 extern MemAddressAlign
 extern MemAddressToBlock
 extern MemAllocate
