@@ -105,3 +105,5 @@ vm: $(TARGET)
 	sudo umount ./VBoxDisk
 	$(RM) -r VBoxDisk
 	sudo losetup -d /dev/loop0
+
+# Hi! this is a test (sorry)
