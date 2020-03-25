@@ -19,7 +19,7 @@
 
 
 ; includes
-%include "include/paging.def"
+%include "include/pagingDefines.inc"
 
 %include "include/errors.inc"
 %include "include/memory.inc"

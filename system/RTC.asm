@@ -18,12 +18,11 @@
 
 
 
-%include "include/RTC.def"
-
 %include "include/globals.inc"
 %include "include/numbers.inc"
 %include "include/screen.inc"
 
+%include "include/RTCDefines.inc"
 
 
 
@@ -51,46 +50,46 @@ RTCAdjustBCD:
 	mov eax, 0x00000000
 
 
-	mov al, byte [tSystem.year]
+	mov al, byte [tSystem.RTCYear]
 	push eax
 	call BCDToDecimal
 	pop eax
-	mov byte [tSystem.year], al
+	mov byte [tSystem.RTCYear], al
 
 
-	mov al, byte [tSystem.month]
+	mov al, byte [tSystem.RTCMonth]
 	push eax
 	call BCDToDecimal
 	pop eax
-	mov byte [tSystem.month], al
-
-	
-	mov al, byte [tSystem.day]
-	push eax
-	call BCDToDecimal
-	pop eax
-	mov byte [tSystem.day], al
+	mov byte [tSystem.RTCMonth], al
 
 	
-	mov al, byte [tSystem.hours]
+	mov al, byte [tSystem.RTCDay]
 	push eax
 	call BCDToDecimal
 	pop eax
-	mov byte [tSystem.hours], al
+	mov byte [tSystem.RTCDay], al
 
 	
-	mov al, byte [tSystem.minutes]
+	mov al, byte [tSystem.RTCHours]
 	push eax
 	call BCDToDecimal
 	pop eax
-	mov byte [tSystem.minutes], al
+	mov byte [tSystem.RTCHours], al
 
 	
-	mov al, byte [tSystem.seconds]
+	mov al, byte [tSystem.RTCMinutes]
 	push eax
 	call BCDToDecimal
 	pop eax
-	mov byte [tSystem.seconds], al
+	mov byte [tSystem.RTCMinutes], al
+
+	
+	mov al, byte [tSystem.RTCSeconds]
+	push eax
+	call BCDToDecimal
+	pop eax
+	mov byte [tSystem.RTCSeconds], al
 
 
 	mov esp, ebp
@@ -205,47 +204,47 @@ RTCInterruptHandler:
 
 	; now grab the time values from the RTC:
 
-	; get the year
+	; get the RTCYear
 	mov al, 0x09
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
-	mov byte [tSystem.year], al
+	mov byte [tSystem.RTCYear], al
 	
-	; get the month
+	; get the RTCMonth
 	mov al, 0x08
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
-	mov byte [tSystem.month], al
+	mov byte [tSystem.RTCMonth], al
 	
-	; get the day
+	; get the RTCDay
 	mov al, 0x07
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
-	mov byte [tSystem.day], al
+	mov byte [tSystem.RTCDay], al
 	
 	; get the hour
 	mov al, 0x04
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
-	mov byte [tSystem.hours], al
+	mov byte [tSystem.RTCHours], al
 	
-	; get the minutes
+	; get the RTCMinutes
 	mov al, 0x02
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
-	mov byte [tSystem.minutes], al
+	mov byte [tSystem.RTCMinutes], al
 	
-	; get the seconds
+	; get the RTCSeconds
 	mov al, 0x00
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
-	mov byte [tSystem.seconds], al
+	mov byte [tSystem.RTCSeconds], al
 
 
 	; see which hour mode is in use
@@ -255,7 +254,7 @@ RTCInterruptHandler:
 		; if we get here, 12 hour mode is being used so we adjust the values accordingly
 
 		; first, we see if bit 7 is set, which is used to signify PM
-		mov al, byte [tSystem.hours]
+		mov al, byte [tSystem.RTCHours]
 		test al, 10000000b
 		jz .NotPM
 			; if we get here, the PM bit was set
@@ -299,7 +298,7 @@ RTCInterruptHandler:
 		.ModificationsComplete:
 
 		; and finally, write the modified value back to the tSystem struct
-		mov byte [tSystem.hours], al
+		mov byte [tSystem.RTCHours], al
 	.Using24:
 	; if we get here, 24 hour mode is being used, so no adjustment is needed
 
