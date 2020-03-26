@@ -8,7 +8,7 @@ Linker script and memory map
 
                 0x0000000000000600                phys = 0x600
 
-.text           0x0000000000000600     0x8df2
+.text           0x0000000000000600     0x8de9
                 0x0000000000000600                code = .
  *(.text)
  .text          0x0000000000000600      0x65e builds/obj/kernel.o
@@ -336,163 +336,163 @@ Linker script and memory map
                 0x0000000000008b5c                RTCAdjustBCD
                 0x0000000000008bce                RTCInit
                 0x0000000000008c1c                RTCInterruptHandler
- .text          0x0000000000008cd1      0x148 builds/obj/system/paging.o
+ .text          0x0000000000008cd1      0x13f builds/obj/system/paging.o
                 0x0000000000008cd1                PagingInit
-                0x0000000000008ce1                PagingMap
-                0x0000000000008d29                PagingDirNew
- .text          0x0000000000008e19      0x123 builds/obj/system/GDT.o
- .text          0x0000000000008f3c      0x4b6 builds/obj/video/screen.o
-                0x0000000000008f3c                Print16
-                0x0000000000008fcd                PrintIfConfigBits16
-                0x0000000000008fe5                PrintRegs16
-                0x0000000000009053                ScreenClear16
-                0x0000000000009084                ScreenScroll16
-                0x00000000000090d2                CursorHome
-                0x00000000000090e7                Print32
-                0x00000000000091a7                PrintIfConfigBits32
-                0x00000000000091e2                PrintRAM32
-                0x00000000000092ab                PrintRegs32
-                0x0000000000009381                ScreenClear32
-                0x00000000000093b1                ScreenScroll32
+                0x0000000000008cd8                PagingMap
+                0x0000000000008d20                PagingDirNew
+ .text          0x0000000000008e10      0x123 builds/obj/system/GDT.o
+ .text          0x0000000000008f33      0x4b6 builds/obj/video/screen.o
+                0x0000000000008f33                Print16
+                0x0000000000008fc4                PrintIfConfigBits16
+                0x0000000000008fdc                PrintRegs16
+                0x000000000000904a                ScreenClear16
+                0x000000000000907b                ScreenScroll16
+                0x00000000000090c9                CursorHome
+                0x00000000000090de                Print32
+                0x000000000000919e                PrintIfConfigBits32
+                0x00000000000091d9                PrintRAM32
+                0x00000000000092a2                PrintRegs32
+                0x0000000000009378                ScreenClear32
+                0x00000000000093a8                ScreenScroll32
  *(.rodata)
 
-.data           0x00000000000093f4     0x165c
-                0x00000000000093f4                data = .
+.data           0x00000000000093ec     0x165c
+                0x00000000000093ec                data = .
  *(.data)
- .data          0x00000000000093f4      0x430 builds/obj/kernel.o
-                0x00000000000097bc                tss.back_link
-                0x00000000000097c0                tss.esp0
-                0x00000000000097c4                tss.ss0
-                0x00000000000097c8                tss.esp1
-                0x00000000000097cc                tss.ss1
-                0x00000000000097d0                tss.esp2
-                0x00000000000097d4                tss.ss2
-                0x00000000000097d8                tss.cr3
-                0x00000000000097dc                tss.eip
-                0x00000000000097e0                tss.eflags
-                0x00000000000097e4                tss.eax
-                0x00000000000097e8                tss.ecx
-                0x00000000000097ec                tss.edx
-                0x00000000000097f0                tss.ebx
-                0x00000000000097f4                tss.esp
-                0x00000000000097f8                tss.ebp
-                0x00000000000097fc                tss.esi
-                0x0000000000009800                tss.edi
-                0x0000000000009804                tss.es
-                0x0000000000009808                tss.cs
-                0x000000000000980c                tss.ss
-                0x0000000000009810                tss.ds
-                0x0000000000009814                tss.fs
-                0x0000000000009818                tss.gs
-                0x000000000000981c                tss.ldt
-                0x0000000000009820                tss.trap
-                0x0000000000009822                tss.iomap_base
-                0x0000000000009824                tss.end
- .data          0x0000000000009824       0x10 builds/obj/api/strings.o
- .data          0x0000000000009834      0x198 builds/obj/drivers/PS2Controller.o
- .data          0x00000000000099cc       0x32 builds/obj/drivers/IDEController.o
- .data          0x00000000000099fe        0xc builds/obj/drivers/FATFilesystem.o
- .data          0x0000000000009a0a        0x2 builds/obj/io/storage.o
- .data          0x0000000000009a0c        0x2 builds/obj/system/hardware.o
-                0x0000000000009a0c                kKeyBufferWrite
-                0x0000000000009a0d                kKeyBufferRead
- .data          0x0000000000009a0e      0x4da builds/obj/system/interrupts.o
-                0x0000000000009a0e                kIDTPtr
- .data          0x0000000000009ee8       0x4b builds/obj/system/PCI.o
- .data          0x0000000000009f33       0xbd builds/obj/system/globals.o
-                0x0000000000009f33                tSystem.configBitsHint$
-                0x0000000000009f3d                tSystem.configBits
-                0x0000000000009f41                tSystem.copyright$
-                0x0000000000009f65                tSystem.versionMajor
-                0x0000000000009f66                tSystem.versionMinor
-                0x0000000000009f67                tSystem.versionBuild
-                0x0000000000009f6b                tSystem.ticksSinceBoot
-                0x0000000000009f6f                tSystem.currentTask
-                0x0000000000009f73                tSystem.currentTaskSlotAddress
-                0x0000000000009f77                tSystem.taskingEnable
-                0x0000000000009f78                tSystem.taskStackSize
-                0x0000000000009f7c                tSystem.taskKernelStackSize
-                0x0000000000009f80                tSystem.multicoreAvailable
-                0x0000000000009f81                tSystem.CPUIDVendor$
-                0x0000000000009f91                tSystem.CPUIDBrand$
-                0x0000000000009fd1                tSystem.CPUIDLargestBasicQuery
-                0x0000000000009fd5                tSystem.CPUIDLargestExtendedQuery
-                0x0000000000009fd9                tSystem.APMVersionMajor
-                0x0000000000009fda                tSystem.APMVersionMinor
-                0x0000000000009fdb                tSystem.APMFeatures
-                0x0000000000009fdd                tSystem.mouseButtonCount
-                0x0000000000009fde                tSystem.mouseButtons
-                0x0000000000009fdf                tSystem.mousePacketByte0
-                0x0000000000009fe0                tSystem.mousePacketByte1
-                0x0000000000009fe1                tSystem.mousePacketByte2
-                0x0000000000009fe2                tSystem.mousePacketByte3
-                0x0000000000009fe3                tSystem.mousePacketByteSize
-                0x0000000000009fe4                tSystem.mousePacketByteCount
-                0x0000000000009fe5                tSystem.mouseWheelPresent
-                0x0000000000009fe6                tSystem.mouseX
-                0x0000000000009fe8                tSystem.mouseXLimit
-                0x0000000000009fea                tSystem.mouseY
-                0x0000000000009fec                tSystem.mouseYLimit
-                0x0000000000009fee                tSystem.mouseZ
- .data          0x0000000000009ff0      0x152 builds/obj/system/memory.o
- .data          0x000000000000a142        0x4 builds/obj/system/numbers.o
- .data          0x000000000000a146        0x2 builds/obj/system/NKAPM.o
- .data          0x000000000000a148      0x7a8 builds/obj/system/debug.o
- .data          0x000000000000a8f0       0x5b builds/obj/system/RTC.o
- .data          0x000000000000a94b      0x105 builds/obj/video/screen.o
-                0x000000000000a94b                gCursorX
-                0x000000000000a94c                gCursorY
-                0x000000000000a94d                gTextColor
-                0x000000000000a94e                gBackColor
-                0x000000000000a94f                kMaxLines
-                0x000000000000a950                kBytesPerScreen
+ .data          0x00000000000093ec      0x430 builds/obj/kernel.o
+                0x00000000000097b4                tss.back_link
+                0x00000000000097b8                tss.esp0
+                0x00000000000097bc                tss.ss0
+                0x00000000000097c0                tss.esp1
+                0x00000000000097c4                tss.ss1
+                0x00000000000097c8                tss.esp2
+                0x00000000000097cc                tss.ss2
+                0x00000000000097d0                tss.cr3
+                0x00000000000097d4                tss.eip
+                0x00000000000097d8                tss.eflags
+                0x00000000000097dc                tss.eax
+                0x00000000000097e0                tss.ecx
+                0x00000000000097e4                tss.edx
+                0x00000000000097e8                tss.ebx
+                0x00000000000097ec                tss.esp
+                0x00000000000097f0                tss.ebp
+                0x00000000000097f4                tss.esi
+                0x00000000000097f8                tss.edi
+                0x00000000000097fc                tss.es
+                0x0000000000009800                tss.cs
+                0x0000000000009804                tss.ss
+                0x0000000000009808                tss.ds
+                0x000000000000980c                tss.fs
+                0x0000000000009810                tss.gs
+                0x0000000000009814                tss.ldt
+                0x0000000000009818                tss.trap
+                0x000000000000981a                tss.iomap_base
+                0x000000000000981c                tss.end
+ .data          0x000000000000981c       0x10 builds/obj/api/strings.o
+ .data          0x000000000000982c      0x198 builds/obj/drivers/PS2Controller.o
+ .data          0x00000000000099c4       0x32 builds/obj/drivers/IDEController.o
+ .data          0x00000000000099f6        0xc builds/obj/drivers/FATFilesystem.o
+ .data          0x0000000000009a02        0x2 builds/obj/io/storage.o
+ .data          0x0000000000009a04        0x2 builds/obj/system/hardware.o
+                0x0000000000009a04                kKeyBufferWrite
+                0x0000000000009a05                kKeyBufferRead
+ .data          0x0000000000009a06      0x4da builds/obj/system/interrupts.o
+                0x0000000000009a06                kIDTPtr
+ .data          0x0000000000009ee0       0x4b builds/obj/system/PCI.o
+ .data          0x0000000000009f2b       0xbd builds/obj/system/globals.o
+                0x0000000000009f2b                tSystem.configBitsHint$
+                0x0000000000009f35                tSystem.configBits
+                0x0000000000009f39                tSystem.copyright$
+                0x0000000000009f5d                tSystem.versionMajor
+                0x0000000000009f5e                tSystem.versionMinor
+                0x0000000000009f5f                tSystem.versionBuild
+                0x0000000000009f63                tSystem.ticksSinceBoot
+                0x0000000000009f67                tSystem.currentTask
+                0x0000000000009f6b                tSystem.currentTaskSlotAddress
+                0x0000000000009f6f                tSystem.taskingEnable
+                0x0000000000009f70                tSystem.taskStackSize
+                0x0000000000009f74                tSystem.taskKernelStackSize
+                0x0000000000009f78                tSystem.multicoreAvailable
+                0x0000000000009f79                tSystem.CPUIDVendor$
+                0x0000000000009f89                tSystem.CPUIDBrand$
+                0x0000000000009fc9                tSystem.CPUIDLargestBasicQuery
+                0x0000000000009fcd                tSystem.CPUIDLargestExtendedQuery
+                0x0000000000009fd1                tSystem.APMVersionMajor
+                0x0000000000009fd2                tSystem.APMVersionMinor
+                0x0000000000009fd3                tSystem.APMFeatures
+                0x0000000000009fd5                tSystem.mouseButtonCount
+                0x0000000000009fd6                tSystem.mouseButtons
+                0x0000000000009fd7                tSystem.mousePacketByte0
+                0x0000000000009fd8                tSystem.mousePacketByte1
+                0x0000000000009fd9                tSystem.mousePacketByte2
+                0x0000000000009fda                tSystem.mousePacketByte3
+                0x0000000000009fdb                tSystem.mousePacketByteSize
+                0x0000000000009fdc                tSystem.mousePacketByteCount
+                0x0000000000009fdd                tSystem.mouseWheelPresent
+                0x0000000000009fde                tSystem.mouseX
+                0x0000000000009fe0                tSystem.mouseXLimit
+                0x0000000000009fe2                tSystem.mouseY
+                0x0000000000009fe4                tSystem.mouseYLimit
+                0x0000000000009fe6                tSystem.mouseZ
+ .data          0x0000000000009fe8      0x152 builds/obj/system/memory.o
+ .data          0x000000000000a13a        0x4 builds/obj/system/numbers.o
+ .data          0x000000000000a13e        0x2 builds/obj/system/NKAPM.o
+ .data          0x000000000000a140      0x7a8 builds/obj/system/debug.o
+ .data          0x000000000000a8e8       0x5b builds/obj/system/RTC.o
+ .data          0x000000000000a943      0x105 builds/obj/video/screen.o
+                0x000000000000a943                gCursorX
+                0x000000000000a944                gCursorY
+                0x000000000000a945                gTextColor
+                0x000000000000a946                gBackColor
+                0x000000000000a947                kMaxLines
+                0x000000000000a948                kBytesPerScreen
 
-.bss            0x000000000000aa50      0x451
-                0x000000000000aa50                bss = .
+.bss            0x000000000000aa48      0x451
+                0x000000000000aa48                bss = .
  *(.bss)
- .bss           0x000000000000aa50       0xb6 builds/obj/kernel.o
- .bss           0x000000000000ab06        0x4 builds/obj/system/hardware.o
-                0x000000000000ab06                kKeyBufferAddress
- .bss           0x000000000000ab0a       0x50 builds/obj/system/interrupts.o
- .bss           0x000000000000ab5a       0x50 builds/obj/system/PCI.o
- .bss           0x000000000000abaa       0x66 builds/obj/system/globals.o
-                0x000000000000abaa                tSystem.bitfieldPagesAllocated
-                0x000000000000abae                tSystem.bitfieldPagesReserved
-                0x000000000000abb2                tSystem.bitfieldSize
-                0x000000000000abb6                tSystem.BIOSMemMapShadowPtr
-                0x000000000000abba                tSystem.BIOSMemMapShadowEntries
-                0x000000000000abbe                tSystem.BIOSMemMapShadowSize
-                0x000000000000abc2                tSystem.memoryManagementSpace
-                0x000000000000abc6                tSystem.memoryKiBInstalled
-                0x000000000000abca                tSystem.memoryKiBUsable
-                0x000000000000abce                tSystem.memoryInitialAvailableBytes
-                0x000000000000abd2                tSystem.memoryKiBFree
-                0x000000000000abd6                tSystem.listDrives
-                0x000000000000abda                tSystem.listDriveLetters
-                0x000000000000abde                tSystem.listFSHandlers
-                0x000000000000abe2                tSystem.listPartitions
-                0x000000000000abe6                tSystem.listPCIHandlers
-                0x000000000000abea                tSystem.listTasks
-                0x000000000000abee                tSystem.PCIDeviceCount
-                0x000000000000abf2                tSystem.PCIVersion
-                0x000000000000abf6                tSystem.PCICapabilities
-                0x000000000000abfa                tSystem.PS2ControllerConfig
-                0x000000000000abfb                tSystem.PS2ControllerPort1Status
-                0x000000000000abfc                tSystem.PS2ControllerPort2Status
-                0x000000000000abfd                tSystem.PS2ControllerDeviceID1
-                0x000000000000abff                tSystem.PS2ControllerDeviceID2
-                0x000000000000ac01                tSystem.RTCUpdateHandlerAddress
-                0x000000000000ac05                tSystem.RTCStatusRegisterB
-                0x000000000000ac06                tSystem.RTCHours
-                0x000000000000ac07                tSystem.RTCMinutes
-                0x000000000000ac08                tSystem.RTCSeconds
-                0x000000000000ac09                tSystem.RTCYear
-                0x000000000000ac0a                tSystem.RTCMonth
-                0x000000000000ac0b                tSystem.RTCDay
-                0x000000000000ac0c                tSystem.listMemory
- .bss           0x000000000000ac10      0x230 builds/obj/system/debug.o
- .bss           0x000000000000ae40       0x61 builds/obj/video/screen.o
-                0x000000000000aea1                end = .
+ .bss           0x000000000000aa48       0xb6 builds/obj/kernel.o
+ .bss           0x000000000000aafe        0x4 builds/obj/system/hardware.o
+                0x000000000000aafe                kKeyBufferAddress
+ .bss           0x000000000000ab02       0x50 builds/obj/system/interrupts.o
+ .bss           0x000000000000ab52       0x50 builds/obj/system/PCI.o
+ .bss           0x000000000000aba2       0x66 builds/obj/system/globals.o
+                0x000000000000aba2                tSystem.bitfieldPagesAllocated
+                0x000000000000aba6                tSystem.bitfieldPagesReserved
+                0x000000000000abaa                tSystem.bitfieldSize
+                0x000000000000abae                tSystem.BIOSMemMapShadowPtr
+                0x000000000000abb2                tSystem.BIOSMemMapShadowEntries
+                0x000000000000abb6                tSystem.BIOSMemMapShadowSize
+                0x000000000000abba                tSystem.memoryManagementSpace
+                0x000000000000abbe                tSystem.memoryKiBInstalled
+                0x000000000000abc2                tSystem.memoryKiBUsable
+                0x000000000000abc6                tSystem.memoryInitialAvailableBytes
+                0x000000000000abca                tSystem.memoryKiBFree
+                0x000000000000abce                tSystem.listDrives
+                0x000000000000abd2                tSystem.listDriveLetters
+                0x000000000000abd6                tSystem.listFSHandlers
+                0x000000000000abda                tSystem.listPartitions
+                0x000000000000abde                tSystem.listPCIHandlers
+                0x000000000000abe2                tSystem.listTasks
+                0x000000000000abe6                tSystem.PCIDeviceCount
+                0x000000000000abea                tSystem.PCIVersion
+                0x000000000000abee                tSystem.PCICapabilities
+                0x000000000000abf2                tSystem.PS2ControllerConfig
+                0x000000000000abf3                tSystem.PS2ControllerPort1Status
+                0x000000000000abf4                tSystem.PS2ControllerPort2Status
+                0x000000000000abf5                tSystem.PS2ControllerDeviceID1
+                0x000000000000abf7                tSystem.PS2ControllerDeviceID2
+                0x000000000000abf9                tSystem.RTCUpdateHandlerAddress
+                0x000000000000abfd                tSystem.RTCStatusRegisterB
+                0x000000000000abfe                tSystem.RTCHours
+                0x000000000000abff                tSystem.RTCMinutes
+                0x000000000000ac00                tSystem.RTCSeconds
+                0x000000000000ac01                tSystem.RTCYear
+                0x000000000000ac02                tSystem.RTCMonth
+                0x000000000000ac03                tSystem.RTCDay
+                0x000000000000ac04                tSystem.listMemory
+ .bss           0x000000000000ac08      0x230 builds/obj/system/debug.o
+ .bss           0x000000000000ae38       0x61 builds/obj/video/screen.o
+                0x000000000000ae99                end = .
 LOAD builds/obj/kernel.o
 LOAD builds/obj/api/lists.o
 LOAD builds/obj/api/misc.o
