@@ -32,7 +32,7 @@ SCRIPTS			:= ./scripts
 ISO_TARGET		:= $(OUTPUTDIR)/NIGHT.ISO
 ISO_SCRIPTS 	:= $(SCRIPTS)/kcopy.bat
 # Where ISO_LINUX lives on your system
-ISOLINUX 		:= ./boot/bin_isolinux
+ISOLINUX 		:= ./boot/isolinux
 
 # A floppy image is needed to boot with ISOLINUX
 # besides, it may be handy to be able to test on older systems
