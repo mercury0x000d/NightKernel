@@ -20,6 +20,7 @@
 
 %include "include/RTCDefines.inc"
 
+
 %include "include/globals.inc"
 %include "include/numbers.inc"
 %include "include/screen.inc"
@@ -205,21 +206,21 @@ RTCInterruptHandler:
 
 	; now grab the time values from the RTC:
 
-	; get the year
+	; get the RTCYear
 	mov al, 0x09
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
 	mov byte [tSystem.RTCYear], al
 	
-	; get the month
+	; get the RTCMonth
 	mov al, 0x08
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
 	mov byte [tSystem.RTCMonth], al
 	
-	; get the day
+	; get the RTCDay
 	mov al, 0x07
 	out 0x70, al
 	mov eax, 0x00000000
@@ -233,14 +234,14 @@ RTCInterruptHandler:
 	in al, 0x71
 	mov byte [tSystem.RTCHours], al
 	
-	; get the minutes
+	; get the RTCMinutes
 	mov al, 0x02
 	out 0x70, al
 	mov eax, 0x00000000
 	in al, 0x71
 	mov byte [tSystem.RTCMinutes], al
 	
-	; get the seconds
+	; get the RTCSeconds
 	mov al, 0x00
 	out 0x70, al
 	mov eax, 0x00000000
