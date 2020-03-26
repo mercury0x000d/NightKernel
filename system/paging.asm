@@ -1,5 +1,5 @@
 ; Night Kernel
-; Copyright 2015 - 2019 by Mercury 0x0D
+; Copyright 2015 - 2020 by Mercury 0x0D
 ; paging.asm is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -48,13 +48,13 @@ PagingInit:
 	mov ebp, esp
 
 
-	; make sure the CPU supports Page Size Extensions (PSE)
+	; map the first 64KiB as supervisor only...
+	
 
 
-	; enable PSE
-	mov eax, cr4
-	or eax, 00000000000000000000000000010000b
-	mov cr4, eax
+	; and all the rest (upto 1 MiB) as user
+	
+
 
 
 	.Exit:
@@ -74,7 +74,7 @@ PagingMap:
 	;	Address of Page Directory
 	;	Starting address of virtual memory range
 	;	Starting address of physical memory range
-	;	Number of pages to be mapped
+	;	Number of 4 KiB chunks to be mapped
 	;	Flags to be assigned to mapped pages
 	;
 	;  output:
