@@ -615,79 +615,79 @@ DebugMemoryDetails:
 	call Print32
 
 
-	; set up a loop to step through all elements in the memory list for printing
-	push dword [tSystem.listMemory]
-	call LMElementCountGet
-	mov edx, ecx
-
-	mov cursorY, 4
-	.MemoryListDumpLoop:
-
-		; calculate what index we're on
-		mov eax, edx
-		sub eax, ecx
-
-		; save the important stuff for later
-		push ecx
-		push edx
-
-		; get the address of this element
-		push eax
-		push dword [tSystem.listMemory]
-		call LMElementAddressGet
-
-		; save esi
-		push esi
-
-		push 80
-		push .scratch$
-		push .memoryDetailsFormat$
-		call MemCopy
-
-		; restore and re-save esi
-		pop esi
-		push esi
-
-
-		; build memory details string
-		push dword 8
-		push dword [esi + tMemInfo.address]
-		push .scratch$
-		call StringTokenHexadecimal
-
-		; restore and re-save esi
-		pop esi
-		push esi
-
-		push dword 8
-		push dword [esi + tMemInfo.size]
-		push .scratch$
-		call StringTokenHexadecimal
-
-		; restore esi
-		pop esi
-
-		push dword 2
-		push dword [esi + tMemInfo.task]
-		push .scratch$
-		call StringTokenHexadecimal
-
-		push dword 0x00000000
-		push dword 0x00000007
-		push dword cursorY
-		push dword 1
-		push .scratch$
-		call Print32
-		
-		xor ebx, ebx
-		mov bl, ah
-		mov cursorY, ebx
-
-		; restore the important stuff
-		pop edx
-		pop ecx
-
-	loop .MemoryListDumpLoop
+;	; set up a loop to step through all elements in the memory list for printing
+;	push dword [tSystem.listMemory]
+;	call LMElementCountGet
+;	mov edx, ecx
+;
+;	mov cursorY, 4
+;	.MemoryListDumpLoop:
+;
+;		; calculate what index we're on
+;		mov eax, edx
+;		sub eax, ecx
+;
+;		; save the important stuff for later
+;		push ecx
+;		push edx
+;
+;		; get the address of this element
+;		push eax
+;		push dword [tSystem.listMemory]
+;		call LMElementAddressGet
+;
+;		; save esi
+;		push esi
+;
+;		push 80
+;		push .scratch$
+;		push .memoryDetailsFormat$
+;		call MemCopy
+;
+;		; restore and re-save esi
+;		pop esi
+;		push esi
+;
+;
+;		; build memory details string
+;		push dword 8
+;		push dword [esi + tMemInfo.address]
+;		push .scratch$
+;		call StringTokenHexadecimal
+;
+;		; restore and re-save esi
+;		pop esi
+;		push esi
+;
+;		push dword 8
+;		push dword [esi + tMemInfo.size]
+;		push .scratch$
+;		call StringTokenHexadecimal
+;
+;		; restore esi
+;		pop esi
+;
+;		push dword 2
+;		push dword [esi + tMemInfo.task]
+;		push .scratch$
+;		call StringTokenHexadecimal
+;
+;		push dword 0x00000000
+;		push dword 0x00000007
+;		push dword cursorY
+;		push dword 1
+;		push .scratch$
+;		call Print32
+;		
+;		xor ebx, ebx
+;		mov bl, ah
+;		mov cursorY, ebx
+;
+;		; restore the important stuff
+;		pop edx
+;		pop ecx
+;
+;	loop .MemoryListDumpLoop
 
 	; wait for escape before leaving
 	call DebugWaitForEscape
@@ -905,7 +905,7 @@ section .data
 .debugText6$									db '6 - ', 0x00
 .debugText7$									db '7 - ', 0x00
 .debugText8$									db '8 - ', 0x00
-.debugText9$									db '9 - Bandicoot', 0x00
+.debugText9$									db '9 - Are you feelin lucky?', 0x00
 .debugText0$									db '0 - Reboot', 0x00
 .escMessage$									db 'Press Escape from any sub menu above to return to this main menu', 0x00
 .debuggerMessage$								db 'What a horrible Night to have a bug.', 0x00
@@ -949,11 +949,8 @@ DebugPCIDevices:
 	je .PCIInitSkip
 
 		; if we get here, this hasn't been set up yet... so let's do so!
-
-		; the list will be 256 entries of 36 bytes each
+		; the list will be 256 entries of 36 bytes each (256 * 36 + 16)
 		; allocate memory for the list
-		push 256 * 36 + 16
-		push dword 1
 		call MemAllocate
 
 		; see if there was an error, if not save the pointer
@@ -967,6 +964,12 @@ DebugPCIDevices:
 		push 256
 		push eax
 		call LMListInit
+
+		; to hold the entire data chunk, we need 2 more pages of RAM
+		; this is a crash waiting to happen once other tasks allocate memory on-the-fly
+		; since we will no longer be able to guarantee the three pages we need here are contiguous
+		call MemAllocate
+		call MemAllocate
 
 
 		; write all the strings to the list area
@@ -1758,23 +1761,8 @@ DebugSystemInfo:
 	push .RAMFormat1$
 	call MemCopy
 
-	; copy tSystem.memoryKiBInstalled to our temp quadword
-	push dword 8
-	mov eax, ebp
-	sub eax, 8
-	push eax
-	push tSystem.memoryKiBInstalled
-	call MemCopy
-
-	; shift to divide by 1024 (bytes to KiB)
-	push 10
-	mov eax, ebp
-	sub eax, 8
-	push eax
-	call QuadShiftRight
-
 	push dword 0
-	push tempQuad
+	push dword [tSystem.memoryKiBInstalled]
 	push .scratch$
 	call StringTokenDecimal
 
@@ -1792,9 +1780,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-	mov eax, dword [tSystem.memoryInitialAvailableBytes]
-	shr eax, 10
-	push eax
+	push dword [tSystem.memoryKiBUsable]
 	push .scratch$
 	call StringTokenDecimal
 
@@ -1812,9 +1798,9 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-; DEBUG - commented out pending compatibility with new memory handling method
-;	mov eax, dword [tSystem.memoryFreeBytes]
-	shr eax, 11
+	mov esi, [tSystem.bitfieldPtrPagesAllocated]
+	mov eax, dword [esi + tBitfieldInfo.setCount]
+	shl eax, 2
 	push eax
 	push .scratch$
 	call StringTokenDecimal
@@ -1827,14 +1813,14 @@ DebugSystemInfo:
 	call Print32
 
 
-	; build and print the Drive List string
+	; build and print the allocated bitfield string
 	push 80
 	push .scratch$
-	push .listDriveFormat$
+	push .bitfieldAllocatedFormat$
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listDrives]
+	push dword [tSystem.bitfieldPtrPagesAllocated]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1846,14 +1832,14 @@ DebugSystemInfo:
 	call Print32
 
 
-	; build and print the DriveLetters List string
+	; build and print the reserved bitfield string
 	push 80
 	push .scratch$
-	push .listDriveLettersFormat$
+	push .bitfieldReservedFormat$
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listDriveLetters]
+	push dword [tSystem.bitfieldPtrPagesReserved]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1865,14 +1851,14 @@ DebugSystemInfo:
 	call Print32
 
 
-	; build and print the FS Handlers List string
+	; build and print the Shadowed BIOS Memory Map string
 	push 80
 	push .scratch$
-	push .listFSHandlersFormat$
+	push .BIOSMemoryMapShadow$
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.memoryBIOSMapShadowPtr]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1884,20 +1870,58 @@ DebugSystemInfo:
 	call Print32
 
 
-	; build and print the Memory List string
+	; build and print the Drive List string
 	push 80
 	push .scratch$
-	push .listMemoryFormat$
+	push .listDriveFormat$
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listMemory]
+	push dword [tSystem.listPtrDrives]
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 18
+	push dword 19
+	push dword 1
+	push .scratch$
+	call Print32
+
+
+	; build and print the Drive Letters List string
+	push 80
+	push .scratch$
+	push .listPtrDriveLettersFormat$
+	call MemCopy
+
+	push dword 8
+	push dword [tSystem.listPtrDriveLetters]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 20
+	push dword 1
+	push .scratch$
+	call Print32
+
+
+	; build and print the FS Handlers List string
+	push 80
+	push .scratch$
+	push .listPtrFSHandlersFormat$
+	call MemCopy
+
+	push dword 8
+	push dword [tSystem.listPtrFSHandlers]
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	push dword 21
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1910,32 +1934,32 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 19
+	push dword 22
 	push dword 1
 	push .scratch$
 	call Print32
 
 
-	; build the Tasks List string
+	; build the PCI Handlers List string
 	push 80
 	push .scratch$
 	push .listPCIDevicesFormat$
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listPCIHandlers]
+	push dword [tSystem.listPtrPCIHandlers]
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 20
+	push dword 23
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1944,17 +1968,17 @@ DebugSystemInfo:
 	; build the Tasks List string
 	push 80
 	push .scratch$
-	push .listTasksFormat$
+	push .listPtrTasksFormat$
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	push .scratch$
 	call StringTokenHexadecimal
 
 	push dword 0x00000000
 	push dword 0x00000007
-	push dword 21
+	push dword 24
 	push dword 1
 	push .scratch$
 	call Print32
@@ -1980,14 +2004,16 @@ section .data
 .RAMInfo$										db 'Memory:', 0x00
 .RAMFormat1$									db 'Installed:  ^ KiB', 0x00
 .RAMFormat2$									db 'Usable:     ^ KiB', 0x00
-.RAMFormat3$									db 'Available:  ^ KiB', 0x00
-.listDriveFormat$								db 'Drive List             0x^', 0x00
-.listDriveLettersFormat$						db 'Drive Letters List     0x^', 0x00
-.listFSHandlersFormat$							db 'FS Handlers List       0x^', 0x00
-.listPartitionFormat$							db 'Partition List         0x^', 0x00
-.listPCIDevicesFormat$							db 'PCI Devices List       0x^', 0x00
-.listTasksFormat$								db 'Tasks List             0x^', 0x00
-.listMemoryFormat$								db 'Memory List            0x^', 0x00
+.RAMFormat3$									db 'Used:       ^ KiB', 0x00
+.listDriveFormat$								db 'Drive List                   0x^', 0x00
+.listPtrDriveLettersFormat$						db 'Drive Letters List           0x^', 0x00
+.listPtrFSHandlersFormat$						db 'FS Handlers List             0x^', 0x00
+.listPartitionFormat$							db 'Partition List               0x^', 0x00
+.listPCIDevicesFormat$							db 'PCI Devices List             0x^', 0x00
+.listPtrTasksFormat$							db 'Tasks List                   0x^', 0x00
+.bitfieldAllocatedFormat$						db 'Pages Allocated Bitfield     0x^', 0x00
+.bitfieldReservedFormat$						db 'Pages Reserved Bitfield      0x^', 0x00
+.BIOSMemoryMapShadow$							db 'Shadowed BIOS Memory Map     0x^', 0x00
 
 section .bss
 .scratch$										resb 80
@@ -2044,7 +2070,7 @@ DebugTaskBrowser:
 	mov eax, 0x00000000
 	mov al, currentTask
 	push eax
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
 	mov currentTaskSlotAddress, esi
 

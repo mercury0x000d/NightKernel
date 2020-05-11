@@ -43,7 +43,7 @@ LMBitfieldInit:
 	;	Number of bits
 	;
 	;  output:
-	;	n/a
+	;	EAX - Total bytes occupied by this bitfield
 
 	push ebp
 	mov ebp, esp
@@ -58,11 +58,13 @@ LMBitfieldInit:
 
 
 	; calculate the total size of the memory this list will occupy
+	; Rounding up needs done to keep things simple for the bitfield scanning routines, which process data by the DWord, not by the byte.
+	; memory needed = (bits specified rounded up to the next highest multiple of 32, then divided by 8, plus 16 bytes for the header
 	mov eax, bitCount
-	and eax, 11111111111111111111111111111000b
+	and eax, 11111111111111111111111111100000b
 	cmp eax, bitCount
 	je .NoAdjust
-		add eax, 8
+		add eax, 32
 	.NoAdjust:
 	shr eax, 3
 	add eax, 16
@@ -74,19 +76,18 @@ LMBitfieldInit:
 
 
 	; write the data to the start of the list area, starting with the signature
-	mov dword [esi + tListInfo.signature], 'bits'
+	mov dword [esi + tBitfieldInfo.signature], 'bits'
 
-	; write the size of each element next
-	mov ebx, 0
-	mov dword [esi + tListInfo.elementSize], ebx
+	; initially all bits are clear, so we write setCount as zero
+	mov dword [esi + tBitfieldInfo.setCount], 0
 
-	; write the total number of elements
+	; set elementCount to the number of bits in this bitfield
 	mov eax, bitCount
-	mov dword [esi + tListInfo.elementCount], eax
+	mov dword [esi + tBitfieldInfo.elementCount], eax
 
 	; write total size of list
 	mov eax, bitfieldSize
-	mov dword [esi + tListInfo.listSize], eax
+	mov dword [esi + tBitfieldInfo.listSize], eax
 
 
 	.Exit:
@@ -96,6 +97,226 @@ LMBitfieldInit:
 	mov esp, ebp
 	pop ebp
 ret 8
+
+
+
+
+
+section .text
+LMBitfieldScanClear:
+	; Returns the number of the first clear bit in the bitfield
+	;
+	;  input:
+	;	Bitfield address
+	;	Sequence byte
+	;
+	;  output:
+	;	EAX - Bit number
+	;	EBX - Sequence byte
+	;	EDX - Result code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define bitfieldAddress						dword [ebp + 8]
+	%define sequenceByte						dword [ebp + 12]
+
+
+	; round sequenceByte down to the lowest multiple of 4 since we process a DWord at a time
+	and sequenceByte, 11111100b
+
+	; validate sequenceByte
+	mov esi, bitfieldAddress
+	mov eax, sequenceByte
+	add eax, 0x10
+	cmp eax, dword [esi + tBitfieldInfo.listSize]
+	jae .Fail
+
+	; Now that we've validated the sequenceByte... what the fuzzy kitten nuts is it, anyway? Well, I'm glad you asked! ;)
+	; In short, it's simply a time saving manoeuvre for cases where we will need to allocate a metric crapton of blocks in a row... like filling a
+	; page table, for example. Instead of starting ALL THE WAY from the start of the table each time we search for a block, we can simply feed the
+	; sequenceByte returned by the first call of this function back into the next call of it. Cool, huh? :D
+
+	; adjust the address to allow for the bitfield header and load address into edi so we can SCASD the crap outta it!
+	add bitfieldAddress, 0x10
+	mov edi, bitfieldAddress
+
+	; adjust starting address for the sequenceByte specified
+	add edi, sequenceByte
+
+	; use _THE MAGIC OF ASSEMBLY_ to find the first non-0xFFFFFFFF DWord in the bitfield
+	; bytes to search = (bitfield length - header length - sequenceByte) / 4
+	mov eax, 0xffffffff
+	mov ecx, dword [esi + tBitfieldInfo.listSize]
+	sub ecx, 0x10
+	sub ecx, sequenceByte
+	shr ecx, 2
+	repz scasd 
+
+	; adjust EDI back down to the thing we actually found
+	sub edi, 4
+
+	; Now that we found the first not-completely-filled DWord, we need to scan it to find the first clear bit with BSF.
+	; I already hear you saying, "But wait! BSF only scans for SET bits, not CLEAR ones! And we need to look for clear bits here!"
+	; and yes, you are correct. That just means we'll have to NOT the DWord first to make this work ;)
+	mov eax, [edi]
+	not eax
+	mov ebx, 0
+	bsf ebx, eax
+
+	; now use EBX and ECX and the starting bit to calculate the position of this bit
+	; position = (bytePosition - bitfieldAddress) * 8 + bitPosition
+	mov eax, edi
+	sub eax, bitfieldAddress
+	shl eax, 3
+	add eax, ebx
+
+	; finally, adjust the sequenceByte to be returned
+	mov ebx, edi
+	sub ebx, bitfieldAddress
+
+
+	; Baby get my order right, no err-ahs
+	mov edx, kErrNone
+	jmp .Exit
+
+	; ooooooooooh, fail
+	.Fail:
+	mov edx, kErrInvalidParameter
+
+
+	.Exit:
+	%undef bitfieldAddress
+	%undef sequenceByte
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+LMBitfieldScanSet:
+	; Returns the number of the first set bit in the bitfield
+	;
+	;  input:
+	;	Bitfield address
+	;	Sequence byte
+	;
+	;  output:
+	;	EAX - Bit number
+	;	EBX - Sequence byte
+	;	EDX - Result code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define bitfieldAddress						dword [ebp + 8]
+	%define sequenceByte						dword [ebp + 12]
+
+
+	; round sequenceByte down to the lowest multiple of 4 since we process a DWord at a time
+	and sequenceByte, 11111100b
+
+	; validate sequenceByte
+	mov esi, bitfieldAddress
+	mov eax, sequenceByte
+	add eax, 0x10
+	cmp eax, dword [esi + tBitfieldInfo.listSize]
+	jae .Fail
+
+	; adjust the address to allow for the bitfield header and load address into edi so we can SCASD the crap outta it!
+	add bitfieldAddress, 0x10
+	mov edi, bitfieldAddress
+
+	; adjust starting address for the sequenceByte specified
+	add edi, sequenceByte
+
+	; use _THE MAGIC OF ASSEMBLY_ to find the first non-zero DWord in the bitfield
+	; bytes to search = (bitfield length - header length - sequenceByte) / 4
+	mov eax, 0
+	mov ecx, dword [esi + tBitfieldInfo.listSize]
+	sub ecx, 0x10
+	sub ecx, sequenceByte
+	shr ecx, 2
+	repz scasd 
+
+	; adjust EDI back down to the thing we actually found
+	sub edi, 4
+
+	; Now that we found the first not-completely-clear DWord, we need to scan it to find the first set bit with BSF.
+	mov eax, [edi]
+	mov ebx, 0
+	bsf ebx, eax
+
+	; now use EBX and ECX and the starting bit to calculate the position of this bit
+	; position = (bytePosition - bitfieldAddress) * 8 + bitPosition
+	mov eax, edi
+	sub eax, bitfieldAddress
+	shl eax, 3
+	add eax, ebx
+
+	; finally, adjust the sequenceByte to be returned
+	mov ebx, edi
+	sub ebx, bitfieldAddress
+
+
+	; Havest we an error?
+	mov edx, kErrNone
+	jmp .Exit
+
+	; strike three, kid
+	.Fail:
+	mov edx, kErrInvalidParameter
+
+
+	.Exit:
+	%undef bitfieldAddress
+	%undef sequenceByte
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+section .text
+LMBitfieldSpaceCalc:
+	; Returns the amount of memory needed to hold a bitfield of the specified size
+	;
+	;  input:
+	;	Number of bits
+	;
+	;  output:
+	;	EAX - Total bytes which would be needed to hold the bitfield
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define bitCount							dword [ebp + 8]
+
+
+	; calculate the total size of the memory this bitfield will occupy
+	mov eax, bitCount
+	and eax, 11111111111111111111111111100000b
+	cmp eax, bitCount
+	je .NoAdjust
+		add eax, 32
+	.NoAdjust:
+	shr eax, 3
+	add eax, 16
+
+
+	.Exit:
+	%undef bitCount
+	mov esp, ebp
+	pop ebp
+ret 4
 
 
 
@@ -140,7 +361,7 @@ ret 4
 
 
 section .text
-LMBitfieldElementValidate:
+LMBitfieldValidateElement:
 	; Tests the element specified to be sure it not outside the bounds of the list
 	;
 	;  input:
@@ -160,7 +381,7 @@ LMBitfieldElementValidate:
 
 	; check element validity
 	mov esi, listPtr
-	mov eax, dword [esi + tListInfo.elementCount]
+	mov eax, dword [esi + tBitfieldInfo.elementCount]
 
 	cmp elementNum, eax
 	mov edx, kErrValueTooHigh
@@ -186,7 +407,7 @@ LMBitClear:
 	;
 	;  input:
 	;	Bitfield address
-	;	Bit
+	;	Bit number
 	;
 	;  output:
 	;	EDX - Error code
@@ -199,20 +420,16 @@ LMBitClear:
 	%define element								dword [ebp + 12]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if element is valid
+	; see if element is valid, exit if error
 	push element
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -222,9 +439,34 @@ LMBitClear:
 	push address
 	call LM_BitfieldMath
 
-	; modify the byte
-	btr [ebx], ecx
 
+	; read setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
+
+	; read the byte in
+	mov eax, 0
+	mov al, byte [ebx]
+
+	; subtract the number of currently set bits in this byte from setCount
+	popcnt edx, eax
+	sub edi, edx
+
+	; modify the bit
+	btr eax, ecx
+
+	; add the number of bits now set in this byte to setCount
+	popcnt edx, eax
+	add edi, edx
+
+	; write the byte back to memory
+	mov byte [ebx], al
+
+	; update setCount
+	mov dword [esi + tBitfieldInfo.setCount], edi
+
+
+	; all done!
 	mov edx, kErrNone
 
 
@@ -260,35 +502,30 @@ LMBitClearRange:
 	%define rangeEnd							dword [ebp + 16]
 
 	; allocate local variables
-	sub esp, 16
+	sub esp, 20
 	%define startByte							dword [ebp - 4]
 	%define endByte								dword [ebp - 8]
 	%define startBit							dword [ebp - 12]
 	%define endBit								dword [ebp - 16]
+	%define length								dword [ebp - 20]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if the parameters are valid
+	; see if the parameters are valid, exit if error
 	push rangeStart
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
 	push rangeEnd
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -320,6 +557,7 @@ LMBitClearRange:
 		push endBit
 		push startBit
 		push startByte
+		push address
 		call LM_ByteClearRange
 		jmp .Done
 	.NotASingleByte:
@@ -328,28 +566,72 @@ LMBitClearRange:
 	push 7
 	push startBit
 	push startByte
+	push address
 	call LM_ByteClearRange
 
 	push endBit
 	push 0
 	push endByte
+	push address
 	call LM_ByteClearRange
 
 	; Now we check to see if those bytes were neighbors (e.g. bytes 3 and 4, or 7 and 8). If so, there's no need to do anything further.
-	mov ebx, endByte
-	sub ebx, startByte
-	cmp ebx, 2
+	mov ecx, endByte
+	sub ecx, startByte
+	cmp ecx, 2
 	jl .Done
 
-	; If we get here, the bytes were not neighbors, meaning there's space between them we can blanket with 0x00.
-	; This is MUCH more efficient than setting each byte individually in sequence.
-	push 0x00
-	dec ebx
-	push ebx
-	mov ecx, startByte
-	inc ecx
-	push ecx
-	call MemFill
+
+	; If we get here, the bytes were not neighbors, meaning there's space between them we can blanket with 0x00000000.
+	; This is MUCH more efficient than setting each bit individually in sequence.
+
+	; set up the number of bytes to process
+	dec ecx
+	mov length, ecx
+
+	; load setCount
+	mov esi, address
+	mov edx, [esi + tBitfieldInfo.setCount]
+
+	; set the starting addresses for the lodsd and stosd to come
+	mov esi, startByte
+	inc esi
+	mov edi, esi
+
+	; since we're processing DWords here first, ecx = length / 4
+	shr ecx, 2
+	cmp ecx, 0
+	je .DWordLoopDone
+
+	.DWordLoop:
+		lodsd
+		popcnt ebx, eax
+		sub edx, ebx
+		mov eax, 0x00000000
+		stosd
+	loop .DWordLoop
+	.DWordLoopDone:
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .ByteLoopDone
+
+	.ByteLoop:
+		mov eax, 0
+		lodsb
+		popcnt ebx, eax
+		sub edx, ebx
+		mov al, 0x00
+		stosb
+	loop .ByteLoop
+	.ByteLoopDone:
+
+	; save setCount
+	mov esi, address
+	mov [esi + tBitfieldInfo.setCount], edx
 
 
 	.Done:
@@ -360,8 +642,11 @@ LMBitClearRange:
 	%undef address
 	%undef rangeStart
 	%undef rangeEnd
+	%undef startByte
+	%undef endByte
 	%undef startBit
 	%undef endBit
+	%undef length
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -376,7 +661,7 @@ LMBitFlip:
 	;
 	;  input:
 	;	Bitfield address
-	;	Bit
+	;	Bit number
 	;
 	;  output:
 	;	EDX - Error code
@@ -389,20 +674,16 @@ LMBitFlip:
 	%define element								dword [ebp + 12]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if element is valid
+	; see if element is valid, exit if error
 	push element
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -413,9 +694,33 @@ LMBitFlip:
 	call LM_BitfieldMath
 
 
-	; modify the byte
-	btc [ebx], ecx
+	; read setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
 
+	; read the byte in
+	mov eax, 0
+	mov al, byte [ebx]
+
+	; subtract the number of currently set bits in this byte from setCount
+	popcnt edx, eax
+	sub edi, edx
+
+	; modify the bit
+	btc eax, ecx
+
+	; add the number of bits now set in this byte to setCount
+	popcnt edx, eax
+	add edi, edx
+
+	; write the byte back to memory
+	mov byte [ebx], al
+
+	; update setCount
+	mov dword [esi + tBitfieldInfo.setCount], edi
+
+
+	; all done!
 	mov edx, kErrNone
 
 
@@ -425,6 +730,7 @@ LMBitFlip:
 	mov esp, ebp
 	pop ebp
 ret 8
+
 
 
 
@@ -450,35 +756,30 @@ LMBitFlipRange:
 	%define rangeEnd							dword [ebp + 16]
 
 	; allocate local variables
-	sub esp, 16
+	sub esp, 20
 	%define startByte							dword [ebp - 4]
 	%define endByte								dword [ebp - 8]
 	%define startBit							dword [ebp - 12]
 	%define endBit								dword [ebp - 16]
+	%define length								dword [ebp - 20]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if the parameters are valid
+	; see if the parameters are valid, exit if error
 	push rangeStart
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
 	push rangeEnd
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -510,6 +811,7 @@ LMBitFlipRange:
 		push endBit
 		push startBit
 		push startByte
+		push address
 		call LM_ByteFlipRange
 		jmp .Done
 	.NotASingleByte:
@@ -518,11 +820,13 @@ LMBitFlipRange:
 	push 7
 	push startBit
 	push startByte
+	push address
 	call LM_ByteFlipRange
 
 	push endBit
 	push 0
 	push endByte
+	push address
 	call LM_ByteFlipRange
 
 	; Now we check to see if those bytes were neighbors (e.g. bytes 3 and 4, or 7 and 8). If so, there's no need to do anything further.
@@ -531,18 +835,59 @@ LMBitFlipRange:
 	cmp ecx, 2
 	jl .Done
 
-	; If we get here, the bytes were not neighbors, meaning there's space between them. We need to step through each of those whole bytes
-	; and flip each one with a logical NOT.
+	; If we get here, the bytes were not neighbors, meaning there's space between them. We need to step through that space and apply a NOT
+
+	; set up the number of bytes to process
 	dec ecx
-	mov ebx, startByte
-	inc ebx
-	.NegateLoop:
-		; debug - optimize this later to process DWORDs at a time
-		mov al, [ebx]
+	mov length, ecx
+
+	; load setCount
+	mov esi, address
+	mov edx, [esi + tBitfieldInfo.setCount]
+
+	; set the starting addresses for the lodsd and stosd to come
+	mov esi, startByte
+	inc esi
+	mov edi, esi
+
+	; since we're processing DWords here first, ecx = length / 4
+	shr ecx, 2
+	cmp ecx, 0
+	je .DWordLoopDone
+
+	.DWordLoop:
+		lodsd
+		popcnt ebx, eax
+		sub edx, ebx
+		not eax
+		popcnt ebx, eax
+		add edx, ebx
+		stosd
+	loop .DWordLoop
+	.DWordLoopDone:
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .ByteLoopDone
+
+	.ByteLoop:
+		mov eax, 0
+		lodsb
+		popcnt ebx, eax
+		sub edx, ebx
 		not al
-		mov [ebx], al
-		inc ebx
-	loop .NegateLoop
+		popcnt ebx, eax
+		add edx, ebx
+		stosb
+	loop .ByteLoop
+	.ByteLoopDone:
+
+	; save setCount
+	mov esi, address
+	mov [esi + tBitfieldInfo.setCount], edx
 
 
 	.Done:
@@ -553,8 +898,11 @@ LMBitFlipRange:
 	%undef address
 	%undef rangeStart
 	%undef rangeEnd
+	%undef startByte
+	%undef endByte
 	%undef startBit
 	%undef endBit
+	%undef length
 	mov esp, ebp
 	pop ebp
 ret 12
@@ -569,7 +917,7 @@ LMBitGet:
 	;
 	;  input:
 	;	List address
-	;	Bit
+	;	Bit number
 	;
 	;  output:
 	;	EDX - Error code
@@ -583,20 +931,16 @@ LMBitGet:
 	%define element								dword [ebp + 12]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if element is valid
+	; see if element is valid, exit if error
 	push element
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -622,13 +966,14 @@ ret 8
 
 
 
+
 section .text
 LMBitSet:
 	; Sets the bit specified within the bitfield at the address specified
 	;
 	;  input:
 	;	Bitfield address
-	;	Bit
+	;	Bit number
 	;
 	;  output:
 	;	EDX - Error code
@@ -641,20 +986,16 @@ LMBitSet:
 	%define element								dword [ebp + 12]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if element is valid
+	; see if element is valid, exit if error
 	push element
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -664,9 +1005,34 @@ LMBitSet:
 	push address
 	call LM_BitfieldMath
 
-	; modify the byte
-	bts [ebx], ecx
 
+	; read setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
+
+	; read the byte in
+	mov eax, 0
+	mov al, byte [ebx]
+
+	; subtract the number of currently set bits in this byte from setCount
+	popcnt edx, eax
+	sub edi, edx
+
+	; modify the bit
+	bts eax, ecx
+
+	; add the number of bits now set in this byte to setCount
+	popcnt edx, eax
+	add edi, edx
+
+	; write the byte back to memory
+	mov byte [ebx], al
+
+	; update setCount
+	mov dword [esi + tBitfieldInfo.setCount], edi
+
+
+	; all done!
 	mov edx, kErrNone
 
 
@@ -702,35 +1068,30 @@ LMBitSetRange:
 	%define rangeEnd							dword [ebp + 16]
 
 	; allocate local variables
-	sub esp, 16
+	sub esp, 20
 	%define startByte							dword [ebp - 4]
 	%define endByte								dword [ebp - 8]
 	%define startBit							dword [ebp - 12]
 	%define endBit								dword [ebp - 16]
+	%define length								dword [ebp - 20]
 
 
-	; see if the list is valid
+	; see if the list is valid, exit if error
 	push address
 	call LMBitfieldValidate
-
-	; error check
 	cmp edx, kErrNone
 	jne .Exit
 
-	; see if the parameters are valid
+	; see if the parameters are valid, exit if error
 	push rangeStart
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
 	push rangeEnd
 	push address
-	call LMBitfieldElementValidate
-
-	;error check
+	call LMBitfieldValidateElement
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -762,6 +1123,7 @@ LMBitSetRange:
 		push endBit
 		push startBit
 		push startByte
+		push address
 		call LM_ByteSetRange
 		jmp .Done
 	.NotASingleByte:
@@ -770,28 +1132,74 @@ LMBitSetRange:
 	push 7
 	push startBit
 	push startByte
+	push address
 	call LM_ByteSetRange
 
 	push endBit
 	push 0
 	push endByte
+	push address
 	call LM_ByteSetRange
 
 	; Now we check to see if those bytes were neighbors (e.g. bytes 3 and 4, or 7 and 8). If so, there's no need to do anything further.
-	mov ebx, endByte
-	sub ebx, startByte
-	cmp ebx, 2
+	mov ecx, endByte
+	sub ecx, startByte
+	cmp ecx, 2
 	jl .Done
 
-	; If we get here, the bytes were not neighbors, meaning there's space between them we can blanket with 0xFF.
-	; This is MUCH more efficient than setting each byte individually in sequence.
-	push 0xFF
-	dec ebx
-	push ebx
-	mov ecx, startByte
-	inc ecx
-	push ecx
-	call MemFill
+
+	; If we get here, the bytes were not neighbors, meaning there's space between them we can blanket with 0xFFFFFFFF.
+	; This is MUCH more efficient than setting each bit individually in sequence.
+
+	; set up the number of bytes to process
+	dec ecx
+	mov length, ecx
+
+	; load setCount
+	mov esi, address
+	mov edx, [esi + tBitfieldInfo.setCount]
+
+	; set the starting addresses for the lodsd and stosd to come
+	mov esi, startByte
+	inc esi
+	mov edi, esi
+
+	; since we're processing DWords here first, ecx = length / 4
+	shr ecx, 2
+	cmp ecx, 0
+	je .DWordLoopDone
+
+	.DWordLoop:
+		lodsd
+		popcnt ebx, eax
+		sub edx, ebx
+		mov eax, 0xFFFFFFFF
+		add edx, 32
+		stosd
+	loop .DWordLoop
+	.DWordLoopDone:
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .ByteLoopDone
+
+	.ByteLoop:
+		mov eax, 0
+		lodsb
+		popcnt ebx, eax
+		sub edx, ebx
+		mov al, 0xFF
+		add edx, 8
+		stosb
+	loop .ByteLoop
+	.ByteLoopDone:
+
+	; save setCount
+	mov esi, address
+	mov [esi + tBitfieldInfo.setCount], edx
 
 
 	.Done:
@@ -802,11 +1210,74 @@ LMBitSetRange:
 	%undef address
 	%undef rangeStart
 	%undef rangeEnd
+	%undef startByte
+	%undef endByte
 	%undef startBit
 	%undef endBit
+	%undef length
 	mov esp, ebp
 	pop ebp
 ret 12
+
+
+
+
+
+section .text
+LMCountBitsSet:
+	; Returns the total number of set bits in the memory range specified
+	;
+	;  input:
+	;	Start address
+	;	Number of bytes to process
+	;
+	;  output:
+	;	EDI - Result
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define length								dword [ebp + 12]
+
+
+	mov esi, address
+	mov edi, 0
+
+	; since we're processing DWords here first, ecx = length / 4
+	mov ecx, length
+	shr ecx, 2
+	cmp ecx, 0
+	je .Exit
+
+	.DWordCountLoop:
+		lodsd
+		popcnt ebx, eax
+		add edi, ebx
+	loop .DWordCountLoop
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .Exit
+
+	mov eax, 0
+	.ByteCountLoop:
+		lodsb
+		popcnt ebx, eax
+		add edi, ebx
+	loop .ByteCountLoop
+
+
+	.Exit:
+	%undef address
+	%undef length
+	mov esp, ebp
+	pop ebp
+ret 8
 
 
 
@@ -1092,7 +1563,7 @@ LMElementSizeGet:
 	%undef listPtr
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 4
 
 
 
@@ -1240,7 +1711,7 @@ LMListInit:
 	;	Size of each element
 	;
 	;  output:
-	;	n/a
+	;	EAX - Total bytes occupied by this list
 
 	push ebp
 	mov ebp, esp
@@ -1325,6 +1796,44 @@ LMListSearch:
 	mov esp, ebp
 	pop ebp
 ret 4
+
+
+
+
+
+section .text
+LMListSpaceCalc:
+	; Returns the amount of memory needed to hold a list of the specified size
+	;
+	;  input:
+	;	Number of elements
+	;	Size of each element
+	;
+	;  output:
+	;	EAX - Total bytes which would be needed to hold the list
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define elementCount						dword [ebp + 8]
+	%define elementSize							dword [ebp + 12]
+
+
+	; calculate the total size of the memory this list will occupy
+	mov eax, elementCount
+	mov ebx, elementSize
+	mov edx, 0x00000000
+	mul ebx
+	add eax, 16
+
+
+	.Exit:
+	%undef elementCount
+	%undef elementSize
+	mov esp, ebp
+	pop ebp
+ret 8
 
 
 
@@ -1463,12 +1972,12 @@ ret 8
 
 section .text
 LM_BitfieldMath:
-	; Returns the byte and bit based upon the address and erlement number specified
+	; Returns the byte and bit based upon the address and element number specified
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
-	;	EAX - Element
-	;	ECX - 
+	;	Address
+	;	Element
 	;
 	;  output:
 	;	EBX - byte address
@@ -1517,6 +2026,7 @@ LM_ByteClearRange:
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
+	;	Bitfield address
 	;	Byte address
 	;	Start of bit range
 	;	End of bit range
@@ -1524,34 +2034,55 @@ LM_ByteClearRange:
 	;  output:
 	;	n/a
 
+
 	push ebp
 	mov ebp, esp
 
 	; define input parameters
-	%define byteAddress							dword [ebp + 8]
-	%define startBit							dword [ebp + 12]
-	%define endBit								dword [ebp + 16]
+	%define address								dword [ebp + 8]
+	%define byteAddress							dword [ebp + 12]
+	%define startBit							dword [ebp + 16]
+	%define endBit								dword [ebp + 20]
 
 
-	mov ebx, byteAddress
-	mov ecx, endBit
+	; load the byte on which we'll be working
+	mov esi, byteAddress
+	mov ebx, 0
+	mov bl, [esi]
+
+	; load and adjust setCount
+	mov edi, address
+	mov eax, [edi + tBitfieldInfo.setCount]
+	popcnt ecx, ebx
+	sub eax, ecx
+
+	; loop through and handle the bits
 	mov edx, startBit
+	mov ecx, endBit
+	sub ecx, edx
+	inc ecx
+	.bitLoop:
+		btr ebx, edx
+		inc edx
+	loop .bitLoop
 
-	.BitLoop:
-		btr [ebx], ecx
-		cmp ecx, edx
-		je .Exit
-		dec ecx
-	jmp .BitLoop
+	; adjust and save setCount
+	popcnt ecx, ebx
+	add eax, ecx
+	mov [edi + tBitfieldInfo.setCount], eax
+
+	; write the finished byte back to memory
+	mov [esi], bl
 
 
 	.Exit:
+	%undef address
 	%undef byteAddress
 	%undef startBit
 	%undef endBit
 	mov esp, ebp
 	pop ebp
-ret 12
+ret 16
 
 
 
@@ -1563,6 +2094,7 @@ LM_ByteFlipRange:
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
+	;	Bitfield address
 	;	Byte address
 	;	Start of bit range
 	;	End of bit range
@@ -1574,30 +2106,50 @@ LM_ByteFlipRange:
 	mov ebp, esp
 
 	; define input parameters
-	%define byteAddress							dword [ebp + 8]
-	%define startBit							dword [ebp + 12]
-	%define endBit								dword [ebp + 16]
+	%define address								dword [ebp + 8]
+	%define byteAddress							dword [ebp + 12]
+	%define startBit							dword [ebp + 16]
+	%define endBit								dword [ebp + 20]
 
 
-	mov ebx, byteAddress
-	mov ecx, endBit
+	; load the byte on which we'll be working
+	mov esi, byteAddress
+	mov ebx, 0
+	mov bl, [esi]
+
+	; load and adjust setCount
+	mov edi, address
+	mov eax, [edi + tBitfieldInfo.setCount]
+	popcnt ecx, ebx
+	sub eax, ecx
+
+	; loop through and handle the bits
 	mov edx, startBit
+	mov ecx, endBit
+	sub ecx, edx
+	inc ecx
+	.bitLoop:
+		btc ebx, edx
+		inc edx
+	loop .bitLoop
 
-	.BitLoop:
-		btc [ebx], ecx
-		cmp ecx, edx
-		je .Exit
-		dec ecx
-	jmp .BitLoop
+	; adjust and save setCount
+	popcnt ecx, ebx
+	add eax, ecx
+	mov [edi + tBitfieldInfo.setCount], eax
+
+	; write the finished byte back to memory
+	mov [esi], bl
 
 
 	.Exit:
+	%undef address
 	%undef byteAddress
 	%undef startBit
 	%undef endBit
 	mov esp, ebp
 	pop ebp
-ret 12
+ret 16
 
 
 
@@ -1609,6 +2161,7 @@ LM_ByteSetRange:
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
+	;	Bitfield address
 	;	Byte address
 	;	Start of bit range
 	;	End of bit range
@@ -1620,30 +2173,50 @@ LM_ByteSetRange:
 	mov ebp, esp
 
 	; define input parameters
-	%define byteAddress							dword [ebp + 8]
-	%define startBit							dword [ebp + 12]
-	%define endBit								dword [ebp + 16]
+	%define address								dword [ebp + 8]
+	%define byteAddress							dword [ebp + 12]
+	%define startBit							dword [ebp + 16]
+	%define endBit								dword [ebp + 20]
 
 
-	mov ebx, byteAddress
-	mov ecx, endBit
+	; load the byte on which we'll be working
+	mov esi, byteAddress
+	mov ebx, 0
+	mov bl, [esi]
+
+	; load and adjust setCount
+	mov edi, address
+	mov eax, [edi + tBitfieldInfo.setCount]
+	popcnt ecx, ebx
+	sub eax, ecx
+
+	; loop through and handle the bits
 	mov edx, startBit
+	mov ecx, endBit
+	sub ecx, edx
+	inc ecx
+	.bitLoop:
+		bts ebx, edx
+		inc edx
+	loop .bitLoop
 
-	.BitLoop:
-		bts [ebx], ecx
-		cmp ecx, edx
-		je .Exit
-		dec ecx
-	jmp .BitLoop
+	; adjust and save setCount
+	popcnt ecx, ebx
+	add eax, ecx
+	mov [edi + tBitfieldInfo.setCount], eax
+
+	; write the finished byte back to memory
+	mov [esi], bl
 
 
 	.Exit:
+	%undef address
 	%undef byteAddress
 	%undef startBit
 	%undef endBit
 	mov esp, ebp
 	pop ebp
-ret 12
+ret 16
 
 
 

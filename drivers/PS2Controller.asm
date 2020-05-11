@@ -361,11 +361,7 @@ PS2ControllerInit:
 
 
 	; allocate some RAM for the key buffer
-	push 256
-	push 1
 	call MemAllocate
-
-	; check for error
 	cmp edx, kErrNone
 	jne .errorTimeout
 	

@@ -588,10 +588,8 @@ IDEDetectChannelDevice:
 	%define driveListSlotAddress				dword [ebp - 8]
 
 
-	; allocate a sector's worth of RAM
+	; allocate a sector's worth of RAM - one page will do
 	; add code here to determine the sector size first, then allocate
-	push 512
-	push dword 1
 	call MemAllocate
 
 	; see if there was an error, if not save the pointer
@@ -621,13 +619,13 @@ IDEDetectChannelDevice:
 
 
 		; get first free slot
-		push dword [tSystem.listDrives]
+		push dword [tSystem.listPtrDrives]
 		call LMSlotFindFirstFree
 
 
 		; get the address of that slot into esi
 		push eax
-		push dword [tSystem.listDrives]
+		push dword [tSystem.listPtrDrives]
 		call LMElementAddressGet
 		mov driveListSlotAddress, esi
 
@@ -651,11 +649,8 @@ IDEDetectChannelDevice:
 
 
 		; allocate 1 MiB cache for this drive and save the address
-		push dword 1048576
-		push dword 1
+		; it's safe to ignore this for now since we don't use the cache yet anyway
 		call MemAllocate
-
-		; see if there was an error, if not save the pointer
 		cmp edx, kErrNone
 		jne .Exit
 		mov esi, driveListSlotAddress
@@ -1295,7 +1290,7 @@ IDEServiceHandler:
 
 
 		push parameter1
-		push dword [tSystem.listDrives]
+		push dword [tSystem.listPtrDrives]
 		call LMElementAddressGet
 
 		cmp edx, kErrNone
@@ -1332,7 +1327,7 @@ IDEServiceHandler:
 
 
 		push driveNumber
-		push dword [tSystem.listDrives]
+		push dword [tSystem.listPtrDrives]
 		call LMElementAddressGet
 
 		cmp edx, kErrNone

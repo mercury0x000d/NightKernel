@@ -466,17 +466,20 @@ IDTInit:
 	mov ebp, esp
 
 	; allocate 64 KiB for the IDT
-	push dword 65536
-	push dword 1
 	call MemAllocate
-
-	; see if there was an error, if not save the pointer
 	cmp edx, kErrNone
 	jne .Exit
 	mov dword [kIDTPtr], eax
 
 	; set the proper value into the IDT struct
 	mov dword [tIDT.base], eax
+
+	; to hold the whole IDT, we need 15 more pages of RAM
+	mov ecx, 15
+	.AllocateLoop:
+		call MemAllocate
+	loop .AllocateLoop
+
 
 	; set all the handler slots to the "unsupported routine" handler for sanity
 	mov ecx, 0x00000100

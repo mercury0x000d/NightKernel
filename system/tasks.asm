@@ -56,16 +56,11 @@ TaskInit:
 	mov ebp, esp
 
 
-	; the task list will be 256 entries of tTaskInfo structs
-	; allocate memory for the list
-	push 256 * tTaskInfo_size + 16
-	push dword 1
+	; the task list will be 256 entries of tTaskInfo structs (256 * tTaskInfo_size + 16)
 	call MemAllocate
-
-	; see if there was an error, if not save the pointer
 	cmp edx, kErrNone
 	jne .Exit
-	mov [tSystem.listTasks], eax
+	mov [tSystem.listPtrTasks], eax
 
 	; set up the list header
 	push 96
@@ -73,15 +68,23 @@ TaskInit:
 	push eax
 	call LMListInit
 
+	; to hold this list we need 6 more pages of RAM
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+
 	; Use up slots 0 and 1 so that they won't get assigned to tasks. Why do this? It all goes back to the fact that a task number
 	; of zero tells the Memory Manager that the memory block is empty, and task number 1 is the kernel itself.
 	push 0
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
 	mov [esi], dword 0xFFFFFFFF
 
 	push 1
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
 	mov [esi], dword 0xFFFFFFFF
 
@@ -112,6 +115,10 @@ TaskKill:
 	push ebp
 	mov ebp, esp
 
+	; allocate local variables
+	sub esp, 4
+	%define taskSlot							dword [ebp - 4]
+
 
 	; See if we're trying to kill task 1 and exit if so. Killing task 1 isn't so bad per se, since it isn't technically used for anything,
 	; but doing so would free all memory which was marked as in use by task 1. Since task 1 is the number used by the kernel itself,
@@ -128,8 +135,17 @@ TaskKill:
 
 	; get the slot address of the task specified
 	push dword [ebp + 8]
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
+	mov taskSlot, esi
+
+	; release memory used by this task
+	push dword [esi + tTaskInfo.stackAddress]
+	call MemDispose
+
+	mov esi, taskSlot
+	push dword [esi + tTaskInfo.kernelStackAddress]
+	call MemDispose
 
 	; zero out this task's memory slot
 	push 0x00000000
@@ -146,67 +162,11 @@ TaskKill:
 		mov dword [tSystem.currentTaskSlotAddress], 0
 	.SkipClearing:
 
-	; release all memory blocks in use by this task
-	push dword [ebp + 8]
-	call TaskMemDisposeAll
-
 	; put multitasking back as it was
 	pop eax
 	mov byte [tSystem.taskingEnable], al
 
 	.Done:
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
-
-
-section .text
-TaskMemDisposeAll:
-	; Disposes of all memory allocated by the task number specified
-	;
-	;  input:
-	;	Task number
-	;
-	;  output:
-	;	n/a
-
-	push ebp
-	mov ebp, esp
-
-	; allocate local variables
-	sub esp, 4
-	%define slotCounter							dword [ebp - 4]
-
-
-	push dword [tSystem.listMemory]
-	call LM_Internal_ElementCountGet
-
-	; set up a loop to step through every element of the memory list
-	.DisposeLoop:
-		; save the loop counter
-		mov slotCounter, ecx
-
-		push slotCounter
-		push dword [tSystem.listMemory]
-		call LM_Internal_ElementAddressGet
-
-		mov eax, dword [ebp + 8]
-		cmp dword [tMemInfo.task], eax
-		jne .SkipDispose
-			; if we get here, disposing is needed
-			push dword [tMemInfo.address]
-			call MemDispose
-		.SkipDispose:
-
-	mov ecx, slotCounter
-	loop .DisposeLoop
-
-
-	.Exit:
-	%undef slotCounter
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -243,7 +203,7 @@ TaskNameSet:
 	mov eax, taskNum
 	and eax, 0x000000FF
 	push eax
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LM_Internal_ElementAddressGet
 	mov taskSlotAddress, esi
 
@@ -308,13 +268,13 @@ TaskNew:
 	mov dataSegment, 0x23
 
 	; get first free slot in the task list
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LMSlotFindFirstFree
 	mov taskListSlot, eax
 
 	; get the starting address of that specific slot into esi
 	push eax
-	push dword [tSystem.listTasks]
+	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
 	mov taskListSlotAddress, esi
 
@@ -331,13 +291,9 @@ TaskNew:
 
 
 	; allocate some memory for this task's stack
-	; Intel *strongly* recommends aligning a 32-bit stack on a 32-bit boundary, so we allocate aligned to 4 bytes
-	push dword 4
-	push dword [tSystem.taskStackSize]
-	push taskListSlot
-	call MemAllocateAligned
-
-	; see if there was an error, if not save the pointer
+	; Intel *strongly* recommends aligning a 32-bit stack on a 32-bit boundary
+	; Thankfully our physical memory allocator already aligns everything so!
+	call MemAllocate
 	cmp edx, kErrNone
 	jne .Exit
 	mov esi, taskListSlotAddress
@@ -349,12 +305,7 @@ TaskNew:
 
 	; allocate some memory for this task's kernel stack
 	; the task number is this task's slot number
-	push dword 4
-	push dword [tSystem.taskKernelStackSize]
-	push taskListSlot
-	call MemAllocateAligned
-
-	; see if there was an error, if not save the pointer
+	call MemAllocate
 	cmp edx, kErrNone
 	jne .Exit
 	mov esi, taskListSlotAddress
@@ -510,7 +461,7 @@ TaskSwitch:
 	; Set up a loop to determine the next task to which we should switch. We simply step through every task's ESP
 	; value until we get one that's non-zero, then use it.
 	mov ebx, dword [tSystem.currentTask]
-	mov edi, dword [tSystem.listTasks]
+	mov edi, dword [tSystem.listPtrTasks]
 	.findNextTaskLoop:
 		; increment the task number using the low byte only to make sure we stay under 255
 		inc bl

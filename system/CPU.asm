@@ -33,6 +33,48 @@ bits 32
 
 
 section .text
+CPUInit:
+	; Configures CPU features
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+
+	; enable SSE extensions
+
+	; disable cr0.em
+	mov eax, cr0
+	and eax, 11111111111111111111111111111011b
+
+	; enable cr0.mp
+	or eax, 00000000000000000000000000000010b
+	mov cr0, eax
+
+	; enable cr4.osfxsr
+	mov eax, cr4
+	or eax, 00000000000000000000001000000000b
+
+	; enable cr4.osxmmexcpt
+	or eax, 00000000000000000000010000000000b
+	mov cr4, eax
+
+
+	.Exit:
+	mov esp, ebp
+	pop ebp
+ret
+
+
+
+
+
+section .text
 SetSystemCPUID:
 	; Probes the CPU using CPUID instruction and saves results to the tSystem structure
 	;

@@ -258,11 +258,7 @@ FAT16ChainDelete:
 
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
 	call MemAllocate
-
-	; see if there was an error, if not save the pointer
 	cmp edx, kErrNone
 	jne .Exit
 	mov sectorBufferPtr, eax
@@ -775,6 +771,7 @@ FAT16ChainRead:
 	jne .NotRootDir
 		; if we get here, it's the root directory being requested
 		; allocate enough RAM to hold it
+		; DEBUG - make this compatible with the new physical memory allocator
 		push bufferSize
 		push dword 1
 		call MemAllocate
@@ -1912,7 +1909,7 @@ FAT16FATBackup:
 
 	; get the address of this partition's slot in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LM_Internal_ElementAddressGet
 	mov partitionSlotPtr, esi
 
@@ -3731,31 +3728,31 @@ FAT16ServiceHandler:
 		; set this dispatch routine as the handler for all the partition types we handle
 		; FAT16 "small" volume
 		push 0x04
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; FAT16 "large" volume
 		push 0x06
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; Windows 95 FAT16 volume
 		push 0x0E
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; Hidden FAT16 volume
 		push 0x16
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; Hidden Windows 95 FAT16 volume
 		push 0x1E
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
@@ -3953,12 +3950,12 @@ FAT32ServiceHandler:
 	jne .NotInit
 		; init - set FAT32 handler addresses
 		push 0x0B
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT32ServiceHandler
 
 		push 0x0C
-		push dword [tSystem.listFSHandlers]
+		push dword [tSystem.listPtrFSHandlers]
 		call LM_Internal_ElementAddressGet
 		mov dword [esi], FAT32ServiceHandler
 	.NotInit:

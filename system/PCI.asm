@@ -664,7 +664,7 @@ PCIHandlerGet:
 
 	; get slot address
 	push eax
-	push dword [tSystem.listPCIHandlers]
+	push dword [tSystem.listPtrPCIHandlers]
 	call LMElementAddressGet
 
 	; return slot contents in eax
@@ -711,7 +711,7 @@ PCIHandlerSet:
 
 	; get slot address
 	push eax
-	push dword [tSystem.listPCIHandlers]
+	push dword [tSystem.listPtrPCIHandlers]
 	call LMElementAddressGet
 
 	; insert address into slot

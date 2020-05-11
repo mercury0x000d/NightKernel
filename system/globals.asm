@@ -35,7 +35,7 @@ tSystem:
 	.configBits									dd 00000000000000000000000000000111b
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2020', 0x00
 	.versionMajor								db 0x00
-	.versionMinor								db 0x1E
+	.versionMinor								db 0x1F
 	.versionBuild								dd BUILD
 	.ticksSinceBoot								dd 0x00000000
 	.currentTask								dd 0x00000000
@@ -67,23 +67,21 @@ tSystem:
 	.mouseZ										dw 0x0000
 
 section .bss
-	.bitfieldPagesAllocated						resd 1
-	.bitfieldPagesReserved						resd 1
-	.bitfieldSize								resd 1
-	.BIOSMemMapShadowPtr						resd 1
-	.BIOSMemMapShadowEntries					resd 1
-	.BIOSMemMapShadowSize						resd 1
+	.bitfieldPtrPagesAllocated					resd 1
+	.bitfieldPtrPagesReserved					resd 1
+	.bitfieldPtrSize							resd 1
+	.memoryBIOSMapShadowPtr						resd 1
+	.memoryBIOSMapShadowEntryCount				resd 1
+	.memoryBIOSMapShadowSize					resd 1
 	.memoryManagementSpace						resd 1
 	.memoryKiBInstalled							resd 1
 	.memoryKiBUsable							resd 1
-	.memoryInitialAvailableBytes				resd 1
-	.memoryKiBFree								resd 1
-	.listDrives									resd 1
-	.listDriveLetters							resd 1
-	.listFSHandlers								resd 1
-	.listPartitions								resd 1
-	.listPCIHandlers							resd 1
-	.listTasks									resd 1
+	.listPtrDrives								resd 1
+	.listPtrDriveLetters						resd 1
+	.listPtrFSHandlers							resd 1
+	.listPtrPartitions							resd 1
+	.listPtrPCIHandlers							resd 1
+	.listPtrTasks								resd 1
 	.PCIDeviceCount								resd 1
 	.PCIVersion									resd 1
 	.PCICapabilities							resd 1
@@ -100,9 +98,6 @@ section .bss
 	.RTCYear									resb 1
 	.RTCMonth									resb 1
 	.RTCDay										resb 1
-
-
-.listMemory										resd 1
 
 
 

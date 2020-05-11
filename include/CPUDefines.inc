@@ -19,4 +19,5 @@
 
 
 ; declare functions as global
+global CPUInit
 global SetSystemCPUID

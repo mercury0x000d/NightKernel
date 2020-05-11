@@ -37,7 +37,7 @@ gCursorY										db 0x01
 gTextColor										db 0x07
 gBackColor										db 0x00
 kMaxLines										db 25
-kBytesPerScreen									dw 4000
+kBytesPerScreen									dd 4000
 
 
 
@@ -349,7 +349,7 @@ ScreenClear16:
 	shl ah, 4
 
 	; set up the loop value
-	mov cx, word [kBytesPerScreen]
+	mov ecx, dword [kBytesPerScreen]
 
 	; divide by 2 since we're writing words
 	shr ecx, 1
@@ -384,21 +384,21 @@ ScreenScroll16:
 	push bp
 	mov bp, sp
 
-	; allocate local variables
-	sub sp, 2
-	%define lineCount							word [bp - 2]
+
+	; define input parameters
+	%define lineCount							word [ebp + 4]
 
 
-	mov cx, word [ebp + 4]
+	mov cx, lineCount
 
 	.ScrollLoop:
 		; preserve the line counter
 		mov lineCount, cx
 
-		mov cx, word [kBytesPerScreen]
+		mov ecx, dword [kBytesPerScreen]
 
 		; divide the counter by 8 since we're copying that many bytes at a time
-		shr cx, 3
+		shr ecx, 3
 
 		mov ax, 0xB800
 		mov si, 160
@@ -976,28 +976,14 @@ ScreenClear32:
 	%define clearColor							dword [ebp + 8]
 
 
-	; see how many bytes make up this screen mode
-	mov cx, word [kBytesPerScreen]
-
-	; load the write address
-	mov esi, 0xB8000
-
-	; divide by 2 since we're writing words
-	shr ecx, 1
-
-	; set up the word we're writing
-	mov ebx, clearColor
-	xor ax, ax
-	mov ah, bl
-	shl ah, 4
-
-	.aloop:
-		mov word [esi], ax
-		add esi, 2
-	loop .aloop, cx
+	push clearColor
+	push dword [kBytesPerScreen]
+	push dword 0x0000B8000
+	call MemFill
 
 	; reset the cursor position
 	call CursorHome
+
 
 	.Exit:
 	%undef clearColor
@@ -1026,37 +1012,20 @@ ScreenScroll32:
 	%define lineCount							dword [ebp + 8]
 
 
+	; catalyze the loop
 	mov ecx, lineCount
-
 	.ScrollLoop:
 		; preserve the line counter
-		mov edx, ecx
+		mov lineCount, ecx
 
-		; get how many bytes we have per screen full of info
-		mov ecx, 0x00000000
-		mov cx, word [kBytesPerScreen]
-
-		; divide the counter by 8 since we're copying that many bytes at a time
-		shr ecx, 3
-
-		mov esi, 0xB80A0
-		mov edi, 0xB8000
-		.copyLoop:
-			; read data in
-			mov eax, [esi]
-			add esi, 4
-			mov ebx, [esi]
-			add esi, 4
-			
-			; write data out
-			mov [edi], eax
-			add edi, 4
-			mov [edi], ebx
-			add edi, 4
-		loop .copyLoop
+		; scroll one line
+		push dword [kBytesPerScreen]
+		push dword 0x0000B8000
+		push dword 0x0000B80A0
+		call MemCopy
 
 		; restore line counter
-		mov ecx, edx
+		mov ecx, lineCount
 	loop .ScrollLoop
 
 
