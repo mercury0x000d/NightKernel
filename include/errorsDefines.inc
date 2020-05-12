@@ -26,6 +26,7 @@
 %define kErrValueTooLow							0xF001
 %define kErrValueTooHigh						0xF002
 %define kErrTimeout								0xF003
+%define kErrNotFound							0xF004
 
 ; filesystem errors
 %define kErrDriveLetterInvalid					0xFB00

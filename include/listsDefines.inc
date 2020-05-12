@@ -27,6 +27,14 @@
 
 
 
+; tBitfieldInfo struct, used to manage bitfields
+struc tBitfieldInfo
+	.signature									resd 1
+	.setCount									resd 1
+	.elementCount								resd 1
+	.listSize									resd 1
+endstruc
+
 ; tListInfo struct, used to manage lists
 struc tListInfo
 	.signature									resd 1
@@ -41,8 +49,11 @@ endstruc
 
 ; declare functions as global
 global LMBitfieldInit
+global LMBitfieldScanClear
+global LMBitfieldScanSet
+global LMBitfieldSpaceCalc
 global LMBitfieldValidate
-global LMBitfieldElementValidate
+global LMBitfieldValidateElement
 global LMBitClear
 global LMBitClearRange
 global LMBitFlip
@@ -50,6 +61,7 @@ global LMBitFlipRange
 global LMBitGet
 global LMBitSet
 global LMBitSetRange
+global LMCountBitsSet
 global LMElementAddressGet
 global LMElementCountGet
 global LMElementCountSet
@@ -61,6 +73,7 @@ global LMItemAddAtSlot
 global LMListCompact
 global LMListInit
 global LMListSearch
+global LMListSpaceCalc
 global LMListValidate
 global LMSlotFindFirstFree
 global LMSlotFreeTest
@@ -75,7 +88,3 @@ global LM_Internal_ListCompact
 global LM_Internal_ListSearch
 global LM_Internal_SlotFindFirstFree
 global LM_Internal_SlotFreeTest
-
-
-
-

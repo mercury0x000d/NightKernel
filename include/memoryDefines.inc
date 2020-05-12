@@ -63,6 +63,7 @@ global MemFill
 global MemFindMostSuitable
 global MemInit
 global MemMergeBlocks
+global MemPagesNeeded
 global MemSearchWord
 global MemSearchDWord
 global MemSearchString

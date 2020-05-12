@@ -535,199 +535,49 @@ ret 8
 
 
 section .text
-MemAddressToBlock:
-	; Returns the block number referenced by the address specified
-	;
-	;  input:
-	;	Block address
-	;
-	;  output:
-	;	EAX - Element number of block
-	;	EDX - Result
-	;		true - Block was matched
-	;		false - Block was not matched
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define address								dword [ebp + 8]
-
-	; allocate local variables
-	sub esp, 4
-	%define loopCounter							dword [ebp - 4]
-
-
-	; set up a loop to step through all elements in the memory list for printing
-	push dword [tSystem.listMemory]
-	call LMElementCountGet
-	dec ecx
-
-	.MemorySearchLoop:
-
-		; save the important stuff for later
-		mov loopCounter, ecx
-
-		; get the address of this element
-		push ecx
-		push dword [tSystem.listMemory]
-		call LMElementAddressGet
-
-		; if there was an error, we can exit now
-		cmp edx, 0
-		jne .FailedToMatch
-
-		; see if the address of this block matches the one we're trying to release
-		mov eax, address
-		mov ebx, [esi + tMemInfo.address]
-		cmp eax, ebx
-		jne .NextIteration
-
-		; if we get here, the addresses match! let's report back to the caller
-		mov eax, loopCounter
-		mov edx, true
-		jmp .Exit
-
-		.NextIteration:
-		; restore the important stuff
-		mov ecx, loopCounter
-	loop .MemorySearchLoop
-
-
-	.FailedToMatch:
-	; if we get here, there was no match
-	; time to go home with our tail between our legs
-	mov eax, 0
-	mov edx, false
-
-
-	.Exit:
-	%undef address
-	%undef loopCounter
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
-
-
-section .text
 MemAllocate:
-	; Returns the address of a memory block of the requested size, or zero if unavailble
+	; Returns the address of the first free memory block and marks it allocated in the memory management bitfield
 	;
 	;  input:
-	;	Requesting task number
-	;	Requested memory size in bytes
+	;	n/a
 	;
 	;  output:
 	;	EAX - Address of requested block, or zero if call fails
 	;	EDX - Error code
 
-	; This function implements a best-fit algorithm to fulfill memory requests. Why best-fit? Because it's better at keeping larger
-	; contiguous free blocks available and the additional overhead to implement it is no big deal to modern processors.
-
 	push ebp
 	mov ebp, esp
 
-	; define input parameters
-	%define taskNum								dword [ebp + 8]
-	%define memorySize							dword [ebp + 12]
-
 	; allocate local variables
 	sub esp, 4
-	%define currentBestCandidate				dword [ebp - 4]
+	%define bitNumber							dword [ebp - 4]
 
 
-	; make sure the task number is valid (e.g. nonzero, since we use zero to denote a block that's free)
-	; if this check wasn't done, a memory block could be allocated with a task value of 0, and the rest of the
-	; memory manager calls would see the block as available for use, even though the calling task is using it
-	; As you can imagine, this is a Certified Very Bad Thing.
-	cmp taskNum, 0
-	mov edx, kErrInvalidParameter
-	je .Exit
-
-	push memorySize
-	call MemFindMostSuitable
-	mov currentBestCandidate, eax
-
-	; see if we actually got anything
-	cmp edx, true
+	; get the first free block
+	push 0
+	push dword [tSystem.bitfieldPtrPagesAllocated]
+	call LMBitfieldScanClear
+	cmp edx, kErrNone
 	jne .Fail
 
-	; Below we do the heavy-lifting of handling this request. This is done by cloning the "best candidate" element we just found,
-	; then editing the original to reflect a slightly lower amount of free space since we're trimming off of it to fulfill the
-	; memory request. The clone, which gets created right after the original block in the memory list, will get set to values
-	; which reflect the details of the memory we're taking away.
+	; make sure it's no more than 0xFFFFF since that's all we can directly deal with using 32-bit registers
+	; 0xFFFFF * 0x1000 = 0xFFFFF000... one more page would be above 4 GiB
+	cmp eax, 0xFFFFF
+	ja .Fail
 
-	; grow the memory list
-	push currentBestCandidate
-	call Mem_Internal_MemListGrow
+	; save the bit number for later
+	mov bitNumber, eax
 
-	; test for error
-	cmp edx, true
+	; mark it allocated
+	push eax
+	push dword [tSystem.bitfieldPtrPagesAllocated]
+	call LMBitSet
+	cmp edx, kErrNone
 	jne .Fail
 
-	; get the address of the "best candidate" element (the "original")
-	push currentBestCandidate
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-
-	; save the address and size of this block for later
-	push dword [esi + tMemInfo.address]
-	push dword [esi + tMemInfo.size]
-
-	; shrink this block by the amount we're using
-	mov eax, dword [esi + tMemInfo.size]
-	sub eax, memorySize
-	mov dword [esi + tMemInfo.size], eax
-
-	; see if this block's size now = 0 and delete it if necessary
-	cmp eax, 0
-	jne .BlockSizeNotZero
-		; if we get here, the element needs deleted since it's empty 
-		push currentBestCandidate
-		push dword [tSystem.listMemory]
-		call LMElementDelete
-		dec currentBestCandidate
-	.BlockSizeNotZero:
-
-	; get the address of the new cloned element
-	mov eax, currentBestCandidate
-	inc eax
-	push eax
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-
-	; calculate the address using the values we saved earlier
-	pop ebx
-	pop eax
-	mov edx, memorySize
-	mov ecx, eax
-	add ecx, ebx
-	sub ecx, edx
-	mov dword [esi + tMemInfo.address], ecx
-
-	; set the size
-	mov eax, memorySize
-	mov dword [esi + tMemInfo.size], eax
-
-	; set the requesting task field
-	mov ebx, taskNum
-	mov dword [esi + tMemInfo.task], ebx
-
-	; prepare to return address of this block
-	push ecx
-
-	; we don't want to hand out blocks that are all dirtied up with old data
-	; increase security AND sanity by zeroing the block here
-	push 0x00000000
-	push eax
-	push ecx
-	call MemFill
-
-	; reload the address and exit
-	pop eax
+	; and exit!
+	mov eax, bitNumber
+	shl eax, 12
 	mov edx, kErrNone
 	jmp .Exit
 
@@ -737,169 +587,11 @@ MemAllocate:
 	mov eax, 0
 	mov edx, kErrOutOfMemory
 
-
 	.Exit:
-	%undef taskNum
-	%undef memorySize
-	%undef currentBestCandidate
+	%undef bitNumber
 	mov esp, ebp
 	pop ebp
-ret 8
-
-
-
-
-
-section .text
-MemAllocateAligned:
-	; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble
-	;
-	;  input:
-	;	Requesting task number
-	;	Requested memory size in bytes
-	;	Alignment necessary
-	;
-	;  output:
-	;	EAX - Address of requested block, or zero if call fails
-	;	EDX - Error code
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define taskNum								dword [ebp + 8]
-	%define memorySize							dword [ebp + 12]
-	%define alignment							dword [ebp + 16]
-
-	; allocate local variables
-	sub esp, 20
-	%define blockAddress						dword [ebp - 4]
-	%define blockAddressAligned					dword [ebp - 8]
-	%define blockLeadingSize					dword [ebp - 12]
-	%define blockTrailingSize					dword [ebp - 16]
-	%define blockRequestedSize					dword [ebp - 20]
-
-	; make sure alignment is 2 or greater to avoid both wasted time (1) and division by zero errors (0)
-	cmp alignment, 2
-	jb .Exit
-
-	; first, simply try allocating a block normally. never know... we may happen to get one that's already at an aligned address!
-	push memorySize
-	push taskNum
-	call MemAllocate
-	mov blockAddress, eax
-
-	; make sure we didn't get a bad block
-	cmp blockAddress, 0
-	jne .BlockValid1
-		; if we get here, the block was invalid, e.g. out of memory
-		mov edx, kErrOutOfMemory
-		mov eax, 0
-		jmp .Exit
-	.BlockValid1:
-
-	; see if the address we just got is aligned properly
-	push alignment
-	push blockAddress
-	call MemAddressAlign
-
-	; check the result; if the two addresses match, we're good to exit now!
-	cmp eax, blockAddress
-	jne .NotAligned
-		; if we get here, we happened to be aligned!
-		mov edx, 0
-		mov eax, blockAddress
-		jmp .Exit
-	.NotAligned:
-
-	; if we get here, that last attempt didn't get us an aligned block
-	; release it and start over
-	push blockAddress
-	call MemDispose
-
-	; calculate the block size we'll need to allocate
-	mov eax, memorySize
-	add eax, alignment
-	mov blockRequestedSize, eax
-
-	; allocate a block of sufficient size
-	push eax
-	push taskNum
-	call MemAllocate
-	mov blockAddress, eax
-
-	; make sure we didn't get a bad block
-	cmp blockAddress, 0
-	jne .BlockValid2
-		; if we get here, the block was invalid so we report an out of memory fail
-		mov edx, kErrOutOfMemory
-		mov eax, 0
-		jmp .Exit
-	.BlockValid2:
-
-	; calculate the address inside this block which lies at the proper alignment
-	push alignment
-	push blockAddress
-	call MemAddressAlign
-	mov blockAddressAligned, eax
-
-
-	; calculate the size at the beginning of the block which leads upto the actual aligned address (leading space)
-	mov ebx, blockAddress
-	sub eax, ebx
-	mov blockLeadingSize, eax
-
-	; calculate the size at the end which we will be trimming off (trailing space)
-	mov eax, blockRequestedSize
-	sub eax, memorySize
-	sub eax, blockLeadingSize
-	mov blockTrailingSize, eax
-
-	; if blockAddress = blockAddressAligned, then we happened to get a block that's already aligned
-	; if they aren't equal, we need to trim both the leading and trailing space
-	; if they are equal, we only need to trim the trailing space
-	mov eax, blockAddressAligned
-	mov ebx, blockAddress
-	cmp eax, ebx
-	je .TrimEnd
-
-	; Trim the beginning then adjust blockAddress accordingly
-	mov eax, blockRequestedSize
-	sub eax, blockLeadingSize
-	push dword eax
-	push dword blockAddress
-	call MemShrinkFromBeginning
-
-	mov eax, blockAddress
-	add eax, blockLeadingSize
-	mov blockAddress, eax
-
-	.TrimEnd:
-	; Trim the end. duh.
-	mov eax, blockRequestedSize
-	sub eax, blockLeadingSize
-	sub eax, blockTrailingSize
-	push dword eax
-	push dword blockAddress
-	call MemShrinkFromEnd
-
-	; set the return values and exit
-	mov edx, kErrNone
-	mov eax, blockAddress
-
-
-	.Exit:
-	%undef taskNum
-	%undef memorySize
-	%undef alignment
-	%undef blockAddress
-	%undef blockAddressAligned
-	%undef blockLeadingSize
-	%undef blockTrailingSize
-	%undef blockRequestedSize
-	mov esp, ebp
-	pop ebp
-ret 12
+ret
 
 
 
@@ -977,51 +669,87 @@ MemCopy:
 	%define length								dword [ebp + 16]
 
 
+	; load ye olde addresses
 	mov esi, source
 	mov edi, dest
+
+	; to copy at top speed, we will break the copy operation into parts
+
+	; first, see how many multiples of 128 need transferred, and do those in 128-byte chunks
 	mov ecx, length
-
-	; to copy at top speed, we will break the copy operation into two parts
-	; first, we'll see how many multiples of 16 need transferred, and do those in 16-byte chunks
-
-	; divide by 8
-	shr ecx, 3
+	shr ecx, 7
 
 	; make sure the loop doesn't get executed if the counter is zero
 	cmp ecx, 0
-	je .ChunkLoopDone
+	je .SSEBlockLoopDone
 
 	; do the copy
-	.ChunkLoop:
-		; read 8 bytes in
-		mov eax, [esi]
-		add esi, 4
-		mov ebx, [esi]
-		add esi, 4
+	.SSEBlockLoop:
+		; read 128 bytes in
+		movdqu xmm0, [esi]
+		movdqu xmm1, [esi + 0x10]
+		movdqu xmm2, [esi + 0x20]
+		movdqu xmm3, [esi + 0x30]
+		movdqu xmm4, [esi + 0x40]
+		movdqu xmm5, [esi + 0x50]
+		movdqu xmm6, [esi + 0x60]
+		movdqu xmm7, [esi + 0x70]
 
 		; write them out
-		mov [edi], eax
-		add edi, 4
-		mov [edi], ebx
-		add edi, 4
-	loop .ChunkLoop
-	.ChunkLoopDone:
+		movdqu [edi], xmm0
+		movdqu [edi + 0x10], xmm1
+		movdqu [edi + 0x20], xmm2
+		movdqu [edi + 0x30], xmm3
+		movdqu [edi + 0x40], xmm4
+		movdqu [edi + 0x50], xmm5
+		movdqu [edi + 0x60], xmm6
+		movdqu [edi + 0x70], xmm7
 
-	; now restore the transfer amount
-	mov ecx, [ebp + 16]
-	; see how many bytes we have remaining
-	and ecx, 0x00000007
+		add esi, 128
+		add edi, 128
+	loop .SSEBlockLoop
+	.SSEBlockLoopDone:
+
+
+
+	; next, see how many multiples of 16 need transferred, and do those in 16-byte chunks
+	mov ecx, length
+	and ecx, 00000000000000000000000001111111b
+	shr ecx, 4
 
 	; make sure the loop doesn't get executed if the counter is zero
 	cmp ecx, 0
-	je .Exit
+	je .SSESingleLoopDone
+
+	; do the copy
+	.SSESingleLoop:
+		; read 16 bytes in
+		movdqu xmm0, [esi]
+
+		; write them out
+		movdqu [edi], xmm0
+
+		add esi, 16
+		add edi, 16
+	loop .SSESingleLoop
+	.SSESingleLoopDone:
+
+
+
+	; now see how many bytes we have remaining
+	mov ecx, length
+	and ecx, 00000000000000000000000000001111b
+
+	; make sure the loop doesn't get executed if the counter is zero
+	cmp ecx, 0
+	je .ByteLoopDone
 
 	; and do the copy
 	.ByteLoop:
 		lodsb
-		mov byte [edi], al
-		inc edi	
+		stosb
 	loop .ByteLoop
+	.ByteLoopDone:
 
 
 	.Exit:
@@ -1044,7 +772,7 @@ MemDispose:
 	;	Address of block (as provided by MemAllocate())
 	;
 	;  output:
-	;	n/a
+	;	EDX - Error code
 
 	push ebp
 	mov ebp, esp
@@ -1057,27 +785,27 @@ MemDispose:
 	%define elementNum							dword [ebp - 4]
 
 
-	; find which block number begins with this address
-	push address
-	call MemAddressToBlock
-	mov elementNum, eax
+	; if we have a misaligned address, throw an error
+	mov eax, address
+	and eax, 00000000000000000000111111111111b
+	cmp eax, 0
+	jne .Fail
 
-	; test for success
-	cmp edx, true
-	jne .Exit
-
-	; get the address of this element
-	push eax
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
+	; convert address to bit number (bit number = address / 4096)
+	mov eax, address
+	shr eax, 12
 
 	; mark the block free
-	mov dword [esi + tMemInfo.task], 0
+	push eax
+	push dword [tSystem.bitfieldPtrPagesAllocated]
+	call LMBitClear
+	cmp edx, kErrNone
+	jne .Fail
 
-	; try to condense the memory list
-	push elementNum
-	call MemMergeBlocks
+	jmp .Exit
 
+	.Fail:
+	mov edx, kErrInvalidParameter
 
 	.Exit:
 	%undef address
@@ -1111,19 +839,35 @@ MemFill:
 	%define value								dword [ebp + 16]
 
 
-	mov esi, address
-	mov ecx, length
+	mov edi, address
 	mov ebx, value
 
-	mov edi, esi
-	add edi, ecx
+	; clone al to the remaining bytes in EAX
+	; e.g. 0xBE becomes 0xBEBEBEBE, or 0xAA becomes 0xAAAAAAAA
+	mov bh, bl
+	mov ax, bx
+	shl eax, 16
+	mov ax, bx
 
-	.FillLoop:
-		cmp esi, edi
-		je .Exit
-		mov byte [esi], bl
-		inc esi
-	jmp .FillLoop
+	; since we're processing DWords here first, ecx = length / 4
+	mov ecx, length
+	shr ecx, 2
+	cmp ecx, 0
+	je .DWordTransferDone
+
+	rep stosd
+	.DWordTransferDone:
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .Exit
+
+	.ByteLoop:
+		stosb
+	loop .ByteLoop
 
 
 	.Exit:
@@ -1133,131 +877,6 @@ MemFill:
 	mov esp, ebp
 	pop ebp
 ret 12
-
-
-
-
-
-section .text
-MemFindMostSuitable:
-	; Returns the element number of the most suitable free block for handling a request of the size specified
-	;
-	;  input:
-	;	Size requested
-	;
-	;  output:
-	;	EAX - Most suitable element
-	;	EDX - Result
-	;		true = A suitable block was found
-	;		false = A suitable block was not found
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define size								dword [ebp + 8]
-
-	; allocate local variables
-	sub esp, 20
-	%define listIndexCounter					dword [ebp - 4]
-	%define bestCandidateSlot					dword [ebp - 8]
-	%define bestCandidateSize					dword [ebp - 12]
-	%define exitCode							dword [ebp - 16]
-	%define freeSpaceCounter					dword [ebp - 20]
-
-	; clear the best candidate variable
-	mov bestCandidateSlot, 0
-
-	; default to false
-	mov exitCode, false
-
-	; clear the temporary free space counter
-	mov freeSpaceCounter, 0
-
-	; set up a loop to step through all elements in the memory list
-	; get number of elements in memory list and save it to our loop index counter
-	push dword [tSystem.listMemory]
-	call LMElementCountGet
-
-	.MemoryListLoop:
-		; store ecx to the loop counter variable
-		mov listIndexCounter, ecx
-
-		; get the address of the current element
-		mov eax, listIndexCounter
-		dec eax
-		push eax
-		push dword [tSystem.listMemory]
-		call LMElementAddressGet
-
-		; see if this block is free, 
-		; if not, we go to the next block in the loop
-		mov eax, [esi + tMemInfo.task]
-		cmp eax, 0
-		jne .NextIteration
-
-		; load eax with the block's size
-		mov eax, [esi + tMemInfo.size]
-
-		; update the free memory counter
-		add freeSpaceCounter, eax
-
-		; see if the size of this block is big enough to meet the request
-		; if not, we go to the next block in the loop
-		mov ebx, size
-		cmp eax, ebx
-		jb .NextIteration
-
-			; it was adequate! ONLY if we've already found a block should we check the sizing of this block
-			; if we haven't found a block yet, it doesn't matter if we have a candidate yet or not
-			mov exitCode, true
-			jne .SkipSizeCheck
-				; let's see if it's larger than the current best candidate and jump to the next iteration if so
-				cmp eax, bestCandidateSize
-				ja .NextIteration
-			.SkipSizeCheck:
-
-
-			; we got here, so let's make note of this block
-
-			; note the slot number
-			mov ecx, listIndexCounter
-			dec ecx
-			mov bestCandidateSlot, ecx
-
-			; note the size of this free block
-			mov bestCandidateSize, eax
-
-			; set the flag that we did find something
-			mov exitCode, true
-
-	.NextIteration:
-	mov ecx, listIndexCounter
-	loop .MemoryListLoop
-
-	; update the system free space counter
-	; Q: Why not just update the counter itself directly?
-	; A: If this routine becomes more complex later on to the point that it may have the ability to encounter
-	; an error condition, we don't want it aborting and leaving the system counter in an undefined state.
-	mov eax, freeSpaceCounter
-; commented out pending compatibility with new memory handling method
-;	mov dword [tSystem.memoryFreeBytes], eax
-
-	; return what we found
-	mov eax, bestCandidateSlot
-	mov edx, exitCode
-
-
-	.Exit:
-	%undef size
-	%undef listIndexCounter
-	%undef bestCandidateSlot
-	%undef bestCandidateSize
-	%undef exitCode
-	%undef freeSpaceCounter
-	mov esp, ebp
-	pop ebp
-ret 4
 
 
 
@@ -1277,26 +896,24 @@ MemInit:
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 52
+	sub esp, 44
 	%define offset								dword [ebp - 4]
-	%define bitsRequired						dword [ebp - 8]
+	%define pagesNeeded							dword [ebp - 8]
 	%define qTotalBytes							qword [ebp - 16]
 	%define qUsableBytes						qword [ebp - 24]
 	%define qTotalBytesPtr						dword [ebp - 28]
 	%define qUsableBytesPtr						dword [ebp - 32]
 	%define entryLengthPtr						dword [ebp - 36]
 	%define memoryListBitfieldSpace				dword [ebp - 40]
-	%define memoryListAddr						dword [ebp - 44]
-	%define pagesNeeded							dword [ebp - 48]
-	%define loopIndex							dword [ebp - 52]
+	%define loopIndex							dword [ebp - 44]
 
 
 	; init important stuff
 	mov offset, 0x80000
 
-	pxor mm0, mm0
-	movq qTotalBytes, mm0
-	movq qUsableBytes, mm0
+	pxor xmm0, xmm0
+	movq qTotalBytes, xmm0
+	movq qUsableBytes, xmm0
 
 	mov eax, ebp
 	sub eax, 16
@@ -1306,7 +923,7 @@ MemInit:
 
 
 	; calculate the total amount of bytes in the system and save to qTotalBytes
-	mov ecx, dword [tSystem.BIOSMemMapShadowEntries]
+	mov ecx, dword [tSystem.memoryBIOSMapShadowEntryCount]
 	.MemAddLoop:
 		mov loopIndex, ecx
 
@@ -1363,43 +980,37 @@ MemInit:
 
 
 	; convert ebx to pages and save for later
+	; pagesNeeded = qUsableBytesPtr / 4
 	shr ebx, 2
 	mov pagesNeeded, ebx
 
 
-	; Now that we've processed all that, we need to allocate a place to store it. But how, when the memory management system isn't fully set up yet?
-	; A WILD SOLUTION APPEARS! It'll be super effective! 8)
+	; Now that we've processed all that, we need to allocate a place to store it. But how?? Memory management isn't fully set up yet!
+	; A WILD SOLUTION APPEARS! It'll be super effective! :D
 	; We step through the list again, this time looking for a spot that's appropriate to store the data we found.
 	; It has to be in the 32-bit address space (e.g. under 4 GiB) and large enough to hold the two memory bitfields and the shadowed map data.
 
 	; So, first step; figure out how much space we need for all that. EBX already contains the number of pages (and therefore bits) needed,
 	; and each bitfield will need a single bit per page represented, plus the bitfield header.
-	; tl;dr: EBX = (EBX / 8 + 16) * 2
-	mov ecx, ebx
-	mov eax, ebx
-	and eax, 0xFFFFFFF8
-	cmp eax, 0
-	je .NoAdjust
-		inc ecx
-	.NoAdjust:
-	shr ecx, 3
-	add ecx, 16
-	mov ebx, ecx
-	mov memoryListBitfieldSpace, ebx
-	shl ebx, 1
+	push ebx
+	call LMBitfieldSpaceCalc
+	mov memoryListBitfieldSpace, eax
 
-	; Now we add in the space occupied by the shadowed memory map data. (EBX = EBX + tSystem.BIOSMemMapShadowEntries * 20)
+	; Now we add in the space occupied by the shadowed memory map data. (EBX = EBX + tSystem.memoryBIOSMapShadowEntryCount * 20)
 	; This hack multiplies by 20 without trampling our registers like a MUL instruction would! :D
-	mov eax, dword [tSystem.BIOSMemMapShadowEntries]
-	mov ecx, eax
-	shl eax, 4
+	mov ebx, dword [tSystem.memoryBIOSMapShadowEntryCount]
+	mov ecx, ebx
+	shl ebx, 4
 	shl ecx, 2
-	add ecx, eax
-	mov dword [tSystem.BIOSMemMapShadowSize], ecx
-	add ebx, ecx
+	add ecx, ebx
+	mov dword [tSystem.memoryBIOSMapShadowSize], ecx
+	
+	; total space = eax * 2 + ecx
+	shl eax, 1
+	add eax, ecx
 	
 	; and lastly save EBX to the tSystem struct
-	mov dword [tSystem.memoryManagementSpace], ebx
+	mov dword [tSystem.memoryManagementSpace], eax
 
 
 	; now that we know how much space is needed, it's time to step through that list again and find a spot large enough to hold it
@@ -1408,7 +1019,7 @@ MemInit:
 	mov offset, 0x80000
 
 	; calculate the total amount of bytes in the system and save to qTotalBytes
-	mov ecx, dword [tSystem.BIOSMemMapShadowEntries]
+	mov ecx, dword [tSystem.memoryBIOSMapShadowEntryCount]
 	.MemSearchLoop:
 		mov loopIndex, ecx
 
@@ -1427,14 +1038,14 @@ MemInit:
 		cmp dword [tSystem.memoryManagementSpace], ebx
 		jnge .MemSearchLoopIterate
 
-		; Great, it's big enough! Now let's see if its starting address is in range. Technically, that range
-		; could be anywhere from 1 MiB to 4 GiB, but we'll say 2 GiB (0x80000000) here just to be safe.
+		; Great, it's big enough! Now let's see if its starting address is in range. Technically, that range could be
+		; anywhere from 1 MiB to 4 GiB, but we'll stay in the 1 MiB to 2 GiB (0x80000000) range just to be safe.
 		mov esi, offset
 		add esi, tBIOSMemMapEntry.address
 		mov ebx, [esi]
 
 		; preemptively save the address for later, just in case
-		mov dword [tSystem.bitfieldPagesAllocated], ebx
+		mov dword [tSystem.bitfieldPtrPagesAllocated], ebx
 
 		push 0x80000000
 		push 0x00100000
@@ -1455,7 +1066,8 @@ MemInit:
 	loop .MemSearchLoop
 
 	; If we get here, we're somehow running on a machine which has so little RAM that it doesn't even have space to track those same
-	; precious few bytes. How does such a paradox exist? Well I'm not sure, but the machine probably belongs to a FreeDOS user. ^_^
+	; precious few bytes. How does such a paradox exist? How did we even get this far in such a situation? Well I'm not sure, but such a
+	; machine probably belongs someone aghast that a 32-bit DOS even exists. ^_^ 
 	; Needless to say, this is an error condition. Consider printing a "It's time to upgrade your PC-XT." message.
 	mov edx, kErrMemoryInitFail
 	jmp .Exit
@@ -1465,60 +1077,68 @@ MemInit:
 	; if we get here, we got a good block in which we can create a pair of bitfields and shadow the memory map
 
 	; First, create said bitfields. That's right, TWO bitfields. And why, pray tell, are there two bitfields?
-	; One tracks which pages are allocated (0 if free, 1 if allocated) and the other tracks which pages are usable (0 if not usable, 1 if usable).
+	; pagesAllocated tracks which pages are allocated (0 if free, 1 if allocated).
+	; pagesReserved tracks which pages are reserved (0 if usable, 1 if reserved).
 	push pagesNeeded
-	push dword [tSystem.bitfieldPagesAllocated]
+	push dword [tSystem.bitfieldPtrPagesAllocated]
 	call LMBitfieldInit
 
 	; calculate the address of the next bitfield
-	mov eax, dword [tSystem.bitfieldPagesAllocated]
+	mov eax, dword [tSystem.bitfieldPtrPagesAllocated]
 	add eax, memoryListBitfieldSpace
-	mov dword [tSystem.bitfieldPagesReserved], eax
+	mov dword [tSystem.bitfieldPtrPagesReserved], eax
 
 	; create bitfield #2
 	push pagesNeeded
-	push dword [tSystem.bitfieldPagesReserved]
+	push dword [tSystem.bitfieldPtrPagesReserved]
 	call LMBitfieldInit
 
 	; next, we calculate the destination address for the memory map data
-	mov eax, dword [tSystem.bitfieldPagesAllocated]
+	mov eax, dword [tSystem.bitfieldPtrPagesAllocated]
 	add ebx, memoryListBitfieldSpace
 	shl ebx, 1
 	add eax, ebx
 
 	; save that address to the system struct
-	mov dword [tSystem.BIOSMemMapShadowPtr], eax
+	mov dword [tSystem.memoryBIOSMapShadowPtr], eax
 
 	; now we copy the BIOS memory map from 0x80000 to its spot in the memory management area
-	push dword [tSystem.BIOSMemMapShadowSize]
+	push dword [tSystem.memoryBIOSMapShadowSize]
 	push eax
 	push 0x80000
 	call MemCopy
 
 
-	; Next, we have to set up the bitfields we just allocated. Well, more precisely, one of them. After it's set up, we can simply
-	; MemCopy() it to the second since initially their contents will both be the same.
+	; Next, we have to set up the bitfields we just allocated. Note: Since the contents of both bitfields will initially be the same, we could
+	; just set up one bitfield here then simply MemCopy() it to the second one. But since the majority of memory in any PC will be usable RAM,
+	; the majority bits will not need set, meaning it would be wasteful to MemCopy() a ton of bits which will be unset anyway.
 
-	; The first 1 MiB is reserved for kernel use and certain system purposes, and as such should never be allocated to processes.
+	; The first 1 MiB (256 pages, or page numbers 0 through 255) of physical RAM is reserved for system purposes and therefore should never
+	; be allocated to processes.
 	push 255
 	push 0
-	push dword [tSystem.bitfieldPagesReserved]
+	push dword [tSystem.bitfieldPtrPagesAllocated]
+	call LMBitSetRange
+
+	push 255
+	push 0
+	push dword [tSystem.bitfieldPtrPagesReserved]
 	call LMBitSetRange
 
 
-	; Next, we parse the memory map to determine what gets reserved (e.g. marked in the tSystem.bitfieldPagesReserved bitfield to
+	; Next, we parse the memory map to determine what gets reserved (e.g. marked in the tSystem.bitfieldPtrPagesReserved bitfield to
 	; denote "should never be de-allocated"). We do this by examining every entry at or above the 1 MiB mark and setting the
 	; corresponding bits in the bitfield. This method makes the assumption that every such entry will have a length which is an even
 	; multiple of 4 KiB, and I believe that is a safe assumption to make, as every real machine which I have examined thus far (as well
 	; as VirtualBox) have all conformed to this pattern; not once did I see a memory entry at or over 1 MiB which was not an even
 	; multiple of 4 KiB.
 
-	; At this point, we have two copies of the BIOS memory map - one at the address denoted by tSystem.BIOSMemMapShadowPtr and the other
+	; At this point, we have two copies of the BIOS memory map - one at the address denoted by tSystem.memoryBIOSMapShadowPtr and the other
 	; at 0x80000. Since the operation of this loop is destructive, we use the "old" copy of the map at 0x80000.
 
 	; Init important... oh, you know the drill
 	mov offset, 0x80000
-	mov ecx, dword [tSystem.BIOSMemMapShadowEntries]
+	mov ecx, dword [tSystem.memoryBIOSMapShadowEntryCount]
 
 	.MemReservedLoop:
 		mov loopIndex, ecx
@@ -1541,7 +1161,6 @@ MemInit:
 		mov esi, offset
 		add esi, tBIOSMemMapEntry.address
 		push esi
-
 		call QuadShiftRight
 
 		push 12
@@ -1550,14 +1169,30 @@ MemInit:
 		push esi
 		call QuadShiftRight
 
-		; now we can mark the range as used
+
+		; mark the range as already allocated
 		mov esi, offset
 		mov eax, dword [esi + tBIOSMemMapEntry.address]
 		add eax, dword [esi + tBIOSMemMapEntry.length]
 		dec eax
 		push eax
 		push dword [esi + tBIOSMemMapEntry.address]
-		push dword [tSystem.bitfieldPagesReserved]
+		push dword [tSystem.bitfieldPtrPagesAllocated]
+		call LMBitSetRange
+
+		; check for errors
+		cmp edx, kErrNone
+		jne .Exit
+
+
+		; mark the range as reserved
+		mov esi, offset
+		mov eax, dword [esi + tBIOSMemMapEntry.address]
+		add eax, dword [esi + tBIOSMemMapEntry.length]
+		dec eax
+		push eax
+		push dword [esi + tBIOSMemMapEntry.address]
+		push dword [tSystem.bitfieldPtrPagesReserved]
 		call LMBitSetRange
 
 		; check for errors
@@ -1575,27 +1210,49 @@ MemInit:
 
 	; Next, we have to mark the space occupied by these data structures as reserved as well. The total space occupied by everything we need
 	; to manage memory (both bitfields and the shadowed BIOS memory map) is stored in dword [tSystem.memoryManagementSpace], so we first need
-	; to convert that to a number of pages.
-	mov eax, dword [tSystem.memoryManagementSpace] 
-	shr eax, 12
+	; to convert that to a number of pages and save it for later (we can reuse pagesNeeded for this).
+	push dword [tSystem.memoryManagementSpace] 
+	call MemPagesNeeded
+	mov pagesNeeded, eax
 
+	; now convert the starting address (tSystem.bitfieldPtrPagesAllocated) to a page/bit number/thingy
+	; bit number = tSystem.bitfieldPtrPagesAllocated / 4096
+	mov ebx, dword [tSystem.bitfieldPtrPagesAllocated]
+	shr ebx, 12
 
-jmp $
+	; mark the range as already allocated
+	add eax, ebx
+	dec eax
+	push eax
+	push ebx
+	push dword [tSystem.bitfieldPtrPagesAllocated]
+	call LMBitSetRange
+	cmp edx, kErrNone
+	jne .Exit
 
-
-	; Now that that's done, it's time to duplicate the Reserved bitfield to the Allocated bitfield.
-	push memoryListBitfieldSpace
-	push dword [tSystem.bitfieldPagesAllocated]
-	push dword [tSystem.bitfieldPagesReserved]
-	call MemCopy
-
-
-	; No errors? OH YEAH, WE'RE INVINCIBLE!!
-	mov edx, kErrNone
+	; mark the range as reserved
+	mov ebx, dword [tSystem.bitfieldPtrPagesAllocated]
+	shr ebx, 12
+	mov eax, pagesNeeded
+	add eax, ebx
+	dec eax
+	push eax
+	push ebx
+	push dword [tSystem.bitfieldPtrPagesReserved]
+	call LMBitSetRange
 
 
 	; and exit!
 	.Exit:
+	%undef offset
+	%undef pagesNeeded
+	%undef qTotalBytes
+	%undef qUsableBytes
+	%undef qTotalBytesPtr
+	%undef qUsableBytesPtr
+	%undef entryLengthPtr
+	%undef memoryListBitfieldSpace
+	%undef loopIndex
 	mov esp, ebp
 	pop ebp
 ret
@@ -1605,150 +1262,37 @@ ret
 
 
 section .text
-MemMergeBlocks:
-	; Merges any neighboring free memory list elements into the one specified
+MemPagesNeeded:
+	; Returns the number of 4 KiB memory pages needed to hold data of the specified size
 	;
 	;  input:
-	;	Memory list element number
+	;	Number of bytes
 	;
 	;  output:
-	;	n/a
+	;	EAX - Total pages which would be needed to hold the data
 
 	push ebp
 	mov ebp, esp
 
 	; define input parameters
-	%define elementNum							dword [ebp + 8]
-
-	; allocate 1ocal variables
-	sub esp, 16
-	%define lowerBlockElementNum				dword [ebp - 4]
-	%define higherBlockElementNum				dword [ebp - 8]
-	%define lowerBlockAddress					dword [ebp - 12]
-	%define higherBlockAddress					dword [ebp - 16]
+	%define byteSize							dword [ebp + 8]
 
 
-	; make sure the block passed is free and valid
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-	cmp edx, 0
-	jne .Exit
+	; pages (eax) = byteSize / 4096
+	mov eax, byteSize
+	shr eax, 12
 
-	mov eax, [esi + tMemInfo.task]
-	cmp eax, 0
-	jne .Exit
-
-	; check the next higher block
-	mov ecx, elementNum
-	inc ecx
-	push ecx
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-
-	; check if there was an error, like maybe the element isn't valid
-	cmp edx, 0
-	jne .CheckLowerBlock
-
-		; if we get here the block existed, so let's see if it is free
-		mov eax, [esi + tMemInfo.task]
-		cmp eax, 0
-		jne .CheckLowerBlock
-
-			; if we get here, the block was free, so let's condense!
-			mov ecx, elementNum
-			mov lowerBlockElementNum, ecx
-			inc ecx
-			mov higherBlockElementNum, ecx
-			call .MemCondenseMergeBlocks
-
-
-	.CheckLowerBlock:
-	; check the next lower block
-	mov ecx, elementNum
-	dec ecx
-	push ecx
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-
-	; check if there was an error, like maybe the element isn't valid
-	cmp edx, 0
-	jne .Exit
-
-		; if we get here the block existed, so let's see if it is free
-		mov eax, [esi + tMemInfo.task]
-		cmp eax, 0
-		jne .Exit
-
-			; if we get here, the block was free, so let's condense!
-			mov ecx, elementNum
-			mov lowerBlockElementNum, ecx
-			dec ecx
-			mov higherBlockElementNum, ecx
-			call .MemCondenseMergeBlocks
-	jmp .Exit
-
-
-	.MemCondenseMergeBlocks:
-		; make sure the elements are in the proper order
-		mov esi, lowerBlockElementNum
-		mov edi, higherBlockElementNum
-
-		cmp esi, edi
-		jb .SkipRegisterSwap
-			; swap the registers
-			xchg esi, edi
-		.SkipRegisterSwap:
-
-		mov lowerBlockElementNum, esi
-		mov higherBlockElementNum, edi
-
-
-		; get and save the address of the lower block
-		push esi
-		push dword [tSystem.listMemory]
-		call LMElementAddressGet
-		mov lowerBlockAddress, esi
-
-		; get and save the address of the higher block
-		mov esi, higherBlockElementNum
-		push esi
-		push dword [tSystem.listMemory]
-		call LMElementAddressGet
-		mov higherBlockAddress, esi
-
-		; get size of higher block
-		mov eax, dword [esi + tMemInfo.size]
-
-		; get size of lower block
-		mov esi, lowerBlockAddress
-		mov ebx, dword [esi + tMemInfo.size]
-
-		; add the sizes together and write the result back into the lower block
-		add eax, ebx
-		mov dword [esi + tMemInfo.size], eax
-
-		; delete the higher block
-		push higherBlockElementNum
-		call Mem_Internal_MemListShrink
-
-		; check for failure
-		cmp edx, true
-		je .AllGood
-
-			; there was a failure, add code to handle it here
-			; this is probably safe to ignore since we are using all good blocks here
-
-		.AllGood:
-	ret
+	; if byteSize / 4096 doesn't fall on an even page value, add one
+	mov ebx, byteSize
+	and ebx, 11111111111111111111000000000000b
+	cmp ebx, byteSize
+	je .NoAdjust
+		inc eax
+	.NoAdjust:
 
 
 	.Exit:
-	%undef elementNum
-	%undef lowerBlockElementNum
-	%undef higherBlockElementNum
-	%undef lowerBlockAddress
-	%undef higherBlockAddress
+	%undef byteSize
 	mov esp, ebp
 	pop ebp
 ret 4
@@ -1961,260 +1505,6 @@ ret 12
 
 
 section .text
-MemShrinkFromBeginning:
-	; Shrinks the block of memory specified to the size specified by trimming space off the beginning
-	;
-	;  input:
-	;	Block address
-	;	New size
-	;
-	;  output:
-	;	EDX - Result code
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define blockAddress						dword [ebp + 8]
-	%define newSize								dword [ebp + 12]
-
-	; allocate local variables
-	sub esp, 16
-	%define elementNum							dword [ebp - 4]
-	%define elementAddress						dword [ebp - 8]
-	%define newBlockAddress						dword [ebp - 12]
-	%define newBlockSize						dword [ebp - 16]
-
-
-	; locate the element which corresponds to this address
-	push blockAddress
-	call MemAddressToBlock
-	mov elementNum, eax
-
-	; test for success
-	cmp edx, true
-	je .ElementFound
-		; if we get here, the element could not be found, so we fail
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ElementFound:
-
-	; get the address of this element so that we can do those tasty, tasty modifications ^_^
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-	mov elementAddress, esi
-
-	; check that the caller didn't specify a size larger than the original block (e.g. a grow instead of a shrink)
-	mov eax, newSize
-	mov ebx, dword [esi + tMemInfo.size]
-	cmp eax, ebx
-	jb .SizeIsValid
-		; if we get here, the size was invalid
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.SizeIsValid:
-
-	; clone this element
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementDuplicate
-
-	; test for errors
-	cmp edx, 0
-	je .DuplicateSuccessful
-		; if we get here, the duplicate operation failed
-		mov edx, kErrOutOfMemory
-		jmp .Exit
-	.DuplicateSuccessful:
-
-
-	; now, to set all the proper values on the original block...
-	; first, we can mark it as free
-	mov esi, elementAddress
-	mov dword [esi + tMemInfo.task], 0
-
-	; calculate and set the new size
-	mov eax, newSize
-	mov ebx, dword [esi + tMemInfo.size]
-	sub ebx, eax
-	mov newBlockSize, ebx
-	mov eax, newBlockSize
-	mov dword [esi + tMemInfo.size], eax
-
-	; and while we still have esi set for the original block, let's do a bit of calculation in advance
-	; calculate the address for the new block ahead of time
-	mov ebx, dword [esi + tMemInfo.address]
-	add ebx, eax
-	mov newBlockAddress, ebx
-
-
-	; get the address of the cloned element so that we can set its values
-	inc elementNum
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-
-	; set the size
-	mov eax, newSize
-	mov dword [esi + tMemInfo.size], eax
-
-	; set the address
-	mov eax, newBlockAddress
-	mov dword [esi + tMemInfo.address], eax
-
-
-	; try to condense the memory list
-	dec elementNum
-	push elementNum
-	call MemMergeBlocks
-
-	; if we get here, everything was successful!
-	; set the return code and exit
-	mov edx, kErrNone
-
-
-	.Exit:
-	%undef blockAddress
-	%undef newSize
-	%undef elementNum
-	%undef elementAddress
-	%undef newBlockAddress
-	%undef newBlockSize
-	mov esp, ebp
-	pop ebp
-ret 8
-
-
-
-
-
-section .text
-MemShrinkFromEnd:
-	; Shrinks the block of memory specified to the size specified by trimming space off the end
-	;
-	;  input:
-	;	Block address
-	;	New size
-	;
-	;  output:
-	;	EDX - Result code
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define blockAddress						dword [ebp + 8]
-	%define newSize								dword [ebp + 12]
-
-	; allocate local variables
-	sub esp, 16
-	%define elementNum							dword [ebp - 4]
-	%define elementAddress						dword [ebp - 8]
-	%define newBlockAddress						dword [ebp - 12]
-	%define newBlockSize						dword [ebp - 16]
-
-
-	; locate the element which corresponds to this address
-	push dword 0
-	push blockAddress
-	call MemAddressToBlock
-	mov elementNum, eax
-
-	; test for success
-	cmp edx, true
-	je .ElementFound
-		; if we get here, the element could not be found, so we fail
-		mov edx, kErrInvalidParameter
-		jmp .Exit
-	.ElementFound:
-
-	; get the address of this element so that we can modify it
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-	mov elementAddress, esi
-
-	; check that the caller didn't specify a size larger than the original block (e.g. a grow instead of a shrink)
-	mov eax, newSize
-	mov ebx, dword [esi + tMemInfo.size]
-	cmp eax, ebx
-	jb .SizeIsValid
-		; if we get here, the size was invalid
-		mov edx, kErrValueTooHigh
-		jmp .Exit
-	.SizeIsValid:
-
-	; calculate the new size of the block
-	mov esi, elementAddress
-	mov eax, newSize
-	mov ebx, dword [esi + tMemInfo.size]
-	sub ebx, eax
-	mov newBlockSize, ebx
-
-	; calculate the address the cloned block will have
-	mov ebx, dword [esi + tMemInfo.address]
-	add ebx, eax
-	mov newBlockAddress, ebx
-
-	; set the size of the original block
-	mov eax, newSize
-	mov dword [esi + tMemInfo.size], eax
-
-	; clone this element
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementDuplicate
-
-	; test for errors
-	cmp edx, 0
-	je .DuplicateSuccessful
-		; if we get here, the duplicate operation failed
-		mov edx, kErrOutOfMemory
-		jmp .Exit
-	.DuplicateSuccessful:
-
-	; get the address of the cloned element
-	inc elementNum
-	push elementNum
-	push dword [tSystem.listMemory]
-	call LMElementAddressGet
-
-	; set the size of the cloned block
-	mov eax, newBlockSize
-	mov dword [esi + tMemInfo.size], eax
-
-	; set the address of the cloned block
-	mov eax, newBlockAddress
-	mov dword [esi + tMemInfo.address], eax
-
-	; mark the new block as free
-	mov dword [esi + tMemInfo.task], 0
-
-	; try to condense the memory list
-	push elementNum
-	call MemMergeBlocks
-
-	; if we get here, everything was successful!
-	mov edx, kErrNone
-
-
-	.Exit:
-	%undef blockAddress
-	%undef newSize
-	%undef elementNum
-	%undef elementAddress
-	%undef newBlockAddress
-	%undef newBlockSize
-	mov esp, ebp
-	pop ebp
-ret 8
-
-
-
-
-
-section .text
 MemSwapWordBytes:
 	; Swaps the bytes in a series of words starting at the address specified
 	;
@@ -2296,418 +1586,6 @@ ret 8
 
 
 
-section .text
-Mem_Internal_MemListGrow:
-	; Adds an element to the list itself and duplicates the element specified
-	;
-	;  input:
-	;	Element to duplicate during grow
-	;
-	;  output:
-	;	EDX - Result
-	;		true - Grow was successful
-	;		false - Grow was unsuccessful
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define element								dword [ebp + 8]
-
-	; allocate local variables
-	sub esp, 4
-	%define blockAddress						dword [ebp - 4]
-
-
-	; clone the block we were given
-	push element
-	push dword [tSystem.listMemory]
-	call LMElementDuplicate
-
-	; see if there was an error, although there shouldn't be
-	cmp edx, 0
-	jne .Fail
-
-	; if we get here, all was good!
-	mov edx, true
-	jmp .Exit
-
-
-	.Fail:
-	mov edx, false
-
-
-	.Exit:
-	%undef element
-	%undef blockAddress
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
-
-
-section .text
-Mem_Internal_MemListShrink:
-	; Subtracts an element from the list itself and deletes that element
-	;
-	;  input:
-	;	Element to remove during shrink
-	;
-	;  output:
-	;	EDX - Result
-	;		true - Shrink was successful
-	;		false - Shrink was unsuccessful
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define element								dword [ebp + 8]
-
-	; allocate local variables
- 	sub esp, 4
-	%define blockAddress						dword [ebp - 4]
-
-
-	; next step, let's delete the block the caller specified
-	push element
-	push dword [tSystem.listMemory]
-	call LMElementDelete
-
-	; see if there was an error, although there shouldn't be
-	cmp edx, 0
-	jne .Fail
-
-	; if we get here, all was good!
-	mov edx, true
-	jmp .Exit
-
-
-	.Fail:
-	mov edx, false
-
-
-	.Exit:
-	%undef element
-	%undef blockAddress
-	mov esp, ebp
-	pop ebp
-ret 4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-section .text
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAaaaaaaaaaaAaaaaaaAAAaaaaaaaaaaAaaaaaaaaaAAAaAAAaaaaaaAAaaaaaaAAAaaaaaaAaaaaaMemProbe:
-	; Probes the BIOS memory map using interrupt 0x15:0xE820, finds the largest block of free RAM,
-	; and fills in the appropriate system data structures for later use by the memory manager
-	;
-	;  input:
-	;	n/a
-	;
-	;  output:
-	;	EDX - Error code
-
-	push bp
-	mov bp, sp
-
-	; allocate local variables
-	sub sp, 68
-	%define attributes							dword [bp - 48]
-	%define lengthHigh							dword [bp - 52]
-	%define lengthLow							dword [bp - 56]
-	%define addressHigh							dword [bp - 60]
-	%define addressLow							dword [bp - 64]
-	%define sequenceNum							dword [bp - 68]
-
-
-	; clear the string to all spaces
-	mov cx, 44
-	mov si, bp
-	sub si, 44
-	.OutputStringClearLoop:
-		mov byte [si], 32
-		inc si
-	loop .OutputStringClearLoop
-
-	; throw a null at the end of the string
-	mov byte [bp - 1], 0
-
-	; print the labels string if appropriate
-	mov byte [gTextColor], 7
-	mov byte [gBackColor], 0
-	push .memoryMapLabels$
-	call PrintIfConfigBits16
-
-	; zero out the important stuff
-	mov sequenceNum, 0
-	mov dword [tSystem.listMemory], 0
-	mov dword [tSystem.memoryInitialAvailableBytes], 0
-	mov dword [tSystem.memoryKiBInstalled], 0
-
-
-	.ProbeLoop:
-		mov eax, 0x0000E820						; eax needs to be 0xE820
-		mov ebx, sequenceNum
-		mov ecx, 20
-		mov edx, 'PAMS'							; the magic value "SMAP"
-		mov di, bp
-		sub di, 64								; addressLow (start of buffer)
-		int 0x15
-
-		; see if there was an error
-		mov edx, kErrMemoryInitFail
-		cmp eax, 'PAMS'
-		jne .Exit
-
-		; save the sequence value
-		mov sequenceNum, ebx
-
-		; display the memory mapping table if appropriate
-		mov eax, [tSystem.configBits]
-		and eax, 000000000000000000000000000000010b
-		cmp eax, 000000000000000000000000000000010b
-		jne .SkipMemoryMapPrinting
-
-		; if we get here, it's cool to print verbose data, so let's build some strings!
-		; first we fill in the address section of the string
-		mov cx, 8
-		mov dx, 0
-		.MemoryMapAddressPrintLoop:
-			mov si, bp
-			sub si, 64							; addressLow
-			add si, cx
-			dec si
-			mov ax, [si]
-
-			push cx
-			mov si, bp
-			sub si, 44							; point to the beginning of the output string
-			add si, 3							; position in output string
-			add si, dx
-			push si
-			push ax
-			;call ConvertByteToHexString16
-			pop cx
-			add dx, 2
-		loop .MemoryMapAddressPrintLoop
-
-		; fill in the length section
-		mov cx, 8
-		mov dx, 0
-		.MemoryMapLengthPrintLoop:
-			mov si, bp
-			sub si, 56							; lengthLow
-			add si, cx
-			dec si
-			mov ax, [si]
-
-			push cx
-			mov si, bp
-			sub si, 44							; point to the beginning of the output string
-			add si, 22							; position in output string
-			add si, dx
-			push si
-			push ax
-			;call ConvertByteToHexString16
-			pop cx
-			add dx, 2
-		loop .MemoryMapLengthPrintLoop
-
-		; fill in the type section
-		mov si, bp
-		sub si, 48								; attributes
-		mov ax, [si]
-
-		push cx
-		mov si, bp
-		sub si, 44								; point to the beginning of the output string
-		add si, 41								; position in output string
-		push si
-		push ax
-		;call ConvertByteToHexString16
-		pop cx
-
-		; print the string
-		mov si, bp
-		sub si, 44								; point to the beginning of the output string
-		push si
-		call Print16
-
-		.SkipMemoryMapPrinting:
-		; add the size of this block to the total counter in the system struct
-		push dword tSystem.memoryKiBInstalled
-		mov eax, 0
-		mov ax, bp
-		sub ax, 56
-		push eax
-		call QuadAdd
-
-		; test the output to see what we've just found
-		; Type 1 - Usable RAM
-		; Type 2 - Reserved, unusable
-		; Type 3 - ACPI reclaimable memory
-		; Type 4 - ACPI NVS memory
-		; Type 5 - Area containing bad memory
-		mov ecx, dword attributes
-		cmp ecx, 0x01
-		jne .SkipCheckBlock
-
-			; if we get here, there's a good block of available RAM
-			; let's see if we've found a bigger block than the current record holder!
-			mov eax, lengthLow
-			cmp eax, dword [tSystem.memoryInitialAvailableBytes]
-			jna .SkipCheckBlock
-
-			; if we get here, we've found a new biggest block! YAY!
-			mov dword [tSystem.memoryInitialAvailableBytes], eax
-			mov eax, dword addressLow
-			mov dword [tSystem.listMemory], eax
-
-		.SkipCheckBlock:
-		; check to see if we're done with the loop
-		cmp sequenceNum, 0x00
-		je .Done
-	jmp .ProbeLoop
-
-	.Done:
-	mov edx, kErrNone
-
-
-	.Exit:
-	%undef attributes
-	%undef lengthHigh
-	%undef lengthLow
-	%undef addressHigh
-	%undef addressLow
-	%undef sequenceNum
-	mov sp, bp
-	pop bp
-ret
-
-section .data
-.memoryMapLabels$								db '   Address            Size               Type', 0x00
-
-
-
-
-section .text
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAaaaaaaaMemInit:
-	; Initialize the memory list
-	;
-	;  input:
-	;	n/a
-	;
-	;  output:
-	;	n/a
-
-	push ebp
-	mov ebp, esp
-
-
-	; load up the address of our big block o' RAM
-	mov esi, [tSystem.listMemory]
-
-	; create a list with a single entry of the size of a tMemInfo record
-	push tMemInfo_size
-	push 1
-	push esi
-	call LMListInit
-
-	; now calculate the value of the memoryListReservedSpace global (memory list max slots * size per slot + list header size)
-	; get the element size of the memory list
-	push dword [tSystem.listMemory]
-	call LMElementSizeGet
-
-	; multiply that value by how many list slots for which we're reserving space
-	mov ebx, 8192
-	mov edx, 0
-	mul ebx
-
-	; adjust for the list header
-	add eax, 16
-
-	; save this value
-; commented out pending compatibility with new memory handling method
-;	mov dword [tSystem.memoryListReservedSpace], eax
-
-
-	; start of free memory = address of free memory block + memoryListReservedSpace
-	; add to that the starting address of this memory block
-	add eax, dword [tSystem.listMemory]
-
-	; and finally set the value we calculated into the list itself
-	mov esi, [tSystem.listMemory]
-	add esi, 16
-	mov dword [esi + tMemInfo.address], eax
-
-	; now calculate the new free size
-	; new free size = initial free size - the size of the list space reserved
-	mov eax, [tSystem.memoryInitialAvailableBytes]
-; commented out pending compatibility with new memory handling method
-;	sub eax, dword [tSystem.memoryListReservedSpace]
-	mov dword [esi + tMemInfo.size], eax
-
-	; and we set the task ID, which is 0 because it's free space
-	mov dword [esi + tMemInfo.task], 0
-
-
-	; and exit!
-	mov esp, ebp
-	pop ebp
-ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ; 9000:00000000: 00 00 00 00 00 00 00 00-00 fc 09 00 00 00 00 00
 ; 9000:00000010: 01 00 00 00 00 fc 09 00-00 00 00 00 00 04 00 00
 ; 9000:00000020: 00 00 00 00 02 00 00 00-00 00 0f 00 00 00 00 00
@@ -2719,7 +1597,7 @@ ret
 ; 9000:00000080: 00 10 00 00 00 00 00 00-02 00 00 00 00 00 fc ff
 ; 9000:00000090: 00 00 00 00 00 00 04 00-00 00 00 00 02 00 00 00
 ; 9000:000000a0: 00 00 00 00 01 00 00 00-00 00 00 20 03 00 00 00
-; 9000:000000b0: 01 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00
+; 9000:000000b0: 01 00 00 00
 
 ; Type 1 - Usable RAM
 ; Type 2 - Reserved, unusable
@@ -2749,3 +1627,8 @@ ret
 ; Usable KiB 		0000000000FFFE3F		0000000016776767
 ; Usable pages		00000000003FFF8F		0000000004194191
 
+; 0x00100000 - 0x00180003 - bitfieldPtrPagesAllocated (524292 / 0x00080004 bytes)
+; 0x00180004 - 0x00200007 - bitfieldPtrPagesReserved (524292 / 0x00080004 bytes)
+; 0x00200008 - 0x002000BB - BIOS memory map shadow (180 / 0xB4 bytes)
+; total bytes: 1048764 / 0x001000BC
+; total pages: 257 / 0x0101

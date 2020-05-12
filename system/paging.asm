@@ -164,13 +164,8 @@ PagingDirNew:
 	%define pageDirPtr							dword [ebp - 4]
 
 
-	; get a chunk of RAM that's 4 MiB in size and aligned on a 4 MiB boundary
-	push dword 4096
-	push dword 4096
-	push dword 0x01
-	call MemAllocateAligned
-
-	; see if there was an error, if not save the pointer
+	; get a page of RAM
+	call MemAllocate
 	cmp edx, kErrNone
 	jne .Exit
 	mov pageDirPtr, eax
@@ -283,8 +278,4 @@ pagediraddr  dd 0x00000000
 
 
 pagingdone:
-
-
-
-
 

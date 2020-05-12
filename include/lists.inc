@@ -27,8 +27,11 @@
 
 ; function definitions
 extern LMBitfieldInit
+extern LMBitfieldScanClear
+extern LMBitfieldScanSet
+extern LMBitfieldSpaceCalc
 extern LMBitfieldValidate
-extern LMBitfieldElementValidate
+extern LMBitfieldValidateElement
 extern LMBitClear
 extern LMBitClearRange
 extern LMBitFlip
@@ -36,6 +39,7 @@ extern LMBitFlipRange
 extern LMBitGet
 extern LMBitSet
 extern LMBitSetRange
+extern LMCountBitsSet
 extern LMElementAddressGet
 extern LMElementCountGet
 extern LMElementCountSet
@@ -47,6 +51,7 @@ extern LMItemAddAtSlot
 extern LMListCompact
 extern LMListInit
 extern LMListSearch
+extern LMListSpaceCalc
 extern LMListValidate
 extern LMSlotFindFirstFree
 extern LMSlotFreeTest

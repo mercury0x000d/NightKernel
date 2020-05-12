@@ -44,6 +44,7 @@ extern MemFill
 extern MemFindMostSuitable
 extern MemInit
 extern MemMergeBlocks
+extern MemPagesNeeded
 extern MemSearchWord
 extern MemSearchDWord
 extern MemSearchString

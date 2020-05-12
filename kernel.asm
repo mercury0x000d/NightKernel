@@ -85,7 +85,7 @@ jnc .stickWith25
 	; if we get here, we should shift to 50-line mode
 	; first we update the constants
 	mov byte [kMaxLines], 50
-	mov word [kBytesPerScreen], 8000
+	mov dword [kBytesPerScreen], 8000
 
 	; now we set 8x8 character mode
 	mov ax, 0x1112
@@ -127,7 +127,7 @@ je .MemProbeOK
 
 ; save the returned size of the memory map
 and eax, 0x0000FFFF
-mov dword [tSystem.BIOSMemMapShadowEntries], eax
+mov dword [tSystem.memoryBIOSMapShadowEntryCount], eax
 
 
 
@@ -201,16 +201,23 @@ mov esp, 0x0009fb00
 
 
 
+; set up any CPU features we'll need
+push progressText08$
+call PrintIfConfigBits32
+call CPUInit
+
+
 
 ; turn on CPU debug extensions
-push progressText08$
+; is it faster to leave these off?
+push progressText09$
 call PrintIfConfigBits32
 call DebugCPUFeaturesEnable
 
 
 
 ; memory list init
-push progressText09$
+push progressText0A$
 call PrintIfConfigBits32
 call MemInit
 
@@ -218,11 +225,9 @@ call MemInit
 
 ; now that we have a temporary stack and access to all the memory addresses,
 ; let's allocate some RAM for the real stack
-push progressText0A$
+push progressText0B$
 call PrintIfConfigBits32
 
-push kKernelStack
-push dword 1
 call MemAllocate
 
 ; see if there was an error
@@ -232,8 +237,7 @@ je .StackAllocOK
 	call Fail
 .StackAllocOK:
 
-mov ebx, kKernelStack
-add eax, ebx
+add eax, 4096
 mov esp, eax
 ; push a null to stop any traces which may attempt to analyze the stack later
 push 0x00000000
@@ -241,7 +245,7 @@ push 0x00000000
 
 
 ; set up our interrupt handlers and IDT
-push progressText0B$
+push progressText0C$
 call PrintIfConfigBits32
 call IDTInit
 
@@ -257,7 +261,7 @@ call ISRInitAll
 
 
 ; setup and remap both PICs
-push progressText0C$
+push progressText0D$
 call PrintIfConfigBits32
 call PICInit
 call PICIRQDisableAll
@@ -267,28 +271,28 @@ call PITInit
 
 
 ; init the RTC
-push progressText0D$
+push progressText0E$
 call PrintIfConfigBits32
 call RTCInit
 
 
 
 ; let's get some interrupts firing!
-push progressText0E$
+push progressText0F$
 call PrintIfConfigBits32
 sti
 
 
 
 ; load system data into the info struct
-push progressText0F$
+push progressText10$
 call PrintIfConfigBits32
 call SetSystemCPUID
 
 
 
 ; allocate the system lists
-push progressText10$
+push progressText11$
 call PrintIfConfigBits32
 call KernelInitLists
 
@@ -302,14 +306,14 @@ je .ListInitOK
 
 
 ; init PS/2 driver
-push progressText11$
+push progressText12$
 call PrintIfConfigBits32
 call PS2ControllerInit
 
 
 
 ; set up default handlers
-push progressText12$
+push progressText13$
 call PrintIfConfigBits32
 push dword 0
 push dword 0
@@ -339,21 +343,21 @@ call PCIHandlerSet
 
 
 ; init PCI devices
-push progressText13$
+push progressText14$
 call PrintIfConfigBits32
 call PCIDeviceInitAll
 
 
 
 ; enumerate partitions
-push progressText14$
+push progressText15$
 call PrintIfConfigBits32
 call SMPartitionEnumerate
 
 
 ; map partitions
 ; for now, we just do drive C
-push progressText15$
+push progressText16$
 call PrintIfConfigBits32
 push 2
 push 0
@@ -362,14 +366,14 @@ call SMPartitionMap
 
 
 ; init Task Manager
-push progressText16$
+push progressText17$
 call PrintIfConfigBits32
 call TaskInit
 
 
 
 ; initialize paging
-push progressText17$
+push progressText18$
 call PrintIfConfigBits32
 call PagingInit
 
@@ -780,22 +784,23 @@ progressText04$									db 'APMEnable', 0x00
 progressText05$									db 'LoadGDT', 0x00
 progressText06$									db 'Probing PCI controller', 0x00
 progressText07$									db 'Entering Protected Mode', 0x00
-progressText08$									db 'Enabling CPU debug features', 0x00
-progressText09$									db 'Memory list init', 0x00
-progressText0A$									db 'Stack setup', 0x00
-progressText0B$									db 'IDTInit', 0x00
-progressText0C$									db 'Remaping PICs', 0x00
-progressText0D$									db 'Initializing RTC', 0x00
-progressText0E$									db 'Enabling interrupts', 0x00
-progressText0F$									db 'Building System Table', 0x00
-progressText10$									db 'Allocating list space', 0x00
-progressText11$									db 'Initializing PS/2 driver', 0x00
-progressText12$									db 'Setting up default handler addresses', 0x00
-progressText13$									db 'Initializing PCI devices', 0x00
-progressText14$									db 'Enumerating partitions', 0x00
-progressText15$									db 'Mapping partitions', 0x00
-progressText16$									db 'Initializing Task Manager', 0x00
-progressText17$									db 'Initializing CPU paging features', 0x00
+progressText08$									db 'Configuring CPU features', 0x00
+progressText09$									db 'Enabling CPU debug features', 0x00
+progressText0A$									db 'Memory list init', 0x00
+progressText0B$									db 'Stack setup', 0x00
+progressText0C$									db 'IDTInit', 0x00
+progressText0D$									db 'Remaping PICs', 0x00
+progressText0E$									db 'Initializing RTC', 0x00
+progressText0F$									db 'Enabling interrupts', 0x00
+progressText10$									db 'Building System Table', 0x00
+progressText11$									db 'Allocating list space', 0x00
+progressText12$									db 'Initializing PS/2 driver', 0x00
+progressText13$									db 'Setting up default handler addresses', 0x00
+progressText14$									db 'Initializing PCI devices', 0x00
+progressText15$									db 'Enumerating partitions', 0x00
+progressText16$									db 'Mapping partitions', 0x00
+progressText17$									db 'Initializing Task Manager', 0x00
+progressText18$									db 'Initializing CPU paging features', 0x00
 fatalE820Unsupported$							db 'Fatal: BIOS function 0xE820 unsupported on this machine; unable to probe memory', 0x00
 fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory.', 0x00
 fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory.', 0x00
@@ -825,34 +830,39 @@ KernelInitLists:
 	push ebp
 	mov ebp, esp
 
+	; allocate local variables
+	sub esp, 4
+	%define address								dword [ebp - 4]
 
-	; the drives list will be 256 entries of tDriveInfo structs, plus header
-	push dword 256 * tDriveInfo_size + 16
-	push dword 1
+
+	; the drives list will be 256 entries of tDriveInfo structs, plus header (256 * tDriveInfo_size + 16)
 	call MemAllocate
-
-	; see if there was an error, if not save the pointer
 	cmp edx, kErrNone
 	jne .Exit
-	mov [tSystem.listDrives], eax
+	mov [tSystem.listPtrDrives], eax
 
 	; set up the list header
 	push tDriveInfo_size
 	push dword 256
-	push eax
+	push dword [tSystem.listPtrDrives]
 	call LMListInit
 
-
-
-	; the driveLetters list will be 26 entries (A - Z) of 4 bytes each plus header
-	push dword 26 * 4 + 16
-	push dword 1
+	; to hold this list, we need 7 more pages of RAM
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
 	call MemAllocate
 
-	; see if there was an error, if not save the pointer
+
+
+	; the driveLetters list will be 26 entries (A - Z) of 4 bytes each plus header (26 * 4 + 16)
+	call MemAllocate
 	cmp edx, kErrNone
 	jne .Exit
-	mov [tSystem.listDriveLetters], eax
+	mov [tSystem.listPtrDriveLetters], eax
 
 	; set all elements to 0xFFFFFFFF
 	push dword 0xFF
@@ -860,23 +870,20 @@ KernelInitLists:
 	push eax
 	call MemFill
 
+
 	; set up the list header
 	push dword 4
 	push dword 26
-	push eax
+	push dword [tSystem.listPtrDriveLetters]
 	call LMListInit
 
 
 
-	; the FSHandler list will be 256 entries of 4 bytes each (the size of a single 32-bit address) plus header
-	push dword 256 * 4 + 16
-	push dword 1
+	; the FSHandler list will be 256 entries of 4 bytes each (the size of a single 32-bit address) plus header (256 * 4 + 16)
 	call MemAllocate
-
-	; see if there was an error, if not save the pointer
 	cmp edx, kErrNone
 	jne .Exit
-	mov [tSystem.listFSHandlers], eax
+	mov [tSystem.listPtrFSHandlers], eax
 
 	; set up the list header
 	push dword 4
@@ -886,16 +893,12 @@ KernelInitLists:
 
 
 
-	; the partitions list will be 256 entries of tPartitionInfo structs, plus header
+	; the partitions list will be 256 entries of tPartitionInfo structs, plus header (256 * tPartitionInfo_size + 16)
 	; allocate memory for the list
-	push dword 256 * tPartitionInfo_size + 16
-	push dword 1
 	call MemAllocate
-
-	; see if there was an error, if not save the pointer
 	cmp edx, kErrNone
 	jne .Exit
-	mov [tSystem.listPartitions], eax
+	mov [tSystem.listPtrPartitions], eax
 
 	; set up the list header
 	push dword tPartitionInfo_size
@@ -903,24 +906,35 @@ KernelInitLists:
 	push eax
 	call LMListInit
 
-
-
-	; the PCI handlers list will be 65536 entries of 4 bytes each (the size of a single 32-bit address)
-	; allocate memory for the list
-	push dword 65536 * 4 + 16
-	push dword 1
+	; to hold this list, we need 8 more pages of RAM
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
+	call MemAllocate
 	call MemAllocate
 
-	; see if there was an error, if not save the pointer
+
+	; the PCI handlers list will be 65536 entries of 4 bytes (the size of a single 32-bit address) each (65536 * 4 + 16)
+	; allocate memory for the list
+	call MemAllocate
 	cmp edx, kErrNone
 	jne .Exit
-	mov [tSystem.listPCIHandlers], eax
+	mov [tSystem.listPtrPCIHandlers], eax
 
 	; set up the list header
 	push dword 4
 	push dword 65536
 	push eax
 	call LMListInit
+
+	; to hold this list, we need 64 more pages of RAM
+	mov ecx, 64
+	.AllocateLoop:
+		call MemAllocate
+	loop .AllocateLoop
 
 
 	.Exit:

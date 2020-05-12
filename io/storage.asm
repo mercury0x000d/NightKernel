@@ -64,7 +64,7 @@ SMDiskRead:
 
 	; get the slot address of the drive specified
 	push driveNumber
-	push dword [tSystem.listDrives]
+	push dword [tSystem.listPtrDrives]
 	call LMElementAddressGet
 
 
@@ -123,13 +123,13 @@ SMItemCount:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -191,13 +191,13 @@ SMItemDelete:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -258,13 +258,13 @@ SMItemExists:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -328,13 +328,13 @@ SMItemInfoAccessedGet:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -402,13 +402,13 @@ SMItemInfoCreatedGet:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -476,13 +476,13 @@ SMItemInfoModifiedGet:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -544,13 +544,13 @@ SMItemInfoSizeGet:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -615,13 +615,13 @@ SMItemLoad:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -684,13 +684,13 @@ SMItemNew:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -756,13 +756,13 @@ SMItemStore:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -825,8 +825,6 @@ SMPartitionEnumerate:
 
 
 	; allocate a buffer for the sectors we're going to read, save the address for later
-	push 512
-	push dword 1
 	call MemAllocate
 	mov sectorBufferAddr, eax
 
@@ -835,7 +833,7 @@ SMPartitionEnumerate:
 	jne .Exit
 
 	; step through the drives list and discover partitions on each hard drive (other drive types are excluded)
-	push dword [tSystem.listDrives]
+	push dword [tSystem.listPtrDrives]
 	call LMElementCountGet
 	mov driveListElementCount, ecx
 
@@ -845,7 +843,7 @@ SMPartitionEnumerate:
 	.DriveListLoop:
 		; get the address of this drive list element and save it for later
 		push driveListCurrentElement
-		push dword [tSystem.listDrives]
+		push dword [tSystem.listPtrDrives]
 		call LMElementAddressGet
 		mov driveListCurrentElementAddr, esi
 
@@ -921,13 +919,13 @@ SMPartitionEnumerate:
 
 	.BuildPartitionEntry:
 		; get first free slot in the partition list
-		push dword [tSystem.listPartitions]
+		push dword [tSystem.listPtrPartitions]
 		call LMSlotFindFirstFree
 		mov partitionListCurrentElement, eax
 
 		; get the starting address of that specific slot into esi and save it for later
 		push eax
-		push dword [tSystem.listPartitions]
+		push dword [tSystem.listPtrPartitions]
 		call LMElementAddressGet
 		mov partitionListCurrentElementAddr, esi
 
@@ -1051,7 +1049,7 @@ SMPartitionMap:
 
 	; get the address of this drive list element and save it for later
 	push driveNumber
-	push dword [tSystem.listDriveLetters]
+	push dword [tSystem.listPtrDriveLetters]
 	call LMElementAddressGet
 	mov driveSlotAddress, esi
 
@@ -1101,7 +1099,7 @@ SMPartitionRead:
 
 	; get the slot address of the drive specified
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 
 	; validate the sectors requested
@@ -1171,7 +1169,7 @@ SMPartitionWrite:
 
 	; get the slot address of the drive specified
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 
 	; validate the sectors specified
@@ -1239,13 +1237,13 @@ SMPartitionInfo:
 
 	; get a pointer to the partition's entry in the partitions list
 	push partitionNumber
-	push dword [tSystem.listPartitions]
+	push dword [tSystem.listPtrPartitions]
 	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; Now we use the filesystem type to get the address of the handler for this type of FS
 	push dword [esi + tPartitionInfo.fileSystem]
-	push dword [tSystem.listFSHandlers]
+	push dword [tSystem.listPtrFSHandlers]
 	call LMElementAddressGet
 	mov eax, dword [esi]
 
@@ -1390,7 +1388,7 @@ SMPathPartitionGet:
 
 		; get the partition number from the drive letters list
 		push driveLetter
-		push dword [tSystem.listDriveLetters]
+		push dword [tSystem.listPtrDriveLetters]
 		call LMElementAddressGet
 		mov eax, [esi]
 

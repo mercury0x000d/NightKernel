@@ -21,7 +21,7 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2997
+%define BUILD 3481
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
@@ -66,7 +66,7 @@
 
 
 ; global sTrucTures go here...
-; tDriveInfo, for the drives list (192 bytes)
+; tDriveInfo, for the drives list (120 bytes)
 struc tDriveInfo
 	.model										resb 64
 	.serial										resb 32
@@ -173,23 +173,21 @@ global tSystem.mouseXLimit
 global tSystem.mouseY
 global tSystem.mouseYLimit
 global tSystem.mouseZ
-global tSystem.bitfieldPagesAllocated
-global tSystem.bitfieldPagesReserved
+global tSystem.bitfieldPtrPagesAllocated
+global tSystem.bitfieldPtrPagesReserved
 global tSystem.bitfieldSize
-global tSystem.BIOSMemMapShadowPtr
-global tSystem.BIOSMemMapShadowEntries
-global tSystem.BIOSMemMapShadowSize
+global tSystem.memoryBIOSMapShadowPtr
+global tSystem.memoryBIOSMapShadowEntryCount
+global tSystem.memoryBIOSMapShadowSize
 global tSystem.memoryManagementSpace
 global tSystem.memoryKiBInstalled
 global tSystem.memoryKiBUsable
-global tSystem.memoryInitialAvailableBytes
-global tSystem.memoryKiBFree
-global tSystem.listDrives
-global tSystem.listDriveLetters
-global tSystem.listFSHandlers
-global tSystem.listPartitions
-global tSystem.listPCIHandlers
-global tSystem.listTasks
+global tSystem.listPtrDrives
+global tSystem.listPtrDriveLetters
+global tSystem.listPtrFSHandlers
+global tSystem.listPtrPartitions
+global tSystem.listPtrPCIHandlers
+global tSystem.listPtrTasks
 global tSystem.PCIDeviceCount
 global tSystem.PCIVersion
 global tSystem.PCICapabilities
@@ -206,5 +204,3 @@ global tSystem.RTCSeconds
 global tSystem.RTCYear
 global tSystem.RTCMonth
 global tSystem.RTCDay
-
-global tSystem.listMemory

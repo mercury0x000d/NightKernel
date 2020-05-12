@@ -19,4 +19,5 @@
 
 
 ; function definitions
+extern CPUInit
 extern SetSystemCPUID
