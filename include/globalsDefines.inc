@@ -21,7 +21,7 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 2997
+%define BUILD 3018
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
