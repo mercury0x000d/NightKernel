@@ -608,120 +608,12 @@ MemAddressToBlock:
 	pop ebp
 ret 4
 
+
+
+
+
 section .text
 MemAllocate:
-	; returns the address of a memory block of the requested size, or zero if unavailble
-	; address returned is a 4KiB aligned block
-	;
-	;	input:
-	;		requesting task number
-	;		requested memory size in bytes --> do we even care?
-	;	output:
-	;		EAX - address of requested block or zero if fails
-	;		EDX - error code
-	
-	push ebp
-	mov ebp, esp
-
-	; input params
-	%define taskNum			DWORD [ebp + 8] ; ignored since well... bitfield :)
-	%define memorySize		DWORD [ebp + 12]
-
-	; local vars
-	sub esp, 12
-	%define blocksAmount	DWORD [ebp - 4]
-	%define currentBlock	DWORD [ebp - 8]
-	%define allocToBlock	DWORD [ebp - 12]
-
-	xor edx, edx
-
-	; first we look at how much blocks we need
-	mov eax, memorySize
-	mov ebx, 4096
-	div ebx
-	mov blocksAmount, eax
-
-	cmp edx, 0
-	je .GotAmountOfBlocks
-
-	; if we get here the requested memory size was not a multiple of 4096
-	inc blocksAmount
-
-	.GotAmountOfBlocks:
-	mov ebx, 0
-	mov ecx, DWORD [tSystem.bitfieldSize]
-	mov currentBlock, 0 ;just to be sure :)
-
-	; now to find a great place for you, my good friend [task_number here] :)
-	.SearchForGreatPlace:
-		push ecx
-		
-		; check the bit corresponding to the block we're currently
-		; looking at
-		push currentBlock
-		push DWORD [tSystem.bitfieldPagesAllocated]
-		call LMBitGet
-		
-		jc .blockIsFree
-		
-		; if we get here the block isn't free
-		xor ebx, ebx
-		jmp .continue
-
-		.blockIsFree:
-		inc ebx
-		cmp ebx, blocksAmount
-		je .alloc
-
-		.continue:
-		inc currentBlock
-		pop ecx
-
-		jmp $
-	loop .SearchForGreatPlace
-
-	mov eax, currentBlock
-	cmp eax, [tSystem.bitfieldSize]
-	je .Error
-	
-	; allocate the block
-	; TODO: mark blocks NOT free
-	.alloc:
-	mov ebx, blocksAmount
-	sub currentBlock, ebx
-
-	mov eax, currentBlock
-	mov ebx, 4096
-	mul ebx
-
-	add eax, [tSystem.memoryManagementSpace]	
-
-	jmp .Exit
-
-	.Error:
-	mov eax, 0
-	mov edx, kErrOutOfMemory 
-	.Exit:
-	%undef taskNum
-	%undef memorySize
-	%undef blocksAmount
-	%undef currentBlock
-	%undef allocToBlock
-
-	mov edx, 0
-	
-	mov esp, ebp
-	pop ebp
-ret
-
-section .text
-MemAllocateAligned:
-	mov eax, 0
-	mov edx, kErrOutOfMemory
-ret
-
-section .text
-AAAAaaaaAAAAaaaAAAAaaAAAAMemAllocate:
 	; Returns the address of a memory block of the requested size, or zero if unavailble
 	;
 	;  input:
@@ -859,7 +751,7 @@ ret 8
 
 
 section .text
-AAAAAAAAAaaaaAAAaaaaAAAMemAllocateAligned:
+MemAllocateAligned:
 	; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble
 	;
 	;  input:
@@ -1379,7 +1271,7 @@ MemInit:
 	;	n/a
 	;
 	;  output:
-	;	EDX - error code
+	;	n/a
 
 	push ebp
 	mov ebp, esp
@@ -1428,6 +1320,7 @@ MemInit:
 		push qTotalBytesPtr
 		push entryLengthPtr
 		call QuadAdd
+
 
 		; see if this entry is available RAM (Type 01)
 		mov esi, offset
@@ -1548,7 +1441,7 @@ MemInit:
 		push ebx
 		call RangeCheck
 
-		cmp al, true
+		cmp al, 1
 		jne .MemSearchLoopIterate
 
 		; WOW! If we get here, we found what we're looking for! Now, to get out of this penny-ante loop and copy some memory. 8)
@@ -1565,7 +1458,6 @@ MemInit:
 	; precious few bytes. How does such a paradox exist? Well I'm not sure, but the machine probably belongs to a FreeDOS user. ^_^
 	; Needless to say, this is an error condition. Consider printing a "It's time to upgrade your PC-XT." message.
 	mov edx, kErrMemoryInitFail
-	emms	; needed if we want to use the FPU again (e.g. games) (because we used mm0)
 	jmp .Exit
 
 
@@ -1688,7 +1580,7 @@ MemInit:
 	shr eax, 12
 
 
-; jmp $
+jmp $
 
 
 	; Now that that's done, it's time to duplicate the Reserved bitfield to the Allocated bitfield.
@@ -1704,7 +1596,6 @@ MemInit:
 
 	; and exit!
 	.Exit:
-	emms	; needed if we want to use the FPU again (e.g. games) (because we used mm0)
 	mov esp, ebp
 	pop ebp
 ret

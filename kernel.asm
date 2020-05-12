@@ -214,6 +214,8 @@ push progressText09$
 call PrintIfConfigBits32
 call MemInit
 
+
+
 ; now that we have a temporary stack and access to all the memory addresses,
 ; let's allocate some RAM for the real stack
 push progressText0A$

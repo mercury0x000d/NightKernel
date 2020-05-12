@@ -134,6 +134,6 @@ iso: $(TARGET) floppy
 	cp $(ISOLINUX)/isolinux.cfg $(OUTPUTDIR)/CD_root/isolinux/isolinux.cfg
 	cp $(FLOPPY) $(OUTPUTDIR)/CD_root/images/NIGHT.IMG
 	cp $(ISOLINUX)/memdisk $(OUTPUTDIR)/CD_root/kernel/memdisk
-	mkisofs -o $(OUTPUTDIR)/NIGHT.iso -b isolinux/isolinux.bin -c isolinux/boot.cat \
+	mkisofs -o NIGHT.iso -b isolinux/isolinux.bin -c isolinux/boot.cat \
 	 -no-emul-boot -boot-load-size 4 -boot-info-table $(OUTPUTDIR)/CD_root
 	rm -r $(OUTPUTDIR)/CD_root
