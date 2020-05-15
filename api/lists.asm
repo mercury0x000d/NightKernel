@@ -134,9 +134,9 @@ LMBitfieldScanClear:
 	jae .Fail
 
 	; Now that we've validated the sequenceByte... what the fuzzy kitten nuts is it, anyway? Well, I'm glad you asked! ;)
-	; In short, it's simply a time saving manoeuvre for cases where we will need to allocate a metric crapton of blocks in a row... like filling a
-	; page table, for example. Instead of starting ALL THE WAY from the start of the table each time we search for a block, we can simply feed the
-	; sequenceByte returned by the first call of this function back into the next call of it. Cool, huh? :D
+	; In short, it's simply a time saving manoeuvre for cases where we will need to allocate a metric crapton of blocks in a row...
+	; like filling a page table, for example. Instead of starting ALL THE WAY from the start of the table each time we search for
+	; a block, we can simply feed the sequenceByte returned by the first call of this function back into the next call of it. Cool, huh? :D
 
 	; adjust the address to allow for the bitfield header and load address into edi so we can SCASD the crap outta it!
 	add bitfieldAddress, 0x10

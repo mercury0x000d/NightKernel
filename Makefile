@@ -65,7 +65,6 @@ LOOPDEVICE		:= /dev/loop0
 
 # General make rules
 build : $(TARGET)
-	./scripts/xenops --file "include/globalsDefines.inc"
 $(OBJDIR)/%.o : %.asm
 	@mkdir -p $(@D)
 	$(info ==== .asm($<) -> .o($@) rule)
@@ -83,7 +82,16 @@ clean:
 	-$(RM) -r $(OBJDIR)
 
 
-	
+
+floppy:
+	-mkdir $(OUTPUTDIR)/floppy
+	sudo mount -o loop $(FLOPPY) $(OUTPUTDIR)/floppy
+	sudo cp $(TARGET) $(OUTPUTDIR)/floppy/KERNEL.SYS
+	sudo umount $(OUTPUTDIR)/floppy
+	sudo rm -r builds/floppy	
+
+
+
 # target: help - Display callable targets.
 help:
 	@egrep "^# target:" [Mm]akefile
@@ -97,6 +105,21 @@ help:
 
 
 
+iso: $(TARGET) floppy
+	mkdir $(OUTPUTDIR)/CD_root
+	mkdir $(OUTPUTDIR)/CD_root/isolinux
+	mkdir $(OUTPUTDIR)/CD_root/images
+	mkdir $(OUTPUTDIR)/CD_root/kernel
+	cp $(ISOLINUX)/isolinux.bin $(OUTPUTDIR)/CD_root/isolinux/isolinux.bin
+	cp $(ISOLINUX)/isolinux.cfg $(OUTPUTDIR)/CD_root/isolinux/isolinux.cfg
+	cp $(FLOPPY) $(OUTPUTDIR)/CD_root/images/NIGHT.IMG
+	cp $(ISOLINUX)/memdisk $(OUTPUTDIR)/CD_root/kernel/memdisk
+	mkisofs -o $(OUTPUTDIR)/NIGHT.iso -b isolinux/isolinux.bin -c isolinux/boot.cat \
+	 -no-emul-boot -boot-load-size 4 -boot-info-table $(OUTPUTDIR)/CD_root
+	rm -r $(OUTPUTDIR)/CD_root
+
+
+
 print-%:
 	@echo $* = $($*)
 
@@ -104,6 +127,11 @@ print-%:
 
 run:
 	virtualbox --startvm "Night" --debug-command-line --start-running
+
+
+
+update:
+	./scripts/xenops --file "include/globalsDefines.inc"
 
 
 
@@ -117,23 +145,3 @@ vm: $(TARGET)
 	sudo umount ./VBoxDisk
 	$(RM) -r VBoxDisk
 	sudo losetup -d /dev/loop0
-	
-floppy: 
-	-mkdir $(OUTPUTDIR)/floppy
-	sudo mount -o loop $(FLOPPY) $(OUTPUTDIR)/floppy
-	sudo cp $(TARGET) $(OUTPUTDIR)/floppy/KERNEL.SYS
-	sudo umount $(OUTPUTDIR)/floppy
-	sudo rm -r builds/floppy	
-
-iso: $(TARGET) floppy
-	mkdir $(OUTPUTDIR)/CD_root
-	mkdir $(OUTPUTDIR)/CD_root/isolinux
-	mkdir $(OUTPUTDIR)/CD_root/images
-	mkdir $(OUTPUTDIR)/CD_root/kernel
-	cp $(ISOLINUX)/isolinux.bin $(OUTPUTDIR)/CD_root/isolinux/isolinux.bin
-	cp $(ISOLINUX)/isolinux.cfg $(OUTPUTDIR)/CD_root/isolinux/isolinux.cfg
-	cp $(FLOPPY) $(OUTPUTDIR)/CD_root/images/NIGHT.IMG
-	cp $(ISOLINUX)/memdisk $(OUTPUTDIR)/CD_root/kernel/memdisk
-	mkisofs -o NIGHT.iso -b isolinux/isolinux.bin -c isolinux/boot.cat \
-	 -no-emul-boot -boot-load-size 4 -boot-info-table $(OUTPUTDIR)/CD_root
-	rm -r $(OUTPUTDIR)/CD_root

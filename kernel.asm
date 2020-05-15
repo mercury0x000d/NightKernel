@@ -105,7 +105,7 @@ mov byte [gBackColor], 0
 
 
 
-; copy the BIOS memory map to 9000:0 for later parsing
+; copy the BIOS memory map to 8000:0 (0x80000) for later parsing
 push progressText01$
 call PrintIfConfigBits16
 
@@ -201,8 +201,53 @@ mov esp, 0x0009fb00
 
 
 
-; set up any CPU features we'll need
+; hello world!
+call PrintCopyright
+call PrintVerison
+
+
+
+; probe CPU
 push progressText08$
+call PrintIfConfigBits32
+call CPUProbe
+
+; if we have popcnt support...
+push kCPU_popcnt
+push tSystem.CPUFeatures
+call LMBitGet
+jnc .SkipUsePOPCNT
+	; if we get here, this CPU supports popcnt
+	push POPCNTNoYes$
+	call PrintIfConfigBits32
+	jmp .UsePOPCNTDone
+.SkipUsePOPCNT:
+; if we get here, this CPU does not support popcnt
+push POPCNTNoNo$
+call PrintIfConfigBits32
+.UsePOPCNTDone:
+
+; if we have SSE2 support...
+push kCPU_sse2
+push tSystem.CPUFeatures
+call LMBitGet
+jnc .SkipUseSSE
+	; If we get here, this CPU supports SSE. Woohoo! Man, can we really fling the bits now!
+	push SSEYes$
+	call PrintIfConfigBits32
+	jmp .UseSSEDone
+.SkipUseSSE:
+; if we get here, this CPU does not support SSE
+push SSENo$
+call PrintIfConfigBits32
+
+.UseSSEDone:
+jmp $
+
+
+
+; set up any CPU features we'll need
+push progressText09$
 call PrintIfConfigBits32
 call CPUInit
 
@@ -210,14 +255,14 @@ call CPUInit
 
 ; turn on CPU debug extensions
 ; is it faster to leave these off?
-push progressText09$
+push progressText0A$
 call PrintIfConfigBits32
 call DebugCPUFeaturesEnable
 
 
 
 ; memory list init
-push progressText0A$
+push progressText0B$
 call PrintIfConfigBits32
 call MemInit
 
@@ -225,9 +270,8 @@ call MemInit
 
 ; now that we have a temporary stack and access to all the memory addresses,
 ; let's allocate some RAM for the real stack
-push progressText0B$
+push progressText0C$
 call PrintIfConfigBits32
-
 call MemAllocate
 
 ; see if there was an error
@@ -245,7 +289,7 @@ push 0x00000000
 
 
 ; set up our interrupt handlers and IDT
-push progressText0C$
+push progressText0D$
 call PrintIfConfigBits32
 call IDTInit
 
@@ -261,7 +305,7 @@ call ISRInitAll
 
 
 ; setup and remap both PICs
-push progressText0D$
+push progressText0E$
 call PrintIfConfigBits32
 call PICInit
 call PICIRQDisableAll
@@ -271,23 +315,16 @@ call PITInit
 
 
 ; init the RTC
-push progressText0E$
+push progressText0F$
 call PrintIfConfigBits32
 call RTCInit
 
 
 
 ; let's get some interrupts firing!
-push progressText0F$
-call PrintIfConfigBits32
-sti
-
-
-
-; load system data into the info struct
 push progressText10$
 call PrintIfConfigBits32
-call SetSystemCPUID
+sti
 
 
 
@@ -777,6 +814,7 @@ section .data
 
 
 section .data
+progressText00$									db 'Night Kernel', 0x00
 progressText01$									db 'Shadowing BIOS memory map', 0x00
 progressText02$									db 'Beginning A20 enable procedure', 0x00
 progressText03$									db 'SetSystemAPM', 0x00
@@ -784,16 +822,16 @@ progressText04$									db 'APMEnable', 0x00
 progressText05$									db 'LoadGDT', 0x00
 progressText06$									db 'Probing PCI controller', 0x00
 progressText07$									db 'Entering Protected Mode', 0x00
-progressText08$									db 'Configuring CPU features', 0x00
-progressText09$									db 'Enabling CPU debug features', 0x00
-progressText0A$									db 'Memory list init', 0x00
-progressText0B$									db 'Stack setup', 0x00
-progressText0C$									db 'IDTInit', 0x00
-progressText0D$									db 'Remaping PICs', 0x00
-progressText0E$									db 'Initializing RTC', 0x00
-progressText0F$									db 'Enabling interrupts', 0x00
-progressText10$									db 'Building System Table', 0x00
-progressText11$									db 'Allocating list space', 0x00
+progressText08$									db 'Probing CPU features', 0x00
+progressText09$									db 'Initializing CPU features', 0x00
+progressText0A$									db 'Enabling CPU debug extensions', 0x00
+progressText0B$									db 'Memory list init', 0x00
+progressText0C$									db 'Stack setup', 0x00
+progressText0D$									db 'IDTInit', 0x00
+progressText0E$									db 'Remaping PICs', 0x00
+progressText0F$									db 'Initializing RTC', 0x00
+progressText10$									db 'Enabling interrupts', 0x00
+progressText11$									db 'Allocating system lists', 0x00
 progressText12$									db 'Initializing PS/2 driver', 0x00
 progressText13$									db 'Setting up default handler addresses', 0x00
 progressText14$									db 'Initializing PCI devices', 0x00
@@ -806,6 +844,10 @@ fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory.', 0x00
 fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory.', 0x00
 fatalListMemAlloc$								db 'Fatal: Unable to allocate system list memory.', 0x00
 name$											db 'Kernel Debug Menu', 0x00
+SSEYes$											db 'SSE support detected', 0x00
+SSENo$											db 'SSE support not detected', 0x00
+POPCNTNoYes$									db 'POPCNT support detected', 0x00
+POPCNTNoNo$										db 'POPCNT support not detected', 0x00
 
 
 

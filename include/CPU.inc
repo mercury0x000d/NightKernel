@@ -18,6 +18,11 @@
 
 
 
+; variable definitions
+%include "include/CPUDefines.inc"
+
+
+
 ; function definitions
 extern CPUInit
-extern SetSystemCPUID
+extern CPUProbe

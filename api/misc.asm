@@ -21,7 +21,9 @@
 %include "include/miscDefines.inc"
 
 %include "include/globals.inc"
+%include "include/memory.inc"
 %include "include/screen.inc"
+%include "include/strings.inc"
 
 
 
@@ -114,6 +116,96 @@ Fail:
 	mov esp, ebp
 	pop ebp
 ret 4
+
+
+
+
+
+section .text
+PrintCopyright:
+	; Prints the copyright string
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+	
+
+	; print the kernel string
+	push dword 0x00000000
+	push dword 0x00000007
+	mov al, byte [gCursorY]
+	push eax
+	mov al, byte [gCursorX]
+	push eax
+	push tSystem.copyright$
+	call Print32
+
+	mov byte [gCursorX], al
+	mov byte [gCursorY], ah
+ret
+
+
+
+
+
+section .text
+PrintVerison:
+	; Prints the version string
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+	
+
+	; build and print the version string
+	push 80
+	push .scratch$
+	push .versionFormat$
+	call MemCopy
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.versionMajor]
+	push eax
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 2
+	mov eax, 0x00000000
+	mov al, byte [tSystem.versionMinor]
+	push eax
+	push .scratch$
+	call StringTokenHexadecimal
+
+	push dword 0
+	mov eax, 0x00000000
+	mov ax, word [tSystem.versionBuild]
+	push eax
+	push .scratch$
+	call StringTokenDecimal
+
+	push dword 0x00000000
+	push dword 0x00000007
+	mov al, byte [gCursorY]
+	push eax
+	mov al, byte [gCursorX]
+	push eax
+	push .scratch$
+	call Print32
+
+	mov byte [gCursorX], al
+	mov byte [gCursorY], ah
+ret
+
+section .data
+.versionFormat$									db 'Version ^.^, Build ^', 0x00
+
+section .bss
+.scratch$										resb 80
 
 
 

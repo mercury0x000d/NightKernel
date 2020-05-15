@@ -36,6 +36,7 @@ extern tSystem.taskKernelStackSize
 extern tSystem.multicoreAvailable
 extern tSystem.CPUIDVendor$
 extern tSystem.CPUIDBrand$
+extern tSystem.CPUFeatures
 extern tSystem.CPUIDLargestBasicQuery
 extern tSystem.CPUIDLargestExtendedQuery
 extern tSystem.APMVersionMajor
@@ -55,12 +56,12 @@ extern tSystem.mouseXLimit
 extern tSystem.mouseY
 extern tSystem.mouseYLimit
 extern tSystem.mouseZ
-extern tSystem.bitfieldPtrPagesAllocated
-extern tSystem.bitfieldPtrPagesReserved
-extern tSystem.bitfieldSize
 extern tSystem.memoryBIOSMapShadowPtr
 extern tSystem.memoryBIOSMapShadowEntryCount
 extern tSystem.memoryBIOSMapShadowSize
+extern tSystem.memoryBitfieldPtrPagesAllocated
+extern tSystem.memoryBitfieldPtrPagesReserved
+extern tSystem.memoryBitfieldSize
 extern tSystem.memoryManagementSpace
 extern tSystem.memoryKiBInstalled
 extern tSystem.memoryKiBUsable

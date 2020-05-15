@@ -20,7 +20,10 @@
 
 %include "include/CPUDefines.inc"
 
+%include "include/errors.inc"
 %include "include/globals.inc"
+%include "include/lists.inc"
+%include "include/memory.inc"
 
 
 
@@ -44,6 +47,13 @@ CPUInit:
 
 	push ebp
 	mov ebp, esp
+
+
+	; check for feature support
+	; popcnt: CPUID.01H:ECX.Bit 23
+
+
+
 
 
 	; enable SSE extensions
@@ -75,8 +85,8 @@ ret
 
 
 section .text
-SetSystemCPUID:
-	; Probes the CPU using CPUID instruction and saves results to the tSystem structure
+CPUProbe:
+	; Probes features supported by the CPU and saves the results to the CPUFeatures bitfield
 	;
 	;  input:
 	;	n/a
@@ -94,10 +104,36 @@ SetSystemCPUID:
 	mov esi, tSystem.CPUIDVendor$
 	mov [tSystem.CPUIDLargestBasicQuery], eax
 	mov [esi], ebx
-	add esi, 4
-	mov [esi], edx
-	add esi, 4
-	mov [esi], ecx
+	mov [esi + 4], edx
+	mov [esi + 8], ecx
+
+	; init the bitfield
+	push 192
+	push tSystem.CPUFeatures
+	call LMBitfieldInit
+
+	; save feature flags
+	; Writing data directly into the bitfield here bypasses the update of the setCount value that the List Manager would normally perform.
+	; However... since we will never need that information... who cares?
+	mov eax, 0x00000001
+	mov ecx, 0
+	cpuid
+	mov esi, tSystem.CPUFeatures
+	mov [esi + 16], ecx
+	mov [esi + 20], edx
+
+	; save extended feature flags
+	mov eax, 0x00000007
+	mov ecx, 0
+	cpuid
+	mov [esi + 24], ebx
+	mov [esi + 28], ecx
+	mov [esi + 32], edx
+
+	mov eax, 0x00000007
+	mov ecx, 1
+	cpuid
+	mov [esi + 36], eax
 
 
 	; get processor brand string

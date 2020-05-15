@@ -18,7 +18,14 @@
 
 
 
+; variable definitions
+%include "include/miscDefines.inc"
+
+
+
 ; function definitions
 extern SetSystemAPM
 extern Fail
+extern PrintCopyright
+extern PrintVerison
 extern TimerWait

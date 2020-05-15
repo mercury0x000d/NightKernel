@@ -21,4 +21,6 @@
 ; declare functions as global
 global SetSystemAPM
 global Fail
+global PrintCopyright
+global PrintVerison
 global TimerWait

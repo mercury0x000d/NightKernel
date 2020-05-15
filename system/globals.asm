@@ -46,8 +46,6 @@ tSystem:
 	.multicoreAvailable							db 0x00
 	.CPUIDVendor$								times 16 db 0x00
 	.CPUIDBrand$								times 64 db 0x00
-	.CPUIDLargestBasicQuery						dd 0x00000000
-	.CPUIDLargestExtendedQuery					dd 0x00000000
 	.APMVersionMajor							db 0x00
 	.APMVersionMinor							db 0x00
 	.APMFeatures								dw 0x0000
@@ -67,9 +65,12 @@ tSystem:
 	.mouseZ										dw 0x0000
 
 section .bss
-	.bitfieldPtrPagesAllocated					resd 1
-	.bitfieldPtrPagesReserved					resd 1
-	.bitfieldPtrSize							resd 1
+	.CPUFeatures								resb 64
+	.CPUIDLargestBasicQuery						resd 1
+	.CPUIDLargestExtendedQuery					resd 1
+	.memoryBitfieldPtrPagesAllocated			resd 1
+	.memoryBitfieldPtrPagesReserved				resd 1
+	.memoryBitfieldSize							resd 1
 	.memoryBIOSMapShadowPtr						resd 1
 	.memoryBIOSMapShadowEntryCount				resd 1
 	.memoryBIOSMapShadowSize					resd 1
@@ -98,6 +99,8 @@ section .bss
 	.RTCYear									resb 1
 	.RTCMonth									resb 1
 	.RTCDay										resb 1
+
+
 
 
 

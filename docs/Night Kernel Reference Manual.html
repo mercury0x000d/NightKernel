@@ -123,9 +123,10 @@
 			<br>
 			CPU:<br>
 			<ul>
-				<li>A 386 or higher due to some instructions used (STOSD) and the availability of Protected Mode</li>
+				<li>A 386 or higher due to some instructions used (STOSD, et. al.) and the availability of Protected Mode</li>
+				<li>ABM support (for the List Manager's use of the POPCNT instruction)</li>
 				<li>PAE support to allow memory amounts over 4 GiB</li>
-				<li>SSE4 support (for the List Manager's use of the POPCNT instruction)</li>
+				<li>SSE2 support (for the Memory Manager's use of the XMM registers)</li>
 			</ul>
 			<br>
 			BIOS:<br>
@@ -170,7 +171,7 @@
 			If you're running in a Linux environment and have both VirtualBox and NASM installed, you can use the included makefile found in the root of the repo to streamline building and testing. The rules it accepts are as follows:<br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table 1.1 - Make options</caption></i></b>
+				<caption><b><i>Table 1.1 - Make options</i></b></caption>
 				<tr>
 					<th width = '10%'><i>Rule</i></th>
 					<th width = '90%'><i>Function</i></th>
@@ -239,7 +240,7 @@
 			The menu provides the following options:<br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table 2.1 - Debug Menu selection summary</caption></i></b>
+				<caption><b><i>Table 2.1 - Debug Menu selection summary</i></b></caption>
 				<tr>
 					<th width = '10%'><i>Menu Selection</i></th>
 					<th width = '90%'><i>Description</i></th>
@@ -296,7 +297,7 @@
 			Some of the most useful VirtualBox debugger commands are listed below:<br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table 3.1 - Useful VirtualBox Debugger commands</caption></i></b>
+				<caption><b><i>Table 3.1 - Useful VirtualBox Debugger commands</i></b></caption>
 				<tr>
 					<th width = '30%'><i>Command</i></th>
 					<th width = '70%'><i>Description</i></th>
@@ -601,7 +602,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 5.1 - Driver flags bit definitions</caption></i></b>
+					<caption><b><i>Table 5.1 - Driver flags bit definitions</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Bit</i></th>
 						<th width = '90%'><i>Description</i></th>
@@ -634,7 +635,7 @@
 
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 5.2 - Driver command codes - Block and character driver commands</caption></i></b>
+					<caption><b><i>Table 5.2 - Driver command codes - Block and character driver commands</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Value</i></th>
 						<th width = '90%'><i>Symbol</i></th>
@@ -715,7 +716,7 @@
 
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 5.3 - Driver command codes - Filesystem driver commands</caption></i></b>
+					<caption><b><i>Table 5.3 - Driver command codes - Filesystem driver commands</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Value</i></th>
 						<th width = '90%'><i>Symbol</i></th>
@@ -779,7 +780,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 6.1 - Configbits options</caption></i></b>
+					<caption><b><i>Table 6.1 - Configbits options</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Bit</i></th>
 						<th width = '90%'><i>Description</i></th>
@@ -822,7 +823,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 7.1 - List header format</caption></i></b>
+					<caption><b><i>Table 7.1 - List header format</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Offset</i></th>
 						<th width = '10%'><i>Name</i></th>
@@ -868,7 +869,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 7.2 - Bitfield header format</caption></i></b>
+					<caption><b><i>Table 7.2 - Bitfield header format</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Offset</i></th>
 						<th width = '10%'><i>Name</i></th>
@@ -920,7 +921,7 @@
 			<br>
 			<b>Physical memory</b><br>
 			<br>
-			Upon boot, Night probes the BIOS memory map using function 0xE820 of interrupt 0x15. After obtaining these results, the single largest block of RAM found in the map will be selected to hold the memory management information. The size of this memory management information area will vary based on the amount of memory in the system, but will always hold three things: two bitfields and and a copy of the BIOS memory map itself. The two bitmaps will always be equal to each other in size, as they both contain one bit per page of memory in the system; the first is used to track allocated memory pages, and the second tracks which pages are reserved.<br>
+			Upon boot, Night probes the BIOS memory map using function 0xE820 of interrupt 0x15. After obtaining these results, the lowest block of RAM found in the map which is both at/above the 1 MiB mark and large enough to do so will be selected to hold the memory management information. The size of this memory management information area will vary based on the amount of memory in the system, but will always hold three things: two bitfields and and a copy of the BIOS memory map itself. The two bitfields will always be equal to each other in size, as they both contain one bit per page of memory in the system; the first is used to track allocated memory pages, and the second tracks which pages are reserved.<br>
 			<br>
 			<br>
 			<b>Paging considerations</b><br>
@@ -928,11 +929,13 @@
 			Night uses the PAE feature of x86 processors to enable addressing up to 64 GiB of memory.<br>
 			<br>
 			<br>
+			<!--
 			<b>Difference from other DOS implementations</b><br>
 			<br>
 			Although most versions of MS-DOS support First-Fit, Best-Fit, and Last-Fit allocation strategies, Night currently uses Best-Fit exclusively. Memory requests are fulfilled from the top-down, meaning that the first block allocated will be located at the end of the memory area and subsequent allocations will grow downwards toward the Memory List, much like stack operation.<br>
 			<br>
 			Another difference is the time at which free memory blocks are combined; MS-DOS performs this task upon every allocation attempt, but Night combines upon every deallocation.<br>
+			-->
 		</p>
 		<br>
 		<br>
@@ -943,7 +946,7 @@
 		<hr>
 		<h2><a name = 'Multitasking'>Section 9 - Multitasking, Night Style</a></h2>
 		<p>
-			One of the main benefits Night brings to the DOS experience is multitasking. Some older operating systems common to the DOS era would use a technique called <a href = 'https://infogalactic.com/info/Computer_multitasking#Cooperative_multitasking'>Cooperative Multitasking</a>, which relied on programs to yield their control of the CPU back to the operating system before another program could get time to do its job. This is not the way Night does things.<br>
+			One of the main benefits Night brings to the DOS experience is multitasking. Some older operating systems common to the DOS era would use a technique called <a href = 'https://infogalactic.com/info/Computer_multitasking#Cooperative_multitasking'>Cooperative Multitasking</a>, which relied on programs to voluntarily yield their control of the CPU back to the operating system before another program could get time to do its job. This is not the way Night does things.<br>
 			<br>
 			<a href = 'https://infogalactic.com/info/Computer_multitasking#Preemptive_multitasking'>Preemptive Multitasking</a> is a system by which task switches are initiated by an outside source, usually a hardware interrupt provided to the CPU, which means applications cannot monopolize the processor. This is the technique used by Night.<br>
 			<br>
@@ -955,7 +958,7 @@
 			<br>
 			In computing, as in life, certain tasks are sometimes more crucial to complete than others. Extending this principle to the digital workspace, Night's task management structure contains a <code>priority</code> value which dictates how many turns at the CPU the task will have in a row before being switched out for the next waiting task. Currently the priority levels supported range from 0 (one turn before switch) to 255 (an over-the-top value which is mainly there simply for future-proofing. One caveat exists: since the PIT interrupts fire 256 times per second, maxing out the priority value to 255 can cause near-total lockup of other running tasks. Therefore, it is not recommended to use a priority value over 3 so that other tasks do not visibly suffer from lost CPU time. A future version will incorporate a global execution cap, preventing tasks from being set to too high of a priority.<br>
 			<br>
-			When a task is switched in, Night reads the CPU's Time Stamp Counter and stores the result in <code>switchInLow</code> and <code>switchInHigh</code>. When it is switched back out, the TSC is read once again and the original switch-in values are subtracted from this reading. The resulting value is stored in <code>cycleCountLow</code> and <code>cycleCountHigh</code> and can be used as an estimated number of cycles the task spent doing work during its turn at the CPU. This information can be used by Task Manager-type programs to easily calculate how well tasks are utilizing the timeslices they are allocated.<br>
+			When a task is switched in, Night reads the CPU's Time Stamp Counter and stores the result in <code>switchInLow</code> and <code>switchInHigh</code>. When it is switched back out, the TSC is read once again and the original switch-in values are subtracted from this reading. The resulting value is stored in <code>cycleCountLow</code> and <code>cycleCountHigh</code> and can be used as an estimated number of cycles the task spent doing work during its turn at the CPU. This information can be used by Task Manager-type programs to easily calculate how well tasks are utilizing the time slices they are allocated.<br>
 			<br>
 			Although the x86 architecture does provide a method of performing multitasking in hardware, Night - like many other operating systems - does not use it. Instead, the faster software method is used via a single Task State Segment which is updated at every task switch.<br>
 			<br>
@@ -965,7 +968,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 9.1 - The tTaskInfo structure</caption></i></b>
+					<caption><b><i>Table 9.1 - The tTaskInfo structure</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Offset</i></th>
 						<th width = '20%'><i>Name</i></th>
@@ -1081,7 +1084,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 9.2 - Task flags definitions</caption></i></b>
+					<caption><b><i>Table 9.2 - Task flags definitions</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Bit</i></th>
 						<th width = '15%'><i>Name</i></th>
@@ -1132,7 +1135,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 10.1 - The tSystem structure</caption></i></b>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
 					<tr>
 						<th width = '20%'><i>Name</i></th>
 						<th width = '10%'><i>Size</i></th>
@@ -1152,21 +1155,6 @@
 						<td>APMVersionMinor</td>
 						<td>Byte</td>
 						<td>Minor APM interface version.</td>
-					</tr>
-					<tr>
-						<td>bitfieldPagesSize</td>
-						<td>DWord</td>
-						<td>The size of each of the two memory management bitfields.</td>
-					</tr>
-					<tr>
-						<td>bitfieldPtrPagesAllocated</td>
-						<td>DWord</td>
-						<td>Pointer to the bitfield of allocated memory pages.</td>
-					</tr>
-					<tr>
-						<td>bitfieldPtrPagesReserved</td>
-						<td>DWord</td>
-						<td>Pointer to the bitfield of reserved memory pages.</td>
 					</tr>
 					<tr>
 						<td>configBits</td>
@@ -1259,14 +1247,29 @@
 						<td>The total amount of space occupied by the shadowed BIOS memory map.</td>
 					</tr>
 					<tr>
+						<td>memoryBitfieldPagesSize</td>
+						<td>DWord</td>
+						<td>The size of each of the two memory management bitfields.</td>
+					</tr>
+					<tr>
+						<td>memoryBitfieldPtrPagesAllocated</td>
+						<td>DWord</td>
+						<td>Pointer to the bitfield of allocated memory pages.</td>
+					</tr>
+					<tr>
+						<td>memoryBitfieldPtrPagesReserved</td>
+						<td>DWord</td>
+						<td>Pointer to the bitfield of reserved memory pages.</td>
+					</tr>
+					<tr>
 						<td>memoryKiBInstalled</td>
 						<td>DWord</td>
-						<td>The total amount of memory of all types (usable, Reserved / unusable, ACPI reclaimable, ACPI NVS, bad) installed in the system.</td>
+						<td>The total amount of memory of all types (usable, Reserved / unusable, ACPI reclaimable, ACPI NVS, bad) installed in the system, as reported by the BIOS.</td>
 					</tr>
 					<tr>
 						<td>memoryKiBUsable</td>
 						<td>DWord</td>
-						<td>The total amount of usable memory (RAM) installed in the system.</td>
+						<td>The total amount of usable memory (RAM) installed in the system, as reported by the BIOS.</td>
 					</tr>
 					<tr>
 						<td>memoryManagementSpace</td>
@@ -1479,25 +1482,27 @@
 		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3480 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
+			<b>In progress, 0.1F Update, Build 3593 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
 			<br>
 			New<br>
 			<ul>
+				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
 				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
+				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
+				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
+				<li>Kernel: <i>memory.asm</i> - MemCopySSE() uses SSE registers for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8!</li>
+				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
+				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
 			</ul>
 			Changed<br>
 			<ul>
-				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
-				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
 				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
-				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
-				<li>Kernel: <i>memory.asm</i> - MemCopy() now uses SSE and an improved algorithm resulting in much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8!</li>
+				<li>Kernel: <i>memory.asm</i> - MemCopy() uses an improved algorithm.</li>
 				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
 				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is allocated in 4 KiB blocks, all aligned on a 4 KiB boundary.</li>
 				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenClear() now uses MemFill for the fastest screen clearing ever seen.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
-				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
 			</ul>
 			Fixed<br>
 			<ul>
@@ -2444,7 +2449,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.1 - CMOS.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.1 - CMOS.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -2488,7 +2493,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.2 - CPU.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.2 - CPU.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -2505,12 +2510,1000 @@
 				</tr>
 				<tr>
 					<td>
-						<code>SetSystemCPUID</code><br>
+						<code>CPUProbe</code><br>
 						<br>
-						Probes the CPU using CPUID instruction and saves results to the tSystem structure
+						Probes features supported by the CPU and saves the results to the CPUFeatures bitfield
 					</td>
 					<td>n/a</td>
 					<td>n/a</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
+			Public Constants:<br>
+			<table style = 'width:100%'>
+				<caption><b><i>Table A1.3 - CPU.asm public constants</i></b></caption>
+				<tr>
+					<th width = '30%'>Name</th>
+					<th width = '10%'>Value</th>
+					<th width = '60%'>Description</th>
+				</tr>
+				<tr>
+					<td>kCPU_sse3</td>
+					<td>00</td>
+					<td>Prescott New Instructions-SSE3 (PNI)</td>
+				</tr>
+				<tr>
+					<td>kCPU_pclmulqdq</td>
+					<td>01</td>
+					<td>PCLMULQDQ</td>
+				</tr>
+				<tr>
+					<td>kCPU_dtes64</td>
+					<td>02</td>
+					<td>64-bit debug store</td>
+				</tr>
+				<tr>
+					<td>kCPU_monitor</td>
+					<td>03</td>
+					<td>MONITOR and MWAIT instructions (SSE3)</td>
+				</tr>
+				<tr>
+					<td>kCPU_ds-cpl</td>
+					<td>04</td>
+					<td>CPL qualified debug store</td>
+				</tr>
+				<tr>
+					<td>kCPU_vmx</td>
+					<td>05</td>
+					<td>Virtual Machine eXtensions</td>
+				</tr>
+				<tr>
+					<td>kCPU_smx</td>
+					<td>06</td>
+					<td>Safer Mode Extensions (LaGrande)</td>
+				</tr>
+				<tr>
+					<td>kCPU_est</td>
+					<td>07</td>
+					<td>Enhanced SpeedStep</td>
+				</tr>
+				<tr>
+					<td>kCPU_tm2</td>
+					<td>08</td>
+					<td>Thermal Monitor 2</td>
+				</tr>
+				<tr>
+					<td>kCPU_ssse3</td>
+					<td>09</td>
+					<td>Supplemental SSE3 instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_cnxt-id</td>
+					<td>10</td>
+					<td>L1 Context ID</td>
+				</tr>
+				<tr>
+					<td>kCPU_sdbg</td>
+					<td>11</td>
+					<td>Silicon Debug interface</td>
+				</tr>
+				<tr>
+					<td>kCPU_fma</td>
+					<td>12</td>
+					<td>Fused multiply-add (FMA3)</td>
+				</tr>
+				<tr>
+					<td>kCPU_cx16</td>
+					<td>13</td>
+					<td>CMPXCHG16B instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_xtpr</td>
+					<td>14</td>
+					<td>Can disable sending task priority messages</td>
+				</tr>
+				<tr>
+					<td>kCPU_pdcm</td>
+					<td>15</td>
+					<td>Perfmon & debug capability</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved01</td>
+					<td>16</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_pcid</td>
+					<td>17</td>
+					<td>Process context identifiers</td>
+				</tr>
+				<tr>
+					<td>kCPU_dca</td>
+					<td>18</td>
+					<td>Direct cache access for DMA writes</td>
+				</tr>
+				<tr>
+					<td>kCPU_sse41</td>
+					<td>19</td>
+					<td>SSE4.1 instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_sse42</td>
+					<td>20</td>
+					<td>SSE4.2 instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_x2apic</td>
+					<td>21</td>
+					<td>x2APIC</td>
+				</tr>
+				<tr>
+					<td>kCPU_movbe</td>
+					<td>22</td>
+					<td>MOVBE instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_popcnt</td>
+					<td>23</td>
+					<td>POPCNT instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_tsc-deadline</td>
+					<td>24</td>
+					<td>APIC implements one-shot operation using a TSC deadline value</td>
+				</tr>
+				<tr>
+					<td>kCPU_aes</td>
+					<td>25</td>
+					<td>AES instruction set</td>
+				</tr>
+				<tr>
+					<td>kCPU_xsave</td>
+					<td>26</td>
+					<td>XSAVE, XRESTOR, XSETBV, XGETBV</td>
+				</tr>
+				<tr>
+					<td>kCPU_osxsave</td>
+					<td>27</td>
+					<td>XSAVE enabled by OS</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx</td>
+					<td>28</td>
+					<td>Advanced Vector Extensions</td>
+				</tr>
+				<tr>
+					<td>kCPU_f16c</td>
+					<td>29</td>
+					<td>F16C (half-precision) FP feature</td>
+				</tr>
+				<tr>
+					<td>kCPU_rdrnd</td>
+					<td>30</td>
+					<td>RDRAND (on-chip random number generator) feature</td>
+				</tr>
+				<tr>
+					<td>kCPU_hypervisor</td>
+					<td>31</td>
+					<td>Hypervisor present (always zero on physical CPUs)</td>
+				</tr>
+				<tr>
+					<td colspan = 3><br></td>
+				</tr>
+				<tr>
+					<td>kCPU_fpu</td>
+					<td>32</td>
+					<td>Onboard x87 FPU</td>
+				</tr>
+				<tr>
+					<td>kCPU_vme</td>
+					<td>33</td>
+					<td>Virtual 8086 mode extensions (such as VIF, VIP, PIV)</td>
+				</tr>
+				<tr>
+					<td>kCPU_de</td>
+					<td>34</td>
+					<td>Debugging extensions</td>
+				</tr>
+				<tr>
+					<td>kCPU_pse</td>
+					<td>35</td>
+					<td>Page Size Extension</td>
+				</tr>
+				<tr>
+					<td>kCPU_tsc</td>
+					<td>36</td>
+					<td>Time Stamp Counter</td>
+				</tr>
+				<tr>
+					<td>kCPU_msr</td>
+					<td>37</td>
+					<td>Model-specific registers</td>
+				</tr>
+				<tr>
+					<td>kCPU_pae</td>
+					<td>38</td>
+					<td>Physical Address Extension</td>
+				</tr>
+				<tr>
+					<td>kCPU_mce</td>
+					<td>39</td>
+					<td>Machine Check Exception</td>
+				</tr>
+				<tr>
+					<td>kCPU_cx8</td>
+					<td>40</td>
+					<td>CMPXCHG8 (compare-and-swap) instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_apic</td>
+					<td>41</td>
+					<td>Onboard Advanced Programmable Interrupt Controller</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved02</td>
+					<td>42</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_sep</td>
+					<td>43</td>
+					<td>SYSENTER and SYSEXIT instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_mtrr</td>
+					<td>44</td>
+					<td>Memory Type Range Registers</td>
+				</tr>
+				<tr>
+					<td>kCPU_pge</td>
+					<td>45</td>
+					<td>Page Global Enable bit in CR4</td>
+				</tr>
+				<tr>
+					<td>kCPU_mca</td>
+					<td>46</td>
+					<td>Machine check architecture</td>
+				</tr>
+				<tr>
+					<td>kCPU_cmov</td>
+					<td>47</td>
+					<td>Conditional move and FCMOV instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_pat</td>
+					<td>48</td>
+					<td>Page Attribute Table</td>
+				</tr>
+				<tr>
+					<td>kCPU_pse36</td>
+					<td>49</td>
+					<td>36-bit page size extension</td>
+				</tr>
+				<tr>
+					<td>kCPU_psn</td>
+					<td>50</td>
+					<td>Processor Serial Number</td>
+				</tr>
+				<tr>
+					<td>kCPU_clfsh</td>
+					<td>51</td>
+					<td>CLFLUSH instruction (SSE2)</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved03</td>
+					<td>52</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_ds</td>
+					<td>53</td>
+					<td>Debug store: save trace of executed jumps</td>
+				</tr>
+				<tr>
+					<td>kCPU_acpi</td>
+					<td>54</td>
+					<td>Onboard thermal control MSRs for ACPI</td>
+				</tr>
+				<tr>
+					<td>kCPU_mmx</td>
+					<td>55</td>
+					<td>MMX instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_fxsr</td>
+					<td>56</td>
+					<td>FXSAVE, FXRESTOR instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_sse</td>
+					<td>57</td>
+					<td>SSE / Katmai instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_sse2</td>
+					<td>58</td>
+					<td>SSE2 instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_ss</td>
+					<td>59</td>
+					<td>CPU cache implements self-snoop</td>
+				</tr>
+				<tr>
+					<td>kCPU_htt</td>
+					<td>60</td>
+					<td>Hyper-threading</td>
+				</tr>
+				<tr>
+					<td>kCPU_tm</td>
+					<td>61</td>
+					<td>Thermal monitor automatically limits temperature</td>
+				</tr>
+				<tr>
+					<td>kCPU_ia64</td>
+					<td>62</td>
+					<td>IA64 processor emulating x86</td>
+				</tr>
+				<tr>
+					<td>kCPU_pbe</td>
+					<td>63</td>
+					<td>Pending Break Enable (PBE# pin) wakeup capability</td>
+				</tr>
+				<tr>
+					<td colspan = 3><br></td>
+				</tr>
+				<tr>
+					<td>kCPU_fsgsbase</td>
+					<td>64</td>
+					<td>Access to base of %fs and %gs</td>
+				</tr>
+				<tr>
+					<td>kCPU_ia32_tsc_adjust</td>
+					<td>65</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_sgx</td>
+					<td>66</td>
+					<td>Software Guard Extensions</td>
+				</tr>
+				<tr>
+					<td>kCPU_bmi1</td>
+					<td>67</td>
+					<td>Bit Manipulation Instruction Set 1</td>
+				</tr>
+				<tr>
+					<td>kCPU_hle</td>
+					<td>68</td>
+					<td>TSX Hardware Lock Elision</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx2</td>
+					<td>69</td>
+					<td>Advanced Vector Extensions 2</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved04</td>
+					<td>70</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_smep</td>
+					<td>71</td>
+					<td>Supervisor Mode Execution Prevention</td>
+				</tr>
+				<tr>
+					<td>kCPU_bmi2</td>
+					<td>72</td>
+					<td>Bit Manipulation Instruction Set 2</td>
+				</tr>
+				<tr>
+					<td>kCPU_erms</td>
+					<td>73</td>
+					<td>Enhanced REP MOVSB/STOSB</td>
+				</tr>
+				<tr>
+					<td>kCPU_invpcid</td>
+					<td>74</td>
+					<td>INVPCID instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_rtm</td>
+					<td>75</td>
+					<td>TSX Restricted Transactional Memory</td>
+				</tr>
+				<tr>
+					<td>kCPU_pqm</td>
+					<td>76</td>
+					<td>Platform Quality of Service Monitoring</td>
+				</tr>
+				<tr>
+					<td>kCPU_fpucs_ds_deprecated</td>
+					<td>77</td>
+					<td>FPU CS and FPU DS deprecated</td>
+				</tr>
+				<tr>
+					<td>kCPU_mpx</td>
+					<td>78</td>
+					<td>Intel MPX (Memory Protection Extensions)</td>
+				</tr>
+				<tr>
+					<td>kCPU_pqe</td>
+					<td>79</td>
+					<td>Platform Quality of Service Enforcement</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_f</td>
+					<td>80</td>
+					<td>AVX-512 Foundation</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_dq</td>
+					<td>81</td>
+					<td>AVX-512 Doubleword and Quadword Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_rdseed</td>
+					<td>82</td>
+					<td>RDSEED instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_adx</td>
+					<td>83</td>
+					<td>Intel ADX (Multi-Precision Add-Carry Instruction Extensions)</td>
+				</tr>
+				<tr>
+					<td>kCPU_smap</td>
+					<td>84</td>
+					<td>Supervisor Mode Access Prevention</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_ifma</td>
+					<td>85</td>
+					<td>AVX-512 Integer Fused Multiply-Add Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_pcommit</td>
+					<td>86</td>
+					<td>PCOMMIT instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_clflushopt</td>
+					<td>87</td>
+					<td>CLFLUSHOPT instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_clwb</td>
+					<td>88</td>
+					<td>CLWB instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_intel_pt</td>
+					<td>89</td>
+					<td>Intel Processor Trace</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_pf</td>
+					<td>90</td>
+					<td>AVX-512 Prefetch Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_er</td>
+					<td>91</td>
+					<td>AVX-512 Exponential and Reciprocal Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_cd</td>
+					<td>92</td>
+					<td>AVX-512 Conflict Detection Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_sha</td>
+					<td>93</td>
+					<td>Intel SHA extensions</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_bw</td>
+					<td>94</td>
+					<td>AVX-512 Byte and Word Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_vl</td>
+					<td>95</td>
+					<td>AVX-512 Vector Length Extensions</td>
+				</tr>
+				<tr>
+					<td colspan = 3><br></td>
+				</tr>
+				<tr>
+					<td>kCPU_prefetchwt1</td>
+					<td>96</td>
+					<td>PREFETCHWT1 instruction</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_vbmi</td>
+					<td>97</td>
+					<td>AVX-512 Vector Bit Manipulation Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_umip</td>
+					<td>98</td>
+					<td>User-mode Instruction Prevention</td>
+				</tr>
+				<tr>
+					<td>kCPU_pku</td>
+					<td>99</td>
+					<td>Memory Protection Keys for User-mode pages</td>
+				</tr>
+				<tr>
+					<td>kCPU_ospke</td>
+					<td>100</td>
+					<td>PKU enabled by OS</td>
+				</tr>
+				<tr>
+					<td>kCPU_waitpkg</td>
+					<td>101</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_vbmi2</td>
+					<td>102</td>
+					<td>AVX-512 Vector Bit Manipulation Instructions 2</td>
+				</tr>
+				<tr>
+					<td>kCPU_shstk</td>
+					<td>103</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_gfni</td>
+					<td>104</td>
+					<td>Galois Field instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_vaes</td>
+					<td>105</td>
+					<td>Vector AES instruction set (VEX-256/EVEX)</td>
+				</tr>
+				<tr>
+					<td>kCPU_vpclmulqdq</td>
+					<td>106</td>
+					<td>CLMUL instruction set (VEX-256/EVEX)</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_vnni</td>
+					<td>107</td>
+					<td>AVX-512 Vector Neural Network Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_bitalg</td>
+					<td>108</td>
+					<td>AVX-512 BITALG instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved05</td>
+					<td>109</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_vpopcntdq</td>
+					<td>110</td>
+					<td>AVX-512 Vector Population Count Double and Quad-word</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved06</td>
+					<td>111</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_5levelpaging</td>
+					<td>112</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_mawau0</td>
+					<td>113</td>
+					<td>The value of userspace MPX Address-Width Adjust used by the BNDLDX and BNDSTX Intel MPX instructions in 64-bit mode</td>
+				</tr>
+				<tr>
+					<td>kCPU_mawau1</td>
+					<td>114</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_mawau2</td>
+					<td>115</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_mawau3</td>
+					<td>116</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_mawau4</td>
+					<td>117</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_rdpid</td>
+					<td>118</td>
+					<td>Read Processor ID and IA32_TSC_AUX</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved07</td>
+					<td>119</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved08</td>
+					<td>120</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_cldemote</td>
+					<td>121</td>
+					<td>Cache line demote</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved09</td>
+					<td>122</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_movdiri</td>
+					<td>123</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_movdir64b</td>
+					<td>124</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_enqcmd</td>
+					<td>125</td>
+					<td>Enqueue Stores</td>
+				</tr>
+				<tr>
+					<td>kCPU_sgx_lc</td>
+					<td>126</td>
+					<td>SGX Launch Configuration</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved10</td>
+					<td>127</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td colspan = 3><br></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved11</td>
+					<td>128</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved12</td>
+					<td>129</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_4vnniw</td>
+					<td>130</td>
+					<td>AVX-512 4-register Neural Network Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_4fmaps</td>
+					<td>131</td>
+					<td>AVX-512 4-register Multiply Accumulation Single precision</td>
+				</tr>
+				<tr>
+					<td>kCPU_fsrm</td>
+					<td>132</td>
+					<td>Fast Short REP MOVSB</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved13</td>
+					<td>133</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved14</td>
+					<td>134</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved15</td>
+					<td>135</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_vp2intersect</td>
+					<td>136</td>
+					<td>AVX-512 VP2INTERSECT Doubleword and Quadword Instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved16</td>
+					<td>137</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_md_clear</td>
+					<td>138</td>
+					<td>VERW instruction clears CPU buffers</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved17</td>
+					<td>139</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved18</td>
+					<td>140</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_tsx_force_abort</td>
+					<td>141</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_serialize</td>
+					<td>142</td>
+					<td>Serialize instruction execution</td>
+				</tr>
+				<tr>
+					<td>kCPU_hybrid</td>
+					<td>143</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_tsxldtrk</td>
+					<td>144</td>
+					<td>TSX suspend load address tracking</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved19</td>
+					<td>145</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_pconfig</td>
+					<td>146</td>
+					<td>Platform configuration (Memory Encryption Technologies Instructions)</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved20</td>
+					<td>147</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_ibt</td>
+					<td>148</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved21</td>
+					<td>149</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved22</td>
+					<td>150</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved23</td>
+					<td>151</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved24</td>
+					<td>152</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved25</td>
+					<td>153</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_ibrs_ibpb_specctrl</td>
+					<td>154</td>
+					<td>Speculation Control, part of Indirect Branch Control (IBC): Indirect Branch Restricted Speculation (IBRS) and Indirect Branch Prediction Barrier (IBPB)</td>
+				</tr>
+				<tr>
+					<td>kCPU_stibp</td>
+					<td>155</td>
+					<td>Single Thread Indirect Branch Predictor, part of IBC</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved26</td>
+					<td>156</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_ia32_arch_capabilities</td>
+					<td>157</td>
+					<td>Speculative Side Channel Mitigations</td>
+				</tr>
+				<tr>
+					<td>kCPU_ia32_core_capabilities</td>
+					<td>158</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>kCPU_ssbd</td>
+					<td>159</td>
+					<td>Speculative Store Bypass Disable, as mitigation for Speculative Store Bypass (IA32_SPEC_CTRL)</td>
+				</tr>
+				<tr>
+					<td colspan = 3><br></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved27</td>
+					<td>160</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved28</td>
+					<td>161</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved29</td>
+					<td>162</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved30</td>
+					<td>163</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved31</td>
+					<td>164</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_avx512_bf16</td>
+					<td>165</td>
+					<td>AVX-512 BFLOAT16 instructions</td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved32</td>
+					<td>166</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved33</td>
+					<td>167</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved34</td>
+					<td>168</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved35</td>
+					<td>169</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved36</td>
+					<td>170</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved37</td>
+					<td>171</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved38</td>
+					<td>172</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved39</td>
+					<td>173</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved40</td>
+					<td>174</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved41</td>
+					<td>175</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved42</td>
+					<td>176</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved43</td>
+					<td>177</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved44</td>
+					<td>178</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved45</td>
+					<td>179</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved46</td>
+					<td>180</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved47</td>
+					<td>181</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved48</td>
+					<td>182</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved49</td>
+					<td>183</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved50</td>
+					<td>184</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved51</td>
+					<td>185</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved52</td>
+					<td>186</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved53</td>
+					<td>187</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved54</td>
+					<td>188</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved55</td>
+					<td>189</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved56</td>
+					<td>190</td>
+					<td><i>Reserved</i></td>
+				</tr>
+				<tr>
+					<td>kCPU_reserved57</td>
+					<td>191</td>
+					<td><i>Reserved</i></td>
 				</tr>
 			</table>
 			<br>
@@ -2521,7 +3514,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.3 - CPU.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.4 - CPU.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -2689,7 +3682,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.4 - partitions.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.5 - partitions.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -3039,7 +4032,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.5 - GDT.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.6 - GDT.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -3187,7 +4180,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.6 - hardware.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.7 - hardware.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -3220,7 +4213,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.7 - interrupts.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.8 - interrupts.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -3350,7 +4343,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.8 - List Manager 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.9 - List Manager 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -3835,7 +4828,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.9 - List Manager 32-bit internal functions</caption></i></b>
+				<caption><b><i>Table A1.10 - List Manager 32-bit internal functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4086,7 +5079,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.10 - Memory Manager 16-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.11 - Memory Manager 16-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4173,7 +5166,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.11 - Memory Manager 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.12 - Memory Manager 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4232,7 +5225,24 @@
 					<td>
 						<code>MemCopy</code><br>
 						<br>
-						Copies the specified number of bytes from one address to another
+							Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest)
+					</td>
+					<td>
+						<ol>
+							<li>Source address</li>
+							<li>Destination address</li>
+							<li>Transfer length</li>
+						</ol>
+					</td>
+					<td>
+						n/a
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<code>MemCopySSE</code><br>
+						<br>
+						Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest) using SSE registers for additional speed
 					</td>
 					<td>
 						<ol>
@@ -4287,7 +5297,7 @@
 						n/a
 					</td>
 					<td>
-						n/a
+						Error code
 					</td>
 				</tr>
 				<tr>
@@ -4395,7 +5405,7 @@
 
 			32-bit Internal Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.12 - Memory Manager 32-bit internal functions</caption></i></b>
+				<caption><b><i>Table A1.13 - Memory Manager 32-bit internal functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4445,7 +5455,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.13 - misc.asm 16-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.14 - misc.asm 16-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4467,7 +5477,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.14 - misc.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.15 - misc.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4495,7 +5505,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.15 - numbers.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.16 - numbers.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4593,7 +5603,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.16 - paging.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.17 - paging.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4658,7 +5668,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.17 - PCI Functions 16-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.18 - PCI Functions 16-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4680,7 +5690,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.18 - PCI Functions 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.19 - PCI Functions 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -4980,7 +5990,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.19 - PIC.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.20 - PIC.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5057,7 +6067,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.20 - PS2 Controller.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.21 - PS2 Controller.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5307,7 +6317,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.21 - power.asm 16-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.22 - power.asm 16-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5349,7 +6359,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.22 - RTC.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.23 - RTC.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5391,7 +6401,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.23 - screen.asm 16-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.24 - screen.asm 16-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5461,7 +6471,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.24 - screen.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.25 - screen.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5571,7 +6581,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.25 - serial.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.26 - serial.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5811,7 +6821,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.26 - strings.asm 16-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.27 - strings.asm 16-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -5852,7 +6862,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.27 - strings.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.28 - strings.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -6406,7 +7416,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.28 - tasks.asm 32-bit public functions</caption></i></b>
+				<caption><b><i>Table A1.29 - tasks.asm 32-bit public functions</i></b></caption>
 				<tr>
 					<th width = '60%'>Name / Description</th>
 					<th width = '20%'>Stack Input</th>
@@ -6495,7 +7505,7 @@
 			<a name = 'NightFunctionReference_StandardFunctionReturnCodes'><b>Standard Function Return Codes</b></a><br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.29 - Parameter errors</caption></i></b>
+				<caption><b><i>Table A1.30 - Parameter errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6540,7 +7550,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.30 - List Manager errors</caption></i></b>
+				<caption><b><i>Table A1.31 - List Manager errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6570,7 +7580,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.31 - ELF executable errors</caption></i></b>
+				<caption><b><i>Table A1.32 - ELF executable errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6605,7 +7615,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.32 - Filesystem errors</caption></i></b>
+				<caption><b><i>Table A1.33 - Filesystem errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6670,7 +7680,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.33 - Partition errors</caption></i></b>
+				<caption><b><i>Table A1.34 - Partition errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6695,7 +7705,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.34 - Driver handler errors</caption></i></b>
+				<caption><b><i>Table A1.35 - Driver handler errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6715,7 +7725,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.35 - Memory errors</caption></i></b>
+				<caption><b><i>Table A1.36 - Memory errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6740,7 +7750,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.36 - PS/2 Controller errors</caption></i></b>
+				<caption><b><i>Table A1.37 - PS/2 Controller errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -6778,7 +7788,7 @@
 			All interrupt vectors after 0x77 are null.<br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A2.1 - DOS Interrupt Handler Address Table</caption></i></b>
+				<caption><b><i>Table A2.1 - DOS Interrupt Handler Address Table</i></b></caption>
 				<tr>
 					<th width = '5%'><i>Interrupt Vector</i></th>
 					<th width = '15%'><i>Handler Address - VirtualBox BIOS</i></th>
@@ -7632,7 +8642,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A2.2 - DOS API</caption></i></b>
+				<caption><b><i>Table A2.2 - DOS API</i></b></caption>
 				<tr>
 					<th width = '10%'><i>AX Register</i></th>
 					<th width = '70%'><i>Name</i></th>
