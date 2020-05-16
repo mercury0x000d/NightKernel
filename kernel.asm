@@ -205,44 +205,12 @@ mov esp, 0x0009fb00
 call PrintCopyright
 call PrintVerison
 
-
+jmp $
 
 ; probe CPU
 push progressText08$
 call PrintIfConfigBits32
 call CPUProbe
-
-; if we have popcnt support...
-push kCPU_popcnt
-push tSystem.CPUFeatures
-call LMBitGet
-jnc .SkipUsePOPCNT
-	; if we get here, this CPU supports popcnt
-	push POPCNTNoYes$
-	call PrintIfConfigBits32
-	jmp .UsePOPCNTDone
-.SkipUsePOPCNT:
-; if we get here, this CPU does not support popcnt
-push POPCNTNoNo$
-call PrintIfConfigBits32
-.UsePOPCNTDone:
-
-; if we have SSE2 support...
-push kCPU_sse2
-push tSystem.CPUFeatures
-call LMBitGet
-jnc .SkipUseSSE
-	; If we get here, this CPU supports SSE. Woohoo! Man, can we really fling the bits now!
-	push SSEYes$
-	call PrintIfConfigBits32
-	jmp .UseSSEDone
-.SkipUseSSE:
-; if we get here, this CPU does not support SSE
-push SSENo$
-call PrintIfConfigBits32
-
-.UseSSEDone:
-jmp $
 
 
 
@@ -844,10 +812,6 @@ fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory.', 0x00
 fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory.', 0x00
 fatalListMemAlloc$								db 'Fatal: Unable to allocate system list memory.', 0x00
 name$											db 'Kernel Debug Menu', 0x00
-SSEYes$											db 'SSE support detected', 0x00
-SSENo$											db 'SSE support not detected', 0x00
-POPCNTNoYes$									db 'POPCNT support detected', 0x00
-POPCNTNoNo$										db 'POPCNT support not detected', 0x00
 
 
 

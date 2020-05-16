@@ -1247,29 +1247,34 @@
 						<td>The total amount of space occupied by the shadowed BIOS memory map.</td>
 					</tr>
 					<tr>
-						<td>memoryBitfieldPagesSize</td>
-						<td>DWord</td>
-						<td>The size of each of the two memory management bitfields.</td>
-					</tr>
-					<tr>
-						<td>memoryBitfieldPtrPagesAllocated</td>
+						<td>memoryBitfieldAllocatedPtr</td>
 						<td>DWord</td>
 						<td>Pointer to the bitfield of allocated memory pages.</td>
 					</tr>
 					<tr>
-						<td>memoryBitfieldPtrPagesReserved</td>
+						<td>memoryBitfieldReservedPtr</td>
 						<td>DWord</td>
 						<td>Pointer to the bitfield of reserved memory pages.</td>
 					</tr>
 					<tr>
+						<td>memoryBitfieldSize</td>
+						<td>DWord</td>
+						<td>The size of each of the two memory management bitfields.</td>
+					</tr>
+					<tr>
+						<td>memoryKiBFree</td>
+						<td>DWord</td>
+						<td>The total amount of usable (usable, above 1 MiB) memory available for allocation.</td>
+					</tr>
+					<tr>
 						<td>memoryKiBInstalled</td>
 						<td>DWord</td>
-						<td>The total amount of memory of all types (usable, Reserved / unusable, ACPI reclaimable, ACPI NVS, bad) installed in the system, as reported by the BIOS.</td>
+						<td>The total amount of memory of all types (usable, reserved, ACPI reclaimable, ACPI NVS, bad) installed in the system, as reported by the BIOS.</td>
 					</tr>
 					<tr>
 						<td>memoryKiBUsable</td>
 						<td>DWord</td>
-						<td>The total amount of usable memory (RAM) installed in the system, as reported by the BIOS.</td>
+						<td>The total amount of usable (usable, above 1 MiB) memory installed in the system, as reported by the BIOS.</td>
 					</tr>
 					<tr>
 						<td>memoryManagementSpace</td>
@@ -1482,7 +1487,7 @@
 		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3593 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
+			<b>In progress, 0.1F Update, Build 3626 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1490,14 +1495,13 @@
 				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
 				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
-				<li>Kernel: <i>memory.asm</i> - MemCopySSE() uses SSE registers for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8!</li>
+				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8!</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
 			</ul>
 			Changed<br>
 			<ul>
 				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
-				<li>Kernel: <i>memory.asm</i> - MemCopy() uses an improved algorithm.</li>
 				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
 				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is allocated in 4 KiB blocks, all aligned on a 4 KiB boundary.</li>
 				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>

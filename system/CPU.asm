@@ -49,30 +49,35 @@ CPUInit:
 	mov ebp, esp
 
 
-	; check for feature support
-	; popcnt: CPUID.01H:ECX.Bit 23
+	; check for SSE2 support
+	push kCPU_sse2
+	push tSystem.CPUFeatures
+	call LMBitGet
 
+	; skip enabling if the bit comes back clear
+	jnc .SSEDone
 
+	; skip enabling if there was any kind of error
+	cmp edx, kErrNone
+	jne .SSEDone
+		; If we get here, this CPU supports SSE. Woohoo! Let's enable it so we can really fling the bits!
 
+		; disable cr0.em
+		mov eax, cr0
+		and eax, 11111111111111111111111111111011b
 
+		; enable cr0.mp
+		or eax, 00000000000000000000000000000010b
+		mov cr0, eax
 
-	; enable SSE extensions
+		; enable cr4.osfxsr
+		mov eax, cr4
+		or eax, 00000000000000000000001000000000b
 
-	; disable cr0.em
-	mov eax, cr0
-	and eax, 11111111111111111111111111111011b
-
-	; enable cr0.mp
-	or eax, 00000000000000000000000000000010b
-	mov cr0, eax
-
-	; enable cr4.osfxsr
-	mov eax, cr4
-	or eax, 00000000000000000000001000000000b
-
-	; enable cr4.osxmmexcpt
-	or eax, 00000000000000000000010000000000b
-	mov cr4, eax
+		; enable cr4.osxmmexcpt
+		or eax, 00000000000000000000010000000000b
+		mov cr4, eax
+	.SSEDone:
 
 
 	.Exit:

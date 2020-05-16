@@ -1798,7 +1798,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-	mov esi, [tSystem.memoryBitfieldPtrPagesAllocated]
+	mov esi, [tSystem.memoryBitfieldAllocatedPtr]
 	mov eax, dword [esi + tBitfieldInfo.setCount]
 	shl eax, 2
 	push eax
@@ -1820,7 +1820,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1839,7 +1839,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.memoryBitfieldPtrPagesReserved]
+	push dword [tSystem.memoryBitfieldReservedPtr]
 	push .scratch$
 	call StringTokenHexadecimal
 

@@ -21,6 +21,7 @@
 %include "include/memoryDefines.inc"
 
 %include "include/boolean.inc"
+%include "include/CPU.inc"
 %include "include/globals.inc"
 %include "include/errors.inc"
 %include "include/lists.inc"
@@ -556,7 +557,7 @@ MemAllocate:
 
 	; get the first free block
 	push 0
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitfieldScanClear
 	cmp edx, kErrNone
 	jne .Fail
@@ -571,7 +572,7 @@ MemAllocate:
 
 	; mark it allocated
 	push eax
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitSet
 	cmp edx, kErrNone
 	jne .Fail
@@ -649,7 +650,6 @@ ret 12
 
 
 
-
 section .text
 MemCopy:
 	; Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest)
@@ -671,89 +671,19 @@ MemCopy:
 	%define length								dword [ebp + 16]
 
 
-	; to copy at top speed, we will break the copy operation into two parts
-	; first, we'll see how many multiples of 8 need transferred, and do those in 8-byte chunks
-
-	; set up pointers
-	mov esi, source
-	mov edi, dest
-
-	; divide length by 8 and skip the loop if the result is zero
-	mov ecx, length
-	shr ecx, 3
-	cmp ecx, 0
-	je .ChunkLoopDone
-
-	; do the copy
-	.ChunkLoop:
-		; read 8 bytes in
-		lodsd
-		mov ebx, [esi]
-
-		; write them out
-		stosd
-		mov [edi], ebx
-
-		; increment the counters
-		add esi, 4
-		add edi, 4
-	loop .ChunkLoop
-	.ChunkLoopDone:
-
-	; now restore the transfer amount, see how many bytes we have remaining, and skip the loop if the result is zero
-	mov ecx, length
-	and ecx, 00000000000000000000000000000111b
-	cmp ecx, 0
-	je .ByteLoopDone
-
-	; and do the copy
-	.ByteLoop:
-		lodsb
-		mov byte [edi], al
-		inc edi	
-	loop .ByteLoop
-	.ByteLoopDone:
-
-
-	.Exit:
-	%undef source
-	%undef dest
-	%undef length
-	mov esp, ebp
-	pop ebp
-ret 12
-
-
-
-
-
-section .text
-MemCopySSE:
-	; Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest) using
-	; SSE registers for additional speed
-	;
-	;  input:
-	;	Source address
-	;	Destination address
-	;	Transfer length
-	;
-	;  output:
-	;	n/a
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define source								dword [ebp + 8]
-	%define dest								dword [ebp + 12]
-	%define length								dword [ebp + 16]
-
-
-	; load ye olde addresses
-	mov esi, source
-	mov edi, dest
-
 	; to copy at top speed, we will break the copy operation into parts
+	; the most significant part will be using SSE2 if it's available
+	push kCPU_sse2
+	push tSystem.CPUFeatures
+	call LMBitGet
+
+	; set up the pointers and length mask before we decide the next branch regarding what we just found out about SSE support above
+	mov esi, source
+	mov edi, dest
+	mov edx, 11111111111111111111111111111111b
+
+	jnc .SSEBlockLoopDone
+
 
 	; first, see how many multiples of 128 need transferred, and make sure the loop doesn't get executed if the result is zero
 	mov ecx, length
@@ -786,35 +716,38 @@ MemCopySSE:
 		add esi, 128
 		add edi, 128
 	loop .SSEBlockLoop
+	mov edx, 00000000000000000000000001111111b
+
 	.SSEBlockLoopDone:
 
 
-
-	; next, see how many multiples of 16 need transferred, and make sure the loop doesn't get executed if the result is zero
+	; divide length by 8 and skip the loop if the result is zero
 	mov ecx, length
-	and ecx, 00000000000000000000000001111111b
-	shr ecx, 4
+	and ecx, edx
+	shr ecx, 3
 	cmp ecx, 0
-	je .SSESingleLoopDone
+	je .ChunkLoopDone
 
 	; do the copy
-	.SSESingleLoop:
-		; read 16 bytes in
-		movdqu xmm0, [esi]
+	.ChunkLoop:
+		; read 8 bytes in
+		lodsd
+		mov ebx, [esi]
 
 		; write them out
-		movdqu [edi], xmm0
+		stosd
+		mov [edi], ebx
 
-		add esi, 16
-		add edi, 16
-	loop .SSESingleLoop
-	.SSESingleLoopDone:
-
+		; increment the counters
+		add esi, 4
+		add edi, 4
+	loop .ChunkLoop
+	.ChunkLoopDone:
 
 
 	; now see how many bytes we have remaining
 	mov ecx, length
-	and ecx, 00000000000000000000000000001111b
+	and ecx, 00000000000000000000000000000111b
 
 	; make sure the loop doesn't get executed if the counter is zero
 	cmp ecx, 0
@@ -873,7 +806,7 @@ MemDispose:
 
 	; mark the block free
 	push eax
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitClear
 	cmp edx, kErrNone
 	jne .Fail
@@ -918,20 +851,18 @@ MemFill:
 	mov edi, address
 	mov ebx, value
 
-	; clone al to the remaining bytes in EAX
-	; e.g. 0xBE becomes 0xBEBEBEBE, or 0xAA becomes 0xAAAAAAAA
-	mov bh, bl
-	mov ax, bx
-	shl eax, 16
-	mov ax, bx
-
 	; since we're processing DWords here first, ecx = length / 4
 	mov ecx, length
 	shr ecx, 2
 	cmp ecx, 0
 	je .DWordTransferDone
-
-	rep stosd
+		; clone al to the remaining bytes in EAX
+		; e.g. 0xBE becomes 0xBEBEBEBE, or 0xAA becomes 0xAAAAAAAA
+		mov bh, bl
+		mov ax, bx
+		shl eax, 16
+		mov ax, bx
+		rep stosd
 	.DWordTransferDone:
 
 
@@ -939,11 +870,10 @@ MemFill:
 	mov ecx, length
 	and ecx, 00000000000000000000000000000011b
 	cmp ecx, 0
-	je .Exit
-
-	.ByteLoop:
-		stosb
-	loop .ByteLoop
+	je .ByteTransferDone
+		mov al, bl
+		rep stosb
+	.ByteTransferDone:
 
 
 	.Exit:
@@ -972,30 +902,15 @@ MemInit:
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 40
+	sub esp, 16
 	%define memMapOffset						dword [ebp - 4]
 	%define bitsNeedesPerBitfield				dword [ebp - 8]
-	%define qTotalBytes							qword [ebp - 16]
-	%define qUsableBytes						qword [ebp - 24]
-	%define qTotalBytesPtr						dword [ebp - 28]
-	%define qUsableBytesPtr						dword [ebp - 32]
-	%define entryLengthPtr						dword [ebp - 36]
-	%define loopIndex							dword [ebp - 40]
+	%define entryLengthPtr						dword [ebp - 12]
+	%define loopIndex							dword [ebp - 16]
 
 
 	; init important stuff
 	mov memMapOffset, 0x80000
-
-	pxor xmm0, xmm0
-	movq qTotalBytes, xmm0
-	movq qUsableBytes, xmm0
-
-	mov eax, ebp
-	sub eax, 16
-	mov qTotalBytesPtr, eax
-	sub eax, 8
-	mov qUsableBytesPtr, eax
-
 
 	; calculate how many bits are needed to cover the address space in the machine and save to bitsNeedesPerBitfield
 	; bitsNeedesPerBitfield = (address of last entry in memory map / 4096) + (length of last entry in memory map / 4096)
@@ -1071,7 +986,7 @@ MemInit:
 		mov ebx, [esi]
 
 		; preemptively save the address for later, just in case
-		mov dword [tSystem.memoryBitfieldPtrPagesAllocated], ebx
+		mov dword [tSystem.memoryBitfieldAllocatedPtr], ebx
 
 		push 0x80000000
 		push 0x00100000
@@ -1103,21 +1018,21 @@ MemInit:
 
 	; First, create said bitfields.
 	push bitsNeedesPerBitfield
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitfieldInit
 
 	; calculate the address of the next bitfield
-	mov eax, dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	mov eax, dword [tSystem.memoryBitfieldAllocatedPtr]
 	add eax, [tSystem.memoryBitfieldSize]
-	mov dword [tSystem.memoryBitfieldPtrPagesReserved], eax
+	mov dword [tSystem.memoryBitfieldReservedPtr], eax
 
 	; create bitfield #2
 	push bitsNeedesPerBitfield
-	push dword [tSystem.memoryBitfieldPtrPagesReserved]
+	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitfieldInit
 
 	; next, we calculate the destination address for the memory map data
-	mov eax, dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	mov eax, dword [tSystem.memoryBitfieldAllocatedPtr]
 	add ebx, [tSystem.memoryBitfieldSize]
 	shl ebx, 1
 	add eax, ebx
@@ -1140,12 +1055,12 @@ MemInit:
 	; be allocated to processes.
 	push 255
 	push 0
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitSetRange
 
 	push 255
 	push 0
-	push dword [tSystem.memoryBitfieldPtrPagesReserved]
+	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitSetRange
 
 
@@ -1159,7 +1074,7 @@ MemInit:
 	dec eax
 	push eax
 	push dword 0
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitSetRange
 
 	; mark the range as already allocated
@@ -1167,7 +1082,7 @@ MemInit:
 	dec eax
 	push eax
 	push dword 0
-	push dword [tSystem.memoryBitfieldPtrPagesReserved]
+	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitSetRange
 
 
@@ -1219,7 +1134,7 @@ MemInit:
 		dec eax
 		push eax
 		push dword [esi + tBIOSMemMapEntry.address]
-		push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+		push dword [tSystem.memoryBitfieldAllocatedPtr]
 		call LMBitClearRange
 
 		; check for errors
@@ -1233,7 +1148,7 @@ MemInit:
 		dec eax
 		push eax
 		push dword [esi + tBIOSMemMapEntry.address]
-		push dword [tSystem.memoryBitfieldPtrPagesReserved]
+		push dword [tSystem.memoryBitfieldReservedPtr]
 		call LMBitClearRange
 		cmp edx, kErrNone
 		jne .Exit
@@ -1254,9 +1169,9 @@ MemInit:
 	call MemPagesNeeded
 	mov bitsNeedesPerBitfield, eax
 
-	; now convert the starting address (tSystem.memoryBitfieldPtrPagesAllocated) to a page/bit number/thingy
-	; bit number = tSystem.memoryBitfieldPtrPagesAllocated / 4096
-	mov ebx, dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	; now convert the starting address (tSystem.memoryBitfieldAllocatedPtr) to a page/bit number/thingy
+	; bit number = tSystem.memoryBitfieldAllocatedPtr / 4096
+	mov ebx, dword [tSystem.memoryBitfieldAllocatedPtr]
 	shr ebx, 12
 
 	; mark the range as already allocated
@@ -1264,20 +1179,20 @@ MemInit:
 	dec eax
 	push eax
 	push ebx
-	push dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitSetRange
 	cmp edx, kErrNone
 	jne .Exit
 
 	; mark the range as reserved
-	mov ebx, dword [tSystem.memoryBitfieldPtrPagesAllocated]
+	mov ebx, dword [tSystem.memoryBitfieldAllocatedPtr]
 	shr ebx, 12
 	mov eax, bitsNeedesPerBitfield
 	add eax, ebx
 	dec eax
 	push eax
 	push ebx
-	push dword [tSystem.memoryBitfieldPtrPagesReserved]
+	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitSetRange
 
 
@@ -1285,10 +1200,6 @@ MemInit:
 	.Exit:
 	%undef memMapOffset
 	%undef bitsNeedesPerBitfield
-	%undef qTotalBytes
-	%undef qUsableBytes
-	%undef qTotalBytesPtr
-	%undef qUsableBytesPtr
 	%undef entryLengthPtr
 	%undef loopIndex
 	mov esp, ebp
@@ -1745,7 +1656,7 @@ ret 8
 ; Usable KiB 		0000000000FFFE3F		0000000016776767
 ; Usable pages		00000000003FFF8F		0000000004194191
 
-; 0x00100000 - 0x00180003 - memoryBitfieldPtrPagesAllocated (524292 / 0x00080004 bytes)
+; 0x00100000 - 0x00180003 - memoryBitfieldPagesAllocatedPtr (524292 / 0x00080004 bytes)
 ; 0x00180004 - 0x00200007 - bitfieldPtrPagesReserved (524292 / 0x00080004 bytes)
 ; 0x00200008 - 0x002000BB - BIOS memory map shadow (180 / 0xB4 bytes)
 ; total bytes: 1048764 / 0x001000BC

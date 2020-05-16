@@ -68,15 +68,16 @@ section .bss
 	.CPUFeatures								resb 64
 	.CPUIDLargestBasicQuery						resd 1
 	.CPUIDLargestExtendedQuery					resd 1
-	.memoryBitfieldPtrPagesAllocated			resd 1
-	.memoryBitfieldPtrPagesReserved				resd 1
-	.memoryBitfieldSize							resd 1
-	.memoryBIOSMapShadowPtr						resd 1
 	.memoryBIOSMapShadowEntryCount				resd 1
+	.memoryBIOSMapShadowPtr						resd 1
 	.memoryBIOSMapShadowSize					resd 1
-	.memoryManagementSpace						resd 1
+	.memoryBitfieldAllocatedPtr					resd 1
+	.memoryBitfieldReservedPtr					resd 1
+	.memoryBitfieldSize							resd 1
+	.memoryKiBFree								resd 1
 	.memoryKiBInstalled							resd 1
 	.memoryKiBUsable							resd 1
+	.memoryManagementSpace						resd 1
 	.listPtrDrives								resd 1
 	.listPtrDriveLetters						resd 1
 	.listPtrFSHandlers							resd 1
