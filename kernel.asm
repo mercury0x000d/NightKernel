@@ -127,7 +127,7 @@ je .MemProbeOK
 
 ; save the returned size of the memory map
 and eax, 0x0000FFFF
-mov dword [tSystem.memoryBIOSMapShadowEntryCount], eax
+mov dword [tSystem.memoryBIOSMapEntryCount], eax
 
 
 
@@ -205,7 +205,7 @@ mov esp, 0x0009fb00
 call PrintCopyright
 call PrintVerison
 
-jmp $
+
 
 ; probe CPU
 push progressText08$

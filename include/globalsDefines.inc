@@ -21,7 +21,7 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 3626
+%define BUILD 3670
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
@@ -174,15 +174,15 @@ global tSystem.mouseXLimit
 global tSystem.mouseY
 global tSystem.mouseYLimit
 global tSystem.mouseZ
-global tSystem.memoryBIOSMapShadowEntryCount
-global tSystem.memoryBIOSMapShadowPtr
-global tSystem.memoryBIOSMapShadowSize
+global tSystem.memoryBIOSMapEntryCount
+global tSystem.memoryBIOSMapKiBInstalled
+global tSystem.memoryBIOSMapKiBUsable
+global tSystem.memoryBIOSMapPtr
+global tSystem.memoryBIOSMapSize
 global tSystem.memoryBitfieldAllocatedPtr
 global tSystem.memoryBitfieldReservedPtr
 global tSystem.memoryBitfieldSize
-global tSystem.memoryKiBFree
-global tSystem.memoryKiBInstalled
-global tSystem.memoryKiBUsable
+global tSystem.memoryBitsInitial
 global tSystem.memoryManagementSpace
 global tSystem.listPtrDrives
 global tSystem.listPtrDriveLetters

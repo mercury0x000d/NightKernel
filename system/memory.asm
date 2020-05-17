@@ -917,24 +917,54 @@ MemInit:
 
 	; address calculation
 	mov esi, memMapOffset
-	mov eax, dword [tSystem.memoryBIOSMapShadowEntryCount]
+	mov eax, dword [tSystem.memoryBIOSMapEntryCount]
 	dec eax
 	mov ebx, 20
 	mul ebx
-	add esi, eax
+	add memMapOffset, eax
 
-	; We interrupt this calculation in progress to bring you the value of tSystem.memoryBIOSMapShadowSize!
-	mov dword [tSystem.memoryBIOSMapShadowSize], eax
-	add dword [tSystem.memoryBIOSMapShadowSize], 20
+	; We interrupt this calculation in progress to bring you the value of tSystem.memoryBIOSMapSize!
+	mov dword [tSystem.memoryBIOSMapSize], eax
+	add dword [tSystem.memoryBIOSMapSize], 20
 
 	; We now resume this scheduled calculation, already in progress
 	; resume calculating bitsNeedesPerBitfield
+
+	; shift the address and length to divide by 4096
+	; We must use our QuadShift routines here in case we have a machine which has over 4 GiB of RAM.
+	; The normal registers just won't cut it, son!
+	push 12
+	mov eax, memMapOffset
+	add eax, tBIOSMemMapEntry.address
+	push eax
+	call QuadShiftRight
+
+	push 12
+	mov eax, memMapOffset
+	add eax, tBIOSMemMapEntry.length
+	push eax
+	call QuadShiftRight
+
+	; calculate how large each bitfield must needs be
+	mov esi, memMapOffset
 	mov ebx, [esi + tBIOSMemMapEntry.address]
-	shr ebx, 12
 	mov ecx, [esi + tBIOSMemMapEntry.length]
-	shr ecx, 12
 	add ebx, ecx
 	mov bitsNeedesPerBitfield, ebx
+
+	; put the address and length back the way they were - we'll need them in their original form later
+	push 12
+	mov eax, memMapOffset
+	add eax, tBIOSMemMapEntry.address
+	push eax
+	call QuadShiftLeft
+
+	; shift the length to divide by 4096
+	push 12
+	mov eax, memMapOffset
+	add eax, tBIOSMemMapEntry.length
+	push eax
+	call QuadShiftLeft
 
 
 	; Now we need to figure out where the memory management information will be stored. But how?? Memory management isn't fully set up yet!
@@ -943,7 +973,7 @@ MemInit:
 	; (e.g. under 4 GiB) and large enough to hold the two memory bitfields and the shadowed map data. 
 
 	; So, first step; figure out how much space we need for one bitfield.
-	push ebx
+	push bitsNeedesPerBitfield
 	call LMBitfieldSpaceCalc
 	mov [tSystem.memoryBitfieldSize], eax
 
@@ -952,15 +982,16 @@ MemInit:
 	; pagesAllocated tracks which pages are allocated (0 if free, 1 if allocated).
 	; pagesReserved tracks which pages are reserved (0 if usable, 1 if reserved).
 
-	; total space = bitsNeedesPerBitfield * 2 + tSystem.memoryBIOSMapShadowSize
+	; total space = bitsNeedesPerBitfield * 2 + tSystem.memoryBIOSMapSize
 	shl eax, 1
-	add eax, dword [tSystem.memoryBIOSMapShadowSize]
+	add eax, dword [tSystem.memoryBIOSMapSize]
 	mov dword [tSystem.memoryManagementSpace], eax
 
 
 	; Now that we know how much space is needed, it's time to step through the memory map and find a spot large enough to hold it.
 	; The good news is that this will be the single most awkward allocation we will ever have to perform. It'll be much smoother from here on!
-	mov ecx, dword [tSystem.memoryBIOSMapShadowEntryCount]
+	mov memMapOffset, 0x80000
+	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
 	.MemSearchLoop:
 		mov loopIndex, ecx
 
@@ -1038,10 +1069,10 @@ MemInit:
 	add eax, ebx
 
 	; save that address to the system struct
-	mov dword [tSystem.memoryBIOSMapShadowPtr], eax
+	mov dword [tSystem.memoryBIOSMapPtr], eax
 
 	; now we copy the BIOS memory map from 0x80000 to its spot in the memory management area
-	push dword [tSystem.memoryBIOSMapShadowSize]
+	push dword [tSystem.memoryBIOSMapSize]
 	push eax
 	push 0x80000
 	call MemCopy
@@ -1092,12 +1123,12 @@ MemInit:
 	; machine which I have examined thus far (as well as VirtualBox) have all conformed to this pattern; not once did I see a memory entry at
 	; or over 1 MiB which was not an even multiple of 4 KiB.
 
-	; At this point, we have two copies of the BIOS memory map - one at the address denoted by tSystem.memoryBIOSMapShadowPtr and the other
+	; At this point, we have two copies of the BIOS memory map - one at the address denoted by tSystem.memoryBIOSMapPtr and the other
 	; at 0x80000. Since the operation of this loop is destructive, we use the "old" copy of the map at 0x80000.
 
 	; Init important... oh, you know the drill
 	mov memMapOffset, 0x80000
-	mov ecx, dword [tSystem.memoryBIOSMapShadowEntryCount]
+	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
 
 	.MemReservedLoop:
 		mov loopIndex, ecx
@@ -1114,7 +1145,7 @@ MemInit:
 			jb .MemReservedLoopIterate
 		.MarkReserved:
 
-		; if we get here, this memory range needs marked reserved; first, convert the 64-bit address and length to 32-bit "page" values
+		; if we get here, this memory range needs marked available; first, convert the 64-bit address and length to 32-bit "page" values
 		push 12
 		mov esi, memMapOffset
 		add esi, tBIOSMemMapEntry.address
@@ -1162,6 +1193,12 @@ MemInit:
 	loop .MemReservedLoop
 
 
+	; here we save for later the amount of bits (pages) marked used in the allocated bitmap to aid in calculating free memory later
+	mov esi, [tSystem.memoryBitfieldAllocatedPtr]
+	mov eax, [esi + tBitfieldInfo.setCount]
+	mov [tSystem.memoryBitsInitial], eax
+
+
 	; Next, we have to mark the space occupied by these data structures as reserved as well. The total space occupied by everything we need
 	; to manage memory (both bitfields and the shadowed BIOS memory map) is stored in dword [tSystem.memoryManagementSpace], so we first need
 	; to convert that to a number of pages and save it for later (we can reuse bitsNeedesPerBitfield for this).
@@ -1169,7 +1206,7 @@ MemInit:
 	call MemPagesNeeded
 	mov bitsNeedesPerBitfield, eax
 
-	; now convert the starting address (tSystem.memoryBitfieldAllocatedPtr) to a page/bit number/thingy
+	; now convert the starting address (tSystem.memoryBitfieldAllocatedPtr) to a page / bit number / thingy
 	; bit number = tSystem.memoryBitfieldAllocatedPtr / 4096
 	mov ebx, dword [tSystem.memoryBitfieldAllocatedPtr]
 	shr ebx, 12
@@ -1206,7 +1243,7 @@ MemInit:
 	pop ebp
 ret
 ;	; calculate the total amount of bytes in the system and save to qTotalBytes
-;	mov ecx, dword [tSystem.memoryBIOSMapShadowEntryCount]
+;	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
 ;	.MemAddLoop:
 ;		mov loopIndex, ecx
 ;
@@ -1510,6 +1547,40 @@ ret 12
 
 
 section .text
+MemStats:
+	; Returns stats about the system's memory
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	EAX - KiB total
+	;	EBX - KiB free
+	;	ECX - KiB used
+
+
+	; calculate the initial total memory pool (adding back the first MiB which is a given)
+	mov esi, [tSystem.memoryBitfieldAllocatedPtr]
+	mov eax, [esi + tBitfieldInfo.elementCount]
+	sub eax, [tSystem.memoryBitsInitial]
+	shl eax, 2
+	add eax, 0x400
+
+	; calculate free memory
+	mov ebx, [esi + tBitfieldInfo.elementCount]
+	sub ebx, [esi + tBitfieldInfo.setCount]
+	shl ebx, 2
+
+	; calculate used memory
+	mov ecx, eax
+	sub ecx, ebx
+ret
+
+
+
+
+
+section .text
 MemSwapWordBytes:
 	; Swaps the bytes in a series of words starting at the address specified
 	;
@@ -1656,8 +1727,8 @@ ret 8
 ; Usable KiB 		0000000000FFFE3F		0000000016776767
 ; Usable pages		00000000003FFF8F		0000000004194191
 
-; 0x00100000 - 0x00180003 - memoryBitfieldPagesAllocatedPtr (524292 / 0x00080004 bytes)
-; 0x00180004 - 0x00200007 - bitfieldPtrPagesReserved (524292 / 0x00080004 bytes)
+; 0x00100000 - 0x00180003 - memoryBitfieldAllocatedPtr (524292 / 0x00080004 bytes)
+; 0x00180004 - 0x00200007 - memoryBitfieldReservedPtr (524292 / 0x00080004 bytes)
 ; 0x00200008 - 0x002000BB - BIOS memory map shadow (180 / 0xB4 bytes)
 ; total bytes: 1048764 / 0x001000BC
 ; total pages: 257 / 0x0101

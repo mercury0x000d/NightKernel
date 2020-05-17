@@ -1678,8 +1678,10 @@ DebugSystemInfo:
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 8
-	%define tempQuad							dword [ebp - 8]
+	sub esp, 12
+	%define memoryTotal							dword [ebp - 4]
+	%define memoryFree							dword [ebp - 8]
+	%define memoryUsed							dword [ebp - 12]
 
 
 	; clear the screen first
@@ -1748,6 +1750,12 @@ DebugSystemInfo:
 	call Print32
 
 
+	; get memory info
+	call MemStats
+	mov memoryTotal, eax
+	mov memoryFree, ebx
+	mov memoryUsed, ecx
+
 	; build and print the RAM strings
 	push dword 0x00000000
 	push dword 0x00000007
@@ -1762,7 +1770,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-	push dword [tSystem.memoryKiBInstalled]
+	push memoryTotal
 	push .scratch$
 	call StringTokenDecimal
 
@@ -1780,7 +1788,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-	push dword [tSystem.memoryKiBUsable]
+	push memoryUsed
 	push .scratch$
 	call StringTokenDecimal
 
@@ -1798,10 +1806,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 0
-	mov esi, [tSystem.memoryBitfieldAllocatedPtr]
-	mov eax, dword [esi + tBitfieldInfo.setCount]
-	shl eax, 2
-	push eax
+	push memoryFree
 	push .scratch$
 	call StringTokenDecimal
 
@@ -1858,7 +1863,7 @@ DebugSystemInfo:
 	call MemCopy
 
 	push dword 8
-	push dword [tSystem.memoryBIOSMapShadowPtr]
+	push dword [tSystem.memoryBIOSMapPtr]
 	push .scratch$
 	call StringTokenHexadecimal
 
@@ -1993,7 +1998,9 @@ DebugSystemInfo:
 
 
 	.Exit:
-	%undef tempQuad
+	%undef memoryTotal
+	%undef memoryFree
+	%undef memoryUsed
 	mov esp, ebp
 	pop ebp
 ret
@@ -2002,9 +2009,9 @@ section .data
 .systemInfoText$								db 'System Information', 0x00
 .versionFormat$									db 'Version ^.^, Build ^', 0x00
 .RAMInfo$										db 'Memory:', 0x00
-.RAMFormat1$									db 'Installed:  ^ KiB', 0x00
-.RAMFormat2$									db 'Usable:     ^ KiB', 0x00
-.RAMFormat3$									db 'Used:       ^ KiB', 0x00
+.RAMFormat1$									db 'Total:    ^ KiB', 0x00
+.RAMFormat2$									db 'Used:     ^ KiB', 0x00
+.RAMFormat3$									db 'Free:     ^ KiB', 0x00
 .listDriveFormat$								db 'Drive List                   0x^', 0x00
 .listPtrDriveLettersFormat$						db 'Drive Letters List           0x^', 0x00
 .listPtrFSHandlersFormat$						db 'FS Handlers List             0x^', 0x00

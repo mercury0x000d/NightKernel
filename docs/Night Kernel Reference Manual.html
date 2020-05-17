@@ -176,48 +176,56 @@
 					<th width = '10%'><i>Rule</i></th>
 					<th width = '90%'><i>Function</i></th>
 				</tr>
+
 				<tr>
 					<td>build</td>
 					<td>
 						Assembles the individual source files using NASM and links them into the kernel binary. After assembling, you will have a file called <i>kernel.sys</i> in the <i>builds</i> directory which can be copied over top of the existing FreeDOS kernel on any bootable FreeDOS disk.
 					</td>
 				</tr>
+
 				<tr>
 					<td>clean</td>
 					<td>
 						Deletes all the temporary and output files related to the build process.
 					</td>
 				</tr>
+
 				<tr>
 					<td>floppy</td>
 					<td>
 						Creates a bootable floppy image.
 					</td>
 				</tr>
+
 				<tr>
 					<td>help</td>
 					<td>
 						Displays targets.
 					</td>
 				</tr>
+
 				<tr>
 					<td>iso</td>
 					<td>
 						Creates a bootable CD-ROM image.
 					</td>
 				</tr>
+
 				<tr>
 					<td>print</td>
 					<td>
 						Prints the value of the token specified.
 					</td>
 				</tr>
+
 				<tr>
 					<td>run</td>
 					<td>
 						Runs the kernel in a VirtualBox virtual machine.
 					</td>
 				</tr>
+
 				<tr>
 					<td>vm</td>
 					<td>
@@ -245,36 +253,42 @@
 					<th width = '10%'><i>Menu Selection</i></th>
 					<th width = '90%'><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>System Info</td>
 					<td>
 						Provides details about the system, including the kernel version, CPU description, and the addresses of various data lists the kernel maintains.
 					</td>
 				</tr>
+
 				<tr>
 					<td>PCI Devices</td>
 					<td>
 						Details the PCI devices detected on the system and allows browsing of the PCI register information for each using the Page Up and Page Down keys.
 					</td>
 				</tr>
+
 				<tr>
 					<td>Memory Details</td>
 					<td>
 						Provides a dump of the memory list used to track both free and allocated physical RAM.
 					</td>
 				</tr>
+
 				<tr>
 					<td>RAM Browser</td>
 					<td>
 						An interactive memory browser. Use the Plus and Minus keys on the number pad to scroll through memory addresses or use Page Up or Page down to jump by larger chunks. Typing a hexadecimal address and pressing enter will jump instantly to that memory location. Keep in mind that some modern systems have protected ranges of RAM used by UEFI or SMM/TPM software which are not permitted to be read. Accessing these with the RAM Browser can cause a triple-fault and reset the system.
 					</td>
 				</tr>
+
 				<tr>
 					<td>Task Browser</td>
 					<td>
 						Allows browsing of all slots in the Task List. Use Page Up and Page Down to change the task number, the Plus and Minus keys on the number pad to adjust the priority of running tasks, Spacebar to toggle a task's suspended state, or Enter to kill the task entirely. Keep in mind there is nothing preventing the Debug Menu itself from being suspended or killed, leaving no way to interact with the kernel until the system is restarted.
 					</td>
 				</tr>
+
 				<tr>
 					<td>Reboot</td>
 					<td>Reboots the machine.</td>
@@ -302,78 +316,91 @@
 					<th width = '30%'><i>Command</i></th>
 					<th width = '70%'><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>d (address)</td>
 					<td>
 						Dump memory at address specified
 					</td>
 				</tr>
+
 				<tr>
 					<td>dpd (address | index)</td>
 					<td>
 						Dumps page directory entries
 					</td>
 				</tr>
+
 				<tr>
 					<td>dpda (address)</td>
 					<td>
 						Dumps memory at given address as a page directory
 					</td>
 				</tr>
+
 				<tr>
 					<td>d (address)</td>
 					<td>
 						Dump memory at address specified
 					</td>
 				</tr>
+
 				<tr>
 					<td>r</td>
 					<td>
 						Display active register set
 					</td>
 				</tr>
+
 				<tr>
 					<td>rg</td>
 					<td>
 						Display guest register set
 					</td>
 				</tr>
+
 				<tr>
 					<td>rt</td>
 					<td>
 						Toggles verbose register mode; the next 'r' command will show all registers instead of just the general purpose ones
 					</td>
 				</tr>
+
 				<tr>
 					<td>sa (address) 'string'</td>
 					<td>
 						Search for an ASCII string
 					</td>
 				</tr>
+
 				<tr>
 					<td>sb (address) (byte value | byte string)</td>
 					<td>
 						Search for one or more bytes
 					</td>
 				</tr>
+
 				<tr>
 					<td>sd (address) (word value)</td>
 					<td>
 						Search for one or more words
 					</td>
 				</tr>
+
 				<tr>
 					<td>sw (address) (word value)</td>
 					<td>
 						Search for one or more dwords
 					</td>
 				</tr>
+
 				<tr>
 					<td>t</td>
 					<td>
 						Trace (single-step) through code one instruction at a time.
 					</td>
 				</tr>
+
 				<tr>
 					<td>u (address)</td>
 					<td>
@@ -607,22 +634,27 @@
 						<th width = '10%'><i>Bit</i></th>
 						<th width = '90%'><i>Description</i></th>
 					</tr>
+
 					<tr>
 						<td>00</td>
 						<td>Supports character device interface</td>
 					</tr>
+
 					<tr>
 						<td>01</td>
 						<td>Supports block device interface</td>
 					</tr>
+
 					<tr>
 						<td>02 - 29</td>
 						<td>Reserved</td>
 					</tr>
+
 					<tr>
 						<td>30</td>
 						<td>Filesystem driver</td>
 					</tr>
+
 					<tr>
 						<td>31</td>
 						<td>PCI driver</td>
@@ -640,70 +672,87 @@
 						<th width = '10%'><i>Value</i></th>
 						<th width = '90%'><i>Symbol</i></th>
 					</tr>
+
 					<tr>
 						<td>0x00</td>
 						<td>kDriverInit</td>
 					</tr>
+
 					<tr>
 						<td>0x01</td>
 						<td>kDriverMediaCheck</td>
 					</tr>
+
 					<tr>
 						<td>0x02</td>
 						<td>kDriverBuildBPB</td>
 					</tr>
+
 					<tr>
 						<td>0x03</td>
 						<td>kDriverIOCTLRead</td>
 					</tr>
+
 					<tr>
 						<td>0x04</td>
 						<td>kDriverRead</td>
 					</tr>
+
 					<tr>
 						<td>0x05</td>
 						<td>kDriverNondestructiveRead</td>
 					</tr>
+
 					<tr>
 						<td>0x06</td>
 						<td>kDriverInputStatus</td>
 					</tr>
+
 					<tr>
 						<td>0x07</td>
 						<td>kDriverFlushInputBuffers</td>
 					</tr>
+
 					<tr>
 						<td>0x08</td>
 						<td>kDriverWrite</td>
 					</tr>
+
 					<tr>
 						<td>0x09</td>
 						<td>kDriverWriteVerify</td>
 					</tr>
+
 					<tr>
 						<td>0x0A</td>
 						<td>kDriverOutputStatus</td>
 					</tr>
+
 					<tr>
 						<td>0x0B</td>
 						<td>kDriverFlushOutputBuffers</td>
 					</tr>
+
 					<tr>
 						<td>0x0C</td>
 						<td>kDriverIOCTLWrite</td>
 					</tr>
+
 					<tr>
 						<td>0x0D</td>
 						<td>kDriverOpen</td>
 					</tr>
+
 					<tr>
 						<td>0x0E</td>
 						<td>kDriverClose</td>
 					</tr>
+
 					<tr>
 						<td>0x0F</td>
 						<td>kDriverRemovableMedia</td>
 					</tr>
+
 					<tr>
 						<td>0x10</td>
 						<td>kDriverOutputUntilBusy</td>
@@ -721,42 +770,52 @@
 						<th width = '10%'><i>Value</i></th>
 						<th width = '90%'><i>Symbol</i></th>
 					</tr>
+
 					<tr>
 						<td>0xF0</td>
 						<td>kDriverFileLoad</td>
 					</tr>
+
 					<tr>
 						<td>0xF1</td>
 						<td>kDriverFileInfoAccessedGet</td>
 					</tr>
+
 					<tr>
 						<td>0xF2</td>
 						<td>kDriverFileInfoCreatedGet</td>
 					</tr>
+
 					<tr>
 						<td>0xF3</td>
 						<td>kDriverFileInfoModifiedGet</td>
 					</tr>
+
 					<tr>
 						<td>0xF4</td>
 						<td>kDriverFileInfoSizeGet</td>
 					</tr>
+
 					<tr>
 						<td>0xF5</td>
 						<td>kDriverItemLoad</td>
 					</tr>
+
 					<tr>
 						<td>0xF6</td>
 						<td>kDriverItemNew</td>
 					</tr>
+
 					<tr>
 						<td>0xF7</td>
 						<td>kDriverItemStore</td>
 					</tr>
+
 					<tr>
 						<td>0xF8</td>
 						<td>kDriverPartitionInfo</td>
 					</tr>
+
 					<tr>
 						<td>0xF9</td>
 						<td>kDriverItemCount</td>
@@ -785,22 +844,27 @@
 						<th width = '10%'><i>Bit</i></th>
 						<th width = '90%'><i>Description</i></th>
 					</tr>
+
 					<tr>
 						<td>00</td>
 						<td>Enable Debug Mode</td>
 					</tr>
+
 					<tr>
 						<td>01</td>
 						<td>Verbose boot (Displays startup and diagnostic messages during boot)</td>
 					</tr>
+
 					<tr>
 						<td>02</td>
 						<td>Use 50-line text mode instead of 25-line mode</td>
 					</tr>
+
 					<tr>
 						<td>03</td>
 						<td>Enable paging to disk</td>
 					</tr>
+
 					<tr>
 						<td>04 - 31</td>
 						<td>Reserved</td>
@@ -819,7 +883,7 @@
 		<p>
 			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A <i>list</i>, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceeded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
 			<br>
-			The structure of a list is detailed below.<br>
+			Each list begins with a <code>tListInfo</code> header, the structure of which is detailed below.<br>
 			<br>
 			<code>
 				<table style = 'width:100%'>
@@ -829,6 +893,7 @@
 						<th width = '10%'><i>Name</i></th>
 						<th width = '80%'><i>Description</i></th>
 					</tr>
+
 					<tr>
 						<td>0x00</td>
 						<td>signature</td>
@@ -836,21 +901,25 @@
 							A string (<i>'list'</i>) identifying the beginning of a List Manager list.
 						</td>
 					</tr>
+
 					<tr>
 						<td>0x04</td>
 						<td>elementSize</td>
 						<td>Size in bytes of each element in this list.</td>
 					</tr>
+
 					<tr>
 						<td>0x08</td>
 						<td>elementCount</td>
 						<td>Total number of elements in this list.</td>
 					</tr>
+
 					<tr>
 						<td>0x0C</td>
 						<td>listSize</td>
 						<td>Total size of this list (header and data space) in bytes.</td>
 					</tr>
+
 					<tr>
 						<td>0x10</td>
 						<td colspan = '2'><i>List data</i></td>
@@ -865,7 +934,7 @@
 			<br>
 			The List Manager is versatile enough to handle data of varying sizes with ease, however handling multi-byte data differs enough from handling boolean data that the List Manager offers a separate structure known as a <i>bitfield</i>, which is simply an array of boolean values. This can be used to store a vast number of true/false values.<br>
 			<br>
-			The structure of a bitfield is detailed below.<br>
+			Each bitfield begins with a <code>tBitfieldInfo</code> header, the structure of which is detailed below.<br>
 			<br>
 			<code>
 				<table style = 'width:100%'>
@@ -875,6 +944,7 @@
 						<th width = '10%'><i>Name</i></th>
 						<th width = '80%'><i>Description</i></th>
 					</tr>
+
 					<tr>
 						<td>0x00</td>
 						<td>signature</td>
@@ -882,21 +952,25 @@
 							A string (<i>'bits'</i>) identifying the beginning of a List Manager bitfield.
 						</td>
 					</tr>
+
 					<tr>
 						<td>0x04</td>
 						<td>setCount</td>
 						<td>Number of set bits in this bitfield.</td>
 					</tr>
+
 					<tr>
 						<td>0x08</td>
 						<td>elementCount</td>
 						<td>Total number of bits in this bitfield.</td>
 					</tr>
+
 					<tr>
 						<td>0x0C</td>
 						<td>listSize</td>
 						<td>Total size of this bitfield (header and data space) in bytes.</td>
 					</tr>
+
 					<tr>
 						<td>0x10</td>
 						<td colspan = '2'><i>List data</i></td>
@@ -975,102 +1049,119 @@
 						<th width = '10%'><i>Size</i></th>
 						<th width = '60%'><i>Description</i></th>
 					</tr>
+
 					<tr>
 						<td>0x00</td>
 						<td>pageDirAddress</td>
 						<td>dword</td>
 						<td>The page directory address for this task. This is copied to CR3 upon task switch.</td>
 					</tr>
+
 					<tr>
 						<td>0x04</td>
 						<td>entryPoint</td>
 						<td>dword</td>
 						<td>The initial starting value of EIP for this task.</td>
 					</tr>
+
 					<tr>
 						<td>0x08</td>
 						<td>esp</td>
 						<td>dword</td>
 						<td>The user-level stack pointer.</td>
 					</tr>
+
 					<tr>
 						<td>0x0C</td>
 						<td>esp0</td>
 						<td>dword</td>
 						<td>The kernel stack pointer.</td>
 					</tr>
+
 					<tr>
 						<td>0x10</td>
 						<td>stackAddress</td>
 						<td>dword</td>
 					<td>The memory address of the user stack as returned by <code>MemAllocate()</code>.</td>
 					</tr>
+
 					<tr>
 						<td>0x14</td>
 						<td>kernelStackAddress</td>
 						<td>dword</td>
 						<td>The memory address of the kernel stack as returned by <code>MemAllocate()</code>.</td>
 					</tr>
+
 					<tr>
 						<td>0x18</td>
 						<td>priority</td>
 						<td>byte</td>
 						<td>The priority value for this task. May be 0 - 255, but values over 3 can cause noticible lag in other tasks.</td>
 					</tr>
+
 					<tr>
 						<td>0x19</td>
 						<td>turnsRemaining</td>
 						<td>byte</td>
 						<td>A temporary value used by the task switching code to track how many turns at the CPU this task has left before a task switch will occur. The value of <code>priority</code> is copied into this location initially and then subsequently decremented each pass through the task switching code, at which point <code>priority</code> is copied into this value again for the next time this task is swapped in.</td>
 					</tr>
+
 					<tr>
 						<td>0x1A</td>
 						<td>unused</td>
 						<td>word</td>
 						<td>Free for future allocation</td>
 					</tr>
+
 					<tr>
 						<td>0x1C</td>
 						<td>switchInLow</td>
 						<td>dword</td>
 						<td>The low DWord of the TSC value when this task is switched to.</td>
 					</tr>
+
 					<tr>
 						<td>0x20</td>
 						<td>switchInHigh</td>
 						<td>dword</td>
 						<td>The high DWord of the TSC value when this task is switched to.</td>
 					</tr>
+
 					<tr>
 						<td>0x24</td>
 						<td>cycleCountLow</td>
 						<td>dword</td>
 						<td>The low DWord of the total cycles this task used during its most recent turn at the CPU.</td>
 					</tr>
+
 					<tr>
 						<td>0x28</td>
 						<td>cycleCountHigh</td>
 						<td>dword</td>
 						<td>The high DWord of the total cycles this task used during its most recent turn at the CPU</td>
 					</tr>
+
 					<tr>
 						<td>0x2C</td>
 						<td>spawnedBy</td>
 						<td>dword</td>
 						<td>The task number of the task which spawned this task.</td>
 					</tr>
+
 					<tr>
 						<td>0x30</td>
 						<td>taskFlags</td>
 						<td>byte</td>
 						<td>Flags indicating certain aspects of the task. See table 9.2 for definitions.</td>
 					</tr>
+
 					<tr>
 						<td>0x34 - 0x3F</td>
 						<td>Reserved</td>
 						<td>12 bytes</td>
 						<td>Free for future allocation</td>
 					</tr>
+
 					<tr>
 						<td>0x40</td>
 						<td>name</td>
@@ -1096,16 +1187,19 @@
 						<td>Interrupts</td>
 						<td>Holds the state of this task's interrupt preference, since tasks can't actually disable interrupts</td>
 					</tr>
+
 					<tr>
 						<td>1</td>
 						<td>Suspend</td>
 						<td>Suspends the task from executing when set</td>
 					</tr>
+
 					<tr>
 						<td>2</td>
 						<td>V86 Task</td>
 						<td>Specifies this task is a Virtual 8086 task (e.g. a 'DOS' application)</td>
 					</tr>
+
 					<tr>
 						<td>3 - 31</td>
 						<td>Reserved</td>
@@ -1141,335 +1235,401 @@
 						<th width = '10%'><i>Size</i></th>
 						<th width = '70%'><i>Description</i></th>
 					</tr>
+
 					<tr>
 						<td>APMFeatures</td>
 						<td>Word</td>
 						<td>A word describing features of the machine's APM interface.</td>
 					</tr>
+
 					<tr>
 						<td>APMVersionMajor</td>
 						<td>Byte</td>
 						<td>Major APM interface version.</td>
 					</tr>
+
 					<tr>
 						<td>APMVersionMinor</td>
 						<td>Byte</td>
 						<td>Minor APM interface version.</td>
 					</tr>
+
 					<tr>
 						<td>configBits</td>
 						<td>DWord</td>
 						<td>A dword describing various feature choices in the kernel. See <a href = '#Config'>Section 6 - Setting Options with ConfigBits</a> for more information.</td>
 					</tr>
+
 					<tr>
 						<td>configBitsHint$</td>
 						<td>10 Bytes</td>
 						<td>A string (<i>'configBits'</i>) which preceeds the configBits area.</td>
 					</tr>
+
 					<tr>
 						<td>copyright$</td>
 						<td>36 Bytes</td>
 						<td>The copyright string of the Night kernel.</td>
 					</tr>
+
 					<tr>
 						<td>CPUIDBrand$</td>
 						<td>64 Bytes</td>
 						<td>The CPU brand string as retrieved by the CPUID instruction.</td>
 					</tr>
+
 					<tr>
 						<td>CPUIDLargestBasicQuery</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>CPUIDLargestExtendedQuery</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>CPUIDVendor$</td>
 						<td>16 Bytes</td>
 						<td>The CPU vendor string as retrieved by the CPUID instruction.</td>
 					</tr>
+
 					<tr>
 						<td>currentTask</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>currentTaskSlotAddress</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>listPtrDriveLetters</td>
 						<td>DWord</td>
 						<td>Pointer to the list of drive letters.</td>
 					</tr>
+
 					<tr>
 						<td>listPtrDrives</td>
 						<td>DWord</td>
 						<td>Pointer to the list of drives.</td>
 					</tr>
+
 					<tr>
 						<td>listPtrFSHandlers</td>
 						<td>DWord</td>
 						<td>Pointer to the list of file system handlers.</td>
 					</tr>
+
 					<tr>
 						<td>listPtrPartitions</td>
 						<td>DWord</td>
 						<td>Pointer to the list of partitions.</td>
 					</tr>
+
 					<tr>
 						<td>listPtrPCIHandlers</td>
 						<td>DWord</td>
 						<td>Pointer to the list of PCI device handlers.</td>
 					</tr>
+
 					<tr>
 						<td>listPtrTasks</td>
 						<td>DWord</td>
 						<td>Pointer to the list of tasks.</td>
 					</tr>
+
 					<tr>
-						<td>memoryBIOSMapShadowEntryCount</td>
+						<td>memoryBIOSMapEntryCount</td>
 						<td>DWord</td>
 						<td>The total count of entries in the shadowed BIOS memory map.</td>
 					</tr>
+
 					<tr>
-						<td>memoryBIOSMapShadowPtr</td>
+						<td>memoryBIOSMapKiBInstalled</td>
+						<td>DWord</td>
+						<td>The total amount of memory of all types (usable, reserved, ACPI reclaimable, ACPI NVS, bad) installed in the system, as reported by the BIOS.</td>
+					</tr>
+
+					<tr>
+						<td>memoryBIOSMapKiBUsable</td>
+						<td>DWord</td>
+						<td>The total amount of usable (usable, above 1 MiB) memory installed in the system, as reported by the BIOS.</td>
+					</tr>
+
+					<tr>
+						<td>memoryBIOSMapPtr</td>
 						<td>DWord</td>
 						<td>Pointer to the shadowed BIOS memory map.</td>
 					</tr>
+
 					<tr>
-						<td>memoryBIOSMapShadowSize</td>
+						<td>memoryBIOSMapSize</td>
 						<td>DWord</td>
 						<td>The total amount of space occupied by the shadowed BIOS memory map.</td>
 					</tr>
+
 					<tr>
 						<td>memoryBitfieldAllocatedPtr</td>
 						<td>DWord</td>
 						<td>Pointer to the bitfield of allocated memory pages.</td>
 					</tr>
+
 					<tr>
 						<td>memoryBitfieldReservedPtr</td>
 						<td>DWord</td>
 						<td>Pointer to the bitfield of reserved memory pages.</td>
 					</tr>
+
 					<tr>
 						<td>memoryBitfieldSize</td>
 						<td>DWord</td>
 						<td>The size of each of the two memory management bitfields.</td>
 					</tr>
+
 					<tr>
-						<td>memoryKiBFree</td>
+						<td>memoryBitsInitial</td>
 						<td>DWord</td>
-						<td>The total amount of usable (usable, above 1 MiB) memory available for allocation.</td>
+						<td>The total amount of set bits in bitfield pointed to by tSystem.memoryBitfieldAllocatedPtr. This can be used with the current number of set bits to determine the amount of memory used and free in the system.</td>
 					</tr>
-					<tr>
-						<td>memoryKiBInstalled</td>
-						<td>DWord</td>
-						<td>The total amount of memory of all types (usable, reserved, ACPI reclaimable, ACPI NVS, bad) installed in the system, as reported by the BIOS.</td>
-					</tr>
-					<tr>
-						<td>memoryKiBUsable</td>
-						<td>DWord</td>
-						<td>The total amount of usable (usable, above 1 MiB) memory installed in the system, as reported by the BIOS.</td>
-					</tr>
+
 					<tr>
 						<td>memoryManagementSpace</td>
 						<td>DWord</td>
 						<td>The total amount of space occupied by the two memory management bitfields and the shadowed BIOS memory map.</td>
 					</tr>
+
 					<tr>
 						<td>mouseButtonCount</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseButtons</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mousePacketByte0</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mousePacketByte1</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mousePacketByte2</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mousePacketByte3</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mousePacketByteCount</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mousePacketByteSize</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseWheelPresent</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseX</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseXLimit</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseY</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseYLimit</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>mouseZ</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>multicoreAvailable</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PCICapabilities</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PCIDeviceCount</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PCIVersion</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PS2ControllerConfig</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PS2ControllerDeviceID1</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PS2ControllerDeviceID2</td>
 						<td>Word</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PS2ControllerPort1Status</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>PS2ControllerPort2Status</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>RTCStatusRegisterB</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>RTCUpdateHandlerAddress</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>RTCHours</td>
 						<td>Byte</td>
 						<td>The <i>hours</i> value of the current time.</td>
 					</tr>
+
 					<tr>
 						<td>RTCMinutes</td>
 						<td>Byte</td>
 						<td>The <i>minutes</i> value of the current time.</td>
 					</tr>
+
 					<tr>
 						<td>RTCSeconds</td>
 						<td>Byte</td>
 						<td>The <i>seconds</i> value of the current time.</td>
 					</tr>
+
 					<tr>
 						<td>RTCMonth</td>
 						<td>Byte</td>
 						<td>The <i>month</i> value of the current date.</td>
 					</tr>
+
 					<tr>
 						<td>RTCDay</td>
 						<td>Byte</td>
 						<td>The <i>day</i> value of the current date.</td>
 					</tr>
+
 					<tr>
 						<td>RTCYear</td>
 						<td>Byte</td>
 						<td>The <i>year</i> value of the current date.</td>
 					</tr>
+
 					<tr>
 						<td>taskingEnable</td>
 						<td>Byte</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>taskKernelStackSize</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>taskStackSize</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>ticksSinceBoot</td>
 						<td>DWord</td>
 						<td></td>
 					</tr>
+
 					<tr>
 						<td>versionBuild</td>
 						<td>DWord</td>
 						<td>The build number of the Night kernel.</td>
 					</tr>
+
 					<tr>
 						<td>versionMajor</td>
 						<td>Byte</td>
-						<td>The major verison number of the Night kernel.</td>
+						<td>The major version number of the Night kernel.</td>
 					</tr>
+
 					<tr>
 						<td>versionMinor</td>
 						<td>Byte</td>
-						<td>The minor verison number of the Night kernel.</td>
+						<td>The minor version number of the Night kernel.</td>
 					</tr>
 				</table>
 			</code>
@@ -1487,7 +1647,7 @@
 		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3626 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
+			<b>In progress, 0.1F Update, Build 3670 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1495,7 +1655,7 @@
 				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
 				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
-				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8!</li>
+				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
 			</ul>
@@ -1511,6 +1671,7 @@
 			Fixed<br>
 			<ul>
 				<li>Kernel: <i>lists.asm</i> - Fixed an issue where LMElementSizeGet() was taking eight bytes off the stack upon exit instead of the appropriate four.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a bug causing boot failure on machines with under 4 GiB of memory.</li>
 				<li>Manual: Bugs in various HTML elements. Thanks, GitKraken. :/</li>
 				<li>Manual: Updated a bit of semantics.</li>
 			</ul>
@@ -2454,11 +2615,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.1 - CMOS.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>CMOSRead</code><br>
@@ -2474,6 +2640,7 @@
 						EAX - Register value (8 bits)
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>CMOSWrite</code><br>
@@ -2498,11 +2665,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.2 - CPU.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>CPUInit</code><br>
@@ -2512,6 +2684,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>CPUProbe</code><br>
@@ -2529,981 +2702,1182 @@
 			Public Constants:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.3 - CPU.asm public constants</i></b></caption>
+				<col width = '30%'>
+				<col width = '10%'>
+				<col width = '60%'>
+
 				<tr>
-					<th width = '30%'>Name</th>
-					<th width = '10%'>Value</th>
-					<th width = '60%'>Description</th>
+					<th>Name</th>
+					<th>Value</th>
+					<th>Description</th>
 				</tr>
+
 				<tr>
 					<td>kCPU_sse3</td>
 					<td>00</td>
 					<td>Prescott New Instructions-SSE3 (PNI)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pclmulqdq</td>
 					<td>01</td>
 					<td>PCLMULQDQ</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_dtes64</td>
 					<td>02</td>
 					<td>64-bit debug store</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_monitor</td>
 					<td>03</td>
 					<td>MONITOR and MWAIT instructions (SSE3)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ds-cpl</td>
 					<td>04</td>
 					<td>CPL qualified debug store</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_vmx</td>
 					<td>05</td>
 					<td>Virtual Machine eXtensions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_smx</td>
 					<td>06</td>
 					<td>Safer Mode Extensions (LaGrande)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_est</td>
 					<td>07</td>
 					<td>Enhanced SpeedStep</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_tm2</td>
 					<td>08</td>
 					<td>Thermal Monitor 2</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ssse3</td>
 					<td>09</td>
 					<td>Supplemental SSE3 instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_cnxt-id</td>
 					<td>10</td>
 					<td>L1 Context ID</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sdbg</td>
 					<td>11</td>
 					<td>Silicon Debug interface</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_fma</td>
 					<td>12</td>
 					<td>Fused multiply-add (FMA3)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_cx16</td>
 					<td>13</td>
 					<td>CMPXCHG16B instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_xtpr</td>
 					<td>14</td>
 					<td>Can disable sending task priority messages</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pdcm</td>
 					<td>15</td>
 					<td>Perfmon & debug capability</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved01</td>
 					<td>16</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pcid</td>
 					<td>17</td>
 					<td>Process context identifiers</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_dca</td>
 					<td>18</td>
 					<td>Direct cache access for DMA writes</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sse41</td>
 					<td>19</td>
 					<td>SSE4.1 instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sse42</td>
 					<td>20</td>
 					<td>SSE4.2 instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_x2apic</td>
 					<td>21</td>
 					<td>x2APIC</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_movbe</td>
 					<td>22</td>
 					<td>MOVBE instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_popcnt</td>
 					<td>23</td>
 					<td>POPCNT instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_tsc-deadline</td>
 					<td>24</td>
 					<td>APIC implements one-shot operation using a TSC deadline value</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_aes</td>
 					<td>25</td>
 					<td>AES instruction set</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_xsave</td>
 					<td>26</td>
 					<td>XSAVE, XRESTOR, XSETBV, XGETBV</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_osxsave</td>
 					<td>27</td>
 					<td>XSAVE enabled by OS</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx</td>
 					<td>28</td>
 					<td>Advanced Vector Extensions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_f16c</td>
 					<td>29</td>
 					<td>F16C (half-precision) FP feature</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_rdrnd</td>
 					<td>30</td>
 					<td>RDRAND (on-chip random number generator) feature</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_hypervisor</td>
 					<td>31</td>
 					<td>Hypervisor present (always zero on physical CPUs)</td>
 				</tr>
+
 				<tr>
 					<td colspan = 3><br></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_fpu</td>
 					<td>32</td>
 					<td>Onboard x87 FPU</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_vme</td>
 					<td>33</td>
 					<td>Virtual 8086 mode extensions (such as VIF, VIP, PIV)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_de</td>
 					<td>34</td>
 					<td>Debugging extensions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pse</td>
 					<td>35</td>
 					<td>Page Size Extension</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_tsc</td>
 					<td>36</td>
 					<td>Time Stamp Counter</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_msr</td>
 					<td>37</td>
 					<td>Model-specific registers</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pae</td>
 					<td>38</td>
 					<td>Physical Address Extension</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mce</td>
 					<td>39</td>
 					<td>Machine Check Exception</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_cx8</td>
 					<td>40</td>
 					<td>CMPXCHG8 (compare-and-swap) instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_apic</td>
 					<td>41</td>
 					<td>Onboard Advanced Programmable Interrupt Controller</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved02</td>
 					<td>42</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sep</td>
 					<td>43</td>
 					<td>SYSENTER and SYSEXIT instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mtrr</td>
 					<td>44</td>
 					<td>Memory Type Range Registers</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pge</td>
 					<td>45</td>
 					<td>Page Global Enable bit in CR4</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mca</td>
 					<td>46</td>
 					<td>Machine check architecture</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_cmov</td>
 					<td>47</td>
 					<td>Conditional move and FCMOV instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pat</td>
 					<td>48</td>
 					<td>Page Attribute Table</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pse36</td>
 					<td>49</td>
 					<td>36-bit page size extension</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_psn</td>
 					<td>50</td>
 					<td>Processor Serial Number</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_clfsh</td>
 					<td>51</td>
 					<td>CLFLUSH instruction (SSE2)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved03</td>
 					<td>52</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ds</td>
 					<td>53</td>
 					<td>Debug store: save trace of executed jumps</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_acpi</td>
 					<td>54</td>
 					<td>Onboard thermal control MSRs for ACPI</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mmx</td>
 					<td>55</td>
 					<td>MMX instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_fxsr</td>
 					<td>56</td>
 					<td>FXSAVE, FXRESTOR instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sse</td>
 					<td>57</td>
 					<td>SSE / Katmai instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sse2</td>
 					<td>58</td>
 					<td>SSE2 instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ss</td>
 					<td>59</td>
 					<td>CPU cache implements self-snoop</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_htt</td>
 					<td>60</td>
 					<td>Hyper-threading</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_tm</td>
 					<td>61</td>
 					<td>Thermal monitor automatically limits temperature</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ia64</td>
 					<td>62</td>
 					<td>IA64 processor emulating x86</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pbe</td>
 					<td>63</td>
 					<td>Pending Break Enable (PBE# pin) wakeup capability</td>
 				</tr>
+
 				<tr>
 					<td colspan = 3><br></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_fsgsbase</td>
 					<td>64</td>
 					<td>Access to base of %fs and %gs</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ia32_tsc_adjust</td>
 					<td>65</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sgx</td>
 					<td>66</td>
 					<td>Software Guard Extensions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_bmi1</td>
 					<td>67</td>
 					<td>Bit Manipulation Instruction Set 1</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_hle</td>
 					<td>68</td>
 					<td>TSX Hardware Lock Elision</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx2</td>
 					<td>69</td>
 					<td>Advanced Vector Extensions 2</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved04</td>
 					<td>70</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_smep</td>
 					<td>71</td>
 					<td>Supervisor Mode Execution Prevention</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_bmi2</td>
 					<td>72</td>
 					<td>Bit Manipulation Instruction Set 2</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_erms</td>
 					<td>73</td>
 					<td>Enhanced REP MOVSB/STOSB</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_invpcid</td>
 					<td>74</td>
 					<td>INVPCID instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_rtm</td>
 					<td>75</td>
 					<td>TSX Restricted Transactional Memory</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pqm</td>
 					<td>76</td>
 					<td>Platform Quality of Service Monitoring</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_fpucs_ds_deprecated</td>
 					<td>77</td>
 					<td>FPU CS and FPU DS deprecated</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mpx</td>
 					<td>78</td>
 					<td>Intel MPX (Memory Protection Extensions)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pqe</td>
 					<td>79</td>
 					<td>Platform Quality of Service Enforcement</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_f</td>
 					<td>80</td>
 					<td>AVX-512 Foundation</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_dq</td>
 					<td>81</td>
 					<td>AVX-512 Doubleword and Quadword Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_rdseed</td>
 					<td>82</td>
 					<td>RDSEED instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_adx</td>
 					<td>83</td>
 					<td>Intel ADX (Multi-Precision Add-Carry Instruction Extensions)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_smap</td>
 					<td>84</td>
 					<td>Supervisor Mode Access Prevention</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_ifma</td>
 					<td>85</td>
 					<td>AVX-512 Integer Fused Multiply-Add Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pcommit</td>
 					<td>86</td>
 					<td>PCOMMIT instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_clflushopt</td>
 					<td>87</td>
 					<td>CLFLUSHOPT instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_clwb</td>
 					<td>88</td>
 					<td>CLWB instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_intel_pt</td>
 					<td>89</td>
 					<td>Intel Processor Trace</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_pf</td>
 					<td>90</td>
 					<td>AVX-512 Prefetch Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_er</td>
 					<td>91</td>
 					<td>AVX-512 Exponential and Reciprocal Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_cd</td>
 					<td>92</td>
 					<td>AVX-512 Conflict Detection Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sha</td>
 					<td>93</td>
 					<td>Intel SHA extensions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_bw</td>
 					<td>94</td>
 					<td>AVX-512 Byte and Word Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_vl</td>
 					<td>95</td>
 					<td>AVX-512 Vector Length Extensions</td>
 				</tr>
+
 				<tr>
 					<td colspan = 3><br></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_prefetchwt1</td>
 					<td>96</td>
 					<td>PREFETCHWT1 instruction</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_vbmi</td>
 					<td>97</td>
 					<td>AVX-512 Vector Bit Manipulation Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_umip</td>
 					<td>98</td>
 					<td>User-mode Instruction Prevention</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pku</td>
 					<td>99</td>
 					<td>Memory Protection Keys for User-mode pages</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ospke</td>
 					<td>100</td>
 					<td>PKU enabled by OS</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_waitpkg</td>
 					<td>101</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_vbmi2</td>
 					<td>102</td>
 					<td>AVX-512 Vector Bit Manipulation Instructions 2</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_shstk</td>
 					<td>103</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_gfni</td>
 					<td>104</td>
 					<td>Galois Field instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_vaes</td>
 					<td>105</td>
 					<td>Vector AES instruction set (VEX-256/EVEX)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_vpclmulqdq</td>
 					<td>106</td>
 					<td>CLMUL instruction set (VEX-256/EVEX)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_vnni</td>
 					<td>107</td>
 					<td>AVX-512 Vector Neural Network Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_bitalg</td>
 					<td>108</td>
 					<td>AVX-512 BITALG instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved05</td>
 					<td>109</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_vpopcntdq</td>
 					<td>110</td>
 					<td>AVX-512 Vector Population Count Double and Quad-word</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved06</td>
 					<td>111</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_5levelpaging</td>
 					<td>112</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mawau0</td>
 					<td>113</td>
 					<td>The value of userspace MPX Address-Width Adjust used by the BNDLDX and BNDSTX Intel MPX instructions in 64-bit mode</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mawau1</td>
 					<td>114</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mawau2</td>
 					<td>115</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mawau3</td>
 					<td>116</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_mawau4</td>
 					<td>117</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_rdpid</td>
 					<td>118</td>
 					<td>Read Processor ID and IA32_TSC_AUX</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved07</td>
 					<td>119</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved08</td>
 					<td>120</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_cldemote</td>
 					<td>121</td>
 					<td>Cache line demote</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved09</td>
 					<td>122</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_movdiri</td>
 					<td>123</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_movdir64b</td>
 					<td>124</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_enqcmd</td>
 					<td>125</td>
 					<td>Enqueue Stores</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_sgx_lc</td>
 					<td>126</td>
 					<td>SGX Launch Configuration</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved10</td>
 					<td>127</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td colspan = 3><br></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved11</td>
 					<td>128</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved12</td>
 					<td>129</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_4vnniw</td>
 					<td>130</td>
 					<td>AVX-512 4-register Neural Network Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_4fmaps</td>
 					<td>131</td>
 					<td>AVX-512 4-register Multiply Accumulation Single precision</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_fsrm</td>
 					<td>132</td>
 					<td>Fast Short REP MOVSB</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved13</td>
 					<td>133</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved14</td>
 					<td>134</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved15</td>
 					<td>135</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_vp2intersect</td>
 					<td>136</td>
 					<td>AVX-512 VP2INTERSECT Doubleword and Quadword Instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved16</td>
 					<td>137</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_md_clear</td>
 					<td>138</td>
 					<td>VERW instruction clears CPU buffers</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved17</td>
 					<td>139</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved18</td>
 					<td>140</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_tsx_force_abort</td>
 					<td>141</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_serialize</td>
 					<td>142</td>
 					<td>Serialize instruction execution</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_hybrid</td>
 					<td>143</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_tsxldtrk</td>
 					<td>144</td>
 					<td>TSX suspend load address tracking</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved19</td>
 					<td>145</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_pconfig</td>
 					<td>146</td>
 					<td>Platform configuration (Memory Encryption Technologies Instructions)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved20</td>
 					<td>147</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ibt</td>
 					<td>148</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved21</td>
 					<td>149</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved22</td>
 					<td>150</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved23</td>
 					<td>151</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved24</td>
 					<td>152</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved25</td>
 					<td>153</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ibrs_ibpb_specctrl</td>
 					<td>154</td>
 					<td>Speculation Control, part of Indirect Branch Control (IBC): Indirect Branch Restricted Speculation (IBRS) and Indirect Branch Prediction Barrier (IBPB)</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_stibp</td>
 					<td>155</td>
 					<td>Single Thread Indirect Branch Predictor, part of IBC</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved26</td>
 					<td>156</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ia32_arch_capabilities</td>
 					<td>157</td>
 					<td>Speculative Side Channel Mitigations</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ia32_core_capabilities</td>
 					<td>158</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_ssbd</td>
 					<td>159</td>
 					<td>Speculative Store Bypass Disable, as mitigation for Speculative Store Bypass (IA32_SPEC_CTRL)</td>
 				</tr>
+
 				<tr>
 					<td colspan = 3><br></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved27</td>
 					<td>160</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved28</td>
 					<td>161</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved29</td>
 					<td>162</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved30</td>
 					<td>163</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved31</td>
 					<td>164</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_avx512_bf16</td>
 					<td>165</td>
 					<td>AVX-512 BFLOAT16 instructions</td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved32</td>
 					<td>166</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved33</td>
 					<td>167</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved34</td>
 					<td>168</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved35</td>
 					<td>169</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved36</td>
 					<td>170</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved37</td>
 					<td>171</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved38</td>
 					<td>172</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved39</td>
 					<td>173</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved40</td>
 					<td>174</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved41</td>
 					<td>175</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved42</td>
 					<td>176</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved43</td>
 					<td>177</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved44</td>
 					<td>178</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved45</td>
 					<td>179</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved46</td>
 					<td>180</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved47</td>
 					<td>181</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved48</td>
 					<td>182</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved49</td>
 					<td>183</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved50</td>
 					<td>184</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved51</td>
 					<td>185</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved52</td>
 					<td>186</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved53</td>
 					<td>187</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved54</td>
 					<td>188</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved55</td>
 					<td>189</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved56</td>
 					<td>190</td>
 					<td><i>Reserved</i></td>
 				</tr>
+
 				<tr>
 					<td>kCPU_reserved57</td>
 					<td>191</td>
@@ -3519,11 +3893,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.4 - CPU.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						DebugCPUFeaturesEnable<br>
@@ -3548,6 +3927,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugTraceDisable<br>
@@ -3557,6 +3937,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugTraceEnable<br>
@@ -3566,6 +3947,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						Debugger<br>
@@ -3575,6 +3957,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugInstacrash<br>
@@ -3584,6 +3967,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugMemoryDetails<br>
@@ -3593,6 +3977,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugMenu<br>
@@ -3602,6 +3987,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugPCIDevices<br>
@@ -3611,6 +3997,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugRAMBrowser<br>
@@ -3620,6 +4007,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugStackTrace<br>
@@ -3637,6 +4025,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugSystemInfo<br>
@@ -3646,6 +4035,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugTaskBrowser<br>
@@ -3655,6 +4045,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugVBOXLogWrite<br>
@@ -3668,6 +4059,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						DebugWaitForEscape<br>
@@ -3687,11 +4079,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.5 - partitions.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMDiskRead</code><br>
@@ -3711,6 +4108,7 @@
 						EBX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemCount</code><br>
@@ -3729,6 +4127,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemDelete</code><br>
@@ -3743,6 +4142,7 @@
 					</td>
 					<td>EDX - Error code</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemExists</code><br>
@@ -3759,6 +4159,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemInfoAccessedGet</code><br>
@@ -3778,6 +4179,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemInfoCreatedGet</code><br>
@@ -3800,6 +4202,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemInfoModifiedGet</code><br>
@@ -3822,6 +4225,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemInfoSizeGet</code><br>
@@ -3839,6 +4243,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemLoad</code><br>
@@ -3859,6 +4264,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemNew</code><br>
@@ -3873,6 +4279,7 @@
 					</td>
 					<td>EDX - Error code</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMItemStore</code><br>
@@ -3889,6 +4296,7 @@
 					</td>
 					<td>EDX - Error code</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPartitionEnumerate</code><br>
@@ -3900,6 +4308,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPartitionGetFromPath</code><br>
@@ -3916,6 +4325,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPartitionMap</code><br>
@@ -3930,6 +4340,7 @@
 					</td>
 					<td>EAX - Error code</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPartitionRead</code><br>
@@ -3949,6 +4360,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPartitionWrite</code><br>
@@ -3968,6 +4380,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPathParentGet</code><br>
@@ -3981,6 +4394,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPathPartitionGet</code><br>
@@ -3997,6 +4411,7 @@
 						EBX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPathPartitionStripDrive</code><br>
@@ -4010,6 +4425,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SMPathValidate</code><br>
@@ -4037,11 +4453,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.6 - GDT.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTBuild</code><br>
@@ -4059,6 +4480,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTGetAccessFlags</code><br>
@@ -4074,6 +4496,7 @@
 						EAX - Access flags
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTGetBaseAddress</code><br>
@@ -4089,6 +4512,7 @@
 						EAX - Base address
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTGetLimitAddress</code><br>
@@ -4104,6 +4528,7 @@
 						EAX - Limit address
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTGetSizeFlags</code><br>
@@ -4119,6 +4544,7 @@
 						EAX - Size flags
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTSetAccessFlags</code><br>
@@ -4133,6 +4559,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTSetBaseAddress</code><br>
@@ -4147,6 +4574,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTSetLimitAddress</code><br>
@@ -4161,6 +4589,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>GDTSetSizeFlags</code><br>
@@ -4185,11 +4614,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.7 - hardware.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PITInit</code><br>
@@ -4199,6 +4633,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>Reboot</code><br>
@@ -4218,11 +4653,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.8 - interrupts.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>CriticalError</code><br>
@@ -4250,6 +4690,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>IDTInit</code><br>
@@ -4259,6 +4700,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>InterruptHandlerGetAddress</code><br>
@@ -4274,6 +4716,7 @@
 						EAX - ISR address
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>InterruptHandlerGetFlags</code><br>
@@ -4289,6 +4732,7 @@
 						EAX - Flags
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>InterruptHandlerGetSelector</code><br>
@@ -4304,6 +4748,7 @@
 						EAX - ISR selector
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>InterruptHandlerSet</code><br>
@@ -4320,6 +4765,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>InterruptUnimplemented</code><br>
@@ -4329,6 +4775,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ISRInitAll</code><br>
@@ -4348,11 +4795,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.9 - List Manager 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitfieldInit</code><br>
@@ -4369,6 +4821,7 @@
 						EAX - Total bytes occupied by this bitfield
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitfieldScanClear</code><br>
@@ -4387,6 +4840,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitfieldScanSet</code><br>
@@ -4405,6 +4859,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitfieldSpaceCalc</code><br>
@@ -4420,6 +4875,7 @@
 						EAX - Total bytes which would be needed to hold the bitfield
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitfieldValidate</code><br>
@@ -4435,6 +4891,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitfieldValidateElement</code><br>
@@ -4451,6 +4908,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitClear</code><br>
@@ -4467,6 +4925,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitClearRange</code><br>
@@ -4484,6 +4943,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitFlip</code><br>
@@ -4500,6 +4960,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitFlipRange</code><br>
@@ -4517,6 +4978,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitGet</code><br>
@@ -4534,6 +4996,7 @@
 						Carry Flag - Value of the bit specified
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitSet</code><br>
@@ -4550,6 +5013,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMBitSetRange</code><br>
@@ -4567,6 +5031,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMCountBitsSet</code><br>
@@ -4583,6 +5048,7 @@
 						EDI - Result
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementAddressGet</code><br>
@@ -4600,6 +5066,7 @@
 						EDX - Result code<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementCountGet</code><br>
@@ -4616,6 +5083,7 @@
 						EDX - Result code<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementCountSet</code><br>
@@ -4632,6 +5100,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementDelete</code><br>
@@ -4648,6 +5117,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementDuplicate</code><br>
@@ -4664,6 +5134,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementSizeGet</code><br>
@@ -4680,6 +5151,7 @@
 						EDX - Result code<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMElementValidate</code><br>
@@ -4698,6 +5170,7 @@
 						&emsp;False - The element is not in range
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMItemAddAtSlot</code><br>
@@ -4716,6 +5189,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMListCompact</code><br>
@@ -4731,6 +5205,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMListInit</code><br>
@@ -4748,6 +5223,7 @@
 						EAX - Total bytes occupied by this list
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMListSearch</code><br>
@@ -4761,6 +5237,7 @@
 
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMListSpaceCalc</code><br>
@@ -4777,6 +5254,7 @@
 						EAX - Total bytes which would be needed to hold the list
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMListValidate</code><br>
@@ -4794,6 +5272,7 @@
 						&emsp;False - The list header does not contain a valid signature
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMSlotFindFirstFree</code><br>
@@ -4810,6 +5289,7 @@
 						EDX - Result code<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LMSlotFreeTest</code><br>
@@ -4833,11 +5313,16 @@
 			32-bit Internal Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.10 - List Manager 32-bit internal functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_BitfieldMath</code><br>
@@ -4855,6 +5340,7 @@
 						ECX - bit number
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_ByteClearRange</code><br>
@@ -4872,6 +5358,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_ByteFlipRange</code><br>
@@ -4889,6 +5376,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_ByteSetRange</code><br>
@@ -4907,6 +5395,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ElementAddressGet</code><br>
@@ -4923,6 +5412,7 @@
 						ESI - Element address
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ElementCountGet</code><br>
@@ -4938,6 +5428,7 @@
 						ECX - Number of total element slots in this list
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ElementCountSet</code><br>
@@ -4954,6 +5445,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ElementDelete</code><br>
@@ -4970,6 +5462,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ElementDuplicate</code><br>
@@ -4986,6 +5479,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ElementSizeGet</code><br>
@@ -5001,6 +5495,7 @@
 						EAX - List element size
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ItemAddAtSlot</code><br>
@@ -5019,6 +5514,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ListCompact</code><br>
@@ -5030,6 +5526,7 @@
 					<td>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_ListSearch</code><br>
@@ -5041,6 +5538,7 @@
 					<td>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_SlotFindFirstFree</code><br>
@@ -5056,6 +5554,7 @@
 						EAX - Element number of first free slot
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>LM_Internal_SlotFreeTest</code><br>
@@ -5084,11 +5583,16 @@
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.11 - Memory Manager 16-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>A20Check</code><br>
@@ -5106,6 +5610,7 @@
 						&emsp;Low byte = 0 if disabled, 1 if enabled
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>A20Enable</code><br>
@@ -5115,6 +5620,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>A20EnableBIOS</code><br>
@@ -5124,6 +5630,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>A20EnableFastA20</code><br>
@@ -5133,6 +5640,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>A20EnableKeyboardController</code><br>
@@ -5142,6 +5650,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>A20EnablePortEE</code><br>
@@ -5151,6 +5660,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemMapCopy</code><br>
@@ -5171,11 +5681,16 @@
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A1.12 - Memory Manager 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemAddressAlign</code><br>
@@ -5192,6 +5707,7 @@
 						EAX - Aligned address
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemAllocate</code><br>
@@ -5206,6 +5722,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemCompare</code><br>
@@ -5225,6 +5742,7 @@
 						&emsp;False - The regions are different
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemCopy</code><br>
@@ -5242,23 +5760,7 @@
 						n/a
 					</td>
 				</tr>
-				<tr>
-					<td>
-						<code>MemCopySSE</code><br>
-						<br>
-						Copies the specified number of bytes from one address to another in a "left to right" manner (e.g. lowest address to highest) using SSE registers for additional speed
-					</td>
-					<td>
-						<ol>
-							<li>Source address</li>
-							<li>Destination address</li>
-							<li>Transfer length</li>
-						</ol>
-					</td>
-					<td>
-						n/a
-					</td>
-				</tr>
+
 				<tr>
 					<td>
 						<code>MemDispose</code><br>
@@ -5274,6 +5776,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemFill</code><br>
@@ -5291,6 +5794,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemInit</code><br>
@@ -5304,6 +5808,7 @@
 						Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemPagesNeeded</code><br>
@@ -5319,6 +5824,7 @@
 						EAX - Total pages which would be needed to hold the data
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemSearchWord</code><br>
@@ -5336,6 +5842,7 @@
 						EAX - Address of match (zero if not found)
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemSearchDWord</code><br>
@@ -5353,6 +5860,7 @@
 						EAX - Address of match (zero if not found)
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemSearchString</code><br>
@@ -5370,6 +5878,27 @@
 						EAX - Address of match (zero if not found)
 					</td>
 				</tr>
+
+				<tr>
+					<td>
+						<code>MemStats</code><br>
+						<br>
+						Returns stats about the system's memory<br>
+						<br>
+						Note: The values returned by this function exclude memory below 1 MiB, which is reserved for kernel use.
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>
+						<ol>
+							<li>EAX - KiB total</li>
+							<li>EBX - KiB free</li>
+							<li>ECX - KiB used</li>
+						</ol>
+					</td>
+				</tr>
+
 				<tr>
 					<td>
 						<code>MemSwapWordBytes</code><br>
@@ -5386,6 +5915,7 @@
 						n/a
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>MemSwapDwordWords</code><br>
@@ -5407,64 +5937,21 @@
 			<br>
 			<br>
 
-			32-bit Internal Function Listing:<br>
-			<table style = 'width:100%'>
-				<caption><b><i>Table A1.13 - Memory Manager 32-bit internal functions</i></b></caption>
-				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
-				</tr>
-				<tr>
-					<td>
-						<code>Mem_Internal_MemListGrow</code><br>
-						<br>
-						Adds an element to the list itself and duplicates the element specified
-					</td>
-					<td>
-						<ol>
-							<li>Element to duplicate during grow</li>
-						</ol>
-					</td>
-					<td>
-						EDX - Result<br>
-						&emsp;True - Grow was successful<br>
-						&emsp;False - Grow was unsuccessful
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>Mem_Internal_MemListShrink</code><br>
-						<br>
-						Subtracts an element from the list itself and deletes that element
-					</td>
-					<td>
-						<ol>
-							<li>Element to duplicate during shrink</li>
-						</ol>
-					</td>
-					<td>
-						EDX - Result<br>
-						&emsp;True - Shrink was successful<br>
-						&emsp;False - Shrink was unsuccessful
-					</td>
-				</tr>
-			</table>
-			<br>
-			<br>
-			<br>
-
 			<a name = 'NightFunctionReference_misc.asm'><b>Miscellaneous Functions - <i>misc.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.14 - misc.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.13 - misc.asm 16-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SetSystemAPM</code><br>
@@ -5481,12 +5968,17 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.15 - misc.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.14 - misc.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TimerWait</code><br>
@@ -5509,12 +6001,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.16 - numbers.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.15 - numbers.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>BCDToDecimal</code><br>
@@ -5524,6 +6021,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>RangeCheck</code><br>
@@ -5543,6 +6041,7 @@
 						&emsp;False - The value is not in range
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>QuadAdd</code><br>
@@ -5557,6 +6056,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>QuadShiftLeft</code><br>
@@ -5571,6 +6071,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>QuadShiftRight</code><br>
@@ -5585,6 +6086,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>Random</code><br>
@@ -5607,12 +6109,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.17 - paging.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.16 - paging.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PagingInit</code><br>
@@ -5624,6 +6131,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PagingMap</code><br>
@@ -5639,6 +6147,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PagingDirNew</code><br>
@@ -5651,6 +6160,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PagingTableNew</code><br>
@@ -5672,12 +6182,17 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.18 - PCI Functions 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.17 - PCI Functions 16-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIProbe</code><br>
@@ -5694,12 +6209,17 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.19 - PCI Functions 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.18 - PCI Functions 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCICalculateNext</code><br>
@@ -5719,6 +6239,7 @@
 						ECX - Next PCI Function
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIDeviceInitAll</code><br>
@@ -5730,6 +6251,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIFunctionCheck</code><br>
@@ -5749,6 +6271,7 @@
 						&emsp;False - Function was not found
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIFunctionCountGet</code><br>
@@ -5760,6 +6283,7 @@
 						EAX - Function count
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIFunctionNextGet</code><br>
@@ -5779,6 +6303,7 @@
 						ECX - Next occupied PCI Function
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIHandlerCommand</code><br>
@@ -5803,6 +6328,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIHandlerGet</code><br>
@@ -5817,6 +6343,7 @@
 					</td>
 					<td>EAX - Handler physical address</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIHandlerSet</code><br>
@@ -5832,6 +6359,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIInfoClassGet</code><br>
@@ -5849,6 +6377,7 @@
 						AL - Class<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIInfoDeviceGet</code><br>
@@ -5866,6 +6395,7 @@
 						AX - Device ID<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIInfoProgIfGet</code><br>
@@ -5883,6 +6413,7 @@
 						AL - ProgIf<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIInfoRevisionGet</code><br>
@@ -5900,6 +6431,7 @@
 						AL - Revision<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIInfoSubclassGet</code><br>
@@ -5917,6 +6449,7 @@
 						AL - Subclass<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIInfoVendorGet</code><br>
@@ -5934,6 +6467,7 @@
 						AX - Vendor ID<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIRegisterRead</code><br>
@@ -5952,6 +6486,7 @@
 						EAX - Register value
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIRegisterReadAll</code><br>
@@ -5968,6 +6503,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PCIRegisterWrite</code><br>
@@ -5994,12 +6530,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.20 - PIC.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.19 - PIC.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PICInit</code><br>
@@ -6009,6 +6550,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PICIntComplete</code><br>
@@ -6018,6 +6560,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PICIRQDisable</code><br>
@@ -6031,6 +6574,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PICIRQDisableAll</code><br>
@@ -6040,6 +6584,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PICIRQEnable</code><br>
@@ -6053,6 +6598,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PICIRQEnableAll</code><br>
@@ -6071,12 +6617,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.21 - PS2 Controller.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.20 - PS2 Controller.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>KeyGet</code><br>
@@ -6086,6 +6637,7 @@
 					<td>n/a</td>
 					<td>AL - Key pressed</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>KeyWait</code><br>
@@ -6095,6 +6647,7 @@
 					<td>n/a</td>
 					<td>AL - Key pressed</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2ControllerCommand</code><br>
@@ -6112,6 +6665,7 @@
 						EBX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2ControllerInit</code><br>
@@ -6121,6 +6675,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2ControllerPortTest</code><br>
@@ -6137,6 +6692,7 @@
 						EBX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2ControllerWaitDataRead</code><br>
@@ -6146,6 +6702,7 @@
 					<td>n/a</td>
 					<td>EAX - Error code</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2ControllerWaitDataWrite</code><br>
@@ -6155,6 +6712,7 @@
 					<td>n/a</td>
 					<td>EAX - Error code</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2DeviceCommand</code><br>
@@ -6173,6 +6731,7 @@
 						EBX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2DeviceIdentify</code><br>
@@ -6189,6 +6748,7 @@
 						EBX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2InitKeyboard</code><br>
@@ -6202,6 +6762,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2InitMouse</code><br>
@@ -6215,6 +6776,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2InputHandlerDispatch</code><br>
@@ -6229,6 +6791,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2InputHandlerKeyboard</code><br>
@@ -6242,6 +6805,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2InputHandlerMouse</code><br>
@@ -6255,6 +6819,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2NewConnect</code><br>
@@ -6268,6 +6833,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2Port1InterruptHandler</code><br>
@@ -6277,6 +6843,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2Port2InterruptHandler</code><br>
@@ -6286,6 +6853,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2PortInitDevice</code><br>
@@ -6299,6 +6867,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PS2PortSendTo2</code><br>
@@ -6321,12 +6890,17 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.22 - power.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.21 - power.asm 16-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>APMEnable</code><br>
@@ -6336,6 +6910,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>APMDisable</code><br>
@@ -6345,6 +6920,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>APMShutdown</code><br>
@@ -6363,12 +6939,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.23 - RTC.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.22 - RTC.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>RTCAdjustBCD</code><br>
@@ -6378,6 +6959,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>RTCInit</code><br>
@@ -6387,6 +6969,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>RTCInterruptHandler</code><br>
@@ -6405,12 +6988,17 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.24 - screen.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.23 - screen.asm 16-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>Print16</code><br>
@@ -6424,6 +7012,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PrintIfConfigBits16</code><br>
@@ -6437,6 +7026,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PrintRegs16</code><br>
@@ -6446,6 +7036,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ScreenClear16</code><br>
@@ -6455,6 +7046,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ScreenScroll16</code><br>
@@ -6475,12 +7067,17 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.25 - screen.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.24 - screen.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>CursorHome</code><br>
@@ -6490,6 +7087,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>Print32</code><br>
@@ -6510,6 +7108,7 @@
 						AH - Updated Y position
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PrintIfConfigBits32</code><br>
@@ -6523,6 +7122,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PrintRAM32</code><br>
@@ -6541,6 +7141,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>PrintRegs32</code><br>
@@ -6550,6 +7151,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ScreenClear32</code><br>
@@ -6563,6 +7165,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ScreenScroll32</code><br>
@@ -6585,12 +7188,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.26 - serial.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.25 - serial.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetBaud</code><br>
@@ -6606,6 +7214,7 @@
 						EAX - Baud rate
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetIER</code><br>
@@ -6621,6 +7230,7 @@
 						EAX - IER
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetIIR</code><br>
@@ -6636,6 +7246,7 @@
 						EAX - IIR
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetLSR</code><br>
@@ -6651,6 +7262,7 @@
 						EAX - LSR
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetMSR</code><br>
@@ -6666,6 +7278,7 @@
 						EAX - MSR
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetParity</code><br>
@@ -6686,6 +7299,7 @@
 						&emsp;7 - Space parity<br>
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetStopBits</code><br>
@@ -6701,6 +7315,7 @@
 						EAX - Number of stop bits (1 or 2)
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialGetWordSize</code><br>
@@ -6716,6 +7331,7 @@
 						EAX - Number of data word bits (5 - 8)
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialPrintString</code><br>
@@ -6729,6 +7345,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialSetBaud</code><br>
@@ -6745,6 +7362,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialSetIER</code><br>
@@ -6761,6 +7379,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialSetParity</code><br>
@@ -6784,6 +7403,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialSetStopBits</code><br>
@@ -6800,6 +7420,7 @@
 						EDX - Result code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>SerialSetWordSize</code><br>
@@ -6825,12 +7446,17 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.27 - strings.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.26 - strings.asm 16-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertByteToHexString16</code><br>
@@ -6845,6 +7471,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertWordToHexString16</code><br>
@@ -6866,18 +7493,25 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.28 - strings.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.27 - strings.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertNumberBinaryToString</code><br>
 						<br>
 						Translates the value specified to a binary number in a zero-padded 32 byte string<br>
+						<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 					</td>
 					<td>
@@ -6888,12 +7522,15 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertNumberDecimalToString</code><br>
 						<br>
 						Translates the value specified to a decimal number in a zero-padded 10 byte string<br>
+						<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 					</td>
 					<td>
@@ -6904,12 +7541,15 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertNumberHexToString</code><br>
 						<br>
 						Translates the value specified to a hexadecimal number in a zero-padded 8 byte string<br>
+						<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 					</td>
 					<td>
@@ -6920,12 +7560,15 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertNumberOctalToString</code><br>
 						<br>
 						Translates the value specified to an octal number in a zero-padded 11 byte string<br>
+						<br>
 						Note: No length checking is done on this string; make sure it's long enough to hold the converted number!<br>
+						<br>
 						Note: No terminating null is put on the end of the string - do that yourself.
 
 					</td>
@@ -6937,6 +7580,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertStringBinaryToNumber</code><br>
@@ -6952,6 +7596,7 @@
 						EAX - Numeric value
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertStringDecimalToNumber</code><br>
@@ -6967,6 +7612,7 @@
 						EAX - Numeric value
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertStringHexToNumber</code><br>
@@ -6982,6 +7628,7 @@
 						EAX - Numeric value
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>ConvertStringOctalToNumber</code><br>
@@ -6997,6 +7644,7 @@
 						EAX - Numeric value
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCaseLower</code><br>
@@ -7010,6 +7658,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCaseUpper</code><br>
@@ -7023,6 +7672,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCharAppend</code><br>
@@ -7037,6 +7687,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCharDelete</code><br>
@@ -7051,6 +7702,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCharGet</code><br>
@@ -7065,6 +7717,7 @@
 					</td>
 					<td>AL - ASCII code of character</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCharPrepend</code><br>
@@ -7079,6 +7732,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCharReplace</code><br>
@@ -7094,6 +7748,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringCharReplaceRange</code><br>
@@ -7110,6 +7765,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringDuplicate</code><br>
@@ -7126,6 +7782,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringFill</code><br>
@@ -7140,6 +7797,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringInsert</code><br>
@@ -7155,6 +7813,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringLength</code><br>
@@ -7170,6 +7829,7 @@
 						EAX - String length
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringPadLeft</code><br>
@@ -7185,6 +7845,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringPadRight</code><br>
@@ -7200,6 +7861,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringSearchCharLeft</code><br>
@@ -7216,6 +7878,7 @@
 						EAX - Position of match, or zero if no match
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringSearchCharRight</code><br>
@@ -7232,6 +7895,7 @@
 						EAX - Position of match, or zero if no match
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringSearchCharList</code><br>
@@ -7248,6 +7912,7 @@
 						EAX - Position of match, or zero if no match
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTokenBinary</code><br>
@@ -7263,6 +7928,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTokenDecimal</code><br>
@@ -7278,6 +7944,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTokenHexadecimal</code><br>
@@ -7293,6 +7960,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTokenOctal</code><br>
@@ -7308,6 +7976,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTokenString</code><br>
@@ -7323,6 +7992,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTrimLeft</code><br>
@@ -7337,6 +8007,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTrimRight</code><br>
@@ -7351,6 +8022,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTruncateLeft</code><br>
@@ -7365,6 +8037,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringTruncateRight</code><br>
@@ -7379,6 +8052,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringWordCount</code><br>
@@ -7395,6 +8069,7 @@
 						ECX - Word count
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>StringWordGet</code><br>
@@ -7420,12 +8095,17 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.29 - tasks.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.28 - tasks.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
 				<tr>
-					<th width = '60%'>Name / Description</th>
-					<th width = '20%'>Stack Input</th>
-					<th width = '20%'>Register Output</th>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TaskInit</code><br>
@@ -7435,6 +8115,7 @@
 					<td>n/a</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TaskKill</code><br>
@@ -7448,6 +8129,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TaskMemDisposeAll</code><br>
@@ -7461,6 +8143,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TaskNameSet</code><br>
@@ -7475,6 +8158,7 @@
 					</td>
 					<td>n/a</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TaskNew</code><br>
@@ -7492,6 +8176,7 @@
 						EDX - Error code
 					</td>
 				</tr>
+
 				<tr>
 					<td>
 						<code>TaskSwitch</code><br>
@@ -7509,40 +8194,47 @@
 			<a name = 'NightFunctionReference_StandardFunctionReturnCodes'><b>Standard Function Return Codes</b></a><br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.30 - Parameter errors</i></b></caption>
+				<caption><b><i>Table A1.29 - Parameter errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0x0000</td>
 					<td>kErrNone</td>
 					<td>No error; success</td>
 				</tr>
+
 				<tr>
 					<td>0xF000</td>
 					<td>kErrInvalidParameter</td>
 					<td>Invalid parameter</td>
 				</tr>
+
 				<tr>
 					<td>0xF001</td>
 					<td>kErrValueTooLow</td>
 					<td>Value specified is too low</td>
 				</tr>
+
 				<tr>
 					<td>0xF002</td>
 					<td>kErrValueTooHigh</td>
 					<td>Value specified is too high</td>
 				</tr>
+
 				<tr>
 					<td>0xF003</td>
 					<td>kErrTimeout</td>
 					<td>An event did not happen within a specific amount of time.</td>
 				</tr>
+
 				<tr>
 					<td>0xF004</td>
 					<td>kErrNotFound</td>
@@ -7554,25 +8246,29 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.31 - List Manager errors</i></b></caption>
+				<caption><b><i>Table A1.30 - List Manager errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xF900</td>
 					<td>kErrListInvalid</td>
 					<td>The list at the address specified does not contain the 'list' signature</td>
 				</tr>
+
 				<tr>
 					<td>0xF901</td>
 					<td>kErrElementSizeInvalid</td>
 					<td>The item being added is larger than the element size of this list</td>
 				</tr>
+
 				<tr>
 					<td>0xF902</td>
 					<td>kErrBitfieldInvalid</td>
@@ -7584,30 +8280,35 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.32 - ELF executable errors</i></b></caption>
+				<caption><b><i>Table A1.31 - ELF executable errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xFA00</td>
 					<td>kErrELFInvalidBinary</td>
 					<td>The file specified does not contain the signature of an ELF binary</td>
 				</tr>
+
 				<tr>
 					<td>0xFA01</td>
 					<td>kErrELFWrongArchitecture</td>
 					<td>The ELF binary specified is compiled for an architecture other than the one running Night</td>
 				</tr>
+
 				<tr>
 					<td>0xFA02</td>
 					<td>kErrELFWrongByteOrder</td>
 					<td>The ELF binary specified is compiled for an architecture with a different byte order than the one running Night; e.g. trying to run a big-endian application on a little endian machine</td>
 				</tr>
+
 				<tr>
 					<td>0xFA03</td>
 					<td>kErrELFWrongCPU</td>
@@ -7619,60 +8320,71 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.33 - Filesystem errors</i></b></caption>
+				<caption><b><i>Table A1.32 - Filesystem errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xFB00</td>
 					<td>kErrDriveLetterInvalid</td>
 					<td>Invalid drive letter</td>
 				</tr>
+
 				<tr>
 					<td>0xFB01</td>
 					<td>kErrPathInvalid</td>
 					<td>Invalid file path</td>
 				</tr>
+
 				<tr>
 					<td>0xFB02</td>
 					<td>kErrPathInvalidCharacter</td>
 					<td>Path contains an invalid character</td>
 				</tr>
+
 				<tr>
 					<td>0xFB03</td>
 					<td>kErrItemNotFound</td>
 					<td>The item at the specified path could not be found</td>
 				</tr>
+
 				<tr>
 					<td>0xFB04</td>
 					<td>kErrClusterChainEndUnexpected</td>
 					<td>The end of the cluster chain was encountered before the end of the operation</td>
 				</tr>
+
 				<tr>
 					<td>0xFB05</td>
 					<td>kErrRootDirectoryFull</td>
 					<td>The root directory is full; FAT16 specific.</td>
 				</tr>
+
 				<tr>
 					<td>0xFB06</td>
 					<td>kErrItemAlreadyExists</td>
 					<td>Item specified already exists on the partition</td>
 				</tr>
+
 				<tr>
 					<td>0xFB07</td>
 					<td>kErrClusterChainBad</td>
 					<td>The cluster chain specified is bad; e.g. is longer than the possible number of clusters on the drive</td>
 				</tr>
+
 				<tr>
 					<td>0xFB08</td>
 					<td>kErrDirectoryNotEmpty</td>
 					<td>The directory specified for deletion is not empty</td>
 				</tr>
+
 				<tr>
 					<td>0xFB09</td>
 					<td>kErrNotADirectory</td>
@@ -7684,20 +8396,23 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.34 - Partition errors</i></b></caption>
+				<caption><b><i>Table A1.33 - Partition errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xFC00</td>
 					<td>kErrInvalidPartitionNumber</td>
 					<td>Invalid partition number</td>
 				</tr>
+
 				<tr>
 					<td>0xFC01</td>
 					<td>kErrPartitionFull</td>
@@ -7709,15 +8424,17 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.35 - Driver handler errors</i></b></caption>
+				<caption><b><i>Table A1.34 - Driver handler errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xFD00</td>
 					<td>kErrHandlerNotPresent</td>
@@ -7729,20 +8446,23 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.36 - Memory errors</i></b></caption>
+				<caption><b><i>Table A1.35 - Memory errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xFE00</td>
 					<td>kErrOutOfMemory</td>
 					<td>Insufficient memory</td>
 				</tr>
+
 				<tr>
 					<td>0xFE01</td>
 					<td>kErrMemoryInitFail</td>
@@ -7754,25 +8474,29 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.37 - PS/2 Controller errors</i></b></caption>
+				<caption><b><i>Table A1.36 - PS/2 Controller errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
+
 				<tr>
 					<th><i>Value</i></th>
 					<th><i>Symbol</i></th>
 					<th><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>0xFF00</td>
 					<td>kErrPS2AckFail</td>
 					<td>PS/2 Device failed to acknowledge</td>
 				</tr>
+
 				<tr>
 					<td>0xFF01</td>
 					<td>kErrPS2ControllerReadTimeout</td>
 					<td>PS/2 Controller read timeout</td>
 				</tr>
+
 				<tr>
 					<td>0xFF02</td>
 					<td>kErrPS2ControllerWriteTimeout</td>
@@ -7800,6 +8524,7 @@
 					<th width = '15%'><i>Handler Address - FreeDOS Kernel Build 2042 &amp; COMMAND.COM</i></th>
 					<th width = '50%'><i>Description</i></th>
 				</tr>
+
 				<tr>
 					<td>00</td>
 					<td>F000:FF53</td>
@@ -7807,6 +8532,7 @@
 					<td>101F:015C</td>
 					<td>Divide by zero</td>
 				</tr>
+
 				<tr>
 					<td>01</td>
 					<td>F000:FF53</td>
@@ -7814,6 +8540,7 @@
 					<td>00D8:118A</td>
 					<td>Single step</td>
 				</tr>
+
 				<tr>
 					<td>02</td>
 					<td>F000:FF53</td>
@@ -7821,6 +8548,7 @@
 					<td>0070:0008</td>
 					<td>NMI</td>
 				</tr>
+
 				<tr>
 					<td>03</td>
 					<td>F000:FF53</td>
@@ -7828,6 +8556,7 @@
 					<td>00D8:118A</td>
 					<td>Breakpoint</td>
 				</tr>
+
 				<tr>
 					<td>04</td>
 					<td>F000:FF53</td>
@@ -7835,6 +8564,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>05</td>
 					<td>F000:FF53</td>
@@ -7842,6 +8572,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>06</td>
 					<td>F000:E9CC</td>
@@ -7849,6 +8580,7 @@
 					<td>00D8:11C7</td>
 					<td>Invalid opcode</td>
 				</tr>
+
 				<tr>
 					<td>07</td>
 					<td>F000:FF53</td>
@@ -7856,6 +8588,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>08</td>
 					<td>F000:FEA5</td>
@@ -7863,6 +8596,7 @@
 					<td>0070:000F</td>
 					<td>Timer</td>
 				</tr>
+
 				<tr>
 					<td>09</td>
 					<td>F000:E987</td>
@@ -7870,6 +8604,7 @@
 					<td>0070:0016</td>
 					<td>IRQ 1 - Keyboard</td>
 				</tr>
+
 				<tr>
 					<td>0A</td>
 					<td>F000:FF53</td>
@@ -7877,6 +8612,7 @@
 					<td>0070:002C</td>
 					<td>LPT2</td>
 				</tr>
+
 				<tr>
 					<td>0B</td>
 					<td>F000:E746</td>
@@ -7884,6 +8620,7 @@
 					<td>0070:0041</td>
 					<td>COM2</td>
 				</tr>
+
 				<tr>
 					<td>0C</td>
 					<td>F000:E746</td>
@@ -7891,6 +8628,7 @@
 					<td>0070:0056</td>
 					<td>COM1</td>
 				</tr>
+
 				<tr>
 					<td>0D</td>
 					<td>F000:E746</td>
@@ -7898,6 +8636,7 @@
 					<td>0070:006B</td>
 					<td>ATA</td>
 				</tr>
+
 				<tr>
 					<td>0E</td>
 					<td>F000:EF57</td>
@@ -7905,6 +8644,7 @@
 					<td>0070:0080</td>
 					<td>Floppy</td>
 				</tr>
+
 				<tr>
 					<td>0F</td>
 					<td>F000:FF53</td>
@@ -7912,6 +8652,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>10</td>
 					<td>C000:0022</td>
@@ -7919,6 +8660,7 @@
 					<td>C000:0022</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>11</td>
 					<td>F000:F84D</td>
@@ -7926,6 +8668,7 @@
 					<td>F000:F84D</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>12</td>
 					<td>F000:F841</td>
@@ -7933,6 +8676,7 @@
 					<td>F000:F841</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>13</td>
 					<td>F000:E3FE</td>
@@ -7940,6 +8684,7 @@
 					<td>F000:E3FE</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>14</td>
 					<td>F000:E739</td>
@@ -7947,6 +8692,7 @@
 					<td>F000:E739</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>15</td>
 					<td>F000:F859</td>
@@ -7954,6 +8700,7 @@
 					<td>F000:F859</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>16</td>
 					<td>F000:E82E</td>
@@ -7961,6 +8708,7 @@
 					<td>F000:E82E</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>17</td>
 					<td>F000:EFD4</td>
@@ -7968,6 +8716,7 @@
 					<td>F000:EFD4</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>18</td>
 					<td>F000:F0A4</td>
@@ -7975,6 +8724,7 @@
 					<td>F000:F0A4</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>19</td>
 					<td>F000:E6F2</td>
@@ -7982,6 +8732,7 @@
 					<td>00D8:11CF</td>
 					<td>Bootstrap loader</td>
 				</tr>
+
 				<tr>
 					<td>1A</td>
 					<td>F000:FE6E</td>
@@ -7989,6 +8740,7 @@
 					<td>F000:FE6E</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>1B</td>
 					<td>F000:FF53</td>
@@ -7996,6 +8748,7 @@
 					<td>0070:01FA</td>
 					<td>Keyboard CTRL + Break</td>
 				</tr>
+
 				<tr>
 					<td>1C</td>
 					<td>F000:EFED</td>
@@ -8003,6 +8756,7 @@
 					<td>F000:EFED</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>1D</td>
 					<td>F000:FF53</td>
@@ -8010,6 +8764,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>1E</td>
 					<td>F000:EFC7</td>
@@ -8017,6 +8772,7 @@
 					<td>0070:0119</td>
 					<td>Diskette parameter table</td>
 				</tr>
+
 				<tr>
 					<td>1F</td>
 					<td>C000:57ED</td>
@@ -8024,6 +8780,7 @@
 					<td>C000:57ED</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>20</td>
 					<td>F000:FF53</td>
@@ -8031,6 +8788,7 @@
 					<td>00D8:1197</td>
 					<td>Used by DOS 1.00 and up - Terminate program</td>
 				</tr>
+
 				<tr>
 					<td>21</td>
 					<td>F000:FF53</td>
@@ -8038,6 +8796,7 @@
 					<td>00D8:119F</td>
 					<td>Used by DOS 1.00 and up - Main DOS API</td>
 				</tr>
+
 				<tr>
 					<td>22</td>
 					<td>F000:FF53</td>
@@ -8045,6 +8804,7 @@
 					<td>101F:A7B4</td>
 					<td>Used by DOS 1.00 and up - Program terminate address</td>
 				</tr>
+
 				<tr>
 					<td>23</td>
 					<td>F000:FF53</td>
@@ -8052,6 +8812,7 @@
 					<td>100F:07C6</td>
 					<td>Used by DOS 1.00 and up - Control-C handler address</td>
 				</tr>
+
 				<tr>
 					<td>24</td>
 					<td>F000:FF53</td>
@@ -8059,6 +8820,7 @@
 					<td>101F:0247</td>
 					<td>Used by DOS 1.00 and up - Critical error handler address</td>
 				</tr>
+
 				<tr>
 					<td>25</td>
 					<td>F000:FF53</td>
@@ -8066,6 +8828,7 @@
 					<td>00D8:11A7</td>
 					<td>Used by DOS 1.00 and up - Absolute disk read</td>
 				</tr>
+
 				<tr>
 					<td>26</td>
 					<td>F000:FF53</td>
@@ -8073,6 +8836,7 @@
 					<td>00D8:11AF</td>
 					<td>Used by DOS 1.00 and up - Absolute disk write</td>
 				</tr>
+
 				<tr>
 					<td>27</td>
 					<td>F000:FF53</td>
@@ -8080,6 +8844,7 @@
 					<td>00D8:11B7</td>
 					<td>Used by DOS 1.00 and up - Terminate and stay resident</td>
 				</tr>
+
 				<tr>
 					<td>28</td>
 					<td>F000:FF53</td>
@@ -8087,6 +8852,7 @@
 					<td>00D8:118A</td>
 					<td>Used by DOS 2.00 and up - Idle callout</td>
 				</tr>
+
 				<tr>
 					<td>29</td>
 					<td>F000:FF53</td>
@@ -8094,6 +8860,7 @@
 					<td>0070:01E8</td>
 					<td>Used by DOS 2.00 and up - Fast console output</td>
 				</tr>
+
 				<tr>
 					<td>2A</td>
 					<td>F000:FF53</td>
@@ -8101,6 +8868,7 @@
 					<td>00D8:118A</td>
 					<td>Used by DOS 3.00 and up - Networking and critical section</td>
 				</tr>
+
 				<tr>
 					<td>2B</td>
 					<td>F000:FF53</td>
@@ -8108,6 +8876,7 @@
 					<td>00D8:118A</td>
 					<td>Used by DOS 6.22 and up - Reserved (points to IRET)</td>
 				</tr>
+
 				<tr>
 					<td>2C</td>
 					<td>F000:FF53</td>
@@ -8115,6 +8884,7 @@
 					<td>00D8:118A</td>
 					<td>Used by DOS 6.00 and up - Reserved (points to IRET)</td>
 				</tr>
+
 				<tr>
 					<td>2D</td>
 					<td>F000:FF53</td>
@@ -8122,6 +8892,7 @@
 					<td>00D8:118A</td>
 					<td>Used by DOS 6.00 and up - Reserved (points to IRET)</td>
 				</tr>
+
 				<tr>
 					<td>2E</td>
 					<td>F000:FF53</td>
@@ -8129,6 +8900,7 @@
 					<td>100F:07C8</td>
 					<td>Used by DOS 2.00 and up - Reload Transient</td>
 				</tr>
+
 				<tr>
 					<td>2F</td>
 					<td>F000:FF53</td>
@@ -8136,6 +8908,7 @@
 					<td>00D8:118F</td>
 					<td>Used by DOS 3.00 and up - Multiplex</td>
 				</tr>
+
 				<tr>
 					<td>30</td>
 					<td>F000:FF53</td>
@@ -8143,6 +8916,7 @@
 					<td>D811:D7EA</td>
 					<td>Used by DOS 1.00 and up - FAR JMP instruction for CP/M compatibility</td>
 				</tr>
+
 				<tr>
 					<td>31</td>
 					<td>F000:FF53</td>
@@ -8150,6 +8924,7 @@
 					<td>00D8:1100</td>
 					<td>Partially overwritten by above</td>
 				</tr>
+
 				<tr>
 					<td>32</td>
 					<td>F000:FF53</td>
@@ -8157,6 +8932,7 @@
 					<td>00D8:118A</td>
 					<td>No commonly known use pertaining to DOS, but revectored by FreeDOS anyway</td>
 				</tr>
+
 				<tr>
 					<td>33</td>
 					<td>F000:FF53</td>
@@ -8164,6 +8940,7 @@
 					<td>00D8:118A</td>
 					<td>A whole bunch o' mice!</td>
 				</tr>
+
 				<tr>
 					<td>34</td>
 					<td>F000:FF53</td>
@@ -8171,6 +8948,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode D8</td>
 				</tr>
+
 				<tr>
 					<td>35</td>
 					<td>F000:FF53</td>
@@ -8178,6 +8956,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode D9</td>
 				</tr>
+
 				<tr>
 					<td>36</td>
 					<td>F000:FF53</td>
@@ -8185,6 +8964,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode DA</td>
 				</tr>
+
 				<tr>
 					<td>37</td>
 					<td>F000:FF53</td>
@@ -8192,6 +8972,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode DB</td>
 				</tr>
+
 				<tr>
 					<td>38</td>
 					<td>F000:FF53</td>
@@ -8199,6 +8980,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode DC</td>
 				</tr>
+
 				<tr>
 					<td>39</td>
 					<td>F000:FF53</td>
@@ -8206,6 +8988,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode DD</td>
 				</tr>
+
 				<tr>
 					<td>3A</td>
 					<td>F000:FF53</td>
@@ -8213,6 +8996,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode DE</td>
 				</tr>
+
 				<tr>
 					<td>3B</td>
 					<td>F000:FF53</td>
@@ -8220,6 +9004,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Opcode DF</td>
 				</tr>
+
 				<tr>
 					<td>3C</td>
 					<td>F000:FF53</td>
@@ -8227,6 +9012,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Instructions w/ segment override</td>
 				</tr>
+
 				<tr>
 					<td>3D</td>
 					<td>F000:FF53</td>
@@ -8234,6 +9020,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - Standalone FWAIT</td>
 				</tr>
+
 				<tr>
 					<td>3E</td>
 					<td>F000:FF53</td>
@@ -8241,6 +9028,7 @@
 					<td>00D8:118A</td>
 					<td>FPU emulation - 'Shortcut' call</td>
 				</tr>
+
 				<tr>
 					<td>3F</td>
 					<td>F000:FF53</td>
@@ -8248,6 +9036,7 @@
 					<td>00D8:118A</td>
 					<td>Overlay Manager - MS LINK.EXE, Borland TLINK VROOM</td>
 				</tr>
+
 				<tr>
 					<td>40</td>
 					<td>F000:EC59</td>
@@ -8255,6 +9044,7 @@
 					<td>F000:EC59</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>41</td>
 					<td>9FC0:003D</td>
@@ -8262,6 +9052,7 @@
 					<td>9FC0:003D</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>42</td>
 					<td>F000:FF53</td>
@@ -8269,6 +9060,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>43</td>
 					<td>C000:69ED</td>
@@ -8276,6 +9068,7 @@
 					<td>C000:69ED</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>44</td>
 					<td>F000:FF53</td>
@@ -8283,6 +9076,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>45</td>
 					<td>F000:FF53</td>
@@ -8290,6 +9084,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>46</td>
 					<td>F000:FF53</td>
@@ -8297,6 +9092,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>47</td>
 					<td>F000:FF53</td>
@@ -8304,6 +9100,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>48</td>
 					<td>F000:FF53</td>
@@ -8311,6 +9108,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>49</td>
 					<td>F000:FF53</td>
@@ -8318,6 +9116,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>4A</td>
 					<td>F000:FF53</td>
@@ -8325,6 +9124,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>4B</td>
 					<td>F000:FF53</td>
@@ -8332,6 +9132,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>4C</td>
 					<td>F000:FF53</td>
@@ -8339,6 +9140,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>4D</td>
 					<td>F000:FF53</td>
@@ -8346,6 +9148,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>4E</td>
 					<td>F000:FF53</td>
@@ -8353,6 +9156,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>4F</td>
 					<td>F000:FF53</td>
@@ -8360,6 +9164,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>50</td>
 					<td>F000:FF53</td>
@@ -8367,6 +9172,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>51</td>
 					<td>F000:FF53</td>
@@ -8374,6 +9180,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>52</td>
 					<td>F000:FF53</td>
@@ -8381,6 +9188,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>53</td>
 					<td>F000:FF53</td>
@@ -8388,6 +9196,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>54</td>
 					<td>F000:FF53</td>
@@ -8395,6 +9204,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>55</td>
 					<td>F000:FF53</td>
@@ -8402,6 +9212,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>56</td>
 					<td>F000:FF53</td>
@@ -8409,6 +9220,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>57</td>
 					<td>F000:FF53</td>
@@ -8416,6 +9228,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>58</td>
 					<td>F000:FF53</td>
@@ -8423,6 +9236,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>59</td>
 					<td>F000:FF53</td>
@@ -8430,6 +9244,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>5A</td>
 					<td>F000:FF53</td>
@@ -8437,6 +9252,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>5B</td>
 					<td>F000:FF53</td>
@@ -8444,6 +9260,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>5C</td>
 					<td>F000:FF53</td>
@@ -8451,6 +9268,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>5D</td>
 					<td>F000:FF53</td>
@@ -8458,6 +9276,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>5E</td>
 					<td>F000:FF53</td>
@@ -8465,6 +9284,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>5F</td>
 					<td>F000:FF53</td>
@@ -8472,6 +9292,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>60</td>
 					<td>0000:0000</td>
@@ -8479,6 +9300,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>61</td>
 					<td>0000:0000</td>
@@ -8486,6 +9308,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>62</td>
 					<td>0000:0000</td>
@@ -8493,6 +9316,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>63</td>
 					<td>0000:0000</td>
@@ -8500,6 +9324,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>64</td>
 					<td>0000:0000</td>
@@ -8507,6 +9332,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>65</td>
 					<td>0000:0000</td>
@@ -8514,6 +9340,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>66</td>
 					<td>0000:0000</td>
@@ -8521,6 +9348,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>67</td>
 					<td>0000:0000</td>
@@ -8528,6 +9356,7 @@
 					<td>0000:0000</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>68</td>
 					<td>F000:FF53</td>
@@ -8535,6 +9364,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>69</td>
 					<td>F000:FF53</td>
@@ -8542,6 +9372,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>6A</td>
 					<td>F000:FF53</td>
@@ -8549,6 +9380,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>6B</td>
 					<td>F000:FF53</td>
@@ -8556,6 +9388,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>6C</td>
 					<td>F000:FF53</td>
@@ -8563,6 +9396,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>6D</td>
 					<td>F000:FF53</td>
@@ -8570,6 +9404,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>6E</td>
 					<td>F000:FF53</td>
@@ -8577,6 +9412,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>6F</td>
 					<td>F000:FF53</td>
@@ -8584,6 +9420,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>70</td>
 					<td>F000:F8FE</td>
@@ -8591,6 +9428,7 @@
 					<td>0070:001D</td>
 					<td>RTC</td>
 				</tr>
+
 				<tr>
 					<td>71</td>
 					<td>F000:FF53</td>
@@ -8598,6 +9436,7 @@
 					<td>F000:FF53</td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td>72</td>
 					<td>F000:E746</td>
@@ -8605,6 +9444,7 @@
 					<td>0070:0095</td>
 					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
 				</tr>
+
 				<tr>
 					<td>73</td>
 					<td>F000:E746</td>
@@ -8612,6 +9452,7 @@
 					<td>0070:00AA</td>
 					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
 				</tr>
+
 				<tr>
 					<td>74</td>
 					<td>F000:F8C1</td>
@@ -8619,6 +9460,7 @@
 					<td>0070:00BF</td>
 					<td>PS/2 Port 2</td>
 				</tr>
+
 				<tr>
 					<td>75</td>
 					<td>F000:E2CA</td>
@@ -8626,6 +9468,7 @@
 					<td>0070:0024</td>
 					<td>FPU Exception</td>
 				</tr>
+
 				<tr>
 					<td>76</td>
 					<td>F000:F8EC</td>
@@ -8633,6 +9476,7 @@
 					<td>0070:00D4</td>
 					<td>Used by DOS 3.30 and up - Stack switching routine (unless STACKS=0)</td>
 				</tr>
+
 				<tr>
 					<td>77</td>
 					<td>F000:E746</td>
@@ -8652,36 +9496,43 @@
 					<th width = '70%'><i>Name</i></th>
 					<th width = '20%'><i>Supporting DOS Versions</i></th>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/62/25.html'>0000</a></td>
 					<td>Program terminate</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/63/25.html'>0100</a></td>
 					<td>Read char from STDIN with echo</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/65/25.html'>0200</a></td>
 					<td>Write character to STDOUT</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/66/25.html'>0300</a></td>
 					<td>Auxiliary input</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/67/25.html'>0400</a></td>
 					<td>Auxiliary output</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/68/25.html'>0500</a></td>
 					<td>Printer output</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/69/25.html'>
@@ -8692,6 +9543,7 @@
 					<td>Direct console I/O</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/70/25.html'>
@@ -8702,435 +9554,521 @@
 					<td>Direct console I/O</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/71/25.html'>0700</a></td>
 					<td>Direct console input without echo</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/72/25.html'>0800</a></td>
 					<td>Console input without echo</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/73/25.html'>0900</a></td>
 					<td>Display string</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/74/25.html'>0A00</a></td>
 					<td>Buffered keyboard input</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/76/25.html'>0B00</a></td>
 					<td>Get input status</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/78/25.html'>0C00</a></td>
 					<td>Flush input buffer and input</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/79/25.html'>0D00</a></td>
 					<td>Disk reset</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/81/25.html'>0E00</a></td>
 					<td>Set default drive</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/85/25.html'>0F00</a></td>
 					<td>Open file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/86/25.html'>1000</a></td>
 					<td>Close file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/87/25.html'>1100</a></td>
 					<td>Find first file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/88/25.html'>1200</a></td>
 					<td>Find next file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/89/25.html'>1300</a></td>
 					<td>Delete file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/90/25.html'>1400</a></td>
 					<td>Sequential read</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/91/25.html'>1500</a></td>
 					<td>Sequential write</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/92/25.html'>1600</a></td>
 					<td>Create or truncate file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/93/25.html'>1700</a></td>
 					<td>Rename file</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/94/25.html'>1800</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/99/25.html'>1900</a></td>
 					<td>Get default drive</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/00/26.html'>1A00</a></td>
 					<td>Set disk transfer address</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/01/26.html'>1B00</a></td>
 					<td>Get allocation info for default drive</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/02/26.html'>1C00</a></td>
 					<td>Get allocation info for specified drive</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/03/26.html'>1D00</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/04/26.html'>1E00</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/05/26.html'>1F00</a></td>
 					<td>Get disk parameter block for default drive</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/06/26.html'>2000</a></td>
 					<td>Reserved</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/09/26.html'>2100</a></td>
 					<td>Random read</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/10/26.html'>2200</a></td>
 					<td>Random write</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/11/26.html'>2300</a></td>
 					<td>Get file size in records</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/12/26.html'>2400</a></td>
 					<td>Set random record number</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/13/26.html'>2500</a></td>
 					<td>Set interrupt vector</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/93/26.html'>2600</a></td>
 					<td>Create PSP</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/94/26.html'>2700</a></td>
 					<td>Random block read</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/95/26.html'>2800</a></td>
 					<td>Random block write</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/96/26.html'>2900</a></td>
 					<td>Parse filename</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/97/26.html'>2A00</a></td>
 					<td>Get date</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/98/26.html'>2B00</a></td>
 					<td>Set date</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/14/27.html'>2C00</a></td>
 					<td>Get time</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/18/27.html'>2D00</a></td>
 					<td>Set time</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/20/27.html'>2E00</a></td>
 					<td>Set verify flag</td>
 					<td>1.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/21/27.html'>2F00</a></td>
 					<td>Get disk transfer address</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/22/27.html'>3000</a></td>
 					<td>Get DOS version</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/34/27.html'>3100</a></td>
 					<td>Terminate and stay resident</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/35/27.html'>3200</a></td>
 					<td>Get disk parameter block for specified drive</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/36/27.html'>3300</a></td>
 					<td>Get Ctrl-Break checking state</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/36/27.html'>3301</a></td>
 					<td>Set Ctrl-Break checking state</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/37/27.html'>3302</a></td>
 					<td>Get and set extended Ctrl-Break checking state</td>
 					<td>3.xx+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/38/27.html'>3303</a></td>
 					<td>Get CPSW state</td>
 					<td>3.40 / 4.00</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/39/27.html'>3304</a></td>
 					<td>Set CPSW state</td>
 					<td>3.40 / 4.00</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/40/27.html'>3305</a></td>
 					<td>Get boot drive</td>
 					<td>4.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/41/27.html'>3306</a></td>
 					<td>Get true version number</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/43/27.html'>3307</a></td>
 					<td>Set / clear DOS_Flag</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/50/27.html'>3400</a></td>
 					<td>Get InDOS flag pointer</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/51/27.html'>3500</a></td>
 					<td>Get interrupt vector</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/62/27.html'>3600</a></td>
 					<td>Get free disk space</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/63/27.html'>3700</a></td>
 					<td>Get switch character</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/64/27.html'>3701</a></td>
 					<td>Set switch character</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/ix/21/38.html'>3800</a></td>
 					<td>Get or set country info</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/84/27.html'>3800</a></td>
 					<td>Get country info</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/85/27.html'>3801 - 38FF</a></td>
 					<td>Set country info</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/86/27.html'>3900</a></td>
 					<td>Create subdirectory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/87/27.html'>3A00</a></td>
 					<td>Remove subdirectory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/88/27.html'>3B00</a></td>
 					<td>Change current directory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/89/27.html'>3C00</a></td>
 					<td>Create or truncate file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/90/27.html'>3D00</a></td>
 					<td>Open existing file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/93/27.html'>3E00</a></td>
 					<td>Close file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/94/27.html'>3F00</a></td>
 					<td>Read file or device</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/02/28.html'>4000</a></td>
 					<td>Write file or device</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/08/28.html'>4100</a></td>
 					<td>Delete file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/10/28.html'>4200</a></td>
 					<td>Move file pointer</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/ix/21/43.html'>4300</a></td>
 					<td>Get or set file attributes</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/32/28.html'>4400</a></td>
 					<td>IOCTL - Get device information</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/33/28.html'>4401</a></td>
 					<td>IOCTL - Set device information</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/34/28.html'>4402</a></td>
 					<td>IOCTL - Read from character device control channel</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/66/28.html'>4403</a></td>
 					<td>IOCTL - Write to character device control channel</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/83/28.html'>4404</a></td>
 					<td>IOCTL - Read from character device control channel</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/93/28.html'>4405</a></td>
 					<td>IOCTL - Write to block device control channel</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/00/29.html'>4406</a></td>
 					<td>IOCTL - Get input status</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/01/29.html'>4407</a></td>
 					<td>IOCTL - Get output status</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/02/29.html'>4408</a></td>
 					<td>IOCTL - Check if block device removable</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/03/29.html'>4409</a></td>
 					<td>IOCTL - Check if block device remote</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/04/29.html'>440A</a></td>
 					<td>IOCTL - Check if handle is remote</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/05/29.html'>440B</a></td>
 					<td>IOCTL - Set sharing retry count</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/06/29.html'>440C</a></td>
 					<td>IOCTL - Generic character device request</td>
 					<td>3.20+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/08/29.html'>440D</a></td>
 					<td>IOCTL - Generic block device request</td>
 					<td>3.20+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/09/29.html'>
@@ -9141,6 +10079,7 @@
 					<td>Generic IOCTL - Lock logical volume</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/10/29.html'>
@@ -9151,6 +10090,7 @@
 					<td>Generic IOCTL - Lock physical volume</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/11/29.html'>
@@ -9161,6 +10101,7 @@
 					<td>Generic IOCTL - Unlock logical volume</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/12/29.html'>
@@ -9171,6 +10112,7 @@
 					<td>Generic IOCTL - Unlock physical volume</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/13/29.html'>
@@ -9181,6 +10123,7 @@
 					<td>Generic IOCTL - Get lock flag state</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/14/29.html'>
@@ -9191,6 +10134,7 @@
 					<td>Generic IOCTL - Enumerate open files</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/15/29.html'>
@@ -9201,6 +10145,7 @@
 					<td>Generic IOCTL - Find swap file</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/16/29.html'>
@@ -9211,6 +10156,7 @@
 					<td>Generic IOCTL - Get current lock state</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/17/29.html'>
@@ -9221,256 +10167,307 @@
 					<td>Generic IOCTL - Get first cluster</td>
 					<td>7.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/19/29.html'>440E</a></td>
 					<td>IOCTL - Get logical drive map</td>
 					<td>3.20+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/20/29.html'>440F</a></td>
 					<td>IOCTL - Set logical drive map</td>
 					<td>3.20+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/21/29.html'>4410</a></td>
 					<td>IOCTL - Query generic IOCTL capability (Handle)</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/23/29.html'>4411</a></td>
 					<td>IOCTL - Query generic IOCTL capability (Drive)</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/43/29.html'>4500</a></td>
 					<td>Duplicate handle</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/44/29.html'>4600</a></td>
 					<td>Redirect handle</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/45/29.html'>4700</a></td>
 					<td>Get current directory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/46/29.html'>4800</a></td>
 					<td>Allocate memory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/47/29.html'>4900</a></td>
 					<td>Release memory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/48/29.html'>4A00</a></td>
 					<td>Reallocate memory</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/51/29.html'>4B00</a></td>
 					<td>Execute program</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/86/29.html'>4C00</a></td>
 					<td>Terminate with return code</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/88/29.html'>4D00</a></td>
 					<td>Get program return code</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/89/29.html'>4E00</a></td>
 					<td>Find first file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/91/29.html'>4F00</a></td>
 					<td>Find next file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/92/29.html'>5000</a></td>
 					<td>Set current PSP</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/94/29.html'>5100</a></td>
 					<td>Get current PSP</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/95/29.html'>5200</a></td>
 					<td>Get DOS internal pointers (SYSVARS)</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/97/29.html'>5300</a></td>
 					<td>Create disk parameter block</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/98/29.html'>5400</a></td>
 					<td>Get verify flag</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/01/30.html'>5500</a></td>
 					<td>Create program PSP</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/02/30.html'>5600</a></td>
 					<td>Rename file</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/04/30.html'>5700</a></td>
 					<td>Get last-written date and time</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/05/30.html'>5701</a></td>
 					<td>Set last-written date and time</td>
 					<td>2.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/13/30.html'>5704</a></td>
 					<td>Get last access date and time</td>
 					<td>7.00, Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/14/30.html'>5705</a></td>
 					<td>Set last access date and time</td>
 					<td>7.00, Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/15/30.html'>5706</a></td>
 					<td>Get creation date and time</td>
 					<td>7.00, Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/16/30.html'>5707</a></td>
 					<td>Set creation date and time</td>
 					<td>7.00, Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/20/30.html'>5800</a></td>
 					<td>Get memory allocation strategy</td>
 					<td>2.11+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/20/30.html'>5801</a></td>
 					<td>Set allocation strategy</td>
 					<td>2.11+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/21/30.html'>5802</a></td>
 					<td>Get UMB link state</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/21/30.html'>5803</a></td>
 					<td>Set UMB link state</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/24/30.html'>5900</a></td>
 					<td>Get extended error info</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/26/30.html'>5A00</a></td>
 					<td>Create unique file</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/27/30.html'>5B00</a></td>
 					<td>Create new file</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/28/30.html'>5C00</a></td>
 					<td>Lock region of file</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/28/30.html'>5C01</a></td>
 					<td>Unlock region of file</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/29/30.html'>5D00</a></td>
 					<td>Server function call</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/30/30.html'>5D01</a></td>
 					<td>Commit all files for specified computer/process</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/31/30.html'>5D02</a></td>
 					<td>SHARE.EXE - Close file by name</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/32/30.html'>5D03</a></td>
 					<td>SHARE.EXE - Close all files for specified computer</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/33/30.html'>5D04</a></td>
 					<td>SHARE.EXE - Close all files for specified process</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/34/30.html'>5D05</a></td>
 					<td>SHARE.EXE - Get open file list entry</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/35/30.html'>5D06</a></td>
 					<td>Get address of DOS swappable data area</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/36/30.html'>5D07</a></td>
 					<td>Get redirected printer mode</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/37/30.html'>5D08</a></td>
 					<td>Set redirected printer mode</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/38/30.html'>5D09</a></td>
 					<td>Flush redirected printer output</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/39/30.html'>5D0A</a></td>
 					<td>Set extended error information</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/40/30.html'>5D0B</a></td>
 					<td>Get DOS swappable data areas</td>
 					<td>4.xx only</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/42/30.html'>5E00</a></td>
 					<td>Network - Get machine name</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/44/30.html'>
@@ -9481,186 +10478,223 @@
 					<td>Network - Set machine name</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/46/30.html'>5E02</a></td>
 					<td>Network - Set network printer setup string</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/47/30.html'>5E03</a></td>
 					<td>Network - Get network printer setup string</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/48/30.html'>5E04</a></td>
 					<td>Network - Set printer mode</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/50/30.html'>5E05</a></td>
 					<td>Network - Get printer mode</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/53/30.html'>5F00</a></td>
 					<td>Network - Get redirection mode</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/54/30.html'>5F01</a></td>
 					<td>Network - Set redirection mode</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/55/30.html'>5F02</a></td>
 					<td>Network - Get redirection list entry</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/56/30.html'>5F03</a></td>
 					<td>Network - Redirect device</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/57/30.html'>5F04</a></td>
 					<td>Network - Cancel redirection</td>
 					<td>3.10+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/58/30.html'>5F05</a></td>
 					<td>Network - Get extended redirection list entry</td>
 					<td>4.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/62/30.html'>5F07</a></td>
 					<td>Enable drive</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/64/30.html'>5F08</a></td>
 					<td>Disable drive</td>
 					<td>5.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/50/31.html'>6000</a></td>
 					<td>Qualify filename</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/51/31.html'>6100</a></td>
 					<td>Reserved</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/53/31.html'>6200</a></td>
 					<td>Get current PSP</td>
 					<td>3.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/56/31.html'>6300</a></td>
 					<td>Get double-byte character set lead byte table pointer</td>
 					<td>3.20+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/61/31.html'>6400</a></td>
 					<td>Set device driver lookahead flag</td>
 					<td>3.20+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/ix/21/65.html'>6500</a></td>
 					<td>Get extended country info</td>
 					<td>3.30+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/80/31.html'>6601</a></td>
 					<td>Get global code page table</td>
 					<td>3.30+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/81/31.html'>6602</a></td>
 					<td>Set global code page table</td>
 					<td>3.30+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/82/31.html'>6700</a></td>
 					<td>Set handle count</td>
 					<td>3.30+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/83/31.html'>6800</a></td>
 					<td>Commit file</td>
 					<td>3.30+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/84/31.html'>6900</a></td>
 					<td>Get or set disk serial number</td>
 					<td>4.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/89/31.html'>6A00</a></td>
 					<td>Commit file (Undocumented)</td>
 					<td>4.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/91/31.html'>6B00</a></td>
 					<td>Reserved</td>
 					<td>4.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/92/31.html'>6C00</a></td>
 					<td>Extended open/create file</td>
 					<td>4.00+</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/09/32.html'>710D</a></td>
 					<td>Long filename support - Reset drive</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/10/32.html'>7139</a></td>
 					<td>Long filename support - Create directory</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/11/32.html'>713A</a></td>
 					<td>Long filename support - Remove directory</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/12/32.html'>713B</a></td>
 					<td>Long filename support - Set current directory</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/13/32.html'>7141</a></td>
 					<td>Long filename support - Delete file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/14/32.html'>7143</a></td>
 					<td>Long filename support - Get / set file attributes</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/15/32.html'>7147</a></td>
 					<td>Long filename support - Get current directory</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/16/32.html'>714E</a></td>
 					<td>Long filename support - Find first file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/17/32.html'>714F</a></td>
 					<td>Long filename support - Find next file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/18/32.html'>7156</a></td>
 					<td>Long filename support - Move (rename) file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/19/32.html'>
@@ -9671,6 +10705,7 @@
 					<td>Long filename support - Truename</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/20/32.html'>
@@ -9681,6 +10716,7 @@
 					<td>Long filename support - Get short name for file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/21/32.html'>
@@ -9691,26 +10727,31 @@
 					<td>Long filename support - Get canonical long filename or path</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/22/32.html'>716C</a></td>
 					<td>Long filename support - Create / open file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/23/32.html'>71A0</a></td>
 					<td>Long filename support - Get volume information</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/24/32.html'>71A1</a></td>
 					<td>Long filename support - Terminate Find first / Find next</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/29/32.html'>71A6</a></td>
 					<td>Long filename support - Get file information</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/30/32.html'>
@@ -9721,6 +10762,7 @@
 					<td>Long filename support - Time conversion</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/31/32.html'>
@@ -9731,16 +10773,19 @@
 					<td>Long filename support - Time conversion</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/32/32.html'>71A8</a></td>
 					<td>Long filename support - Generate short filename</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td><a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/33/32.html'>71A9</a></td>
 					<td>Long filename support - Server create / open file</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/34/32.html'>
@@ -9751,6 +10796,7 @@
 					<td>Long filename support - Create SUBST</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/35/32.html'>
@@ -9761,6 +10807,7 @@
 					<td>Long filename support - Terminate SUBST</td>
 					<td>Windows 95</td>
 				</tr>
+
 				<tr>
 					<td>
 						<a href = 'http://www.delorie.com/djgpp/doc/rbinter/id/36/32.html'>
