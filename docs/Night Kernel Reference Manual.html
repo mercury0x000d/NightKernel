@@ -124,9 +124,7 @@
 			CPU:<br>
 			<ul>
 				<li>A 386 or higher due to some instructions used (STOSD, et. al.) and the availability of Protected Mode</li>
-				<li>ABM support (for the List Manager's use of the POPCNT instruction)</li>
 				<li>PAE support to allow memory amounts over 4 GiB</li>
-				<li>SSE2 support (for the Memory Manager's use of the XMM registers)</li>
 			</ul>
 			<br>
 			BIOS:<br>
@@ -233,6 +231,8 @@
 					</td>
 				</tr>
 			</table>
+			<br>
+			You may run multiple rules at once in a single command; e.g. <code><i>make clean update build vm floppy iso run</i></code> could be used to perform a complete build of the kernel in all forms - the binary file, a floppy image, and a CD image.
 		</p>
 		<br>
 		<br>
@@ -425,9 +425,9 @@
 			<i>'C ... all the power of assembly language programming with all the ease of assembly language programming.'</i><br>
 			&emsp; - Stuart Cheshire, <i>Tricks of the Mac Game Programming Gurus</i><br>
 			<br>
-			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readibility than comparable C code.<br>
+			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe due to certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readibility than comparable C code.<br>
 			<br>
-			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from the Memory Manager:<br>
+			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from an older version of the Memory Manager:<br>
 
 			<code>
 				<p style = 'background-color: DimGray'>
@@ -1647,7 +1647,7 @@
 		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3670 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
+			<b>In progress, 0.1F Update, Build 3711 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1656,6 +1656,7 @@
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
 				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
 				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
+				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() to return the Hamming weight of a number.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
 			</ul>
@@ -1663,7 +1664,7 @@
 			<ul>
 				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
 				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
-				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is allocated in 4 KiB blocks, all aligned on a 4 KiB boundary.</li>
+				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is now allocated in 4 KiB blocks and aligned on a 4 KiB boundary.</li>
 				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenClear() now uses MemFill for the fastest screen clearing ever seen.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
@@ -6024,6 +6025,22 @@
 
 				<tr>
 					<td>
+						<code>PopulationCount</code><br>
+						<br>
+						Returns the number of set bits (Hamming weight) of the number provided
+					</td>
+					<td>
+						<ol>
+							<li>Numeric value</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Number of set bits
+					</td>
+				</tr>
+
+				<tr>
+					<td>
 						<code>RangeCheck</code><br>
 						<br>
 						Checks that a value passed is in range
@@ -6098,7 +6115,9 @@
 							<li>Number limit</li>
 						</ol>
 					</td>
-					<td>EAX - 32-bit random number between 0 and the number limit</td>
+					<td>
+						EAX - 32-bit random number between 0 and the number limit
+					</td>
 				</tr>
 			</table>
 			<br>

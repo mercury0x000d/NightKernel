@@ -31,6 +31,7 @@
 %include "include/interrupts.inc"
 %include "include/lists.inc"
 %include "include/memory.inc"
+%include "include/numbers.inc"
 %include "include/misc.inc"
 %include "include/paging.inc"
 %include "include/PCI.inc"
@@ -233,6 +234,19 @@ call DebugCPUFeaturesEnable
 push progressText0B$
 call PrintIfConfigBits32
 call MemInit
+
+
+
+
+
+
+
+; popcnt replacement testing area
+push kCPU_popcnt
+push tSystem.CPUFeatures
+call LMBitClear
+
+
 
 
 

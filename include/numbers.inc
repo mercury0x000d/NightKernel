@@ -20,6 +20,7 @@
 
 ; function definitions
 extern BCDToDecimal
+extern PopulationCount
 extern RangeCheck
 extern QuadAdd
 extern QuadShiftLeft

@@ -97,6 +97,91 @@ ret
 
 
 section .text
+PopulationCount:
+	; Returns the number of set bits (Hamming Weight) of the number provided
+	;
+	;  input:
+	;	Numeric value
+	;
+	;  output:
+	;	EAX - Number of set bits
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define number								dword [ebp + 8]
+
+
+	; phase 1
+	mov eax, number
+	mov ebx, eax
+	and ebx, 01010101010101010101010101010101b
+
+	mov ecx, eax
+	shr ecx, 1
+	and ecx, 01010101010101010101010101010101b
+
+	mov eax, ebx
+	add eax, ecx
+
+
+	; phase 2
+	mov ebx, eax
+	and ebx, 00110011001100110011001100110011b
+
+	mov ecx, eax
+	shr ecx, 2
+	and ecx, 00110011001100110011001100110011b
+
+	mov eax, ebx
+	add eax, ecx
+
+
+	; phase 3
+	mov ebx, eax
+	and ebx, 00001111000011110000111100001111b
+
+	mov ecx, eax
+	shr ecx, 4
+	and ecx, 00001111000011110000111100001111b
+
+	mov eax, ebx
+	add eax, ecx
+
+
+	; phase 4
+	mov ebx, eax
+	and ebx, 00000000111111110000000011111111b
+
+	mov ecx, eax
+	shr ecx, 8
+	and ecx, 00000000111111110000000011111111b
+
+	add ebx, ecx
+
+
+	; phase 5
+	mov eax, ebx
+	and eax, 00000000000000001111111111111111b
+
+	shr ebx, 16
+	and ebx, 00000000000000001111111111111111b
+
+	add eax, ebx
+
+
+	.Exit:
+	%undef number
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+
+
+section .text
 RangeCheck:
 	; Checks that a value passed is in range
 	;
