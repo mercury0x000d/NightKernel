@@ -237,19 +237,6 @@ call MemInit
 
 
 
-
-
-
-
-; popcnt replacement testing area
-push kCPU_popcnt
-push tSystem.CPUFeatures
-call LMBitClear
-
-
-
-
-
 ; now that we have a temporary stack and access to all the memory addresses,
 ; let's allocate some RAM for the real stack
 push progressText0C$

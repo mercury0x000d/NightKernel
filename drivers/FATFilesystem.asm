@@ -1910,7 +1910,7 @@ FAT16FATBackup:
 	; get the address of this partition's slot in the partitions list
 	push partitionNumber
 	push dword [tSystem.listPtrPartitions]
-	call LM_Internal_ElementAddressGet
+	call LMElementAddressGet
 	mov partitionSlotPtr, esi
 
 	; allocate a sector buffer
@@ -3729,31 +3729,31 @@ FAT16ServiceHandler:
 		; FAT16 "small" volume
 		push 0x04
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; FAT16 "large" volume
 		push 0x06
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; Windows 95 FAT16 volume
 		push 0x0E
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; Hidden FAT16 volume
 		push 0x16
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		; Hidden Windows 95 FAT16 volume
 		push 0x1E
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT16ServiceHandler
 
 		jmp .Exit
@@ -3951,12 +3951,12 @@ FAT32ServiceHandler:
 		; init - set FAT32 handler addresses
 		push 0x0B
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT32ServiceHandler
 
 		push 0x0C
 		push dword [tSystem.listPtrFSHandlers]
-		call LM_Internal_ElementAddressGet
+		call LMElementAddressGet
 		mov dword [esi], FAT32ServiceHandler
 	.NotInit:
 

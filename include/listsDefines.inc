@@ -77,14 +77,3 @@ global LMListSpaceCalc
 global LMListValidate
 global LMSlotFindFirstFree
 global LMSlotFreeTest
-global LM_Internal_ElementAddressGet
-global LM_Internal_ElementCountGet
-global LM_Internal_ElementCountSet
-global LM_Internal_ElementDelete
-global LM_Internal_ElementDuplicate
-global LM_Internal_ElementSizeGet
-global LM_Internal_ItemAddAtSlot
-global LM_Internal_ListCompact
-global LM_Internal_ListSearch
-global LM_Internal_SlotFindFirstFree
-global LM_Internal_SlotFreeTest

@@ -55,14 +55,3 @@ extern LMListSpaceCalc
 extern LMListValidate
 extern LMSlotFindFirstFree
 extern LMSlotFreeTest
-extern LM_Internal_ElementAddressGet
-extern LM_Internal_ElementCountGet
-extern LM_Internal_ElementCountSet
-extern LM_Internal_ElementDelete
-extern LM_Internal_ElementDuplicate
-extern LM_Internal_ElementSizeGet
-extern LM_Internal_ItemAddAtSlot
-extern LM_Internal_ListCompact
-extern LM_Internal_ListSearch
-extern LM_Internal_SlotFindFirstFree
-extern LM_Internal_SlotFreeTest

@@ -1647,7 +1647,7 @@
 		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3711 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
+			<b>In progress, 0.1F Update, Build 3729 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
 			<br>
 			New<br>
 			<ul>
@@ -1659,14 +1659,16 @@
 				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() to return the Hamming weight of a number.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
+				<li>Repo: Added 'testing files' folder. The files within can be used in place of kernel.asm to test out specific features in the future.</li>
 			</ul>
 			Changed<br>
 			<ul>
+				<li>Kernel: <i>lists.asm</i> - Changed prefix format for internal functions from <i>LM_Internal_</i> to <i>LM_Private_</i>.</li>
 				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
 				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
 				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is now allocated in 4 KiB blocks and aligned on a 4 KiB boundary.</li>
 				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
-				<li>Kernel: <i>screen.asm</i> - ScreenClear() now uses MemFill for the fastest screen clearing ever seen.</li>
+				<li>Kernel: <i>screen.asm</i> - ScreenClear() now uses MemFill for the fastest screen clearing ever seen. That's right - the screen can now be wiped with the power of SSE. Just what Intel had in mind when they added it to their CPUs.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
 			</ul>
 			Fixed<br>
@@ -2605,8 +2607,10 @@
 				</tr>
 			</table>
 			<br>
-			- Public functions are intended for calling from any other routines.<br>
-			- Internal functions are intended to be called only by the kernel internally.<br>
+			<ul>
+				<li>Public functions are intended for calling from any other routines.</li>
+				<li>Private functions cannot be called from code outside the source file in which they reside.</li>
+			</ul>
 			<br>
 			<br>
 			<br>
@@ -5311,9 +5315,9 @@
 			<br>
 			<br>
 
-			32-bit Internal Function Listing:<br>
+			32-bit Private Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.10 - List Manager 32-bit internal functions</i></b></caption>
+				<caption><b><i>Table A1.10 - List Manager 32-bit private functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -5326,7 +5330,7 @@
 
 				<tr>
 					<td>
-						<code>LM_BitfieldMath</code><br>
+						<code>LM_Private_BitfieldMath</code><br>
 						<br>
 						Returns the byte and bit based upon the address and element number specified
 					</td>
@@ -5344,7 +5348,7 @@
 
 				<tr>
 					<td>
-						<code>LM_ByteClearRange</code><br>
+						<code>LM_Private_ByteClearRange</code><br>
 						<br>
 						Clears a range of bits in a single byte
 					</td>
@@ -5362,7 +5366,7 @@
 
 				<tr>
 					<td>
-						<code>LM_ByteFlipRange</code><br>
+						<code>LM_Private_ByteFlipRange</code><br>
 						<br>
 						Flips a range of bits in a single byte
 					</td>
@@ -5380,7 +5384,7 @@
 
 				<tr>
 					<td>
-						<code>LM_ByteSetRange</code><br>
+						<code>LM_Private_ByteSetRange</code><br>
 						<br>
 						Sets a range of bits in a single byte
 					</td>
@@ -5399,7 +5403,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ElementAddressGet</code><br>
+						<code>LM_Private_ElementAddressGet</code><br>
 						<br>
 						Returns the address of the specified element in the list specified
 					</td>
@@ -5416,7 +5420,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ElementCountGet</code><br>
+						<code>LM_Private_ElementCountGet</code><br>
 						<br>
 						Returns the number of elements in the list specified
 					</td>
@@ -5432,7 +5436,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ElementCountSet</code><br>
+						<code>LM_Private_ElementCountSet</code><br>
 						<br>
 						Sets the total number of elements in the list specified
 					</td>
@@ -5449,7 +5453,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ElementDelete</code><br>
+						<code>LM_Private_ElementDelete</code><br>
 						<br>
 						Deletes the element at the slot number specified from the list specified
 					</td>
@@ -5466,7 +5470,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ElementDuplicate</code><br>
+						<code>LM_Private_ElementDuplicate</code><br>
 						<br>
 						Duplicates the element at the slot number specified in the list specified
 					</td>
@@ -5483,7 +5487,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ElementSizeGet</code><br>
+						<code>LM_Private_ElementSizeGet</code><br>
 						<br>
 						Returns the size of elements in the list specified
 					</td>
@@ -5499,7 +5503,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ItemAddAtSlot</code><br>
+						<code>LM_Private_ItemAddAtSlot</code><br>
 						<br>
 						Adds an item to the list specified at the list slot specified
 					</td>
@@ -5518,7 +5522,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ListCompact</code><br>
+						<code>LM_Private_ListCompact</code><br>
 						<br>
 						Compacts the list specified (eliminates empty slots to make list contiguous)
 					</td>
@@ -5530,7 +5534,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_ListSearch</code><br>
+						<code>LM_Private_ListSearch</code><br>
 						<br>
 						Searches the list specified for the element specified
 					</td>
@@ -5542,7 +5546,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_SlotFindFirstFree</code><br>
+						<code>LM_Private_SlotFindFirstFree</code><br>
 						<br>
 						Finds the first free slot available in the list specified
 					</td>
@@ -5558,7 +5562,7 @@
 
 				<tr>
 					<td>
-						<code>LM_Internal_SlotFreeTest</code><br>
+						<code>LM_Private_SlotFreeTest</code><br>
 						<br>
 						Tests the element specified in the list specified to see if it is free
 					</td>

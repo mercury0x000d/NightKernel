@@ -21,8 +21,11 @@
 %include "include/listsDefines.inc"
 
 %include "include/boolean.inc"
+%include "include/CPU.inc"
 %include "include/errors.inc"
+%include "include/globals.inc"
 %include "include/memory.inc"
+%include "include/numbers.inc"
 
 
 
@@ -434,38 +437,27 @@ LMBitClear:
 	jne .Exit
 
 
-	; get the byte and bit from the address and element
+	; see if we support POPCNT
+	push kCPU_popcnt
+	push tSystem.CPUFeatures
+	call LMBitGet
+	jnc .NoPOPCNT
+
+	; Thankfully POPCNT is supported!
 	push element
 	push address
-	call LM_BitfieldMath
+	call LM_Private_LMBitClear
+	jmp .Done
 
 
-	; read setCount
-	mov esi, address
-	mov edi, dword [esi + tBitfieldInfo.setCount]
-
-	; read the byte in
-	mov eax, 0
-	mov al, byte [ebx]
-
-	; subtract the number of currently set bits in this byte from setCount
-	popcnt edx, eax
-	sub edi, edx
-
-	; modify the bit
-	btr eax, ecx
-
-	; add the number of bits now set in this byte to setCount
-	popcnt edx, eax
-	add edi, edx
-
-	; write the byte back to memory
-	mov byte [ebx], al
-
-	; update setCount
-	mov dword [esi + tBitfieldInfo.setCount], edi
+	; Crap. No POPCNT means we do this the old-fashioned way.
+	.NoPOPCNT:
+	push element
+	push address
+	call LM_Private_LMBitClearLegacy
 
 
+	.Done:
 	; all done!
 	mov edx, kErrNone
 
@@ -533,13 +525,13 @@ LMBitClearRange:
 	; see which bytes will be at the start and end of this operation
 	push rangeStart
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 	mov startByte, ebx
 	mov startBit, ecx
 
 	push rangeEnd
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 	mov endByte, ebx
 	mov endBit, ecx
 
@@ -558,7 +550,7 @@ LMBitClearRange:
 		push startBit
 		push startByte
 		push address
-		call LM_ByteClearRange
+		call LM_Private_ByteClearRange
 		jmp .Done
 	.NotASingleByte:
 
@@ -567,13 +559,13 @@ LMBitClearRange:
 	push startBit
 	push startByte
 	push address
-	call LM_ByteClearRange
+	call LM_Private_ByteClearRange
 
 	push endBit
 	push 0
 	push endByte
 	push address
-	call LM_ByteClearRange
+	call LM_Private_ByteClearRange
 
 	; Now we check to see if those bytes were neighbors (e.g. bytes 3 and 4, or 7 and 8). If so, there's no need to do anything further.
 	mov ecx, endByte
@@ -691,7 +683,7 @@ LMBitFlip:
 	; get the byte and bit from the address and element
 	push element
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 
 
 	; read setCount
@@ -787,13 +779,13 @@ LMBitFlipRange:
 	; see which bytes will be at the start and end of this operation
 	push rangeStart
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 	mov startByte, ebx
 	mov startBit, ecx
 
 	push rangeEnd
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 	mov endByte, ebx
 	mov endBit, ecx
 
@@ -812,7 +804,7 @@ LMBitFlipRange:
 		push startBit
 		push startByte
 		push address
-		call LM_ByteFlipRange
+		call LM_Private_ByteFlipRange
 		jmp .Done
 	.NotASingleByte:
 
@@ -821,13 +813,13 @@ LMBitFlipRange:
 	push startBit
 	push startByte
 	push address
-	call LM_ByteFlipRange
+	call LM_Private_ByteFlipRange
 
 	push endBit
 	push 0
 	push endByte
 	push address
-	call LM_ByteFlipRange
+	call LM_Private_ByteFlipRange
 
 	; Now we check to see if those bytes were neighbors (e.g. bytes 3 and 4, or 7 and 8). If so, there's no need to do anything further.
 	mov ecx, endByte
@@ -948,7 +940,7 @@ LMBitGet:
 	; get the byte and bit from the address and element
 	push element
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 
 	; return the byte
 	bt [ebx], ecx
@@ -1003,7 +995,7 @@ LMBitSet:
 	; get the byte and bit from the address and element
 	push element
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 
 
 	; read setCount
@@ -1099,13 +1091,13 @@ LMBitSetRange:
 	; see which bytes will be at the start and end of this operation
 	push rangeStart
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 	mov startByte, ebx
 	mov startBit, ecx
 
 	push rangeEnd
 	push address
-	call LM_BitfieldMath
+	call LM_Private_BitfieldMath
 	mov endByte, ebx
 	mov endBit, ecx
 
@@ -1124,7 +1116,7 @@ LMBitSetRange:
 		push startBit
 		push startByte
 		push address
-		call LM_ByteSetRange
+		call LM_Private_ByteSetRange
 		jmp .Done
 	.NotASingleByte:
 
@@ -1133,13 +1125,13 @@ LMBitSetRange:
 	push startBit
 	push startByte
 	push address
-	call LM_ByteSetRange
+	call LM_Private_ByteSetRange
 
 	push endBit
 	push 0
 	push endByte
 	push address
-	call LM_ByteSetRange
+	call LM_Private_ByteSetRange
 
 	; Now we check to see if those bytes were neighbors (e.g. bytes 3 and 4, or 7 and 8). If so, there's no need to do anything further.
 	mov ecx, endByte
@@ -1322,7 +1314,7 @@ LMElementAddressGet:
 
 	push elementNum
 	push listPtr
-	call LM_Internal_ElementAddressGet
+	call LM_Private_ElementAddressGet
 
 	mov edx, kErrNone
 
@@ -1364,7 +1356,7 @@ LMElementCountGet:
 	jne .Exit
 
 	push listPtr
-	call LM_Internal_ElementCountGet
+	call LM_Private_ElementCountGet
 
 	mov edx, kErrNone
 
@@ -1407,7 +1399,7 @@ LMElementCountSet:
 
 	push newElementCount
 	push listPtr
-	call LM_Internal_ElementCountSet
+	call LM_Private_ElementCountSet
 
 	mov edx, kErrNone
 
@@ -1459,7 +1451,7 @@ LMElementDelete:
 
 	push elementNum
 	push listPtr
-	call LM_Internal_ElementDelete
+	call LM_Private_ElementDelete
 
 	mov edx, kErrNone
 
@@ -1511,7 +1503,7 @@ LMElementDuplicate:
 
 	push elementNum
 	push listPtr
-	call LM_Internal_ElementDuplicate
+	call LM_Private_ElementDuplicate
 
 	mov edx, kErrNone
 
@@ -1553,7 +1545,7 @@ LMElementSizeGet:
 	jne .Exit
 
 	push listPtr
-	call LM_Internal_ElementSizeGet
+	call LM_Private_ElementSizeGet
 	mov eax, edx
 
 	mov edx, kErrNone
@@ -1652,7 +1644,7 @@ LMItemAddAtSlot:
 	push newItemPtr
 	push slotNum
 	push listPtr
-	call LM_Internal_ItemAddAtSlot
+	call LM_Private_ItemAddAtSlot
 
 	mov edx, kErrNone
 
@@ -1688,7 +1680,7 @@ LMListCompact:
 
 
 	push listPtr
-	call LM_Internal_ListCompact
+	call LM_Private_ListCompact
 
 
 	.Exit:
@@ -1788,7 +1780,7 @@ LMListSearch:
 
 
 	push address
-	call LM_Internal_ListSearch
+	call LM_Private_ListSearch
 
 
 	.Exit:
@@ -1903,7 +1895,7 @@ LMSlotFindFirstFree:
 	jne .Exit
 
 	push address
-	call LM_Internal_SlotFindFirstFree
+	call LM_Private_SlotFindFirstFree
 
 	mov edx, kErrNone
 
@@ -1956,7 +1948,7 @@ LMSlotFreeTest:
 
 	push elementNum
 	push address
-	call LM_Internal_SlotFreeTest
+	call LM_Private_SlotFreeTest
 
 
 	.Exit:
@@ -1971,7 +1963,7 @@ ret 8
 
 
 section .text
-LM_BitfieldMath:
+LM_Private_BitfieldMath:
 	; Returns the byte and bit based upon the address and element number specified
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
@@ -2021,7 +2013,7 @@ ret 8
 
 
 section .text
-LM_ByteClearRange:
+LM_Private_ByteClearRange:
 	; Clears a range of bits in a single byte
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
@@ -2089,7 +2081,7 @@ ret 16
 
 
 section .text
-LM_ByteFlipRange:
+LM_Private_ByteFlipRange:
 	; Flips a range of bits in a single byte
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
@@ -2156,7 +2148,7 @@ ret 16
 
 
 section .text
-LM_ByteSetRange:
+LM_Private_ByteSetRange:
 	; Sets a range of bits in a single byte
 	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
@@ -2223,7 +2215,7 @@ ret 16
 
 
 section .text
-LM_Internal_ElementAddressGet:
+LM_Private_ElementAddressGet:
 	; Returns the address of the specified element in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2263,7 +2255,7 @@ ret 8
 
 
 section .text
-LM_Internal_ElementCountGet:
+LM_Private_ElementCountGet:
 	; Returns the total number of elements in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2296,7 +2288,7 @@ ret 4
 
 
 section .text
-LM_Internal_ElementCountSet:
+LM_Private_ElementCountSet:
 	; Sets the total number of elements in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2333,7 +2325,7 @@ ret 8
 
 
 section .text
-LM_Internal_ElementDelete:
+LM_Private_ElementDelete:
 	; Deletes the element specified from the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2360,13 +2352,13 @@ LM_Internal_ElementDelete:
 
 	; get the element size of this list
 	push address
-	call LM_Internal_ElementSizeGet
+	call LM_Private_ElementSizeGet
 	mov elementSize, eax
 
 	; get the number of elements in this list
 	push dword 0
 	push address
-	call LM_Internal_ElementCountGet
+	call LM_Private_ElementCountGet
 
 	; save the number of elements for later
 	mov elementCount, ecx
@@ -2387,7 +2379,7 @@ LM_Internal_ElementDelete:
 		push edx
 		mov eax, address
 		push eax
-		call LM_Internal_ElementAddressGet
+		call LM_Private_ElementAddressGet
 
 		; save the address we got
 		push esi
@@ -2397,7 +2389,7 @@ LM_Internal_ElementDelete:
 		inc edx
 		push edx
 		push address
-		call LM_Internal_ElementAddressGet
+		call LM_Private_ElementAddressGet
 		mov eax, esi
 
 		; retrieve the previous address
@@ -2442,7 +2434,7 @@ ret 8
 
 
 section .text
-LM_Internal_ElementDuplicate:
+LM_Private_ElementDuplicate:
 	; Duplicates the element specified in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2469,13 +2461,13 @@ LM_Internal_ElementDuplicate:
 
 	; get the element size of this list
 	push address
-	call LM_Internal_ElementSizeGet
+	call LM_Private_ElementSizeGet
 	mov elementSize, eax
 
 	; get the number of elements in this list
 	push dword 0
 	push address
-	call LM_Internal_ElementCountGet
+	call LM_Private_ElementCountGet
 
 	; increment the number of elements and save for later
 	inc ecx
@@ -2484,7 +2476,7 @@ LM_Internal_ElementDuplicate:
 	; update the number of elements in this list
 	push ecx
 	push address
-	call LM_Internal_ElementCountSet
+	call LM_Private_ElementCountSet
 
 	; set up a loop to copy down by one all elements from the end to the one to be duplicated
 	mov ecx, elementCount
@@ -2501,7 +2493,7 @@ LM_Internal_ElementDuplicate:
 		mov edx, elementCount
 		push edx
 		push address
-		call LM_Internal_ElementAddressGet
+		call LM_Private_ElementAddressGet
 
 		; save this address
 		push esi
@@ -2511,7 +2503,7 @@ LM_Internal_ElementDuplicate:
 		dec edx
 		push edx
 		push address
-		call LM_Internal_ElementAddressGet
+		call LM_Private_ElementAddressGet
 		
 		; retrieve the earlier saved address
 		pop edi
@@ -2548,7 +2540,7 @@ ret 8
 
 
 section .text
-LM_Internal_ElementSizeGet:
+LM_Private_ElementSizeGet:
 	; Returns the elements size of the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2581,7 +2573,7 @@ ret 4
 
 
 section .text
-LM_Internal_ItemAddAtSlot:
+LM_Private_ItemAddAtSlot:
 	; Adds an item to the list specified at the list slot specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2612,7 +2604,7 @@ LM_Internal_ItemAddAtSlot:
 	; get the size of each element in this list
 	mov edi, address
 	push edi
-	call LM_Internal_ElementSizeGet
+	call LM_Private_ElementSizeGet
 
 	; now compare that to the given size of the new item
 	cmp newItemSize, eax
@@ -2653,7 +2645,7 @@ ret 16
 
 
 section .text
-LM_Internal_ListCompact:
+LM_Private_ListCompact:
 	; Compacts the list specified (eliminates empty slots to make list contiguous)
 	;
 	;  input:
@@ -2676,7 +2668,7 @@ ret 4
 
 
 section .text
-LM_Internal_ListSearch:
+LM_Private_ListSearch:
 	; Searches all elements of the list specified for the data specified
 	;
 	;  input:
@@ -2699,7 +2691,7 @@ ret 4
 
 
 section .text
-LM_Internal_SlotFindFirstFree:
+LM_Private_SlotFindFirstFree:
 	; Finds the first empty element in the list specified
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2730,7 +2722,7 @@ LM_Internal_SlotFindFirstFree:
 		; test this element
 		push edx
 		push address
-		call LM_Internal_SlotFreeTest
+		call LM_Private_SlotFreeTest
 		mov eax, edx
 
 		; restore the counter
@@ -2766,7 +2758,7 @@ ret 4
 
 
 section .text
-LM_Internal_SlotFreeTest:
+LM_Private_SlotFreeTest:
 	; Tests the element specified in the list specified to see if it is free
 	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
@@ -2823,3 +2815,141 @@ LM_Internal_SlotFreeTest:
 	mov esp, ebp
 	pop ebp
 ret 8
+
+
+
+
+
+LM_Private_LMBitClear:
+	; Clears the bit specified within the bitfield at the address specified
+	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
+	;
+	;  input:
+	;	Bitfield address
+	;	Bit number
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define element								dword [ebp + 12]
+
+
+	; get the byte and bit from the address and element
+	push element
+	push address
+	call LM_Private_BitfieldMath
+
+
+	; read setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
+
+	; read the byte in
+	mov eax, 0
+	mov al, byte [ebx]
+
+	; subtract the number of currently set bits in this byte from setCount
+	popcnt edx, eax
+	sub edi, edx
+
+	; modify the bit
+	btr eax, ecx
+
+	; add the number of bits now set in this byte to setCount
+	popcnt edx, eax
+	add edi, edx
+
+	; write the byte back to memory
+	mov byte [ebx], al
+
+	; update setCount
+	mov dword [esi + tBitfieldInfo.setCount], edi
+
+
+
+
+	.Exit:
+	%undef address
+	%undef element
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+
+LM_Private_LMBitClearLegacy:
+	; Clears the bit specified within the bitfield at the address specified
+	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
+	;
+	;  input:
+	;	Bitfield address
+	;	Bit number
+	;
+	;  output:
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define element								dword [ebp + 12]
+
+
+	; get the byte and bit from the address and element
+	push element
+	push address
+	call LM_Private_BitfieldMath
+
+
+	; read setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
+
+	; read the byte in
+	mov eax, 0
+	mov al, byte [ebx]
+jmp $
+mov edx, 0xcafebeef
+	; subtract the number of currently set bits in this byte from setCount
+	push eax
+	call PopulationCount
+	popcnt edx, eax
+	sub edi, edx
+
+	; modify the bit
+	btr eax, ecx
+
+	; add the number of bits now set in this byte to setCount
+	popcnt edx, eax
+	add edi, edx
+
+	; write the byte back to memory
+	mov byte [ebx], al
+
+	; update setCount
+	mov dword [esi + tBitfieldInfo.setCount], edi
+
+
+
+
+	.Exit:
+	%undef address
+	%undef element
+	mov esp, ebp
+	pop ebp
+ret 8
+
+
+
+
+
+

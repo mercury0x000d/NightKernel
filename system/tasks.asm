@@ -204,7 +204,7 @@ TaskNameSet:
 	and eax, 0x000000FF
 	push eax
 	push dword [tSystem.listPtrTasks]
-	call LM_Internal_ElementAddressGet
+	call LMElementAddressGet
 	mov taskSlotAddress, esi
 
 	; get and save the length of the string specified
