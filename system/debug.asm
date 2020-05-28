@@ -951,7 +951,8 @@ DebugPCIDevices:
 		; if we get here, this hasn't been set up yet... so let's do so!
 		; the list will be 256 entries of 36 bytes each (256 * 36 + 16)
 		; allocate memory for the list
-		call MemAllocate
+		push 3
+		call MemAllocatePages
 
 		; see if there was an error, if not save the pointer
 		cmp edx, kErrNone
@@ -964,12 +965,6 @@ DebugPCIDevices:
 		push 256
 		push eax
 		call LMListInit
-
-		; to hold the entire data chunk, we need 2 more pages of RAM
-		; this is a crash waiting to happen once other tasks allocate memory on-the-fly
-		; since we will no longer be able to guarantee the three pages we need here are contiguous
-		call MemAllocate
-		call MemAllocate
 
 
 		; write all the strings to the list area
@@ -2380,6 +2375,128 @@ section .data
 .taskFlagsFormat$								db 'Flags                      0x^', 0x00
 .CPULoadFormat$									db 'Timeslice utilization      ^ ^', 0x00
 .pageDirAddressFormat$							db 'Page directory address     0x^', 0x00
+
+
+
+
+
+section .text
+DebugVBoxLogRegs:
+	; Quick register dump routine for protected mode
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+
+	; pusha for printing
+	pusha
+
+	; get edi
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output2$
+	add ebx, 21
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get esi
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output2$
+	add ebx, 5
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get ebp
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output2$
+	add ebx, 53
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get esp
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output2$
+	add ebx, 37
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get ebx
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output1$
+	add ebx, 21
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get edx
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output1$
+	add ebx, 53
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get ecx
+	pop eax
+
+	; convert it to a string
+	mov ebx, .output1$
+	add ebx, 37
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; get eax
+	pop eax
+
+	; convert it to a string
+	mov bx, .output1$
+	add bx, 5
+	push ebx
+	push eax
+	call ConvertNumberHexToString
+
+
+	; print the strings
+	push .output1$
+	call DebugVBoxLogWrite
+
+	push .output2$
+	call DebugVBoxLogWrite
+
+	push .null$
+	call DebugVBoxLogWrite
+ret
+
+section .data
+.output1$										db ' EAX 00000000    EBX 00000000    ECX 00000000    EDX 00000000 ', 0x00
+.output2$										db ' ESI 00000000    EDI 00000000    ESP 00000000    EBP 00000000 ', 0x00
+.null$											db '', 0x00
 
 
 

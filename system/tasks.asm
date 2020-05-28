@@ -57,7 +57,8 @@ TaskInit:
 
 
 	; the task list will be 256 entries of tTaskInfo structs (256 * tTaskInfo_size + 16)
-	call MemAllocate
+	push 7
+	call MemAllocatePages
 	cmp edx, kErrNone
 	jne .Exit
 	mov [tSystem.listPtrTasks], eax
@@ -68,13 +69,6 @@ TaskInit:
 	push eax
 	call LMListInit
 
-	; to hold this list we need 6 more pages of RAM
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
 
 	; Use up slots 0 and 1 so that they won't get assigned to tasks. Why do this? It all goes back to the fact that a task number
 	; of zero tells the Memory Manager that the memory block is empty, and task number 1 is the kernel itself.

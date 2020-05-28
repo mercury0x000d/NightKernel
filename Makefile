@@ -136,12 +136,20 @@ update:
 
 
 vm: $(TARGET)
-	mkdir VBoxDisk -p 
-	sudo losetup -d $(LOOPDEVICE) || true 
+	mkdir VBoxDisk -p
+	sleep .05
+	sudo losetup -d $(LOOPDEVICE) || true
+	sleep .05
 	sudo losetup $(LOOPDEVICE) ./builds/Night.vdi -o 2129408
+	sleep .05
 	sudo mount $(LOOPDEVICE) ./VBoxDisk
+	sleep .05
 	sudo rm ./VBoxDisk/KERNEL.SYS
+	sleep .05
 	sudo cp "$(TARGET)" "./VBoxDisk/KERNEL.SYS"
+	sleep .05
 	sudo umount ./VBoxDisk
+	sleep .05
 	$(RM) -r VBoxDisk
+	sleep .05
 	sudo losetup -d /dev/loop0

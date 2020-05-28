@@ -55,6 +55,7 @@ global MemMapCopy
 
 global MemAddressAlign
 global MemAllocate
+global MemAllocatePages
 global MemCompare
 global MemCopy
 global MemDispose

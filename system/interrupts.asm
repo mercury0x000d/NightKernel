@@ -465,21 +465,20 @@ IDTInit:
 	push ebp
 	mov ebp, esp
 
-	; allocate 64 KiB for the IDT
-	call MemAllocate
+	; allocate local variables
+	sub esp, 4
+	%define loopCounter							dword [ebp - 4]
+
+
+	; allocate 64 KiB (16 pages) for the IDT
+	push 16
+	call MemAllocatePages
 	cmp edx, kErrNone
 	jne .Exit
 	mov dword [kIDTPtr], eax
 
 	; set the proper value into the IDT struct
 	mov dword [tIDT.base], eax
-
-	; to hold the whole IDT, we need 15 more pages of RAM
-	mov ecx, 15
-	.AllocateLoop:
-		call MemAllocate
-	loop .AllocateLoop
-
 
 	; set all the handler slots to the "unsupported routine" handler for sanity
 	mov ecx, 0x00000100
@@ -503,6 +502,7 @@ IDTInit:
 
 
 	.Exit:
+	%undef loopCounter
 	mov esp, ebp
 	pop ebp
 ret
@@ -1732,11 +1732,26 @@ jmp TaskSwitch
 section .text
 ISR21:
 	; PS/2 Port 1
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0021
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x21
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1747,11 +1762,26 @@ iretd
 section .text
 ISR22:
 	; Cascade - used internally by the PICs, should never fire
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0022
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x22
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1762,11 +1792,26 @@ iretd
 section .text
 ISR23:
 	; Serial port 2
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0023
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x23
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1791,11 +1836,26 @@ iretd
 section .text
 ISR25:
 	; Parallel port 2
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0025
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x25
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1846,11 +1906,26 @@ iretd
 section .text
 ISR29:
 	; Free for peripherals / legacy SCSI / NIC
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD0029
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x29
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1861,11 +1936,26 @@ iretd
 section .text
 ISR2A:
 	; Free for peripherals / SCSI / NIC
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002A
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x2A
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1876,11 +1966,26 @@ iretd
 section .text
 ISR2B:
 	; Free for peripherals / SCSI / NIC
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002B
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x2B
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1891,11 +1996,26 @@ iretd
 section .text
 ISR2C:
 	; PS/2 Port 2
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002C
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x2C
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1906,11 +2026,26 @@ iretd
 section .text
 ISR2D:
 	; FPU / Coprocessor / Inter-processor
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002D
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x2D
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1921,11 +2056,26 @@ iretd
 section .text
 ISR2E:
 	; Primary ATA Hard Disk
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002E
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x2E
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd
 
@@ -1936,10 +2086,25 @@ iretd
 section .text
 ISR2F:
 	; Secondary ATA Hard Disk
-	; for debugging, makes sure the system hangs upon exception
-	mov ebp, 0xDEAD002F
+	bt dword [tSystem.configBits], kCBIntHalt
+	jnc .Exit
+
+	mov byte [gCursorX], 1
+	mov byte [gCursorY], 1
 	call PrintRegs32
+	push 0x2F
+
+	push 0
+	push 7
+	push 3
+	push 1
+	push 8
+	mov eax, esp
+	add eax, 20
+	push eax
+	call PrintRAM32
 	jmp $
 
+	.Exit:
 	call PICIntComplete
 iretd

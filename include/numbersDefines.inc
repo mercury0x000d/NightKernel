@@ -21,6 +21,7 @@
 ; declare functions as global
 global BCDToDecimal
 global PopulationCount
+global PopulationCountRange
 global RangeCheck
 global QuadAdd
 global QuadShiftLeft

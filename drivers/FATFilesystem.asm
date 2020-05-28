@@ -772,8 +772,8 @@ FAT16ChainRead:
 		; if we get here, it's the root directory being requested
 		; allocate enough RAM to hold it
 		; DEBUG - make this compatible with the new physical memory allocator
-		push bufferSize
-		push dword 1
+		;push bufferSize
+		;push dword 1
 		call MemAllocate
 
 		; see if there was an error, if not save the pointer
@@ -805,8 +805,9 @@ FAT16ChainRead:
 	mov bufferSize, eax
 
 	; allocate a buffer of the appropriate length for this chain
-	push eax
-	push dword 1
+	; DEBUG - make this compatible with the new physical memory allocator
+	;push eax
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error, if not save the pointer
@@ -988,8 +989,8 @@ FAT16ChainShrink:
 
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error, save the returned pointer if not
@@ -1330,8 +1331,8 @@ FAT16ClusterFreeFirstGet:
 	mov partitionNumber, eax
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error, save buffer address if not
@@ -1461,8 +1462,8 @@ FAT16ClusterFreeTotalGet:
 
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error, if not save the pointer
@@ -1578,8 +1579,8 @@ FAT16ClusterNextGet:
 
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error, if not save the pointer
@@ -1670,8 +1671,8 @@ FAT16ClusterNextSet:
 
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error, if not save the pointer
@@ -1914,8 +1915,8 @@ FAT16FATBackup:
 	mov partitionSlotPtr, esi
 
 	; allocate a sector buffer
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error
@@ -3476,8 +3477,8 @@ FAT16PartitionCacheData:
 
 
 	; allocate a sector buffer in which we can play
-	push 512
-	push dword 1
+	;push 512
+	;push dword 1
 	call MemAllocate
 
 	; see if there was an error

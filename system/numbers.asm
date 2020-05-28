@@ -21,6 +21,9 @@
 %include "include/numbersDefines.inc"
 
 %include "include/boolean.inc"
+%include "include/CPU.inc"
+%include "include/globals.inc"
+%include "include/lists.inc"
 
 
 
@@ -104,7 +107,7 @@ PopulationCount:
 	;	Numeric value
 	;
 	;  output:
-	;	EAX - Number of set bits
+	;	EDI - Number of set bits
 
 	push ebp
 	mov ebp, esp
@@ -113,62 +116,216 @@ PopulationCount:
 	%define number								dword [ebp + 8]
 
 
+;	; see if we support POPCNT
+;	push kCPU_popcnt
+;	push tSystem.CPUFeatures
+;	call LMBitGet
+;	jnc .NoPOPCNT
+;
+;	; Thankfully POPCNT is supported!
+;	popcnt eax, number
+;	jmp .Exit
+
+
+	.NoPOPCNT:
+	; Crap. No POPCNT means we do this the old-fashioned add-and-shift way.
 	; phase 1
-	mov eax, number
-	mov ebx, eax
+	mov edi, number
+	mov ebx, edi
 	and ebx, 01010101010101010101010101010101b
-
-	mov ecx, eax
-	shr ecx, 1
-	and ecx, 01010101010101010101010101010101b
-
-	mov eax, ebx
-	add eax, ecx
-
+	shr edi, 1
+	and edi, 01010101010101010101010101010101b
+	add edi, ebx
 
 	; phase 2
-	mov ebx, eax
+	mov ebx, edi
 	and ebx, 00110011001100110011001100110011b
-
-	mov ecx, eax
-	shr ecx, 2
-	and ecx, 00110011001100110011001100110011b
-
-	mov eax, ebx
-	add eax, ecx
-
+	shr edi, 2
+	and edi, 00110011001100110011001100110011b
+	add edi, ebx
 
 	; phase 3
-	mov ebx, eax
+	mov ebx, edi
 	and ebx, 00001111000011110000111100001111b
-
-	mov ecx, eax
-	shr ecx, 4
-	and ecx, 00001111000011110000111100001111b
-
-	mov eax, ebx
-	add eax, ecx
-
+	shr edi, 4
+	and edi, 00001111000011110000111100001111b
+	add edi, ebx
 
 	; phase 4
-	mov ebx, eax
+	mov ebx, edi
 	and ebx, 00000000111111110000000011111111b
-
-	mov ecx, eax
-	shr ecx, 8
-	and ecx, 00000000111111110000000011111111b
-
-	add ebx, ecx
-
+	shr edi, 8
+	and edi, 00000000111111110000000011111111b
+	add edi, ebx
 
 	; phase 5
-	mov eax, ebx
-	and eax, 00000000000000001111111111111111b
-
-	shr ebx, 16
+	mov ebx, edi
 	and ebx, 00000000000000001111111111111111b
+	shr edi, 16
+	and edi, 00000000000000001111111111111111b
+	add edi, ebx
 
-	add eax, ebx
+
+	.Exit:
+	%undef number
+	mov esp, ebp
+	pop ebp
+ret 4
+
+
+
+
+
+section .text
+PopulationCountRange:
+	; Returns the number of set bits (Hamming Weight) of the memory range provided
+	;
+	;  input:
+	;	Starting address
+	;	Length
+	;
+	;  output:
+	;	EDI - Number of set bits
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define address								dword [ebp + 8]
+	%define length								dword [ebp + 12]
+	%define number								dword [ebp + 12]
+
+
+	; see if we support POPCNT
+	push kCPU_popcnt
+	push tSystem.CPUFeatures
+	call LMBitGet
+	jnc .NoPOPCNT
+
+	; Thankfully POPCNT is supported!
+	mov esi, address
+	mov edi, 0
+	mov ecx, length
+
+	; since we're processing DWords here first, ecx = length / 4
+	shr ecx, 2
+	cmp ecx, 0
+	je .POPCNTDWordLoopDone
+
+	.POPCNTDWordLoop:
+		lodsd
+		popcnt ebx, eax
+		add edi, ebx
+	loop .POPCNTDWordLoop
+	.POPCNTDWordLoopDone:
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .POPCNTByteLoopDone
+
+	.POPCNTByteLoop:
+		mov eax, 0
+		lodsb
+		popcnt ebx, eax
+		add edi, ebx
+	loop .POPCNTByteLoop
+	.POPCNTByteLoopDone:
+
+	jmp .Exit
+
+
+	.NoPOPCNT:
+	; Hitch up the horse and buggy! There's no POPCNT in these here parts.
+	mov esi, address
+	mov edi, 0
+	mov ecx, length
+
+	; since we're processing DWords here first, ecx = length / 4
+	shr ecx, 2
+	cmp ecx, 0
+	je .DWordLoopDone
+
+	.DWordLoop:
+		lodsd
+
+		; phase 1
+		mov ebx, eax
+		and ebx, 01010101010101010101010101010101b
+		shr eax, 1
+		and eax, 01010101010101010101010101010101b
+		add eax, ebx
+
+		; phase 2
+		mov ebx, eax
+		and ebx, 00110011001100110011001100110011b
+		shr eax, 2
+		and eax, 00110011001100110011001100110011b
+		add eax, ebx
+
+		; phase 3
+		mov ebx, eax
+		and ebx, 00001111000011110000111100001111b
+		shr eax, 4
+		and eax, 00001111000011110000111100001111b
+		add eax, ebx
+
+		; phase 4
+		mov ebx, eax
+		and ebx, 00000000111111110000000011111111b
+		shr eax, 8
+		and eax, 00000000111111110000000011111111b
+		add eax, ebx
+
+		; phase 5
+		mov ebx, eax
+		and ebx, 00000000000000001111111111111111b
+		shr eax, 16
+		and eax, 00000000000000001111111111111111b
+		add eax, ebx
+
+		add edi, eax
+	loop .DWordLoop
+	.DWordLoopDone:
+
+
+	; if the length was not evenly divisible by 4, we need to process the remaining bytes here
+	mov ecx, length
+	and ecx, 00000000000000000000000000000011b
+	cmp ecx, 0
+	je .ByteLoopDone
+
+	.ByteLoop:
+		lodsb
+
+		; phase 1
+		mov bl, al
+		and bl, 01010101b
+		shr al, 1
+		and al, 01010101b
+		add al, bl
+
+		; phase 2
+		mov bl, al
+		and bl, 00110011b
+		shr al, 2
+		and al, 00110011b
+		add al, bl
+
+		; phase 3
+		mov bl, al
+		and bl, 00001111b
+		shr al, 4
+		and al, 00001111b
+		add al, bl
+
+		and eax, 00000000000000000000000011111111b
+		add edi, eax
+	loop .ByteLoop
+	.ByteLoopDone:
+
 
 
 	.Exit:

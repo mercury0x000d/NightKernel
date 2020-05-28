@@ -94,8 +94,8 @@ Fail:
 
 	mov eax, 0x00000000
 
-	push dword 0x00000004
 	push dword 0x00000000
+	push dword 0x00000004
 
 	mov al, byte [gCursorY]
 	push dword eax

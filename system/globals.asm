@@ -25,30 +25,30 @@
 
 
 section .data
-
-
-
-
-
 tSystem:
 	.configBitsHint$							db 'ConfigBits'
 	.configBits									dd 00000000000000000000000000000111b
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2020', 0x00
+
 	.versionMajor								db 0x00
 	.versionMinor								db 0x1F
 	.versionBuild								dd BUILD
+
 	.ticksSinceBoot								dd 0x00000000
+
 	.currentTask								dd 0x00000000
 	.currentTaskSlotAddress						dd 0x00000000
 	.taskingEnable								db 0x00
-	.taskStackSize								dd 1024		; a 1 KiB stack is almost guaranteed to be too small in the future
+	.taskStackSize								dd 1024			; a 1 KiB stack is almost guaranteed to be too small in the future
 	.taskKernelStackSize						dd 1024
-	.multicoreAvailable							db 0x00
-	.CPUIDVendor$								times 16 db 0x00
-	.CPUIDBrand$								times 64 db 0x00
+
 	.APMVersionMajor							db 0x00
 	.APMVersionMinor							db 0x00
 	.APMFeatures								dw 0x0000
+
+	.CPUIDVendor$								times 16 db 0x00
+	.CPUIDBrand$								times 64 db 0x00
+
 	.mouseButtonCount							db 0x00
 	.mouseButtons								db 0x00
 	.mousePacketByte0							db 0x00
@@ -64,10 +64,19 @@ tSystem:
 	.mouseYLimit								dw 0x0000
 	.mouseZ										dw 0x0000
 
+	.multicoreAvailable							db 0x00
+
+	.PS2Config									db 00000111b
+	.PS2Port1DeviceID							dw 0xFFFF
+	.PS2Port2DeviceID							dw 0xFFFF
+
+
+
 section .bss
 	.CPUFeatures								resb 64
 	.CPUIDLargestBasicQuery						resd 1
 	.CPUIDLargestExtendedQuery					resd 1
+
 	.memoryBIOSMapEntryCount					resd 1
 	.memoryBIOSMapKiBInstalled					resd 1
 	.memoryBIOSMapKiBUsable						resd 1
@@ -78,20 +87,19 @@ section .bss
 	.memoryBitfieldSize							resd 1
 	.memoryBitsInitial							resd 1
 	.memoryManagementSpace						resd 1
+
 	.listPtrDrives								resd 1
 	.listPtrDriveLetters						resd 1
 	.listPtrFSHandlers							resd 1
 	.listPtrPartitions							resd 1
 	.listPtrPCIHandlers							resd 1
+	.listPtrPS2Handlers							resd 1
 	.listPtrTasks								resd 1
+
 	.PCIDeviceCount								resd 1
 	.PCIVersion									resd 1
 	.PCICapabilities							resd 1
-	.PS2ControllerConfig						resb 1
-	.PS2ControllerPort1Status					resb 1
-	.PS2ControllerPort2Status					resb 1
-	.PS2ControllerDeviceID1						resw 1
-	.PS2ControllerDeviceID2						resw 1
+
 	.RTCUpdateHandlerAddress					resd 1
 	.RTCStatusRegisterB							resb 1
 	.RTCHours									resb 1

@@ -235,6 +235,13 @@ push progressText0B$
 call PrintIfConfigBits32
 call MemInit
 
+; see if there was an error
+cmp edx, kErrNone
+je .MemInitOK
+	push fatalMemInit$
+	call Fail
+.MemInitOK:
+
 
 
 ; now that we have a temporary stack and access to all the memory addresses,
@@ -311,15 +318,8 @@ je .ListInitOK
 
 
 
-; init PS/2 driver
-push progressText12$
-call PrintIfConfigBits32
-call PS2ControllerInit
-
-
-
 ; set up default handlers
-push progressText13$
+push progressText12$
 call PrintIfConfigBits32
 push dword 0
 push dword 0
@@ -349,9 +349,16 @@ call PCIHandlerSet
 
 
 ; init PCI devices
-push progressText14$
+push progressText13$
 call PrintIfConfigBits32
 call PCIDeviceInitAll
+
+
+
+; init PS/2 controller
+push progressText14$
+call PrintIfConfigBits32
+call PS2ControllerInit
 
 
 
@@ -383,23 +390,16 @@ push progressText18$
 call PrintIfConfigBits32
 call PagingInit
 
-
-
+sti
 
 
 bt dword [tSystem.configBits], kCBDebugMode
 jnc .SkipStartDelay
 	; if we get here, we're in Debug Mode
 	; wouldn't it be nice if we gave the user a moment to admire all those handy debug messages?
-	push 512
+	push 1024
 	call TimerWait
 .SkipStartDelay:
-
-
-
-; clear the screen and start!
-push 0x00000000
-call ScreenClear32
 
 
 
@@ -460,6 +460,10 @@ call TaskNameSet
 ; WELCOME TO USERLAND! Please enjoy your stay.
 
 
+
+; clear the screen prior to entering user mode
+push 0x00000000
+call ScreenClear32
 
 cli
 
@@ -591,7 +595,7 @@ Task2:
 	; build mouse location string
 	push dword 2
 	mov eax, 0
-	mov ax, word [tSystem.PS2ControllerDeviceID2]
+	mov ax, word [tSystem.PS2Port2DeviceID]
 	push eax
 	push .scratch2$
 	call StringTokenHexadecimal
@@ -801,17 +805,18 @@ progressText0E$									db 'Remaping PICs', 0x00
 progressText0F$									db 'Initializing RTC', 0x00
 progressText10$									db 'Enabling interrupts', 0x00
 progressText11$									db 'Allocating system lists', 0x00
-progressText12$									db 'Initializing PS/2 driver', 0x00
-progressText13$									db 'Setting up default handler addresses', 0x00
-progressText14$									db 'Initializing PCI devices', 0x00
+progressText12$									db 'Setting up default handler addresses', 0x00
+progressText13$									db 'Initializing PCI devices', 0x00
+progressText14$									db 'Initializing PS/2 controller', 0x00
 progressText15$									db 'Enumerating partitions', 0x00
 progressText16$									db 'Mapping partitions', 0x00
 progressText17$									db 'Initializing Task Manager', 0x00
 progressText18$									db 'Initializing CPU paging features', 0x00
 fatalE820Unsupported$							db 'Fatal: BIOS function 0xE820 unsupported on this machine; unable to probe memory', 0x00
-fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory.', 0x00
-fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory.', 0x00
-fatalListMemAlloc$								db 'Fatal: Unable to allocate system list memory.', 0x00
+fatalIDTMemAlloc$								db 'Fatal: Unable to allocate IDT memory', 0x00
+fatalKernelStackMemAlloc$						db 'Fatal: Unable to allocate kernel stack memory', 0x00
+fatalListMemAlloc$								db 'Fatal: Unable to allocate system list memory', 0x00
+fatalMemInit$									db 'Fatal: MemInit() failed', 0x00
 name$											db 'Kernel Debug Menu', 0x00
 
 
@@ -843,7 +848,8 @@ KernelInitLists:
 
 
 	; the drives list will be 256 entries of tDriveInfo structs, plus header (256 * tDriveInfo_size + 16)
-	call MemAllocate
+	push 8
+	call MemAllocatePages
 	cmp edx, kErrNone
 	jne .Exit
 	mov [tSystem.listPtrDrives], eax
@@ -853,15 +859,6 @@ KernelInitLists:
 	push dword 256
 	push dword [tSystem.listPtrDrives]
 	call LMListInit
-
-	; to hold this list, we need 7 more pages of RAM
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
 
 
 
@@ -886,6 +883,21 @@ KernelInitLists:
 
 
 
+	; the PS2Handler list will be 65536 entries of 4 bytes each (the size of a single 32-bit address) plus header (65536 * 4 + 16)
+	; Is this method incredibly wasteful? You bet. It should be changed in the future.
+	call MemAllocate
+	cmp edx, kErrNone
+	jne .Exit
+	mov [tSystem.listPtrPS2Handlers], eax
+
+	; set up the list header
+	push dword 4
+	push dword 65536
+	push eax
+	call LMListInit
+
+
+
 	; the FSHandler list will be 256 entries of 4 bytes each (the size of a single 32-bit address) plus header (256 * 4 + 16)
 	call MemAllocate
 	cmp edx, kErrNone
@@ -902,7 +914,8 @@ KernelInitLists:
 
 	; the partitions list will be 256 entries of tPartitionInfo structs, plus header (256 * tPartitionInfo_size + 16)
 	; allocate memory for the list
-	call MemAllocate
+	push 9
+	call MemAllocatePages
 	cmp edx, kErrNone
 	jne .Exit
 	mov [tSystem.listPtrPartitions], eax
@@ -913,20 +926,12 @@ KernelInitLists:
 	push eax
 	call LMListInit
 
-	; to hold this list, we need 8 more pages of RAM
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
-	call MemAllocate
 
 
 	; the PCI handlers list will be 65536 entries of 4 bytes (the size of a single 32-bit address) each (65536 * 4 + 16)
 	; allocate memory for the list
-	call MemAllocate
+	push 65
+	call MemAllocatePages
 	cmp edx, kErrNone
 	jne .Exit
 	mov [tSystem.listPtrPCIHandlers], eax
@@ -936,12 +941,6 @@ KernelInitLists:
 	push dword 65536
 	push eax
 	call LMListInit
-
-	; to hold this list, we need 64 more pages of RAM
-	mov ecx, 64
-	.AllocateLoop:
-		call MemAllocate
-	loop .AllocateLoop
 
 
 	.Exit:

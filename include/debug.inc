@@ -31,5 +31,6 @@ extern DebugRAMBrowser
 extern DebugStackTrace
 extern DebugSystemInfo
 extern DebugTaskBrowser
+extern DebugVBoxLogRegs
 extern DebugVBoxLogWrite
 extern DebugWaitForEscape

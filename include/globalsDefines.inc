@@ -21,13 +21,14 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 3729
+%define BUILD 4216
 
 ; for configbits settings - great idea, Antony!
 %define kCBDebugMode							0
 %define kCBVerbose								1
 %define kCBLines50								2
 %define kCBVMEnable								3
+%define kCBIntHalt								4
 
 ; block and character driver commands
 %define kDriverInit								0x00
@@ -139,41 +140,26 @@ endstruc
 
 
 ; declare as global
-global tSystem.configBitsHint$
-global tSystem.configBits
-global tSystem.copyright$
-global tSystem.versionMajor
-global tSystem.versionMinor
-global tSystem.versionBuild
-global tSystem.ticksSinceBoot
-global tSystem.currentTask
-global tSystem.currentTaskSlotAddress
-global tSystem.taskingEnable
-global tSystem.taskStackSize
-global tSystem.taskKernelStackSize
-global tSystem.multicoreAvailable
-global tSystem.CPUIDVendor$
-global tSystem.CPUIDBrand$
-global tSystem.CPUFeatures
-global tSystem.CPUIDLargestBasicQuery
-global tSystem.CPUIDLargestExtendedQuery
+global tSystem.APMFeatures
 global tSystem.APMVersionMajor
 global tSystem.APMVersionMinor
-global tSystem.APMFeatures
-global tSystem.mouseButtonCount
-global tSystem.mouseButtons
-global tSystem.mousePacketByte0
-global tSystem.mousePacketByte1
-global tSystem.mousePacketByte2
-global tSystem.mousePacketByte3
-global tSystem.mousePacketByteSize
-global tSystem.mousePacketByteCount
-global tSystem.mouseWheelPresent
-global tSystem.mouseX
-global tSystem.mouseXLimit
-global tSystem.mouseY
-global tSystem.mouseYLimit
-global tSystem.mouseZ
+global tSystem.configBits
+global tSystem.configBitsHint$
+global tSystem.copyright$
+global tSystem.CPUFeatures
+global tSystem.CPUIDBrand$
+global tSystem.CPUIDLargestBasicQuery
+global tSystem.CPUIDLargestExtendedQuery
+global tSystem.CPUIDVendor$
+global tSystem.currentTask
+global tSystem.currentTaskSlotAddress
+global tSystem.listPtrDriveLetters
+global tSystem.listPtrDrives
+global tSystem.listPtrFSHandlers
+global tSystem.listPtrPartitions
+global tSystem.listPtrPCIHandlers
+global tSystem.listPtrPS2Handlers
+global tSystem.listPtrTasks
 global tSystem.memoryBIOSMapEntryCount
 global tSystem.memoryBIOSMapKiBInstalled
 global tSystem.memoryBIOSMapKiBUsable
@@ -184,25 +170,39 @@ global tSystem.memoryBitfieldReservedPtr
 global tSystem.memoryBitfieldSize
 global tSystem.memoryBitsInitial
 global tSystem.memoryManagementSpace
-global tSystem.listPtrDrives
-global tSystem.listPtrDriveLetters
-global tSystem.listPtrFSHandlers
-global tSystem.listPtrPartitions
-global tSystem.listPtrPCIHandlers
-global tSystem.listPtrTasks
+global tSystem.mouseButtonCount
+global tSystem.mouseButtons
+global tSystem.mousePacketByte0
+global tSystem.mousePacketByte1
+global tSystem.mousePacketByte2
+global tSystem.mousePacketByte3
+global tSystem.mousePacketByteCount
+global tSystem.mousePacketByteSize
+global tSystem.mouseWheelPresent
+global tSystem.mouseX
+global tSystem.mouseXLimit
+global tSystem.mouseY
+global tSystem.mouseYLimit
+global tSystem.mouseZ
+global tSystem.multicoreAvailable
+global tSystem.PCICapabilities
 global tSystem.PCIDeviceCount
 global tSystem.PCIVersion
-global tSystem.PCICapabilities
-global tSystem.PS2ControllerConfig
-global tSystem.PS2ControllerPort1Status
-global tSystem.PS2ControllerPort2Status
-global tSystem.PS2ControllerDeviceID1
-global tSystem.PS2ControllerDeviceID2
-global tSystem.RTCUpdateHandlerAddress
-global tSystem.RTCStatusRegisterB
+global tSystem.PS2Config
+global tSystem.PS2Port1DeviceID
+global tSystem.PS2Port2DeviceID
+global tSystem.RTCDay
 global tSystem.RTCHours
 global tSystem.RTCMinutes
-global tSystem.RTCSeconds
-global tSystem.RTCYear
 global tSystem.RTCMonth
-global tSystem.RTCDay
+global tSystem.RTCSeconds
+global tSystem.RTCStatusRegisterB
+global tSystem.RTCUpdateHandlerAddress
+global tSystem.RTCYear
+global tSystem.taskingEnable
+global tSystem.taskKernelStackSize
+global tSystem.taskStackSize
+global tSystem.ticksSinceBoot
+global tSystem.versionBuild
+global tSystem.versionMajor
+global tSystem.versionMinor

@@ -31,5 +31,6 @@ global DebugRAMBrowser
 global DebugStackTrace
 global DebugSystemInfo
 global DebugTaskBrowser
+global DebugVBoxLogRegs
 global DebugVBoxLogWrite
 global DebugWaitForEscape

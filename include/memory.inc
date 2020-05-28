@@ -36,6 +36,7 @@ extern MemMapCopy
 
 extern MemAddressAlign
 extern MemAllocate
+extern MemAllocatePages
 extern MemCompare
 extern MemCopy
 extern MemDispose

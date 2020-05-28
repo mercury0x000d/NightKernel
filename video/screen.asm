@@ -37,7 +37,7 @@ gCursorY										db 0x01
 gTextColor										db 0x07
 gBackColor										db 0x00
 kMaxLines										db 25
-kBytesPerScreen									dd 4000
+kBytesPerScreen									dw 4000
 
 
 
@@ -349,7 +349,7 @@ ScreenClear16:
 	shl ah, 4
 
 	; set up the loop value
-	mov ecx, dword [kBytesPerScreen]
+	mov cx, word [kBytesPerScreen]
 
 	; divide by 2 since we're writing words
 	shr ecx, 1
@@ -976,10 +976,25 @@ ScreenClear32:
 	%define clearColor							dword [ebp + 8]
 
 
-	push clearColor
-	push dword [kBytesPerScreen]
-	push dword 0x0000B8000
-	call MemFill
+	; see how many bytes make up this screen mode
+	mov cx, word [kBytesPerScreen]
+
+	; load the write address
+	mov esi, 0xB8000
+
+	; divide by 2 since we're writing words
+	shr ecx, 1
+
+	; set up the word we're writing
+	mov ebx, clearColor
+	xor ax, ax
+	mov ah, bl
+	shl ah, 4
+
+	.aloop:
+		mov word [esi], ax
+		add esi, 2
+	loop .aloop, cx
 
 	; reset the cursor position
 	call CursorHome

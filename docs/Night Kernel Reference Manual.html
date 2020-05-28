@@ -841,36 +841,50 @@
 				<table style = 'width:100%'>
 					<caption><b><i>Table 6.1 - Configbits options</i></b></caption>
 					<tr>
-						<th width = '10%'><i>Bit</i></th>
-						<th width = '90%'><i>Description</i></th>
+						<col width = '10%'>
+						<col width = '20%'>
+						<col width = '70%'>
+					</tr>
+
+					<tr>
+						<th><i>Bit</i></th>
+						<th><i>Symbol</i></th>
+						<th><i>Description</i></th>
 					</tr>
 
 					<tr>
 						<td>00</td>
+						<td>kCBDebugMode</td>
 						<td>Enable Debug Mode</td>
 					</tr>
 
 					<tr>
 						<td>01</td>
+						<td>kCBVerbose</td>
 						<td>Verbose boot (Displays startup and diagnostic messages during boot)</td>
 					</tr>
 
 					<tr>
 						<td>02</td>
+						<td>kCBLines50</td>
 						<td>Use 50-line text mode instead of 25-line mode</td>
 					</tr>
 
 					<tr>
 						<td>03</td>
+						<td>kCBVMEnable</td>
 						<td>Enable paging to disk</td>
 					</tr>
 
 					<tr>
-						<td>04 - 31</td>
-						<td>Reserved</td>
+						<td>04</td>
+						<td>kCBIntHalt</td>
+						<td>Calls to any undefined interrupt handlers will push the interrupt number onto the stack and trigger a halt with register and stack dump.</td>
 					</tr>
 				</table>
 			</code>
+			<br>
+			All unlisted bits are reserved.<br>
 		</p>
 		<br>
 		<br>
@@ -1513,33 +1527,21 @@
 					</tr>
 
 					<tr>
-						<td>PS2ControllerConfig</td>
+						<td>PS2Config</td>
 						<td>Byte</td>
-						<td></td>
+						<td>A copy of the current PS/2 Controller Configuration Byte, or zero if no controller is present.</td>
 					</tr>
 
 					<tr>
-						<td>PS2ControllerDeviceID1</td>
+						<td>PS2Port1DeviceID</td>
 						<td>Word</td>
-						<td></td>
+						<td>ID of the device connected to port 1 of the PS/2 Controller, or 0xFFFF if no device is present.</td>
 					</tr>
 
 					<tr>
-						<td>PS2ControllerDeviceID2</td>
+						<td>PS2Port2DeviceID</td>
 						<td>Word</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>PS2ControllerPort1Status</td>
-						<td>Byte</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>PS2ControllerPort2Status</td>
-						<td>Byte</td>
-						<td></td>
+						<td>ID of the device connected to port 2 of the PS/2 Controller, or 0xFFFF if no device is present.</td>
 					</tr>
 
 					<tr>
@@ -1647,16 +1649,17 @@
 		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3729 - Bitfield support, SSE optimizations, revamped memory management, List Manager improvements</b><br>
+			<b>In progress, 0.1F Update, Build 3729 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements</b><br>
 			<br>
 			New<br>
 			<ul>
 				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
+				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBIntHalt to aid in debugging misfiring interrupts.</li>
 				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
 				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
 				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
-				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() to return the Hamming weight of a number.</li>
+				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() and PopulationCountRange() to return the Hamming weight of a number or range of memory, respectively. Uses POPCNT for additional speed if supported by the CPU.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
 				<li>Repo: Added 'testing files' folder. The files within can be used in place of kernel.asm to test out specific features in the future.</li>
@@ -1668,13 +1671,17 @@
 				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
 				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is now allocated in 4 KiB blocks and aligned on a 4 KiB boundary.</li>
 				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
-				<li>Kernel: <i>screen.asm</i> - ScreenClear() now uses MemFill for the fastest screen clearing ever seen. That's right - the screen can now be wiped with the power of SSE. Just what Intel had in mind when they added it to their CPUs.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Increased timeout for reads and writes to 0.25 seconds to improve compatibility with some older hardware.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Restructured driver to handle only the controller - device functions have been split off into their own files.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
 			</ul>
 			Fixed<br>
 			<ul>
 				<li>Kernel: <i>lists.asm</i> - Fixed an issue where LMElementSizeGet() was taking eight bytes off the stack upon exit instead of the appropriate four.</li>
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug causing boot failure on machines with under 4 GiB of memory.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection fixed; several keyboards which previously did not work with Night are now detected and handled appropriately.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Malfunctioning ports are no longer left active.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Updated all functions to adhere to the convention of using EDX for returning error codes.</li>
 				<li>Manual: Bugs in various HTML elements. Thanks, GitKraken. :/</li>
 				<li>Manual: Updated a bit of semantics.</li>
 			</ul>
@@ -6039,7 +6046,24 @@
 						</ol>
 					</td>
 					<td>
-						EAX - Number of set bits
+						EDI - Number of set bits
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>PopulationCountRange</code><br>
+						<br>
+						Returns the number of set bits (Hamming weight) of the memory range provided
+					</td>
+					<td>
+						<ol>
+							<li>Starting address</li>
+							<li>Length</li>
+						</ol>
+					</td>
+					<td>
+						EDI - Number of set bits
 					</td>
 				</tr>
 
@@ -6720,7 +6744,7 @@
 					<td>
 						<code>PS2ControllerWaitDataRead</code><br>
 						<br>
-						Reads data from the PS/2 controller
+						Waits until data is ready to be read from the PS/2 controller
 					</td>
 					<td>n/a</td>
 					<td>EAX - Error code</td>
@@ -6730,7 +6754,7 @@
 					<td>
 						<code>PS2ControllerWaitDataWrite</code><br>
 						<br>
-						Writes data to the PS/2 controller
+						Waits until the PS/2 controller is ready to accept data
 					</td>
 					<td>n/a</td>
 					<td>EAX - Error code</td>
@@ -6744,7 +6768,7 @@
 					</td>
 					<td>
 						<ol>
-							<li>Port number of the device to recieve the command</li>
+							<li>Port number of the device to receive the command</li>
 							<li>Command byte</li>
 							<li>Data byte</li>
 						</ol>

@@ -26,6 +26,7 @@
 %include "include/globals.inc"
 %include "include/memory.inc"
 %include "include/numbers.inc"
+%include "include/screen.inc"
 
 
 
@@ -422,49 +423,59 @@ LMBitClear:
 	%define address								dword [ebp + 8]
 	%define element								dword [ebp + 12]
 
+	; allocate local variables
+	sub esp, 12
+	%define bitCountBefore						dword [ebp - 4]
+	%define byteNumber							dword [ebp - 8]
+	%define bitNumber							dword [ebp - 12]
 
-	; see if the list is valid, exit if error
-	push address
-	call LMBitfieldValidate
-	cmp edx, kErrNone
-	jne .Exit
 
-	; see if element is valid, exit if error
+	; get the byte and bit from the address and element
 	push element
 	push address
-	call LMBitfieldValidateElement
-	cmp edx, kErrNone
-	jne .Exit
+	call LM_Private_BitfieldMath
+	mov byteNumber, ebx
+	mov bitNumber, ecx
 
+	; read the byte in
+	mov eax, 0
+	mov al, byte [ebx]
 
-	; see if we support POPCNT
-	push kCPU_popcnt
-	push tSystem.CPUFeatures
-	call LMBitGet
-	jnc .NoPOPCNT
+	; get the number of currently set bits in this byte
+	push eax
+	call PopulationCount
+	mov bitCountBefore, eax
 
-	; Thankfully POPCNT is supported!
-	push element
-	push address
-	call LM_Private_LMBitClear
-	jmp .Done
+	; restore the important stuff
+	mov ebx, byteNumber
+	mov ecx, bitNumber
+	mov eax, 0
+	mov al, byte [ebx]
 
+	; modify the bit
+	btr eax, ecx
 
-	; Crap. No POPCNT means we do this the old-fashioned way.
-	.NoPOPCNT:
-	push element
-	push address
-	call LM_Private_LMBitClearLegacy
+	; write the byte back to memory
+	mov byte [ebx], al
 
+	; get the number of currently set bits in this byte
+	push eax
+	call PopulationCount
 
-	.Done:
-	; all done!
-	mov edx, kErrNone
+	; update setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
+	sub edi, bitCountBefore
+	add edi, eax
+	mov dword [esi + tBitfieldInfo.setCount], edi
 
 
 	.Exit:
 	%undef address
 	%undef element
+	%undef bitCountBefore
+	%undef byteNumber
+	%undef bitNumber
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -581,27 +592,32 @@ LMBitClearRange:
 	dec ecx
 	mov length, ecx
 
-	; load setCount
+	; adjust the startByte
+	inc startByte
+
+	; adjust setCount
+	push length
+	push startByte
+	call PopulationCountRange
+
+	; adjust setCount
 	mov esi, address
 	mov edx, [esi + tBitfieldInfo.setCount]
+	sub edx, edi
+	mov [esi + tBitfieldInfo.setCount], edx
 
 	; set the starting addresses for the lodsd and stosd to come
 	mov esi, startByte
-	inc esi
 	mov edi, esi
 
 	; since we're processing DWords here first, ecx = length / 4
+	mov ecx, length
 	shr ecx, 2
 	cmp ecx, 0
 	je .DWordLoopDone
 
-	.DWordLoop:
-		lodsd
-		popcnt ebx, eax
-		sub edx, ebx
-		mov eax, 0x00000000
-		stosd
-	loop .DWordLoop
+	mov eax, 0x00000000
+	rep stosd
 	.DWordLoopDone:
 
 
@@ -611,19 +627,8 @@ LMBitClearRange:
 	cmp ecx, 0
 	je .ByteLoopDone
 
-	.ByteLoop:
-		mov eax, 0
-		lodsb
-		popcnt ebx, eax
-		sub edx, ebx
-		mov al, 0x00
-		stosb
-	loop .ByteLoop
+	rep stosb
 	.ByteLoopDone:
-
-	; save setCount
-	mov esi, address
-	mov [esi + tBitfieldInfo.setCount], edx
 
 
 	.Done:
@@ -977,60 +982,59 @@ LMBitSet:
 	%define address								dword [ebp + 8]
 	%define element								dword [ebp + 12]
 
-
-	; see if the list is valid, exit if error
-	push address
-	call LMBitfieldValidate
-	cmp edx, kErrNone
-	jne .Exit
-
-	; see if element is valid, exit if error
-	push element
-	push address
-	call LMBitfieldValidateElement
-	cmp edx, kErrNone
-	jne .Exit
+	; allocate local variables
+	sub esp, 12
+	%define bitCountBefore						dword [ebp - 4]
+	%define byteNumber							dword [ebp - 8]
+	%define bitNumber							dword [ebp - 12]
 
 
 	; get the byte and bit from the address and element
 	push element
 	push address
 	call LM_Private_BitfieldMath
-
-
-	; read setCount
-	mov esi, address
-	mov edi, dword [esi + tBitfieldInfo.setCount]
+	mov byteNumber, ebx
+	mov bitNumber, ecx
 
 	; read the byte in
 	mov eax, 0
 	mov al, byte [ebx]
 
-	; subtract the number of currently set bits in this byte from setCount
-	popcnt edx, eax
-	sub edi, edx
+	; get the number of currently set bits in this byte
+	push eax
+	call PopulationCount
+	mov bitCountBefore, eax
+
+	; restore the important stuff
+	mov ebx, byteNumber
+	mov ecx, bitNumber
+	mov eax, 0
+	mov al, byte [ebx]
 
 	; modify the bit
 	bts eax, ecx
 
-	; add the number of bits now set in this byte to setCount
-	popcnt edx, eax
-	add edi, edx
-
 	; write the byte back to memory
 	mov byte [ebx], al
 
+	; get the number of currently set bits in this byte
+	push eax
+	call PopulationCount
+
 	; update setCount
+	mov esi, address
+	mov edi, dword [esi + tBitfieldInfo.setCount]
+	sub edi, bitCountBefore
+	add edi, eax
 	mov dword [esi + tBitfieldInfo.setCount], edi
-
-
-	; all done!
-	mov edx, kErrNone
 
 
 	.Exit:
 	%undef address
 	%undef element
+	%undef bitCountBefore
+	%undef byteNumber
+	%undef bitNumber
 	mov esp, ebp
 	pop ebp
 ret 8
@@ -1141,34 +1145,41 @@ LMBitSetRange:
 
 
 	; If we get here, the bytes were not neighbors, meaning there's space between them we can blanket with 0xFFFFFFFF.
-	; This is MUCH more efficient than setting each bit individually in sequence.
+	; This is MUCH more efficient than setting each bit individually in sequence. First, though, we need to account for the set bits already present.
 
 	; set up the number of bytes to process
 	dec ecx
 	mov length, ecx
 
-	; load setCount
+	; adjust the startByte
+	inc startByte
+
+	; adjust setCount
+	push length
+	push startByte
+	call PopulationCountRange
+
+	; adjust setCount
 	mov esi, address
 	mov edx, [esi + tBitfieldInfo.setCount]
+	sub edx, edi
+	mov ecx, length
+	shl ecx, 3
+	add edx, ecx
+	mov [esi + tBitfieldInfo.setCount], edx
 
 	; set the starting addresses for the lodsd and stosd to come
 	mov esi, startByte
-	inc esi
 	mov edi, esi
 
 	; since we're processing DWords here first, ecx = length / 4
+	mov ecx, length
 	shr ecx, 2
 	cmp ecx, 0
 	je .DWordLoopDone
 
-	.DWordLoop:
-		lodsd
-		popcnt ebx, eax
-		sub edx, ebx
-		mov eax, 0xFFFFFFFF
-		add edx, 32
-		stosd
-	loop .DWordLoop
+	mov eax, 0xFFFFFFFF
+	rep stosd
 	.DWordLoopDone:
 
 
@@ -1178,20 +1189,8 @@ LMBitSetRange:
 	cmp ecx, 0
 	je .ByteLoopDone
 
-	.ByteLoop:
-		mov eax, 0
-		lodsb
-		popcnt ebx, eax
-		sub edx, ebx
-		mov al, 0xFF
-		add edx, 8
-		stosb
-	loop .ByteLoop
+	rep stosb
 	.ByteLoopDone:
-
-	; save setCount
-	mov esi, address
-	mov [esi + tBitfieldInfo.setCount], edx
 
 
 	.Done:
@@ -1965,7 +1964,6 @@ ret 8
 section .text
 LM_Private_BitfieldMath:
 	; Returns the byte and bit based upon the address and element number specified
-	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
 	;	Address
@@ -2015,7 +2013,6 @@ ret 8
 section .text
 LM_Private_ByteClearRange:
 	; Clears a range of bits in a single byte
-	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
 	;	Bitfield address
@@ -2043,10 +2040,15 @@ LM_Private_ByteClearRange:
 	mov bl, [esi]
 
 	; load and adjust setCount
-	mov edi, address
-	mov eax, [edi + tBitfieldInfo.setCount]
-	popcnt ecx, ebx
-	sub eax, ecx
+	push ebx
+	call PopulationCount
+	mov esi, address
+	sub dword [esi + tBitfieldInfo.setCount], edi
+
+	; reload the byte on which we'll be working
+	mov esi, byteAddress
+	mov ebx, 0
+	mov bl, [esi]
 
 	; loop through and handle the bits
 	mov edx, startBit
@@ -2058,13 +2060,14 @@ LM_Private_ByteClearRange:
 		inc edx
 	loop .bitLoop
 
-	; adjust and save setCount
-	popcnt ecx, ebx
-	add eax, ecx
-	mov [edi + tBitfieldInfo.setCount], eax
-
 	; write the finished byte back to memory
 	mov [esi], bl
+
+	; adjust and save setCount
+	push ebx
+	call PopulationCount
+	mov esi, address
+	add dword [esi + tBitfieldInfo.setCount], edi	
 
 
 	.Exit:
@@ -2083,7 +2086,6 @@ ret 16
 section .text
 LM_Private_ByteFlipRange:
 	; Flips a range of bits in a single byte
-	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
 	;	Bitfield address
@@ -2150,7 +2152,6 @@ ret 16
 section .text
 LM_Private_ByteSetRange:
 	; Sets a range of bits in a single byte
-	; Note: This is an internal function, and is not to be called from outside the list manager.
 	;
 	;  input:
 	;	Bitfield address
@@ -2177,10 +2178,15 @@ LM_Private_ByteSetRange:
 	mov bl, [esi]
 
 	; load and adjust setCount
-	mov edi, address
-	mov eax, [edi + tBitfieldInfo.setCount]
-	popcnt ecx, ebx
-	sub eax, ecx
+	push ebx
+	call PopulationCount
+	mov esi, address
+	sub dword [esi + tBitfieldInfo.setCount], edi
+
+	; reload the byte on which we'll be working
+	mov esi, byteAddress
+	mov ebx, 0
+	mov bl, [esi]
 
 	; loop through and handle the bits
 	mov edx, startBit
@@ -2192,13 +2198,14 @@ LM_Private_ByteSetRange:
 		inc edx
 	loop .bitLoop
 
-	; adjust and save setCount
-	popcnt ecx, ebx
-	add eax, ecx
-	mov [edi + tBitfieldInfo.setCount], eax
-
 	; write the finished byte back to memory
 	mov [esi], bl
+
+	; adjust and save setCount
+	push ebx
+	call PopulationCount
+	mov esi, address
+	add dword [esi + tBitfieldInfo.setCount], edi	
 
 
 	.Exit:
@@ -2217,7 +2224,6 @@ ret 16
 section .text
 LM_Private_ElementAddressGet:
 	; Returns the address of the specified element in the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2257,7 +2263,6 @@ ret 8
 section .text
 LM_Private_ElementCountGet:
 	; Returns the total number of elements in the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2290,7 +2295,6 @@ ret 4
 section .text
 LM_Private_ElementCountSet:
 	; Sets the total number of elements in the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2327,7 +2331,6 @@ ret 8
 section .text
 LM_Private_ElementDelete:
 	; Deletes the element specified from the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2436,7 +2439,6 @@ ret 8
 section .text
 LM_Private_ElementDuplicate:
 	; Duplicates the element specified in the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2542,7 +2544,6 @@ ret 8
 section .text
 LM_Private_ElementSizeGet:
 	; Returns the elements size of the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2575,7 +2576,6 @@ ret 4
 section .text
 LM_Private_ItemAddAtSlot:
 	; Adds an item to the list specified at the list slot specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2693,7 +2693,6 @@ ret 4
 section .text
 LM_Private_SlotFindFirstFree:
 	; Finds the first empty element in the list specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2760,7 +2759,6 @@ ret 4
 section .text
 LM_Private_SlotFreeTest:
 	; Tests the element specified in the list specified to see if it is free
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
 	;
 	;  input:
 	;	List address
@@ -2815,141 +2813,3 @@ LM_Private_SlotFreeTest:
 	mov esp, ebp
 	pop ebp
 ret 8
-
-
-
-
-
-LM_Private_LMBitClear:
-	; Clears the bit specified within the bitfield at the address specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
-	;
-	;  input:
-	;	Bitfield address
-	;	Bit number
-	;
-	;  output:
-	;	EDX - Error code
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define address								dword [ebp + 8]
-	%define element								dword [ebp + 12]
-
-
-	; get the byte and bit from the address and element
-	push element
-	push address
-	call LM_Private_BitfieldMath
-
-
-	; read setCount
-	mov esi, address
-	mov edi, dword [esi + tBitfieldInfo.setCount]
-
-	; read the byte in
-	mov eax, 0
-	mov al, byte [ebx]
-
-	; subtract the number of currently set bits in this byte from setCount
-	popcnt edx, eax
-	sub edi, edx
-
-	; modify the bit
-	btr eax, ecx
-
-	; add the number of bits now set in this byte to setCount
-	popcnt edx, eax
-	add edi, edx
-
-	; write the byte back to memory
-	mov byte [ebx], al
-
-	; update setCount
-	mov dword [esi + tBitfieldInfo.setCount], edi
-
-
-
-
-	.Exit:
-	%undef address
-	%undef element
-	mov esp, ebp
-	pop ebp
-ret 8
-
-
-
-
-
-
-LM_Private_LMBitClearLegacy:
-	; Clears the bit specified within the bitfield at the address specified
-	; Note: this function performs no validity checking and is only intended for use by other List Manager functions
-	;
-	;  input:
-	;	Bitfield address
-	;	Bit number
-	;
-	;  output:
-	;	EDX - Error code
-
-	push ebp
-	mov ebp, esp
-
-	; define input parameters
-	%define address								dword [ebp + 8]
-	%define element								dword [ebp + 12]
-
-
-	; get the byte and bit from the address and element
-	push element
-	push address
-	call LM_Private_BitfieldMath
-
-
-	; read setCount
-	mov esi, address
-	mov edi, dword [esi + tBitfieldInfo.setCount]
-
-	; read the byte in
-	mov eax, 0
-	mov al, byte [ebx]
-jmp $
-mov edx, 0xcafebeef
-	; subtract the number of currently set bits in this byte from setCount
-	push eax
-	call PopulationCount
-	popcnt edx, eax
-	sub edi, edx
-
-	; modify the bit
-	btr eax, ecx
-
-	; add the number of bits now set in this byte to setCount
-	popcnt edx, eax
-	add edi, edx
-
-	; write the byte back to memory
-	mov byte [ebx], al
-
-	; update setCount
-	mov dword [esi + tBitfieldInfo.setCount], edi
-
-
-
-
-	.Exit:
-	%undef address
-	%undef element
-	mov esp, ebp
-	pop ebp
-ret 8
-
-
-
-
-
-

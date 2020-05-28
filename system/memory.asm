@@ -551,8 +551,9 @@ MemAllocate:
 	mov ebp, esp
 
 	; allocate local variables
-	sub esp, 4
+	sub esp, 8
 	%define bitNumber							dword [ebp - 4]
+	%define address								dword [ebp - 8]
 
 
 	; get the first free block
@@ -577,9 +578,19 @@ MemAllocate:
 	cmp edx, kErrNone
 	jne .Fail
 
-	; and exit!
+	; translate bit number to address and save for later
 	mov eax, bitNumber
 	shl eax, 12
+	mov address, eax
+
+	; zero out this memory block for security and sanity
+	push 0x00
+	push 4096
+	push address
+	call MemFill
+
+	; and exit!
+	mov eax, address
 	mov edx, kErrNone
 	jmp .Exit
 
@@ -591,9 +602,68 @@ MemAllocate:
 
 	.Exit:
 	%undef bitNumber
+	%undef address
 	mov esp, ebp
 	pop ebp
 ret
+
+
+
+
+
+section .text
+MemAllocatePages:
+	; Allocates the number of pages specified
+	;
+	;  input:
+	;	Number of pages
+	;
+	;  output:
+	;	EAX - Address of first requested block, or zero if call fails
+	;	EDX - Error code
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define pageCount							dword [ebp + 8]
+
+	; allocate local variables
+	sub esp, 4
+	%define address								dword [ebp - 4]
+
+
+	; allocate a page
+	call MemAllocate
+	mov address, eax
+	cmp edx, kErrNone
+	jne .Exit
+
+	mov ecx, pageCount
+	dec ecx
+	.AllocateLoop:
+		mov pageCount, ecx
+
+		; allocate a page
+		call MemAllocate
+		cmp edx, kErrNone
+		jne .Exit
+
+		mov ecx, pageCount
+	loop .AllocateLoop
+
+	; and exit!
+	mov eax, address
+	mov edx, kErrNone
+	jmp .Exit
+
+
+	.Exit:
+	%undef bitNumber
+	%undef address
+	mov esp, ebp
+	pop ebp
+ret 4
 
 
 
@@ -1062,6 +1132,27 @@ MemInit:
 	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitfieldInit
 
+
+	; the memory we just claimed may be dirty; force clean it
+	push 0x00000000
+	mov ecx, dword [tSystem.memoryBitfieldSize]
+	sub ecx, 0x10
+	push ecx
+	mov esi, dword [tSystem.memoryBitfieldAllocatedPtr]
+	add esi, 0x10
+	push esi
+	call MemFill
+
+	push 0x00000000
+	mov ecx, dword [tSystem.memoryBitfieldSize]
+	sub ecx, 0x10
+	push ecx
+	mov esi, dword [tSystem.memoryBitfieldReservedPtr]
+	add esi, 0x10
+	push esi
+	call MemFill
+
+
 	; next, we calculate the destination address for the memory map data
 	mov eax, dword [tSystem.memoryBitfieldAllocatedPtr]
 	add ebx, [tSystem.memoryBitfieldSize]
@@ -1076,23 +1167,6 @@ MemInit:
 	push eax
 	push 0x80000
 	call MemCopy
-
-
-	; Next, we have to set up the bitfields we just allocated. Note: Since the contents of both bitfields will initially be the same, we could
-	; just set up one bitfield here then simply MemCopy() it to the second one. But since the majority of memory in any PC will be usable RAM,
-	; the majority bits will not need set, meaning it would be wasteful to MemCopy() a ton of bits which will be unset anyway.
-
-	; The first 1 MiB (256 pages, or page numbers 0 through 255) of physical RAM is reserved for system purposes and therefore should never
-	; be allocated to processes.
-	push 255
-	push 0
-	push dword [tSystem.memoryBitfieldAllocatedPtr]
-	call LMBitSetRange
-
-	push 255
-	push 0
-	push dword [tSystem.memoryBitfieldReservedPtr]
-	call LMBitSetRange
 
 
 	; Now that they are both created, we set every. Single. Bit. Why? Because the memory map of this system likely has 1.5 metric crap-tons
