@@ -147,7 +147,7 @@ A20Delay:
 		mov ah, 0
 		int 0x1A
 
-		cmp dx, 40
+		cmp dx, 4
 	jb .DelayLoop
 
  
