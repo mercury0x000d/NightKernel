@@ -726,7 +726,6 @@ InterruptUnimplemented:
 	push kUnsupportedInt$
 	call Fail
 
-	call PICIntComplete
 	popa
 
 	mov esp, ebp
@@ -1057,8 +1056,6 @@ ISR00:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1082,8 +1079,6 @@ ISR01:
 	push dword [tSystem.currentTask]
 	call Debugger
 
-	; acknowledge the PIC
-	call PICIntComplete
 
 	; restore DS
 	pop ds
@@ -1101,8 +1096,6 @@ ISR02:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1125,8 +1118,6 @@ ISR03:
 	push dword [tSystem.currentTask]
 	call Debugger
 
-	; acknowledge the PIC
-	call PICIntComplete
 
 	; restore DS
 	pop ds
@@ -1144,8 +1135,6 @@ ISR04:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1163,8 +1152,6 @@ ISR05:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1183,8 +1170,6 @@ ISR06:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 
 jmp TaskSwitch
 
@@ -1203,8 +1188,6 @@ ISR07:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1226,8 +1209,6 @@ ISR08:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1245,8 +1226,6 @@ ISR09:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1268,8 +1247,6 @@ ISR0A:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1291,8 +1268,6 @@ ISR0B:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1314,8 +1289,6 @@ ISR0C:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1341,8 +1314,6 @@ ISR0D:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1364,8 +1335,6 @@ ISR0E:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1384,8 +1353,6 @@ ISR0F:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1404,8 +1371,6 @@ ISR10:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1427,8 +1392,6 @@ ISR11:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1447,8 +1410,6 @@ ISR12:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1466,8 +1427,6 @@ ISR13:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1485,8 +1444,6 @@ ISR14:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1504,8 +1461,6 @@ ISR15:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1523,8 +1478,6 @@ ISR16:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1542,8 +1495,6 @@ ISR17:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1561,8 +1512,6 @@ ISR18:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1580,8 +1529,6 @@ ISR19:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1599,8 +1546,6 @@ ISR1A:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1618,8 +1563,6 @@ ISR1B:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1637,8 +1580,6 @@ ISR1C:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1657,8 +1598,6 @@ ISR1D:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1680,8 +1619,6 @@ ISR1E:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1699,8 +1636,6 @@ ISR1F:
 	push .error$
 	call CriticalError
 
-	; acknowledge the PIC
-	call PICIntComplete
 jmp TaskSwitch
 
 section .data
@@ -1721,7 +1656,7 @@ ISR20:
 
 	inc dword [tSystem.ticksSinceBoot]
 
-	call PICIntComplete
+	call PICIntCompleteMaster
 
 jmp TaskSwitch
 
@@ -1752,7 +1687,7 @@ ISR21:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1782,7 +1717,7 @@ ISR22:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1812,7 +1747,7 @@ ISR23:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1826,7 +1761,7 @@ ISR24:
 	;call SerialGetIIR
 	;pop edx
 	;pop ecx
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1856,7 +1791,7 @@ ISR25:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1867,7 +1802,7 @@ section .text
 ISR26:
 	; Floppy disk
 	; the kernel does nothing directly with the floppy drives, so we can simply exit here
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1877,7 +1812,7 @@ iretd
 section .text
 ISR27:
 	; Parallel port 1 - Supposedly prone to misfire?
-	call PICIntComplete
+	call PICIntCompleteMaster
 iretd
 
 
@@ -1894,7 +1829,7 @@ ISR28:
 	call RTCInterruptHandler
 
 	; signal the end of the interrupt to the PIC
-	call PICIntComplete
+	call PICIntCompleteSlave
 
 	pop ds
 iretd
@@ -1926,7 +1861,7 @@ ISR29:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd
 
 
@@ -1956,7 +1891,7 @@ ISR2A:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd
 
 
@@ -1986,7 +1921,7 @@ ISR2B:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd
 
 
@@ -2016,7 +1951,7 @@ ISR2C:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd
 
 
@@ -2046,7 +1981,7 @@ ISR2D:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd
 
 
@@ -2076,7 +2011,7 @@ ISR2E:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd
 
 
@@ -2106,5 +2041,5 @@ ISR2F:
 	jmp $
 
 	.Exit:
-	call PICIntComplete
+	call PICIntCompleteSlave
 iretd

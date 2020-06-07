@@ -30,7 +30,8 @@
 
 ; declare functions as global
 global PICInit
-global PICIntComplete
+global PICIntCompleteMaster
+global PICIntCompleteSlave
 global PICIRQDisable
 global PICIRQDisableAll
 global PICIRQEnable

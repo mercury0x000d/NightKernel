@@ -42,6 +42,7 @@ extern MemCopy
 extern MemDispose
 extern MemFill
 extern MemInit
+extern MemMapPrint
 extern MemPagesNeeded
 extern MemSearchWord
 extern MemSearchDWord

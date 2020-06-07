@@ -399,6 +399,172 @@ ret 8
 
 
 section .text
+ConvertNumberHexQuadToString:
+	; Translates the value specified to a hexadecimal number in a zero-padded 8 byte string
+	; Note: No length checking is done on this string; make sure it's long enough to hold the converted number!
+	; Note: No terminating null is put on the end of the string - do that yourself.
+	;
+	;  input:
+	;	Numeric value (QWord)
+	;	String address
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define numberQuadLow						dword [ebp + 8]
+	%define numberQuadHigh						dword [ebp + 12]
+	%define stringAddress						dword [ebp + 16]
+
+
+	mov esi, numberQuadHigh
+	mov edi, stringAddress
+
+	mov ecx, 0xF0000000
+	and ecx, esi
+	shr ecx, 28
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x0F000000
+	and ecx, esi
+	shr ecx, 24
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x00F00000
+	and ecx, esi
+	shr ecx, 20
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x000F0000
+	and ecx, esi
+	shr ecx, 16
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x0000F000
+	and ecx, esi
+	shr ecx, 12
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x00000F00
+	and ecx, esi
+	shr ecx, 8
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x000000F0
+	and ecx, esi
+	shr ecx, 4
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x0000000F
+	and ecx, esi
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+
+	mov esi, numberQuadLow
+
+	mov ecx, 0xF0000000
+	and ecx, esi
+	shr ecx, 28
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x0F000000
+	and ecx, esi
+	shr ecx, 24
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x00F00000
+	and ecx, esi
+	shr ecx, 20
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x000F0000
+	and ecx, esi
+	shr ecx, 16
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x0000F000
+	and ecx, esi
+	shr ecx, 12
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x00000F00
+	and ecx, esi
+	shr ecx, 8
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x000000F0
+	and ecx, esi
+	shr ecx, 4
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+	mov ecx, 0x0000000F
+	and ecx, esi
+	add ecx, kHexDigits
+	mov al, [ecx]
+	mov byte [edi], al
+	inc edi
+
+
+	.Exit:
+	%undef number
+	%undef stringAddress
+	mov esp, ebp
+	pop ebp
+ret 12
+
+
+
+
+
+section .text
 ConvertNumberOctalToString:
 	; Translates the value specified to an octal number in a zero-padded 11 byte string
 	; Note: No length checking is done on this string; make sure it's long enough to hold the converted number!
@@ -2173,7 +2339,7 @@ StringTokenHexadecimal:
 	;
 	;  input:
 	;	String address
-	;	Dword value to be added to the string
+	;	DWord value to be added to the string
 	;	Number trim value
 	;
 	;  output:
@@ -2285,6 +2451,131 @@ StringTokenHexadecimal:
 	mov esp, ebp
 	pop ebp
 ret 12
+
+
+
+
+
+section .text
+StringTokenHexadecimalQuad:
+	; Finds the first occurrance of the ^ character and replaces it with a hexadecimal number, truncated to the length specified
+	;
+	;  input:
+	;	String address
+	;	QWord value to be added to the string
+	;	Number trim value
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define stringAddress						dword [ebp + 8]
+	%define numberQuadLow						dword [ebp + 12]
+	%define numberQuadHigh						dword [ebp + 16]
+	%define trim								dword [ebp + 20]
+
+	; allocate local variables
+	sub esp, 25
+	%define tokenPosition						dword [ebp - 4]
+	%define bufferAddress						dword [ebp - 8]
+	; 17 byte string buffer for number-to-string conversion output is at [ebp - 25]
+
+
+	; get the length of the formatting string, exit if it's null
+	push stringAddress
+	call StringLength
+	cmp eax, 0
+	je .Exit
+
+
+	; find the location of the first token character
+	push dword 0x0000005E
+	push stringAddress
+	call StringSearchCharLeft
+	mov tokenPosition, eax
+
+
+	; if the token location is 0, then no token was found... so we exit
+	cmp tokenPosition, 0
+	je .Exit
+
+
+	; calculate the address of our string buffer
+	mov eax, ebp
+	sub eax, 25
+	mov bufferAddress, eax
+
+
+	; zero the string buffer
+	push 0
+	push 17
+	push bufferAddress
+	call MemFill
+
+
+	; convert the number passed to a string
+	push bufferAddress
+	push numberQuadHigh
+	push numberQuadLow
+	call ConvertNumberHexQuadToString
+
+
+	; trim leading zeroes if necessary
+	cmp trim, 0
+	jne .NoTrimLeading
+		push dword 0x00000030
+		push bufferAddress
+		call StringTrimLeft
+
+		; see if the string length is zero and add a single zero back if so
+		mov eax, bufferAddress
+		mov bl, [eax]
+		cmp bl, 0
+		jne .SkipAddZero
+			mov eax, bufferAddress
+			mov byte [eax], 0x30
+			inc eax
+			mov byte [eax], 0x00
+		.SkipAddZero:
+		jmp .NoTruncate
+	.NoTrimLeading:
+
+
+	; if the trim value is less than the maximum possible length of the string, then truncate as directed
+	cmp trim, 16
+	jae .NoTruncate
+		push trim
+		push bufferAddress
+		call StringTruncateLeft
+	.NoTruncate:
+
+
+	; delete the token itself
+	push tokenPosition
+	push stringAddress
+	call StringCharDelete
+
+
+	; insert the string we created into the output string
+	dec tokenPosition
+	push tokenPosition
+	push bufferAddress
+	push stringAddress
+	call StringInsert
+
+
+	.Exit:
+	%undef stringAddress
+	%undef numberValue
+	%undef trim
+	%undef tokenPosition
+	%undef bufferAddress
+	mov esp, ebp
+	pop ebp
+ret 16
 
 
 

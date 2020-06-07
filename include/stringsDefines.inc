@@ -24,6 +24,7 @@ global ConvertWordToHexString16
 global ConvertNumberBinaryToString
 global ConvertNumberDecimalToString
 global ConvertNumberHexToString
+global ConvertNumberHexQuadToString
 global ConvertNumberOctalToString
 global ConvertStringBinaryToNumber
 global ConvertStringDecimalToNumber
@@ -48,6 +49,7 @@ global StringSearchCharList
 global StringTokenBinary
 global StringTokenDecimal
 global StringTokenHexadecimal
+global StringTokenHexadecimalQuad
 global StringTokenOctal
 global StringTokenString
 global StringTrimLeft

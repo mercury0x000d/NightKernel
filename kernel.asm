@@ -58,6 +58,9 @@ main:
 ; Clear the direction flag; nobody knows what weirdness the BIOS did before we got here.
 cld
 
+; Clear the interrupt flag for the same reason.
+cli
+
 ; init the stack segment
 mov ax, 0x0000
 mov ss, ax
@@ -206,7 +209,7 @@ mov esp, 0x0009fb00
 call PrintCopyright
 call PrintVerison
 
-
+jmp $
 
 ; probe CPU
 push progressText08$
@@ -233,9 +236,10 @@ call DebugCPUFeaturesEnable
 ; memory list init
 push progressText0B$
 call PrintIfConfigBits32
-call MemInit
 
-; see if there was an error
+call MemMapPrint
+
+call MemInit
 cmp edx, kErrNone
 je .MemInitOK
 	push fatalMemInit$
@@ -397,7 +401,7 @@ bt dword [tSystem.configBits], kCBDebugMode
 jnc .SkipStartDelay
 	; if we get here, we're in Debug Mode
 	; wouldn't it be nice if we gave the user a moment to admire all those handy debug messages?
-	push 1024
+	push 4096
 	call TimerWait
 .SkipStartDelay:
 

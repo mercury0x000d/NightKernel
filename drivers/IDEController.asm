@@ -241,7 +241,7 @@ ret 20
 	loop .ReadLoop
 
 	; acknowledge the interrupt at the PIC
-	call PICIntComplete
+	call PICIntCompleteSlave
 	
 	; acknowledge the interrupt at the ATA device by reading the status register
 	mov dx, bx
@@ -1184,7 +1184,7 @@ IDEInterruptHandlerPrimary:
 	pushf
 
 	; acknowledge the interrupt to the PIC
-	call PICIntComplete
+	call PICIntCompleteSlave
 
 	popf
 	popa
@@ -1214,7 +1214,7 @@ IDEInterruptHandlerSecondary:
 	pushf
 
 	; acknowledge the interrupt to the PIC
-	call PICIntComplete
+	call PICIntCompleteSlave
 
 	popf
 	popa

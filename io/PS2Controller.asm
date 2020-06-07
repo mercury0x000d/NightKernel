@@ -94,6 +94,14 @@ PS2ControllerInit:
 	sub esp, 1
 	%define tempConfig							byte [ebp - 1]
 
+	; disable IRQs for both ports to ensure setup isn't interrupted
+	call PICIRQDisableAll
+
+	; reactivate the timer tick interrupt
+	push 0
+	call PICIRQEnable
+
+
 	; set up interrupt handlers for both ports
 	push 0x8E
 	push PS2Port1InterruptHandler
@@ -108,14 +116,6 @@ PS2ControllerInit:
 	call InterruptHandlerSet
 
 
-	; disable IRQs for both ports to ensure setup isn't interrupted
-	push dword 1
-	call PICIRQDisable
-
-	push dword 12
-	call PICIRQDisable
-
-
 	; empty ye olde bufferoonio
 	call PS2BufferClear
 
@@ -123,8 +123,15 @@ PS2ControllerInit:
 	; set up the controller how we need it for now
 	push kCmdWriteConfigByte
 	call PS2ControllerCommand
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 	cmp edx, kErrNone
 	jne .Exit
+
 
 	mov al, [tSystem.PS2Config]
 	or al, (kCCBPort1Disable | kCCBPort2Disable)
@@ -133,6 +140,14 @@ PS2ControllerInit:
 	; write the byte
 	push eax
 	call PS2ControllerWrite
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
+	cmp edx, kErrNone
+	jne .Exit
 
 	; and finally, discard potential garbage
 	call PS2BufferClear
@@ -141,12 +156,24 @@ PS2ControllerInit:
 	; As of now, port 2 should be disabled (bit 5, the kCCBPort2Disable bit, should be set).
 	; If we get the config byte again and see it's not, we know there's no port 2 to begin with
 	; and we can mark it for disable globally.
-	push dword kCmdReadConfigByte
+	push kCmdReadConfigByte
 	call PS2ControllerCommand
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 	cmp edx, kErrNone
 	jne .Exit
 
 	call PS2ControllerRead
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -158,13 +185,25 @@ PS2ControllerInit:
 
 
 	; perform controller test
-	push dword kCmdTestController
+	push kCmdTestController
 	call PS2ControllerCommand
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 	cmp edx, kErrNone
 	jne .Exit
 
 	; check the test results
 	call PS2ControllerRead
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 	cmp edx, kErrNone
 	jne .Exit
 	cmp al, kControllerTestPass
@@ -179,6 +218,12 @@ PS2ControllerInit:
 	; write controller configuration byte
 	push kCmdWriteConfigByte
 	call PS2ControllerCommand
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -211,30 +256,26 @@ PS2ControllerInit:
 	call PS2BufferClear
 
 
-	; allocate some RAM for the key buffer
-	call MemAllocate
-	cmp edx, kErrNone
-	jne .Exit
-	mov [kKeyBufferAddress], eax
+	; ; allocate some RAM for the key buffer
+	; call MemAllocate
+	; cmp edx, kErrNone
+	; jne .Exit
+	; mov [kKeyBufferAddress], eax
 
 
 	; And finally, send a reset command to each port. If the device responds, it will trigger the interrupt handler and
 	; cause the device init code to be called to detect what it is and then set it up appropriately based on its type.
 	; This, my friend, is how we support hotplugging!
 
+
+
 	; send reset to port 1
-	push dword kCmdDeviceReset
-	push dword 1
-	call PS2DeviceWrite
-pusha
-mov ecx, 0xbeef1111
-call DebugVBoxLogRegs
-popa
-
-
-
-	; reenable IRQs for both ports
-	push dword 1
+	call PS2ControllerWaitDataWrite
+	cmp edx, kErrNone
+	jne .Exit
+	mov al, kCmdDeviceReset
+	out kPS2DataPort, al
+	push 1
 	call PICIRQEnable
 
 
@@ -242,35 +283,49 @@ push 256
 call TimerWait
 
 
-
-	push dword 1
+	push 1
 	call PICIRQDisable
 
-	push dword 12
-	call PICIRQDisable
-
-
-
+	; take out the trash
+	call PS2BufferClear
 
 	; send reset to port 2
+	push kCmdWritePort2InputPort
+	call PS2ControllerCommand
+	call PS2ControllerWaitDataWrite
+	cmp edx, kErrNone
+	jne .Exit
+	mov al, kCmdDeviceReset
+	out kPS2DataPort, al
+	push 12
+	call PICIRQEnable
+
+
+
+call PICIRQEnableAll
+
+; 	; ; send reset to port 1
+; 	push kCmdDeviceReset
+; 	push 1
+; 	call PS2DeviceWrite
+
+
+
+
 ; should this perhaps only be executed if the port exists?
-	push dword kCmdDeviceReset
-	push dword 2
-	call PS2DeviceWrite
-pusha
-mov ecx, 0xbeef2222
-call DebugVBoxLogRegs
-popa
+	; push kCmdDeviceReset
+	; push 2
+	; call PS2DeviceWrite
 
 
-	push dword 12
-	call PICIRQEnable
+; jmp $
 
-push 256
-call TimerWait
 
-	push dword 1
-	call PICIRQEnable
+
+	; push 1
+	; call PICIRQEnable
+
+
 
 
 	jmp .Exit
@@ -280,6 +335,12 @@ call TimerWait
 
 
 	.Exit:
+pusha
+mov eax, 0xAAAAAAAA
+mov ebx, 0xAAAAAAAA
+mov ecx, 0xAAAAAAAA
+call PrintRegs32
+popa
 
 	%undef tempConfig
 	mov esp, ebp
@@ -467,22 +528,12 @@ PS2DeviceIdentify:
 	push kCmdGetDeviceID
 	push portNum
 	call PS2DeviceWrite
-pusha
-mov ecx, edx
-mov edx, 0xbababa01
-call DebugVBoxLogRegs
-popa
 	cmp edx, kErrNone
 	jne .Exit
 
 
 	; a timeout here means the device just doesn't care about us - error!
 	call PS2ControllerRead
-pusha
-mov ecx, edx
-mov edx, 0xbababa02
-call DebugVBoxLogRegs
-popa
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -495,11 +546,6 @@ popa
 
 	; if we timeout this time, no biggie - the device just didn't have so much to say
 	call PS2ControllerRead
-pusha
-mov ecx, edx
-mov edx, 0xbababa03
-call DebugVBoxLogRegs
-popa
 	cmp edx, kErrNone
 	jne .Done
 
@@ -519,11 +565,6 @@ popa
 
 
 	.Exit:
-pusha
-mov ecx, edx
-mov edx, 0xbaba0000
-call DebugVBoxLogRegs
-popa
 	%undef portNum
 	%undef IDBytes
 	mov esp, ebp
@@ -843,11 +884,6 @@ PS2InputHandlerDispatch:
 
 	; load the device ID
 	mov eax, deviceID
-pusha
-mov ebx,  handlerData
-mov edx, 0x41baebae
-call DebugVBoxLogRegs
-popa
 
 	cmp ax, kDevMouseStandard
 	jne .NotFF00
@@ -999,8 +1035,25 @@ PS2InputHandlerMouse:
 
 	; get the input byte
 	mov eax, inputByte
+; pusha
+; inc dword [.debuglog]
+; mov edi, [.debuglog]
+; mov byte [edi], al
+; push 2
+; push 0
+; push 1
+; push 1
+; push 3
+; push 0x900000
+; call PrintRAM32
+; popa
 
+cmp al, 0xfa
+jne .Continue
+cmp byte [tSystem.mousePacketByteCount], 0
+je .Exit
 
+.Continue:
 	; add this byte to the mouse packet
 	mov ebx, tSystem.mousePacketByte0
 	mov ecx, 0x00000000
@@ -1176,6 +1229,9 @@ PS2InputHandlerMouse:
 	pop ebp
 ret 4
 
+section .data
+.debuglog						dd 0x00900020
+
 
 
 
@@ -1201,21 +1257,24 @@ PS2NewConnect:
 	%define deviceID							dword [ebp - 4]
 
 
-	; disable interrupts and suspend port operation
-	call PICIRQDisableAll
+	; suspend port operation
+	call PS2PortsDisable
 
-	push dword 0
-	call PICIRQEnable
-	sti
+	call PS2BufferClear
 
-	; disable data reporting
+	; disable data reporting for both devices
 	push kCmdDisableDataReporting
-	push portNum
+	push 1
 	call PS2DeviceWrite
 	cmp edx, kErrNone
 	jne .Exit
 
-	;call PS2PortsDisable
+	push kCmdDisableDataReporting
+	push 2
+	call PS2DeviceWrite
+	cmp edx, kErrNone
+	jne .Exit
+
 
 	call PS2BufferClear
 
@@ -1231,10 +1290,6 @@ PS2NewConnect:
 	; save the device ID to the appropriate spot
 	cmp portNum, 1
 	jne .Not1
-pusha
-mov ecx, 0x77770001
-call DebugVBoxLogRegs
-popa
 		mov word [tSystem.PS2Port1DeviceID], ax
 
 		; init the device
@@ -1242,18 +1297,10 @@ popa
 		call PS2PortInitDevice
 
 		mov ax, word [tSystem.PS2Port1DeviceID]
-pusha
-mov ecx, 0x77770002
-call DebugVBoxLogRegs
-popa
 	.Not1:
 
 	cmp portNum, 2
 	jne .Not2
-pusha
-mov ecx, 0x77770003
-call DebugVBoxLogRegs
-popa
 		mov word [tSystem.PS2Port2DeviceID], ax
 
 		; init the device
@@ -1261,10 +1308,6 @@ popa
 		call PS2PortInitDevice
 
 		mov ax, word [tSystem.PS2Port2DeviceID]
-pusha
-mov ecx, 0x77770004
-call DebugVBoxLogRegs
-popa
 	.Not2:
 
 
@@ -1274,16 +1317,18 @@ popa
 
 
 	.Exit:
-	; enable data reporting
+	; enable data reporting for both ports
 	push kCmdEnableDataReporting
-	push portNum
+	push 1
 	call PS2DeviceWrite
 
-	; restore port operation and proper interrupt state
-	;call PS2PortsEnable
+	push kCmdEnableDataReporting
+	push 2
+	call PS2DeviceWrite
 
-	cli
-	call PICIRQEnableAll
+
+	; restore port operation and proper interrupt state
+	call PS2PortsEnable
 
 
 	%undef portNum
@@ -1317,32 +1362,15 @@ PS2Port1InterruptHandler:
 	pop ds
 	pop es
 
+; disable all interrupts except the timer tick interrupt
+call PICIRQDisableAll
+push 0
+call PICIRQEnable
+sti
 
 	mov eax, 0x00000000
 	in al, kPS2DataPort
 
-
-pusha
-pushf
-mov bx, [tSystem.PS2Port1DeviceID]
-mov cx, [.deviceBytes]
-mov edx, 0xd00d1111
-call DebugVBoxLogRegs
-
-inc dword [.debuglog]
-mov edi, [.debuglog]
-mov byte [edi], al
-
-;push 7
-;push 0
-;push 16
-;push 1
-;push 8
-;push 0x800000
-;call PrintRAM32
-
-popf
-popa
 
 	; if we have a device ID for this port, that means there's an existing device there
 	cmp word [tSystem.PS2Port1DeviceID], kDevNone
@@ -1360,18 +1388,16 @@ popa
 	jne .Exit
 
 
-	; if we got here, the device has signaled an Ack plus a Test Passed byte, so let's see what the thing is
+	; if we got here, the device has signaled a Test Passed byte, so let's see what the thing is and set it up
 	call PS2BufferClear
 	push 1
 	call PS2NewConnect
-pusha
-mov ecx, 0x99990000
-call DebugVBoxLogRegs
-popa
 
 
 	.Exit:
-	call PICIntComplete
+cli
+call PICIRQEnableAll
+	call PICIntCompleteMaster
 
 
 	pop es
@@ -1383,9 +1409,6 @@ popa
 	pop ebp
 iretd
 
-section .data
-.deviceBytes					dw 0x0000
-.debuglog						dd 0x007fffff
 
 
 
@@ -1413,30 +1436,15 @@ PS2Port2InterruptHandler:
 	pop ds
 	pop es
 
+; disable all interrupts except the timer tick interrupt
+call PICIRQDisableAll
+push 0
+call PICIRQEnable
+sti
 
 	mov eax, 0x00000000
 	in al, kPS2DataPort
-pusha
-pushf
-mov bx, [tSystem.PS2Port2DeviceID]
-mov cx, [.deviceBytes]
-mov edx, 0xd00d2222
-call DebugVBoxLogRegs
 
-inc dword [.debuglog]
-mov edi, [.debuglog]
-mov byte [edi], al
-
-;push 7
-;push 0
-;push 25
-;push 1
-;push 8
-;push 0x900000
-;call PrintRAM32
-
-popf
-popa
 
 	; if we have a device ID for this port, that means there's an existing device there
 	cmp word [tSystem.PS2Port2DeviceID], kDevNone
@@ -1454,18 +1462,16 @@ popa
 	jne .Exit
 
 
-	; if we got here, the device has signaled an Ack plus a Test Passed byte, so let's see what the thing is
+	; if we got here, the device has signaled a Test Passed byte, so let's see what the thing is and set it up
 	call PS2BufferClear
 	push 2
 	call PS2NewConnect
-pusha
-mov ecx, 0x99990000
-call DebugVBoxLogRegs
-popa
 
 
 	.Exit:
-	call PICIntComplete
+cli
+call PICIRQEnableAll
+	call PICIntCompleteSlave
 
 	pop es
 	pop ds
@@ -1475,10 +1481,6 @@ popa
 	mov esp, ebp
 	pop ebp
 iretd
-
-section .data
-.deviceBytes					dw 0x0000
-.debuglog						dd 0x008fffff
 
 
 
@@ -1712,20 +1714,9 @@ PS2DeviceWrite:
 	; select port 2 if necessary
 	push portNum
 	call PS2PortSendTo2
-pusha
-mov eax, portNum
-mov ebx, dataByte
-mov ecx, 0xbeebeec0
-call DebugVBoxLogRegs
-popa
 
 	; wait until ready to write
 	call PS2ControllerWaitDataWrite
-pusha
-mov ebx, dataByte
-mov ecx, 0xbeebeec1
-call DebugVBoxLogRegs
-popa
 	cmp edx, kErrNone
 	jne .Exit
 
@@ -1734,10 +1725,6 @@ popa
 	out kPS2DataPort, al
 
 	call PS2ControllerRead
-pusha
-mov ecx, 0xbeebeec2
-call DebugVBoxLogRegs
-popa
 	cmp edx, kErrNone
 	jne .Exit
 	cmp al, kCmdAcknowledged
@@ -1753,10 +1740,6 @@ popa
 
 
 	.Exit:
-pusha
-mov ecx, 0xbeebeec3
-call DebugVBoxLogRegs
-popa
 	%undef dataByte
 	mov esp, ebp
 	pop ebp
@@ -2007,9 +1990,10 @@ PS2PortsEnable:
 	mov al, [tSystem.PS2Config]
 	push eax
 	call PS2ControllerWrite
+	cmp edx, kErrNone
+	jne .Exit
 
 	call PS2BufferClear
-
 
 	.Exit:
 ret

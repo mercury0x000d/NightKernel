@@ -27,7 +27,8 @@
 
 ; function definitions
 extern PICInit
-extern PICIntComplete
+extern PICIntCompleteMaster
+extern PICIntCompleteSlave
 extern PICIRQDisable
 extern PICIRQDisableAll
 extern PICIRQEnable

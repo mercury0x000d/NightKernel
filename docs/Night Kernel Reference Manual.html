@@ -69,15 +69,19 @@
 			<br>
 			<a href = '#Multitasking'>Section 9 - Multitasking, Night Style</a><br>
 			<br>
-			<a href = '#SystemStruct'>Section 10 - The System Struct</a><br>
+			<a href = '#Events'>Section 10 - Things that Go Bump in the Night: Events in the Night Kernel</a><br>
 			<br>
 			________________________________<br>
 			<br>
-			<a href = '#Changelog'>Appendix 0 - Version History</a><br>
+			<a href = '#SystemStruct'>Appendix 0 - The System Structure</a><br>
 			<br>
 			<a href = '#NightFunctionReference'>Appendix 1 - Night Kernel Function Reference</a><br>
 			<br>
-			<a href = '#DOSFunctionReference'>Appendix 2 - DOS Functions Reference</a><br>
+			<a href = '#StandardFunctionReturnCodes'>Appendix 2 - Standard Function Return Codes</a><br>
+			<br>
+			<a href = '#DOSFunctionReference'>Appendix 3 - DOS Functions Reference</a><br>
+			<br>
+			<a href = '#Changelog'>Appendix 4 - Version History</a><br>
 			<br>
 			<a href = '#License'>GNU General Public License</a><br>
 			<br>
@@ -99,7 +103,7 @@
 			<br>
 			<br>
 			<br>
-			<b>Days before the Night:</b><br>
+			<b>Days before the <i>Night</i>:</b><br>
 			<br>
 			Although the Night project itself began in June of 2015, its roots go back much further. Its creator originally got the idea to build a custom operating system from scratch after the lackluster release of Microsoft's Windows 95. Initially, this idea manifest as a simple shell with the goal of bringing multitasking and other modern features to older hardware... and 'older hardware' is no joke - the original project featured character graphics and was coded in IBM BASICA on a PC XT!<br>
 			<br>
@@ -151,20 +155,23 @@
 			<br>
 			<br>
 			<br>
+
 			There are multiple ways to take Night for a test drive:<br>
 			<br>
-			<b>Booting the pre-made VirtualBox image</b><br>
-			In the <i>builds</i> folder of the repo, you will find a VirtualBox disk image named <i>Night.vdi</i>; a 16 MiB disk with a base-only install of FreeDOS 1.2 (sans sources) and the default <i>kernel.sys</i> swapped out for the Night Kernel. This disk image is fixed-size to allow for easier mounting under the host operating system and is ready to boot a VirtualBox virtual machine.<br>
+			<b>Booting a pre-made image</b><br>
+			The <i>builds</i> folder of the repo is home to a selection of pre-built disk images, each of which are bootable and loaded with the Night kernel. Here you will find a floppy image (NIGHT.IMG), a CD image (NIGHT.iso), and a VDI VirtualBox disk image (Night.vdi); a 16 MiB disk with a base-only install of FreeDOS 1.2 (sans sources) and the default <i>kernel.sys</i> swapped out for the Night Kernel. This disk image is fixed-size to allow for easier mounting under the host operating system and is ready to boot a VirtualBox virtual machine.<br>
 			<br>
 			To create a virtual machine suitable for testing out Night, the default DOS configuration offered by VirtualBox can, for the most part, be used without alteration, however you should name the machine <i>Night</i> for compatibility with the included makefile.<br>
 			<br>
 			<br>
 			<br>
+
 			<b>Booting the pre-assembled kernel binary</b><br>
 			The repo's <i>builds</i> folder is also home to a pre-assembled <i>kernel.sys</i>, which you can copy over the existing FreeDOS kernel on any bootable FreeDOS medium, then just boot from that bootable media as you normally would.<br>
 			<br>
 			<br>
 			<br>
+
 			<b>Building from source</b><br>
 			If you're running in a Linux environment and have both VirtualBox and NASM installed, you can use the included makefile found in the root of the repo to streamline building and testing. The rules it accepts are as follows:<br>
 			<br>
@@ -390,7 +397,7 @@
 				<tr>
 					<td>sw (address) (word value)</td>
 					<td>
-						Search for one or more dwords
+						Search for one or more DWords
 					</td>
 				</tr>
 
@@ -425,7 +432,7 @@
 			<i>'C ... all the power of assembly language programming with all the ease of assembly language programming.'</i><br>
 			&emsp; - Stuart Cheshire, <i>Tricks of the Mac Game Programming Gurus</i><br>
 			<br>
-			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe due to certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readibility than comparable C code.<br>
+			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe due to certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readability than comparable C code.<br>
 			<br>
 			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from an older version of the Memory Manager:<br>
 
@@ -435,7 +442,7 @@
 					<span style = 'color: Turquoise'>&nbsp; section</span> <span style = 'color: Chartreuse'>.text</span><br>
 					<span style = 'color: Chartreuse'>&nbsp; MemAllocateAligned:</span><br>
 					<span style = 'color: LightGray'>
-						&nbsp;&nbsp;&nbsp;&nbsp; ; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailble<br>
+						&nbsp;&nbsp;&nbsp;&nbsp; ; Returns the address of a memory block of the requested size aligned to the value specified, or zero if unavailable<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ;<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ; input:<br>
 						&nbsp;&nbsp;&nbsp;&nbsp; ;&nbsp;&nbsp;&nbsp;Requesting task number<br>
@@ -474,18 +481,18 @@
 					<br>
 					<span style = 'color: LightGray'>&nbsp;&nbsp;&nbsp;&nbsp; ; define input parameters</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>taskNum</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>8</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>taskNum</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>8</span><span style = 'color: White'>]</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>memorySize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>12</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>memorySize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>12</span><span style = 'color: White'>]</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>alignment</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>16</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>alignment</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>16</span><span style = 'color: White'>]</span><br>
 					<br>
 				</p>
 			</code>
 
 			Now that EBP has been preserved and set, offsets from it may be defined to represent parameters passed to this function. Values pushed onto the stack by the caller begin at <code>[EBP + 8]</code> and ascend from there. Since all of Night's functions expect 32-bit parameters, this means that the first parameter passed will live at <code>[EBP + 8]</code>, the second at <code>[EBP + 12]</code>, the third at <code>[EBP + 16]</code>, and so on. As for <code>[EBP + 0]</code> and <code>[EBP + 4]</code>, those stack locations are where the saved <code>EBP</code> register and the return address, respectively, live.<br>
 			<br>
-			Using <code>define</code> directives essentially tells NASM, 'Every time you see <code><i>memorySize</i></code> in the code below, go ahead and substitute it with <code><i>dword [ebp + 12]</i></code>'. Note that these directives are not <i>technically</i> required (using a bare reference like <code>dword [ebp + 12]</code> in the code directly is perfectly valid) but using them makes the code much easier for us humans to read.<br>
+			Using <code>define</code> directives essentially tells NASM, 'Every time you see <code><i>memorySize</i></code> in the code below, go ahead and substitute it with <code><i>DWord [ebp + 12]</i></code>'. Note that these directives are not <i>technically</i> required (using a bare reference like <code>DWord [ebp + 12]</code> in the code directly is perfectly valid) but using them makes the code much easier for us humans to read.<br>
 			<br>
 			<br>
 			<br>
@@ -497,20 +504,20 @@
 
 					<span style = 'color: DeepPink'>&nbsp;&nbsp;&nbsp;&nbsp; sub</span> <span style = 'color: Orange'>esp</span><span style = 'color: White'>, </span> <span style = 'color: Fuchsia'>20</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockAddress</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>4</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockAddress</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>4</span><span style = 'color: White'>]</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockAddressAligned</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>8</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockAddressAligned</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>8</span><span style = 'color: White'>]</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockLeadingSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>12</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockLeadingSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>12</span><span style = 'color: White'>]</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockTrailingSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>16</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockTrailingSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>16</span><span style = 'color: White'>]</span><br>
 
-					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockRequestedSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>dword</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>20</span><span style = 'color: White'>]</span><br>
+					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockRequestedSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>20</span><span style = 'color: White'>]</span><br>
 					<br>
 				</p>
 			</code>
 
-			Variables local to this function can be represented in a manner similar to that of parameters. To do this, we first must adjust the stack pointer to clear out enough spack in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined.<br>
+			Variables local to this function can be represented in a manner similar to that of parameters. To do this, we first must adjust the stack pointer to clear out enough space in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined.<br>
 			<br>
 			A handy mnemonic for remembering which EBP references are which is that <i>locals</i> are <i>lower</i> than EBP, and <i>parameters</i> are <i>positive</i>.<br>
 			<br>
@@ -531,7 +538,7 @@
 				</p>
 			</code>
 
-			Next in this function is an example of how passed parameters are accessed. As mentioned earlier, using <code>cmp dword [ebp + 12], 2</code> here would be totally acceptable by NASM, but thanks to the <code>define</code>s we set in place earlier, we can make the code much more easy to read. This code performs a simple check on the <code>alignment</code> passed and exits if it is below two.<br>
+			Next in this function is an example of how passed parameters are accessed. As mentioned earlier, using <code>cmp DWord [ebp + 12], 2</code> here would be totally acceptable by NASM, but thanks to the <code>define</code>s we set in place earlier, we can make the code much more easy to read. This code performs a simple check on the <code>alignment</code> passed and exits if it is below two.<br>
 			<br>
 			<br>
 			<br>
@@ -550,7 +557,7 @@
 				</p>
 			</code>
 
-			And now, skipping ahead to the end, the work of this function is complete. Remember those registers mentioned above in the function descrption? This is where they get set prior to exiting the function.<br>
+			And now, skipping ahead to the end, the work of this function is complete. Remember those registers mentioned above in the function description? This is where they get set prior to exiting the function.<br>
 			<br>
 			<br>
 			<br>
@@ -895,7 +902,7 @@
 		<hr>
 		<h2><a name = 'Lists'>Section 7 - The List Manager</a></h2>
 		<p>
-			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A <i>list</i>, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceeded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
+			Managing smooth operation of a computer system necessitates the kernel keep track of numerous points of data. To ease that task, a library of code was created to manage arrays of stored data: the List Manager. Browsing the kernel source illustrates just how many items in which the List Manager has a hand in tracking; everything from drives and partitions to the PCI devices contained in the computer. A <i>list</i>, in this context, is simply a series of blocks of data of a constant size (called <i>elements</i>) stored in series, preceded by a header, which contains a handful of 32-bit values which describe characteristics of the list.<br>
 			<br>
 			Each list begins with a <code>tListInfo</code> header, the structure of which is detailed below.<br>
 			<br>
@@ -1067,42 +1074,42 @@
 					<tr>
 						<td>0x00</td>
 						<td>pageDirAddress</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The page directory address for this task. This is copied to CR3 upon task switch.</td>
 					</tr>
 
 					<tr>
 						<td>0x04</td>
 						<td>entryPoint</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The initial starting value of EIP for this task.</td>
 					</tr>
 
 					<tr>
 						<td>0x08</td>
 						<td>esp</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The user-level stack pointer.</td>
 					</tr>
 
 					<tr>
 						<td>0x0C</td>
 						<td>esp0</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The kernel stack pointer.</td>
 					</tr>
 
 					<tr>
 						<td>0x10</td>
 						<td>stackAddress</td>
-						<td>dword</td>
+						<td>DWord</td>
 					<td>The memory address of the user stack as returned by <code>MemAllocate()</code>.</td>
 					</tr>
 
 					<tr>
 						<td>0x14</td>
 						<td>kernelStackAddress</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The memory address of the kernel stack as returned by <code>MemAllocate()</code>.</td>
 					</tr>
 
@@ -1110,7 +1117,7 @@
 						<td>0x18</td>
 						<td>priority</td>
 						<td>byte</td>
-						<td>The priority value for this task. May be 0 - 255, but values over 3 can cause noticible lag in other tasks.</td>
+						<td>The priority value for this task. May be 0 - 255, but values over 3 can cause noticeable lag in other tasks.</td>
 					</tr>
 
 					<tr>
@@ -1130,35 +1137,35 @@
 					<tr>
 						<td>0x1C</td>
 						<td>switchInLow</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The low DWord of the TSC value when this task is switched to.</td>
 					</tr>
 
 					<tr>
 						<td>0x20</td>
 						<td>switchInHigh</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The high DWord of the TSC value when this task is switched to.</td>
 					</tr>
 
 					<tr>
 						<td>0x24</td>
 						<td>cycleCountLow</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The low DWord of the total cycles this task used during its most recent turn at the CPU.</td>
 					</tr>
 
 					<tr>
 						<td>0x28</td>
 						<td>cycleCountHigh</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The high DWord of the total cycles this task used during its most recent turn at the CPU</td>
 					</tr>
 
 					<tr>
 						<td>0x2C</td>
 						<td>spawnedBy</td>
-						<td>dword</td>
+						<td>DWord</td>
 						<td>The task number of the task which spawned this task.</td>
 					</tr>
 
@@ -1234,8 +1241,31 @@
 		<br>
 		<br>
 
+
+
+
+
 		<hr>
-		<h2><a name = 'SystemStruct'>Section 10 - The System Struct</a></h2>
+		<h2><a name = 'Events'>Section 10 - Things that Go Bump in the <i>Night</i>: Events in the Night Kernel</a></h2>
+		<p>
+			User interaction among traditional DOS applications is quite non-uniform. Some programs reply only to text commands, others support keyboard and mouse input, others still expect in their designed crafted in such a way that the program .<br>
+			<br>
+
+			<a href = 'https://infogalactic.com/info/Computer_multitasking#Cooperative_multitasking'>things</a>
+			<br>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+
+
+
+
+		<hr>
+		<h2><a name = 'SystemStruct'>Appendix 0 - The System Structure</a></h2>
 		<p>
 			Night tracks system information in the <code>tSystem</code> structure. Its fields are specified below.<br>
 			<br>
@@ -1271,13 +1301,13 @@
 					<tr>
 						<td>configBits</td>
 						<td>DWord</td>
-						<td>A dword describing various feature choices in the kernel. See <a href = '#Config'>Section 6 - Setting Options with ConfigBits</a> for more information.</td>
+						<td>A DWord describing various feature choices in the kernel. See <a href = '#Config'>Section 6 - Setting Options with ConfigBits</a> for more information.</td>
 					</tr>
 
 					<tr>
 						<td>configBitsHint$</td>
 						<td>10 Bytes</td>
-						<td>A string (<i>'configBits'</i>) which preceeds the configBits area.</td>
+						<td>A string (<i>'configBits'</i>) which precedes the configBits area.</td>
 					</tr>
 
 					<tr>
@@ -1645,916 +1675,9 @@
 		<br>
 		<br>
 
-		<hr>
-		<h2><a name = 'Changelog'>Appendix 0 - Version History</a></h2>
-		<p>
-			<ul></ul>
-			<b>In progress, 0.1F Update, Build 3729 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
-				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBIntHalt to aid in debugging misfiring interrupts.</li>
-				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
-				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
-				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
-				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
-				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() and PopulationCountRange() to return the Hamming weight of a number or range of memory, respectively. Uses POPCNT for additional speed if supported by the CPU.</li>
-				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
-				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
-				<li>Repo: Added 'testing files' folder. The files within can be used in place of kernel.asm to test out specific features in the future.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>lists.asm</i> - Changed prefix format for internal functions from <i>LM_Internal_</i> to <i>LM_Private_</i>.</li>
-				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
-				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
-				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is now allocated in 4 KiB blocks and aligned on a 4 KiB boundary.</li>
-				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
-				<li>Kernel: <i>PS2Controller.asm</i> - Increased timeout for reads and writes to 0.25 seconds to improve compatibility with some older hardware.</li>
-				<li>Kernel: <i>PS2Controller.asm</i> - Restructured driver to handle only the controller - device functions have been split off into their own files.</li>
-				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>lists.asm</i> - Fixed an issue where LMElementSizeGet() was taking eight bytes off the stack upon exit instead of the appropriate four.</li>
-				<li>Kernel: <i>memory.asm</i> - Fixed a bug causing boot failure on machines with under 4 GiB of memory.</li>
-				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection fixed; several keyboards which previously did not work with Night are now detected and handled appropriately.</li>
-				<li>Kernel: <i>PS2Controller.asm</i> - Malfunctioning ports are no longer left active.</li>
-				<li>Kernel: <i>PS2Controller.asm</i> - Updated all functions to adhere to the convention of using EDX for returning error codes.</li>
-				<li>Manual: Bugs in various HTML elements. Thanks, GitKraken. :/</li>
-				<li>Manual: Updated a bit of semantics.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
 
-			<b>10/15/2019, 0.1E Update, Build 2718 - Code integrity improvements</b><br>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: All <code>%define</code> statements now have matching <code>%undef</code> statements to make undefined references able to be caught immediately instead of inadvertently pointing to a value in another function.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: Bugs in various files regarding variable scope, code layout, and efficiency.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
 
-			<b>10/14/2019, 0.1E Update, Build 2681 - Incorporated Antony's changes from Linker branch</b><br>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: Instead of having NASM build the whole kernel by using <code>%include</code> statements, NASM now builds each individual file separately and then uses LD to link them together. Modularity FTW!</li>
-			</ul>
-			<br>
-			<br>
-			<br>
 
-			<b>10/10/2019, 0.1E Update, Build 2675 - Start of paging support, memory probe bug fixes, start of 64-bit math support</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: Moved all files toward a more standard format by adding <code>%include</code>s to the start of each file which needs defined structs, constants, or the like.</li>
-				<li>Kernel: <i>memory.asm</i> - Added <code>PageDirNew()</code> to create a new empty page directory.</li>
-				<li>Kernel: <i>numbers.asm</i> - Added <code>QuadAdd16()</code>, <code>QuadAdd()</code>, <code>QuadShiftLeft()</code>, and <code>QuadShiftRight()</code> to perform calculations on 64-bit values. Useful for totalling memory on machines with more than 4 GiB of RAM!</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>interrupts.asm</i> - Optimized some interrupt handling code.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>lists.asm</i> - Removed some stray error checking in <code>LM_Internal_ItemAddAtSlot()</code>.</li>
-				<li>Kernel: <i>lists.asm</i> - Streamlined error checking in numerous routines.</li>
-				<li>Kernel: <i>memory.asm</i> - Fixed a use-without-initialization error causing <code>MemProbe()</code> to not reliably fetch proper information.</li>
-				<li>Kernel: <i>RTC.asm</i> - Fixed/improved stack handling in the ISR.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>9/25/2019, 0.1D Update, Build 2247 - Basic FAT16 driver complete</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16ItemCount()</code> to return how many items match the attributes specified in the folder specified.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16PartitionInfo()</code> to return free space on the drive</li>
-				<li>Kernel: <i>memory.asm</i> - Added a mechanism to <code>MemFindMostSuitable()</code> to track free memory as it works. This function is called in every memory allocation, so it should always maintain the current number of free bytes.</li>
-				<li>Manual: Added additional filesystem driver command codes.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - All routines which previously accepted a partition number now accept a pointer to a tPartitionInfo record instead, allowing them to be much more efficient.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Eliminated unnecessary path string copying in several functions</li>
-				<li>Kernel: <i>globals.asm</i> - <code>tPartitionInfo</code> now holds the partition number of itself as well. This is done to allow code optimizations in other functions.</li>
-				<li>Manual: Added new function error codes.</li>
-				<li>Manual: Removed <i>IDE Controller.asm</i> from the <i>Function Reference</i> section as it is a driver and its routines should never be called directly anyway.</li>
-				<li>Kernel: Combined <i>files.asm</i> and <i>disks.asm</i> into <i>storage.asm</i> and updated the NKRM accordingly.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: Improved error trapping after allocating memory in various routines.</li>
-				<li>Kernel: Worked on various files to begin establishing EDX as the standard register which holds returned error cdoes.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ChainGrow()</code> now zeroes-out all clusters which it adds onto a cluster chain.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemExists()</code> now works.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed some local variable allocations.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Plugged a memory leak in <code>FAT16ServiceHandler()</code>.</li>
-				<li>Manual: Fixed error code return registers for several functions.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>9/20/2019, 0.1D Update, Build 2009 - FAT16 driver progress</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16EntryBuild()</code></li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - In addition to everything it already cached, <code>FAT16PartitionCacheData()</code> now caches the number of bytes and sectors occupied by the root directory.</li>
-				<li>Kernel: <i>files.asm</i> - Added <code>FMItemNew()</code> to create new empty files and directories.</li>
-				<li>Kernel: The old <code>ESI</code>-based method of accessing structs has been replaced by proper <code>struc</code> statements, removing the dependence on <code>ESI</code>, allowing numerous sections of code to be greatly optimized, <i>and</i> saving many bytes of space in the process.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: File paths are no longer passed to the FM routines with drive specifiers.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ChainRead()</code> and <code>FAT16ChainWrite()</code> now handle writing to 'sector 0' (the root directory) directly.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemMatch()</code> now works on its own local copy of the string it is passed instead of fouling up the caller's copy.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Increased the number of parameters which can be passed to filesystemn driver routines.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>LM_Internal_ElementAddressGet()</code> is now used instead of <code>LMElementAddressGet()</code> for speed.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed an unused local variable from <code>FAT16ItemMatch()</code>.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16CalcClustersNeeded()</code> to <code>FAT16CalcSpaceNeeded()</code>, as it now returns the number of clusters <i>and</i> sectors to store a file.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16FileInfoAccessedGet()</code>, <code>FAT16FileInfoCreatedGet()</code>, <code>FAT16FileInfoModifiedGet()</code>, <code>FAT16FileInfoSizeGet()</code>, and <code>FAT16FileStore()</code> to <code>FAT16ItemInfoAccessedGet()</code>, <code>FAT16ItemInfoCreatedGet()</code>, <code>FAT16ItemInfoModifiedGet()</code>, <code>FAT16ItemInfoSizeGet()</code>, and <code>FAT16ItemStore()</code>, respectively.</li>
-				<li>Kernel: <i>files.asm</i> - Offloaded all the path preparation work into the FAT16 driver itself, greatly condensing the code in this file's routines.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemNew()</code> no longer marks a cluster as in use until it determines the item doesn't already exist.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemNew()</code> now properly writes the cluster number on '..' entries.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed a use-without-define error in <code>FAT16ItemLoad()</code>.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed some unused local variables in various functions.</li>
-				<li>Kernel: <i>files.asm</i> - Fixed an issue in <code>FMFileStore()</code> where the stack was not cleared properly prior to return.</li>
-				<li>Kernel: <i>memory.asm</i> - <code>MemAllocate()</code> now returns proper error codes.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>9/5/2019, 0.1D Update, Build 1397 - Start of FAT16 algorithmic improvements</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemLoad()</code> (formerly called <code>FAT16PathToDirEntry()</code>) now implements *insert echo here* RE-CUR-SION!</li>
-				<li>Kernel: <i>files.asm</i> - Added <code>FMPathParentGet()</code>.</li>
-				<li>Kernel: <i>strings.asm</i> - Added <code>StringSearchCharRight()</code>.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ServiceHandler()</code> no longer adds its own kErrNone prior to returning; leave that up to the function which was called.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileInfoSizeSet()</code> since this function will be handled by the item / chain writing routines.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileLoad()</code> since <code>FAT16ItemLoad()</code> has now been reworked to do everything it did, and more - like reliably loading directories as well as files! :D</li>
-				<li>Kernel: <i>files.asm</i> - <code>FMPathPartitionStripDrive()</code> now leaves the leading '/' on paths it processes (e.g. returns <i>/system/apps/program.exe</i> instead of <i>system/apps/program.exe.</i> </li>
-				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringSearchChar()</code> to <code>StringSearchCharLeft()</code>.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>strings.asm</i> - Fixed <code>StringSearchCharLeft()</code> to return null in EAX if no match is found.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16CalcLBAClusterToSector()</code>.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Calling <code>FAT16FileStore()</code> with the path of an already-existing file now successfully overwrites the file and correctly adjusts the number of clusters used to save the file on disk.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Optimized FAT16 info caching to happen in the service handler routine instead of in every single other one.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16ClustersNeeded()</code> to <code>FAT16CalcClustersNeeded()</code>.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16TableElementFromCluster()</code> to <code>FAT16CalcTableElementFromCluster()</code>.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed an issue where <code>FAT16ChainShrink()</code> was using <code>thisSector</code> instead of <code>lastSector</code> for disk writes.</li>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed an issue where <code>FAT16ClustersNeeded()</code> was not calculating correctly due to edx not being set to zero prior to division.</li>
-				<li>Manual: Moved the text describing table 5.1 to accompany the table itself. What a novel idea!</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/25/2019, 0.1D Update, Build 1211</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16ChainGrow()</code>, <code>FAT16ChainShrink()</code>, and <code>FAT16ChainResize()</code>.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16ItemClusterCount()</code> to <code>FAT16ChainLength()</code>.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>IDE Controller.asm</i> - Fixed an issue where <code>IDEATASectorWriteLBA28PIO()</code> was not polling after flushing the disk cache leading to intermittent sector I/O failures.</li>
-				<li>Kernel: <i>IDE Controller.asm</i> - Removed <i>ATA Controller.asm</i> and <i>partitions.asm</i> which somehow got added back into (or never got removed from) the project.</li>
-				<li>Manual: Fixed an erroneous entry in the previous version which said paging was added. It was not. Yet.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>kernel.asm</i> - Implemented new driver handling method</li>
-				<li>Kernel: <i>kernel.asm</i>, <i>screen.asm</i> - Made use of new global defines for ConfigBits options</li>
-				<li>Kernel: <i>PS/2 Controller.asm</i> - Added function info to the NKRM.</li>
-				<li>Manual: Added driver command code tables.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>debug.asm</i> - Removed PCI register dumps.</li>
-				<li>Kernel: <i>drives.asm</i> (Formerly <i>partitions.asm</i>) - Removed that <i>bloody</i> driver code! :)</li>
-				<li>Kernel: <i>drives.asm</i> Added <code>DiskRead()</code>, <code>PartitionMap()</code>, and <code>PartitionRead()</code>.</li>
-				<li>Kernel: <i>hardware.asm</i> - Eliminated the legacy driver loading system.</li>
-				<li>Kernel: <i>IDE Controller.asm</i>, <i>lists.asm</i>, <i>memory.asm</i>, <i>PCI.asm</i>, <i>strings.asm</i> - Added defines for input paramteters.</li>
-				<li>Kernel: <i>PCI.asm</i> - Added <code>PCIHandlerGet()</code> and <code>PCIHandlerSet()</code>.</li>
-				<li>Kernel: <i>PCI.asm</i> - Added <code>PCIInfoClassGet()</code>, <code>PCIInfoDeviceGet()</code>, <code>PCIInfoProgIfGet()</code>, <code>PCIInfoRevisionGet()</code>, <code>PCIInfoSubclassGet()</code>, and <code>PCIInfoVendorGet()</code>.</li>
-				<li>Kernel: <i>PCI.asm</i> - Overhauled code, renamed functions for consistency.</li>
-				<li>Kernel: <i>PCI.asm</i> - Removed PCI register caching.</li>
-				<li>Kernel: <i>PCI.asm</i> - Removed the 'search' method of loading drivers in favor of the new table-based method.</li>
-				<li>Kernel: <i>PS/2 Controller.asm</i> - Changed all routines over to new method of returning values in registers instead of on the stack.</li>
-				<li>Kernel: <i>PS/2 Controller.asm</i> - Since this is the <i>only</i> legacy driver in the system, it made sense to just have Night handle it directly.</li>
-				<li>Kernel: <i>strings.asm</i> - Added <code>StringCharGet()</code>.</li>
-				<li>Kernel: <i>strings.asm</i> - Tidied up <code>StringWordCount()</code> and <code>StringWordGet()</code>.</li>
-				<li>Kernel: Condensed <i>FAT12.asm</i>, <i>FAT16.asm</i>, and <i>FAT32.asm</i>, into a single driver - <i>FAT Filesystem.asm</i>.</li>
-				<li>Manual: Added external links to MS-DOS function descriptions.</li>
-				<li>Manual: Added symbol names to error codes table.</li>
-				<li>Manual: Updated Coding Conventions section.</li>
-				<li>Manual: Updated drivers section.</li>
-				<li>Toolchain: Removed Xenops dependency. If we include one publicly-available utility, we may as well include all the others we use. And we're not doing that.</li>
-				<li>Toolchain: Included drive image is now FAT16 formatted.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>IDE Controller.asm</i> - All four possible IDE devices on a controller are now properly detected.</li>
-				<li>Kernel: <i>IDE Controller.asm</i> - Fixed a bug where a controller present with no drive attached was added to the drives list as a valid (albeit meaningless) drive.</li>
-				<li>Kernel: <i>IDE Controller.asm</i> - <code>IDEATASectorReadLBA28PIO()</code> and <code>IDEATASectorWriteLBA28PIO()</code> now wait and flush the disk cache properly between sectors during multi-sector operations.</li>
-				<li>Kernel: <i>IDE Controller.asm</i> - Optimized and compacted <code>IDEDetectChannelDevices()</code>.</li>
-				<li>Kernel: <i>IDE Controller.asm</i> - The model name and serial number of device number one on both channels is now properly recorded.</li>
-				<li>Kernel: <i>memory.asm</i> - Fixed improper stack clearing upon exit in <code>Mem_Internal_MemListShrink()</code>.</li>
-				<li>Kernel: <i>lists.asm</i> - Fixed an error in <code>LM_Internal_SlotFreeTest()</code> regarding address calculation.</li>
-				<li>Kernel: <i>screen.asm</i> - Fixed a bug in <code>PrintRegs16()</code> and <code>PrintRegs32()</code> which did not print correct values for BP/EBP.</li>
-				<li>Kernel: <i>strings.asm</i> - Eliminated a remnant of the prior stack-based parameter passing method.</li>
-				<li>Kernel: <i>strings.asm</i> - Fixed an errant local variable reference in <code>StringCharPrepend()</code>.</li>
-				<li>Kernel: <i>strings.asm</i> - Fixed an out-of-bounds write in <code>StringPadRight()</code>.</li>
-				<li>Kernel: <i>strings.asm</i> - <code>StringWordGet()</code> now returns a null string if the requested word is greater than the number of words in the string.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: Added a <i>build</i> value to the <code>tSystem</code> struct.</li>
-				<li>Manual: Added function listings for all remaining files.</li>
-				<li>Manual: Added Sub-section links in the index to the various sections of the Night Kernel Function Reference.</li>
-				<li>Toolchain: Integrated Maarten's awesome <a href = 'https://github.com/m44rtn/xenops'>Xenops</a> tool to allow autoincrementing of the build value in <i>globals.asm</i>. I seriously can't overstate how cool this little utility is.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>FAT12.asm</i> - Optimized bit tests in <code>FSType01Init()</code>.</li>
-				<li>Kernel: <i>globals.asm</i> - <code>tTaskInfo.taskFlags</code> is now a 32-bit value instead of an 8-bit one.</li>
-				<li>Kernel: <i>globals.asm</i> - Used <code>%define</code> for <code>true</code> and <code>false</code> instead of constants to save a couple doublewords of space.</li>
-				<li>Kernel: <i>screen.asm</i> - Optimized bit tests in <code>PrintIfConfigBits16()</code> and <code>PrintIfConfigBits32()</code>.</li>
-				<li>Kernel: <i>tasks.asm</i> - Majorly optimized task switching logic in <code>TaskSwitch()</code> resulting in a significant speed increase.</li>
-				<li>Kernel: Functions now return parameters in registers as opposed to on the stack.</li>
-				<li>Manual: Updated <i>Section 4 - Coding Conventions Used in Night</i>.</li>
-				<li>Manual: Updated List Manager Functions section to show new parameter return conventions.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>lists.asm</i> - Fixed bugs in <code>LMElementValidate()</code> and <code>LMListValidate()</code> which made them always return True.</li>
-				<li>Kernel: <i>memory.asm</i> - Fixed a stack leak in <code>MemDispose()</code>.</li>
-				<li>Kernel: <i>memory.asm</i> - <code>MemAddressAlign()</code> now checks input to prevent possible division by zero errors.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>debug.asm</i> - Added a task browser.</li>
-				<li>Kernel: <i>debug.asm</i> - Added <code>DebugCPUFeaturesEnable()</code> to enable the debugging features of the x86 CPU; any addresses loaded into DR0 through DR3 will be set as global breakpoints and be trapped upon execution.</li>
-				<li>Kernel: <i>debug.asm</i> - Added <code>DebugTraceEnable()</code> and <code>DebugTraceDisable()</code>.</li>
-				<li>Kernel: <i>debug.asm</i> - Added <code>Debugger()</code> to support kernel-level single stepping of instructions</li>
-				<li>Kernel: <i>kernel.asm</i> - Added a simple performance counter task which displays how many times the CPU was able to add to a memory location in a single second along with a bare-bones load calculation.</li>
-				<li>Kernel: <i>interrupts.asm</i> - Added contingencies to the critical error handler so that it can attempt to handle some situations without automatically insta-killing every task which crosses its path.</li>
-				<li>Kernel: <i>tasks.asm</i> - Added a priority system to running tasks. Every task is started at 0 priority, but if this value is raised that task will get more turns at the CPU than others.</li>
-				<li>Kernel: <i>tasks.asm</i> - Implemented task flags so that tasks can now be independently suspended and resumed.</li>
-				<li>Kernel: <i>tasks.asm</i> - <code>TaskNew()</code> now respects the setting of the <code>VM</code> bit in the <code>EFLAGS</code> register to specify that the task is to use Virtual-8086 mode, and extra stack handling logic has been added to accomodate the segment registers pushed by the CPU for V86 tasks.</li>
-				<li>Kernel: <i>tasks.asm</i> - Tasks now include a performance value based on the <code>RDTSC</code> instruction which is updated by the kernel at each task switch.</li>
-				<li>Manual: Added DOS function reference appendix.</li>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>globals.asm</i> - Increased the size of the <code>tTaskInfo</code> struct to 96 bytes to allow more room to keep track of task-y things.</li>
-				<li>Kernel: <i>globals.asm</i> - Moved the mouse-related globals to the <code>.data</code> section to ensure they are null if the mouse cannot be initialized.</li>
-				<li>Kernel: <i>interrupts.asm</i> - Removed globals <code>exceptionSelector</code>, <code>exceptionAddress</code>, and <code>exceptionFlags</code> since this information is now all passed on the stack.</li>
-				<li>Kernel: <i>interrupts.asm</i> - Tidied up the critical error handler.</li>
-				<li>Kernel: <i>tasks.asm</i> - Changed <code>TaskNew()</code> to now create tasks at user-level.</li>
-				<li>Manual: Fleshed out the section on multitasking.</li>
-			</ul>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>debug.asm</i> - Fixed a <i>stupid</i> bug in <code>DebugWaitForEscape()</code> which caused stack corruption.</li>
-				<li>Kernel: <i>interrupts.asm</i> - Remedied a mismatched parameter in the critical error handler.</li>
-				<li>Kernel: <i>screen.asm</i> - An incorrect shift in <code>ScreenClear16()</code> and <code>ScreenClear32()</code> resulted in a multiply instead of a divide, causing too much memory to be cleared.</li>
-				<li>Kernel: <i>strings.asm</i> - Fixed a bug in <code>StringTokenBinary()</code>, <code>StringTokenDecimal()</code>, <code>StringTokenHexadecimal()</code>, and <code>StringTokenOctal()</code> which trimmed <i>all</i> leading zeroes instead of leaving one.</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>4/17/2019, 0.1A Update - Preemptive Multitasking!</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: <i>interrupts.asm</i> - Added a call to <code>TaskSwitch()</code> to PIT interrupt 0x20</li>
-				<li>Kernel: <i>strings.asm</i> - Added <code>ConvertStringBinaryToNumber()</code>, <code>ConvertStringDecimalToNumber()</code>, <code>ConvertStringHexToNumber()</code>, and <code>ConvertStringOctalToNumber()</code> to convert numbers contained in strings to be extracted to actual numeric values</li>
-				<li>Kernel: <i>strings.asm</i> - Added <code>StringSearchChar()</code> to quickly find the first occurrance of a character in a string</li>
-				<li>Kernel: <i>strings.asm</i> - Added <code>StringTokenBinary()</code>, <code>StringTokenDecimal()</code>, <code>StringTokenHexadecimal()</code>, <code>StringTokenOctal()</code> and <code>StringTokenString()</code> as replacements for <code>StringBuild()</code></li>
-				<li>Kernel: <i>tasks.asm</i> - Preemptive multitasking for supervisor code is functional</li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: <i>debug.asm</i> - Added an interactive RAM browser</li>
-				<li>Kernel: <i>debug.asm</i> - Separated the code for each debugging feature out into individual functions.</li>
-				<li>Kernel: <i>debug.asm</i> - Separated the date and time and mouse output displays into their own tasks</li>
-				<li>Kernel: <i>GDT.asm</i> - Added a TSS descriptor slot to the GDT</li>
-				<li>Kernel: <i>globals.asm</i> - Removed the global kernel print string, <i>kPrintText$</i>. There's 0.25 KiB saved!</li>
-				<li>Kernel: <i>interrupts.asm</i> - Moved the RTC interrupt handler to RTC.asm</li>
-				<li>Kernel: <i>interrupts.asm</i> - Removed spurious <code>pushf</code> and <code>popf</code> instructions from some interrupt handlers which aren't necessary since the interrupt already automatically saves and restores the flags register itself.</li>
-				<li>Kernel: <i>interrupts.asm</i> - Revamped the critical error handler to show task information as well</li>
-				<li>Kernel: <i>interrupts.asm</i> - Trimmed some fat from all exception handlers</li>
-				<li>Kernel: <i>memory.asm</i> - Modified <code>MemAllocate()</code> to zero memory blocks out at allocate time. Geez, memory is dirty on some real hardware!</li>
-				<li>Kernel: <i>screen.asm</i> - Changed text printing routines to take text color and position as parameters instead of relying on system-level globals</li>
-				<li>Kernel: <i>screen.asm</i> - Modified algorithm used in <code>PrintRAM32()</code></li>
-				<li>Kernel: <i>strings.asm</i> - Improved efficiency and readability in some existing string routines</li>
-				<li>Kernel: <i>strings.asm</i> - Moved function listings into the NKRM</li>
-				<li>Kernel: <i>strings.asm</i> - Removed a couple comments with references to VESA since we don't deal with that anymore.</li>
-				<li>Kernel: <i>strings.asm</i> - Removed the clumsy and potentially stack-abusing <code>StringBuild()</code> and migrated all code which used it over to the new, more stable routines</li>
-				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringCharInsert()</code> to <code>StringInsert()</code> since it isn't limited to just characters, but can handle entire strings</li>
-				<li>Toolchain: <i>makefile</i> - Added directive for list file generation</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>Kernel: <i>ATA Controller.asm</i> - Partially fixed a bug concerning passing a dummy value to <code>LMSlotFindFirstFree()</code> as described by Maarten <a href = 'https://groups.google.com/d/msg/night-dos-kernel/lJaCvR_s2_I/RN5BjrRxCQAJ'>here</a></li>
-				<li>Kernel: <i>partitions.asm</i> - Fixed another dummy value bug concerning <code>LMSlotFindFirstFree()</code></li>
-				<li>Manual: Fixed a typo in the List Manager header format table</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>4/5/2019, 0.19 Update - Fixes for A20, PS/2, RTC, and PIC</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: A20 - Added functions to <i>memory.asm</i> to support additional A20 enabling methods</li>
-				<li>Kernel: Added <i>tasks.asm</i> for the upcoming shiny new Task Manager routines!</li>
-				<li>Kernel: PS2 Controller - Added support for 5-button mice</li>
-				<li>Kernel: PS2 Controller - Added hotplugging support (device initialization is now handled by the interrupt handler instead of only being performed once at startup)</li>
-				<li>Kernel: RTC - Added <code>BCDToDecimal()</code> and <code>RTCAdjustBCD()</code> to support new RTC handling method</li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: All files - added proper <code>section</code> directives to all files. Something that probably should've been done long ago... 8-)</li>
-				<li>Kernel: A20 - Moved A20 handling out of <i>hardware.asm</i> and into <i>memory.asm</i> since that just makes sense.</li>
-				<li>Kernel: CPU - Split CPUID code from <i>misc.asm</i> into its own file, <i>CPU.asm</i></li>
-				<li>Kernel: <i>debug.asm</i> - Added mouse coordinates to the Debug Menu</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.century</code> since it's not supported by all RTC chips and isn't super necessary anyway</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.delayValue</code> as it's no longer neccessary since CPU cycle-based delay loops have been eliminated</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.keyboardType</code> and <code>tSystem.mouseID</code> in favor of the more versatile <code>tSystem.PS2ControllerDeviceID1</code> and <code>tSystem.PS2ControllerDeviceID2</code></li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.lastError</code> since functions now return error codes</li>
-				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.ticks</code> (and modified <i>TimerWait()</i> to do its job without it) since it's unnecessary to track both how many ticks have passed in a second as well as how many have passed since boot</li>
-				<li>Kernel: <i>hardware.asm</i> - Removed <code>CPUSpeedDetect()</code></li>
-				<li>Kernel: <i>interrupts.asm</i> - Added <code>InterruptHandlerGetAddress()</code>, <code>InterruptHandlerGetFlags()</code>, and <code>InterruptHandlerGetSelector()</code></li>
-				<li>Kernel: <i>interrupts.asm</i> - Streamlined <code>InterruptHandlerSet()</code></li>
-				<li>Kernel: <i>misc.asm</i> - Removed <code>SetSystemCPUSpeed()</code></li>
-				<li>Kernel: <i>PIC.asm</i> - Completed functions <code>PICIRQEnable()</code> and <code>PICIRQDisable()</code> for enabling individual IRQs, renamed other fuctions as needed for consistency</li>
-				<li>Kernel: PS/2 Controller - Changed timeout to use interrupt-based tick counters as opposed to the CPU-cycle based ones used before</li>
-				<li>Kernel: PS/2 Controller - Code set 2 is still used but hardware translation is now disabled, allowing the driver to handle a mouse on port 1 or a keyboard on port 2 without freaking out, in case the user accidentally gets the ports reversed</li>
-				<li>Kernel: PS/2 Controller - Moved existing PS/2 Controller code into its own legacy driver, <i>PS2 Controller.asm</i>, and made it <i>much</i> more robust with proper timeout and device response checking added</li>
-				<li>Kernel: PS/2 Controller - Reduced I/O timeout values to 1/16 of a second</li>
-				<li>Kernel: PS/2 Controller - Removed the <code>kKeyTable</code> array until we get a proper event queue in place which can handle keystrokes and such</li>
-				<li>Kernel: PS/2 Controller - The 256-byte keystroke buffer is now dynamically allocated with a call to <code>MemAllocate()</code> and is referred to by the name <code>kKeyBufferAddress</code> instead of the old name, <code>kKeyBuffer</code>. There's 0.25 KiB saved!</li>
-				<li>Kernel: RTC - Enabled interrupts on the RTC and moved time handling code to the interrupt 0x28 RTC handler instead of letting PIT interrupt 0x20 do the job. This means the time updating code is now only called once per second instead of every. Single. Tick. Big wins for efficiency!</li>
-				<li>Kernel: RTC - Split RTC code off into its own file, <i>RTC.asm</i></li>
-				<li>Manual: Reformatted <i>Version History</i> with HTML lists</li>
-				<li>Manual: Removed <i>Known Issues</i> section. There aren't any more, anyway!</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>Kernel: A20 - Fixed A20 line enabling. Night can now use the BIOS, the Keyboard Controller, and I/O port 0xEE methods in addition to the Fast Enable method it always used. And it <i>even</i> works properly on real hardware! :D</li>
-				<li>Kernel: <i>hardware.asm</i> - Fixed bug where the entry point of legacy drivers was not being calculated correctly</li>
-				<li>Kernel: <i>kernel.asm</i> - Fixed a Bad Thing Waiting To Happen where calls to BIOS services made prior to entering Protected Mode were enabling interrupts even when they were disabled prior to the call. Come <i>on</i> guys, that's just lazy BIOS programming. Always leave things the way you found them!</li>
-				<li>Kernel: PS/2 Controller - Fixed a few errors in PS/2 Controller handling which caused some unnecessary I/O timeouts, causing the boot procedure to be roughly one second faster</li>
-				<li>Kernel: <i>RTC.asm</i> - Fixed RTC format handling. Instead of attempting to modify the RTC to work the way we want (since apparently not all RTC chips are cool with that), Night now reads how the RTC is already set and adapts accordingly. Tested working on real hardware, QEMU, and VirtualBox with the RTC in either binary or BCD mode and in either 12-hour or 24-hour format. Woohoo!</li>
-				<li>Kernel: <i>screen.asm</i> - Fixed bug in scrolling algorithm where text was getting printed before the screen was scrolled, meaning you couldn't write text to the bottom line of the screen</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>3/5/2019, 0.18 Update - Bugfixes for PCI handling on real hardware</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: Added <i>%define</i> symbols for various local variables in multiple files to improve readability</li>
-				<li>Kernel: Added Reboot option to Debug Menu</li>
-				<li>Kernel: Added <code>PCIProbe()</code> to <i>pci.asm</i></li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: Deleted the 32-bit PCIDetect() since we now have the 16-bit PCIProbe()</li>
-				<li>Kernel: Moved function listings from <i>pci.asm</i> into the NKRM</li>
-				<li>Manual: Updated <i>Known Issues</i> section</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>Kernel: Fixed the use of a variable without assignment in one of the string routines</li>
-				<li>Kernel: PCI controller initialization is now handled properly, fixing an infinite loop on real hardware due to a poor detection technique</li>
-				<li>Manual: Removed some stray Javascript left over from a previous design test of 'accordion' sections</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>3/4/2019, 0.17 Update - Memory Manager upgrades</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: Added <i>%define</i> symbols for various local variables in <i>lists.asm</i> and <i>memory.asm</i> to improve readability</li>
-				<li>Kernel: Added <code>MemAllocateAligned()</code>, <code>MemAddressToBlock()</code>, and <code>MemAddressAlign()</code> to <i>memory.asm</i></li>
-				<li>Kernel: Added <code>MemShrinkFromBeginning()</code> and <code>MemShrinkFromEnd()</code> to <i>memory.asm</i></li>
-				<li>Manual: Added <i>Coding Conventions Used in Night</i> section</li>
-				<li>Manual: Added <i>Known Issues</i> section</li>
-				<li>Manual: Added some sweet table captioning style to the NKRM!</li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: Moved error checking out of <code>LM_Internal_SlotFreeTest()</code> and into <code>LMSlotFreeTest()</code></li>
-				<li>Kernel: Moved function listings from <i>lists.asm</i> and <i>memory.asm</i> into the NKRM</li>
-				<li>Kernel: Removed the dynamic memory list/memory block border, implying a slight internal change in how memory is allocated.</li>
-				<li>Kernel: Split some existing memory management code off into <code>Mem_Internal_MemListGrow()</code> and <code>Mem_Internal_MemListShrink()</code></li>
-				<li>Manual: Rolled the existing <i>API Result Codes</i> section into its new replacement: the <i>Internal Function Reference</i> section</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>Kernel: Fixed memory allocation algorithm to actually implement the 'best-fit' strategy</li>
-				<li>Kernel: Improved Memory Manager error checking/handling and corrected some other minor errors. Foresight is never a bad thing, kids.</li>
-				<li>Kernel: <code>MemMergeBlocks()</code> now updates the memory list properly</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>2/19/2019, 0.16 Update - Full physical memory management implementation</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: Added <code>LMElementDuplicate()</code> and <code>LMElementDelete()</code> to <i>lists.asm</i></li>
-				<li>Kernel: Added <code>MemDispose()</code> to <i>memory.asm</i></li>
-				<li>Kernel: Added <code>StackTrace()</code> to <i>debug.asm</i> so our BSOD can now dump the actual stack values</li>
-				<li>Manual: Added <i>API Result Codes</i> section</li>
-				<li>Manual: Added info on the Debug Menu's new <i>Memory Details</i> option</li>
-				<li>Manual: Waxed nostalgic on the history of Night's precursor</li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: Separated List Manager routines into an external and internal group to minimize duplication of list validity checking</li>
-				<li>Kernel: Updated titles of certain List Manager functions for uniformity</li>
-				<li>Manual: Minor updates to List Manager section</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>Kernel: Further polished List Manager code</li>
-				<li>Kernel: Improper memory write in ATA Controller driver</li>
-				<li>Kernel: List Manager routines now have proper error testing and handling</li>
-				<li>Kernel: MemAllocate() now uses the List Manager to keep a list of blocks allocated</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>2/9/2019, 0.15 Update - Start of refinements for upcoming Memory Manager additions</b><br>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: List Manager code overhaul in preparation for upcoming Memory Manager feature additions</li>
-				<li>Kernel: Updated copyright dates in all files</li>
-				<li>Manual: Added section on Debugging Night using the VirtualBox debug console</li>
-				<li>Manual: List Manager details</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>12/26/2018, 0.14 Update - File system driver subsystem</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Kernel: Added <code>DriverLegacyLoad()</code> to hardware.asm</li>
-				<li>Kernel: Added <code>partitions.asm</code> for partition support</li>
-				<li>Kernel: Added PCI device list address to the Debug Menu</li>
-				<li>Manual: Added <i>Section 2 - The Kernel Debug Menu</i> and <i>Section 5 - The List Manager</i> to the reference manual</li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Kernel: Moved <i>globals.asm</i> to the beginning of includes so that all other files can take advantage of the things defined there</li>
-				<li>Kernel: PCIDriverSearch now looks specifically for PCI drivers <i>only</i></li>
-				<li>Kernel: Some minor code cleanups and fixes</li>
-				<li>Manual: <i>Major</i> structure overhaul</li>
-				<li>Manual: Updated driver details</li>
-				<li>Toolchain: Replaced <i>buildrun.sh</i> with a proper makefile using the one in Bird OS as a template (Thanks to Maarten for the inspiration!)</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>Kernel: Driver loading algorithm for both PCI and legacy drivers now loads more than just the first driver found</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>7/28/2018, 0.13 Update - Full exception handling</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Added <code>CriticalError()</code> and tied to it all existing exception traps for proper handling</li>
-				<li>Added CMOS interfacing routines</li>
-				<li>Added <code>DebugVBoxLogWrite()</code> to allow writing diagnostic messages to the VirtualBox log</li>
-				<li>Added the <i>docs</i> folder to the repo, containing the new <i>Night Kernel Reference Manual</i>, the official source of documentation and technical notes for the Night Kernel</li>
-				<li>Fleshed out Antony's <i>nd-ddskel.asm</i></li>
-			</ul>
-			<br>
-			Changed<br>
-			<ul>
-				<li>Cleaned up comments in <code>StringWordCount()</code> and <code>StringWordGet()</code></li>
-				<li>Replaced the kernel's floppy image <i>(night.img)</i> with a new 16 MiB hard drive image, <i>Night.vdi</i> and altered <i>buildrun.sh</i> accordingly</li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li>A minor typo in the function listing of ATA Controller.asm</li>
-				<li><code>ScreenClear16()</code> and <code>ScreenClear32()</code> now clear the screen to the background color instead of always using black</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>7/6/2018, 0.12 Update - Functional ATA driver</b><br>
-			<br>
-			New<br>
-			<ul>
-				<li>Added function listings to the beginnings of all files</li>
-				<li>Added GDT setting and getting routines to facilitate generation of GDT elements on-the-fly; a first step to multitasking</li>
-				<li>Added <code>MemSearchString()</code> - It works for now, but it's not elegant and will definitely need optimized later.</li>
-				<li>Added <code>MemCompare()</code>, <code>MemSwapWordBytes()</code>, and <code>MemSwapDWordWords()</code></li>
-				<li>Added PrintIfConfigBits16 and PrintIfConfigBits32 to only print messages if the flag is set in <code>configBits</code></li>
-				<li> Added a whole buncha string routines! (<code>StringCharAppend()</code>, <code>StringCharPrepend()</code>, <code>StringPadLeft()</code>, <code>StringPadRight()</code>, <code>StringSearchCharList()</code>, <code>StringTruncateLeft()</code>, <code>StringTruncateRight()</code>, <code>StringWordCount()</code>, and <code>StringWordGet()</code>, to be precise)</li>
-				<li>ATA Controller.asm (formerly IDE Controller.asm) is now operational for basic PIO mode</li>
-				<li>Finished <code>PCIDriverSearch()</code> and <code>PCILoadDrivers()</code></li>
-				<li>The ebp register is now used as it was intended in all functions, allowing more flexibility in stack tracing later</li>
-			<br>
-			</ul>
-			Changed<br>
-			<ul>
-				<li>All interrupt service routines now preserve the flags register when appropriate</li>
-				<li>Both <code>ScreenClear16()</code> and <code>ScreenClear32()</code> now honor the kBytesPerScreen value</li>
-				<li>Cleaned up pci.asm and PIC.asm with some %defines</li>
-				<li>Debug menu now shows the time/date/ticks info (previously on System Info screen) and updates the info in real time while waiting for you to make a choice</li>
-				<li>Local variables in all kernel routines are now allocated on the stack, making the kernel fully reentrant. Except for the StringBuild routine. Oh, well. Maybe next version.</li>
-				<li>Optimized List Manager code slightly</li>
-				<li>Optimized <code>StringLength()</code> for speed</li>
-				<li>Relocated GDT header to fit in null descriptor</li>
-				<li>Removed all those 'changes' lines from the function descriptions for sanity... besides, we shouldn't be counting on any certain registers being preserved anyway!</li>
-				<li>Removed <code>CRC32()</code></li>
-				<li>Renamed <code>ClearScreen16()</code> and <code>ClearScreen32()</code> to <code>ScreenClear16()</code> and <code>ScreenClear32()</code></li>
-				<li>Renamed <code>HomeCursor()</code> to <code>CursorHome()</code></li>
-				<li>Renamed <code>IDTWrite()</code> to <code>InterruptHandlerSet()</code></li>
-				<li>Renamed <code>InitGDT()</code> to <code>GDTInit()</code> and changed its function to now load an allocated GDT once protected mode is active</li>
-				<li>Renamed <code>InterruptSetHandlers()</code> to <code>ISRInitAll()</code></li>
-				<li>Renamed various string routines for consistency</li>
-				<li>Revamped existing LBA code into <code>C01ATASectorReadLBA28PIO()</code> and <code>C01ATASectorWriteLBA28PIO()</code></li>
-			</ul>
-			<br>
-			Fixed<br>
-			<ul>
-				<li><code>MemSearchDWord()</code> and <code>MemSearchWord()</code> now actually return values O.O</li>
-				<li><code>PrintRegs16()</code> and <code>PrintRegs32()</code> now preserve the flags register</li>
-				<li>Squashed a bug in <code>ScreenClear32()</code> which could potentially cause a triple fault depending on the value of ECX</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>6/10/2018, 0.11 Update - Fleshed out List Manager and PCI routines, other fixes</b><br>
-			<br>
-			<ul>
-				<li>Added check for PCI controller before attempting to init the PCI bus</li>
-				<li>Added function listing for lists.asm, memory.asm, and pci.asm</li>
-				<li>Added <code>PCICalculateNext()</code> in pci.asm</li>
-				<li>Added <code>PCIGetNextFunction()</code> in pci.asm</li>
-				<li>Added time and date data to system info page on debug menu</li>
-				<li>Changed folder locations and modified buildrun.sh accordingly</li>
-				<li>Finished <code>LMItemGetAddress()</code> in lists.asm</li>
-				<li>Finished <code>PCIGetFunctionCount()</code> (formerly <code>PCIGetDeviceCount()</code>) in pci.asm</li>
-				<li>Optimized (drastically!) the debug menu's PCI listing code and saved around 1.5 KiB</li>
-				<li>Removed duplicate code from <code>LMItemAddAtSlot()</code> in lists.asm</li>
-				<li>Removed <code>LMListSignatureCreate()</code> and <code>LMListSignatureTest()</code> from lists.asm</li>
-				<li>Replaced CRC checksumming in List Manager routines with a simple signature check for speed :/</li>
-				<li>Rewrote PCI routines to use List Manager for data shadowing</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>6/4/2018, 0.10 Update - Stupid little fixes</b><br>
-			<br>
-			<ul>
-				<li>Changed major and minor version numbers to byte size in globals.asm</li>
-				<li>Fixed a bug in the newly optimized PCI device name table where the data being written to screen wasn't coming from the right place. And also saved around 300 bytes!</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>6/4/2018, 0.10 Update - List Manager, 50-line text mode support</b><br>
-			<br>
-			<ul>
-				<li>Added 50-line text mode support. Nice for viewing those beautiful diagnostic messages at boot!</li>
-				<li>Added allocation for 8 KiB main stack (size set by global value)</li>
-				<li>Added configbits setting for screen lines at startup</li>
-				<li>Added <code>CRC32()</code> to misc.asm for data checksumming</li>
-				<li>Added <code>mouseXLimit</code> and <code>mouseYLimit</code> to the system struct (replaces old method of using the current VESA screen resolution)</li>
-				<li>Added <code>PCIDriverLoad()</code> and <code>PCIDriverSearch()</code> for the upcoming driver addition</li>
-				<li>Added the beginning of Night's first driver, IDE Controller.asm!</li>
-				<li>Added the List Manager (api/lists.asm) to manage lists of things; something the kernel will often need to do</li>
-				<li>Changed Debug menu PCI device list to now use List Manager to build its list live and cut the wasted space from hard-coding</li>
-				<li>Changed IDT memory to be allocated instead of using a static address</li>
-				<li>Changed <code>MemoryInit()</code> to respect the BIOS memory map and no longer allocate at an arbitrary address</li>
-				<li>Cleaned up interrupt code and merged 3 files (setints.asm, inthandle.asm, idt.asm) into a single file: interrupts.asm</li>
-				<li>Incorporated disks.asm into IDE driver</li>
-				<li>Made boot-time diagnostic messages and debug menu obey configbits settings</li>
-				<li>Made new folder (api) for accessory code to be used by the kernel and be made available via the Night API</li>
-				<li>Minor change to structure of all function descriptions</li>
-				<li>Moved <code>ConvertToHexString16()</code> from screen.asm to strings.asm</li>
-				<li>Moved keyboard-related globals to ps2.asm</li>
-				<li>Moved strings.asm from system folder to api folder</li>
-				<li>Moved temporary stack (the only stack we've been using up to this point!) from 0x9F800 to 0x600</li>
-				<li>Optimized <code>MemCopy()</code> to transfer 16 bytes at a time instead of just one</li>
-				<li>Optimized text scrolling algorithm to copy in 16-byte chunks, giving a 76.5% speed increase</li>
-				<li>Removed <code>kCRLF</code> from the globals, as it's no longer used</li>
-				<li>Removed VESA structs from the globals since we don't have VESA support anymore :/</li>
-				<li>Renamed system/api.asm to api/misc.asm</li>
-				<li>Trimmed unused routines (<code>PrintDebug()</code>, <code>PrintSimple()</code>, <code>SetSystemVESA()</code>) from misc.asm</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>4/25/2018, 0.0F Update - Final PCI system</b><br>
-			<br>
-			<ul>
-				<li>Added version information to kernel info screen</li>
-				<li>Changed PCI system to load device data into RAM and source all subsequent register reads from there</li>
-				<li>Made minor changes to folder structure</li>
-				<li>Other minor changes</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>1/19/2018, 0.0E Update - Now runs on real hardware!</b><br>
-			<br>
-			<ul>
-				<li>Added automatic sequential highlighted printing to <code>PrintRegsVESA()</code> (formerly <code>RegDump()</code>) for extra ease of use</li>
-				<li>Added PCI bus probing to kernel startup so it only needs done once because it takes so long</li>
-				<li>Added PCI device info dump to debug menu</li>
-				<li>Added <code>PCIGetDeviceCount()</code> to return the total number of PCI devices (functions) in the system</li>
-				<li>Added text color and location features <code>Print16()</code> and <code>Print32()</code> complete with autoscrolling text as the bottom of the screen is reached</li>
-				<li>Added <code>CursorHome()</code></li>
-				<li>Added handlers for breakpoint, invalid opcode and GPF exceptions</li>
-				<li>Removed VESA support in favor of later having a dedicated graphics driver handle video</li>
-				<li>Changed <code>PrintRegs()</code> (formerly <code>RegDump()</code>) to not use <code>StringBuild()</code> to do its job, since I needed <code>PrintRegs()</code> to debug <code>StringBuild()</code> O.O</li>
-				<li>Changed initial boot code in kernel.asm to print small diagnostic messages to assist debugging on real hardware</li>
-				<li>Changed the preferred method of clearing strings from MemCopy-ing an already cleared string over the working one to simply using MemFill to fill the string space with zeros to eliminate the wasted space of the blank strings</li>
-				<li>Changed the token used in <code>StringBuild()</code> to ^ instead of %. Why? Mac throwback! 8-)</li>
-				<li>Changed text printing routines to work identically in both 16 and 32 bit mode</li>
-				<li>Changed the formatting of the GPL text in the beginning of every. Single. File.</li>
-				<li>Fixed a read after end of string bug in <code>BuildString()</code> which gave weird results with tokens</li>
-				<li>Moved some data out of globals.asm and into the respective files with related routines and removed some unused data to tidy up the globals</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>12/6/2017, 0.0D Update - Milestone 1</b><br>
-			<br>
-			<ul>
-				<li>Added beginning of framework for PCI support (Exelyx C code which will be rewritten in assembly)</li>
-				<li>Moved some code around</li>
-				<li>Polished LBA code</li>
-				<li>Slight modifications to the Debug code</li>
-				<li>Structured the project into directories</li>
-				<li>Tested and polished the dummy memory allocation routine</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>12/2/2017, 0.0C Update</b><br>
-			<br>
-			<ul>
-				<li>Changed screen.asm to vesa.asm</li>
-				<li>Added <code>ConvertToOctalString()</code> and <code>ConvertToBinaryString()</code> to api.asm</li>
-				<li>Added <code>ticksSinceBoot</code> system variable for easier timing of events over spans of more than one second</li>
-				<li>Added strings.asm</li>
-				<li>Added <code>MemFill()</code> and <code>MemCopy()</code> to memory.asm</li>
-				<li>Added <code>VESALoadIcon()</code> to vesa.asm</li>
-				<li>Added <code>RegDump()</code> to debug.asm for more debugging ease</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>11/8/2017, 0.0B Update</b><br>
-			<br>
-			<ul>
-				<li>Modified <code>Random()</code> to return numbers within a requested limit</li>
-				<li>Added a starfield to the boot screen (Makes a nice test for <code>Random()</code>'s new feature! :) )</li>
-				<li>Made boot screen selectable by <code>ConfigBits</code> (Also made it disabled by default for now. See the notes at the bottom of globals.asm for details on what ConfigBits can control.)</li>
-				<li>Identified (and thus far did nothing about) a bug where the kernel throws an Invalid Opcode exception at 0008:0000001F when started with insufficient video RAM</li>
-				<li>Cleaned up kernel.asm and moved some IDT setup code that used to be there to idt.asm</li>
-				<li>Added a crosshair cursor (and a couple other surprises) to the Mouse Tracking Test</li>
-				<li>Modified <code>VESAPlot()</code> to clip pixels outside the LFB (Writing to memory outside your target is a Very Bad Thing)</li>
-				<li>Added the beginning of a RAM browser to the debug menu for inspecting memory without relying on the VirtualBox debugger</li>
-				<li>Added <code>ConvertDecimalToString()</code></li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>11/3/2017, 0.0A Update</b><br>
-			<br>
-			<ul>
-				<li>Fixed bug in <code>VESAInit()</code> where setting VESA mode fails silently if video hardware does not support VESA (The error message for the VESA init failing was being printed using VESA. Yes, that is as bad as it sounds. :) )</li>
-				<li>Fixed bug in <code>VESAPlot32()</code> where 16-bit registers were being used instead of 32-bit causing graphical errors when drawing at certain points on the screen</li>
-				<li>Fixed error message printing in <code>A20Enable()</code></li>
-				<li>Changed infinite loops (except the main one!) to a simple 'jmp $'</li>
-				<li>Added beginning of serial communication routines (Existing routines transmit data, but still need to add interrupt handlers that actually do something useful. Also only really works on port 1 for now.)</li>
-				<li>Added pushad/popad to all unused interrupt handlers for future sanity</li>
-				<li>Added <code>VESAClearScreen()</code></li>
-				<li>Added boot logo</li>
-				<li>Added <code>TimerWait()</code></li>
-				<li>Added the beginnings of a debug menu (debug.asm)</li>
-				<li>Beautification of teh codez1! (Tabs &gt; spaces, kids.)</li>
-				<li>Added GPL License.txt since this is kiiiiinda an open-source project and all</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>10/23/2017, 0.09 Update</b><br>
-			<br>
-			<ul>
-				<li>Added 32-bit random number generator <code>Random()</code></li>
-				<li>Added internal time maintenence based on rtc values at boot</li>
-				<li>Added <code>PrintSimple16()</code> and <code>PrintSimple32()</code></li>
-				<li>Added files for upcoming work on deeper hardware management</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>10/21/2017, 0.08 Cleanup</b><br>
-			<br>
-			<ul>
-				<li>Split some code from hardware.asm into PIC.asm, ps2.asm and screen.asm</li>
-				<li>Split some code from kernel.asm into api.asm and hardware.asm</li>
-				<li>Updated all copyright dates and copyright message</li>
-				<li>Merged build.sh and debug.sh into one script</li>
-				<li>Modified buildrun.sh to mount the floppy image on its own instead of relying on VirtualBox to already be configured with a specific image to allow more flexibility<br>
-				...and EVERYTHING STILL WORKS! :D</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/31/2016, 0.08 Update</b><br>
-			<br>
-			<ul>
-				<li>Fixed a horribly insidious bug in which the correct <code>VESAPrint()</code> function pointer is not used if the address of the low byte of the <code>VESAPrint32()</code> function address happens to be 0x18</li>
-				<li>Added limiters on mouse position counters</li>
-				<li>Added a <code>DebugPrint()</code> as a quick debug aid</li>
-				<li>Added jmp $ instructions to all exception handlers which are unimplemented as of yet to make it apparent if the system happens to fall into one. You can't miss a blantant hang lol</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/17/2016, 0.07 Update</b><br>
-			<br>
-			<ul>
-				<li>Finished mouse support</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/14/2016, 0.06 Update</b><br>
-			<br>
-			<ul>
-				<li>Fixed copyright dates</li>
-				<li>Modified timer tick interrupt</li>
-				<li>Beginning of mouse interface</li>
-				<li>Added background color option to <code>VESAPrint()</code></li>
-				<li>Added seconds since boot display to aid in seeing if anything has hung</li>
-				<li>Added some FAT structures</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/7/2016, v0.05 Update</b><br>
-			<br>
-			<ul>
-			<li>Added 24 bit color support</li>
-			<li>Made <code>VESAPrint()</code> and <code>VESAPlot()</code> function pointers to handle different underlying color depth routines</li>
-				<li>Added key buffer, basic keyboard interrupt handler and key fetch routine</li>
-				<li>Enabled interrupts - We've finally gone live!</li>
-				<li>Various minor fixups and corrections</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/6/2016, v0.04 update bugfixes</b><br>
-			<br>
-			<ul>
-				<li>Fixed Maarten's memory code</li>
-				<li>Added <code>PrintFail()</code> for printing pre-VESA init fatal errors</li>
-				<li>Other little fixups</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			<b>8/3/2016, v0.04 update</b><br>
-			<br>
-			<ul>
-				<li>Beginning of VESA support</li>
-				<li>Condensed some code files</li>
-				<li>Text drawing in 32-bit graphics modes</li>
-				<li>Auto detect best mode and set</li>
-				<li>Fast A20 enable</li>
-				<li>Introduced system info structure</li>
-				<li>Maarten's memory code</li>
-			</ul>
-			<br>
-			<br>
-			<br>
-
-			The few versions prior to this were experimental and did nothing noteworthy.
-
-		</p>
-		<br>
-		<br>
-		<br>
 
 		<hr>
 		<h2><a name = 'NightFunctionReference'>Appendix 1 - Night Kernel Function Reference</a></h2>
@@ -2592,10 +1715,10 @@
 						<br>
 						<a href = '#NightFunctionReference_PS2Controller.asm' style = 'font-size: 14px'>PS/2 Functions - PS2 Controller.asm</a><br>
 						<br>
-						<a href = '#NightFunctionReference_power.asm' style = 'font-size: 14px'>Power Functions - power.asm</a><br>
-						<br>
 					</td>
 					<td>
+						<a href = '#NightFunctionReference_power.asm' style = 'font-size: 14px'>Power Functions - power.asm</a><br>
+						<br>
 						<a href = '#NightFunctionReference_RTC.asm' style = 'font-size: 14px'>RTC Functions - RTC.asm</a><br>
 						<br>
 						<a href = '#NightFunctionReference_screen.asm' style = 'font-size: 14px'>Screen Interface Functions - screen.asm</a><br>
@@ -2608,16 +1731,11 @@
 						<br>
 						<a href = '#NightFunctionReference_tasks.asm' style = 'font-size: 14px'>Task Management Functions - tasks.asm</a><br>
 						<br>
-						<a href = '#NightFunctionReference_StandardFunctionReturnCodes' style = 'font-size: 14px'>Standard Function Return Codes</a><br>
-						<br>
 					</td>
 				</tr>
 			</table>
 			<br>
-			<ul>
-				<li>Public functions are intended for calling from any other routines.</li>
-				<li>Private functions cannot be called from code outside the source file in which they reside.</li>
-			</ul>
+			Note: Public functions can be called from any other function. Private functions cannot be called from code outside the file in which they reside.<br>
 			<br>
 			<br>
 			<br>
@@ -3221,7 +2339,7 @@
 				<tr>
 					<td>kCPU_avx512_dq</td>
 					<td>81</td>
-					<td>AVX-512 Doubleword and Quadword Instructions</td>
+					<td>AVX-512 Doubleword and QuaDWord Instructions</td>
 				</tr>
 
 				<tr>
@@ -3559,7 +2677,7 @@
 				<tr>
 					<td>kCPU_avx512_vp2intersect</td>
 					<td>136</td>
-					<td>AVX-512 VP2INTERSECT Doubleword and Quadword Instructions</td>
+					<td>AVX-512 VP2INTERSECT Doubleword and QuaDWord Instructions</td>
 				</tr>
 
 				<tr>
@@ -4014,7 +3132,7 @@
 					<td>
 						DebugRAMBrowser<br>
 						<br>
-						An interactive memory broswer
+						An interactive memory browser
 					</td>
 					<td>n/a</td>
 					<td>n/a</td>
@@ -4086,385 +3204,11 @@
 			<br>
 			<br>
 
-			<a name = 'NightFunctionReference_storage.asm'><b>Storage Manager Functions - <i>storage.asm</i></b></a><br>
-			<br>
-			32-bit Public Function Listing:<br>
-			<table style = 'width:100%'>
-				<caption><b><i>Table A1.5 - partitions.asm 32-bit public functions</i></b></caption>
-				<col width = '60%'>
-				<col width = '20%'>
-				<col width = '20%'>
-
-				<tr>
-					<th>Name / Description</th>
-					<th>Stack Input</th>
-					<th>Register Output</th>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMDiskRead</code><br>
-						<br>
-						Reads sectors from the drive specified
-					</td>
-					<td>
-						<ol>
-							<li>Drive list number</li>
-							<li>Start sector</li>
-							<li>Sector count</li>
-							<li>Buffer pointer</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Handler response<br>
-						EBX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemCount</code><br>
-						<br>
-						Returns the number of items in the directory specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to path string</li>
-							<li>Attributes to match</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Number of matching items, or zero if error<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemDelete</code><br>
-						<br>
-						Deletes the file specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>EDX - Error code</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemExists</code><br>
-						<br>
-						Tests if the item specified already exists
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemInfoAccessedGet</code><br>
-						<br>
-						Returns the date of last access for the specified file
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX (Upper 16 bits) - Year<br>
-						AL - Month<br>
-						AH - Day<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemInfoCreatedGet</code><br>
-						<br>
-						Returns the date and time of creation for the specified file
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX (Upper 16 bits) - Year<br>
-						AL - Month<br>
-						AH - Day<br>
-						EBX (Upper 16 bits) - Hours<br>
-						BH - Minutes<br>
-						BL - Seconds<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemInfoModifiedGet</code><br>
-						<br>
-						Returns the date and time of last modification for the specified file
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX (Upper 16 bits) - Year<br>
-						AL - Month<br>
-						AH - Day<br>
-						EBX (Upper 16 bits) - Hours<br>
-						BH - Minutes<br>
-						BL - Seconds<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemInfoSizeGet</code><br>
-						<br>
-						Returns the size in bytes of the file specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>
-						ECX - File size<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemLoad</code><br>
-						<br>
-						Returns a buffer containing the file specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-						</ol>
-					</td>
-					<td>
-						ESI - Buffer address<br>
-						EAX - Actual size of item loaded into buffer<br>
-						EBX - Starting cluster of chain which is loaded into buffer, or zero if root directory<br>
-						ECX - Buffer size in bytes<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemNew</code><br>
-						<br>
-						Creates a new empty file at the path specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to path string</li>
-						</ol>
-					</td>
-					<td>EDX - Error code</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMItemStore</code><br>
-						<br>
-						Stores the data at the address specified to the file specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Pointer to file path string</li>
-							<li>Address at which to load file</li>
-							<li>Length of file data</li>
-						</ol>
-					</td>
-					<td>EDX - Error code</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPartitionEnumerate</code><br>
-						<br>
-						Scans the drives list and discovers partitions on each drive
-					</td>
-					<td>n/a</td>
-					<td>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPartitionGetFromPath</code><br>
-						<br>
-						Returns the partition number based on the path specified
-					</td>
-					<td>
-						<ol>
-							<li>Path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Partition number<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPartitionMap</code><br>
-						<br>
-						Maps the specified partition to the drive letter specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition number</li>
-							<li>Drive number (0 = A, 1 = B, etc.)</li>
-						</ol>
-					</td>
-					<td>EAX - Error code</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPartitionRead</code><br>
-						<br>
-						Reads sectors from the partition specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition list number</li>
-							<li>Start sector</li>
-							<li>Sector count</li>
-							<li>Buffer pointer</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Handler response<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPartitionWrite</code><br>
-						<br>
-						Reads sectors from the partition specified
-					</td>
-					<td>
-						<ol>
-							<li>Partition list number</li>
-							<li>Start sector</li>
-							<li>Sector count</li>
-							<li>Buffer pointer</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Handler response<br>
-						EDX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPathParentGet</code><br>
-						<br>
-						Shortens the path given to point to the parent path
-					</td>
-					<td>
-						<ol>
-							<li>Pointer to path string</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPathPartitionGet</code><br>
-						<br>
-						Returns the partition number based on the path specified
-					</td>
-					<td>
-						<ol>
-							<li>Pointer to path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Partition number<br>
-						EBX - Error code
-					</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPathPartitionStripDrive</code><br>
-						<br>
-						Returns the path with the leading drive letter/partition specifier removed
-					</td>
-					<td>
-						<ol>
-							<li>Pointer to path string</li>
-						</ol>
-					</td>
-					<td>n/a</td>
-				</tr>
-
-				<tr>
-					<td>
-						<code>SMPathValidate</code><br>
-						<br>
-						Verifies if a path specified is valid per usual DOS rules
-					</td>
-					<td>
-						<ol>
-							<li>Pointer to path string</li>
-						</ol>
-					</td>
-					<td>
-						EAX - Result<br>
-						&emsp;True - The path is valid<br>
-						&emsp;False - The path is not valid
-					</td>
-				</tr>
-			</table>
-			<br>
-			<br>
-			<br>
-
 			<a name = 'NightFunctionReference_GDT.asm'><b>GDT Functions - <i>GDT.asm</i></b></a><br>
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.6 - GDT.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.5 - GDT.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -4497,7 +3241,7 @@
 					<td>
 						<code>GDTGetAccessFlags</code><br>
 						<br>
-						Returns the access flags from the GDT entry specifed
+						Returns the access flags from the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4513,7 +3257,7 @@
 					<td>
 						<code>GDTGetBaseAddress</code><br>
 						<br>
-						Returns the base address from the GDT entry specifed
+						Returns the base address from the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4529,7 +3273,7 @@
 					<td>
 						<code>GDTGetLimitAddress</code><br>
 						<br>
-						Returns the limit address from the GDT entry specifed
+						Returns the limit address from the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4545,7 +3289,7 @@
 					<td>
 						<code>GDTGetSizeFlags</code><br>
 						<br>
-						Returns the size flags from the GDT entry specifed
+						Returns the size flags from the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4561,7 +3305,7 @@
 					<td>
 						<code>GDTSetAccessFlags</code><br>
 						<br>
-						Sets the access flags to the GDT entry specifed
+						Sets the access flags to the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4576,7 +3320,7 @@
 					<td>
 						<code>GDTSetBaseAddress</code><br>
 						<br>
-						Sets the base address to the GDT entry specifed
+						Sets the base address to the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4591,7 +3335,7 @@
 					<td>
 						<code>GDTSetLimitAddress</code><br>
 						<br>
-						Sets the limit address to the GDT entry specifed
+						Sets the limit address to the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4606,7 +3350,7 @@
 					<td>
 						<code>GDTSetSizeFlags</code><br>
 						<br>
-						Sets the size flags to the GDT entry specifed
+						Sets the size flags to the GDT entry specified
 					</td>
 					<td>
 						<ol>
@@ -4625,7 +3369,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.7 - hardware.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.6 - hardware.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -4664,7 +3408,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.8 - interrupts.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.7 - interrupts.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -4806,7 +3550,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.9 - List Manager 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.8 - List Manager 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -5324,7 +4068,7 @@
 
 			32-bit Private Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.10 - List Manager 32-bit private functions</i></b></caption>
+				<caption><b><i>Table A1.9 - List Manager 32-bit private functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -5594,7 +4338,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.11 - Memory Manager 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.10 - Memory Manager 16-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -5637,7 +4381,7 @@
 					<td>
 						<code>A20EnableBIOS</code><br>
 						<br>
-						Enables the A20 line using BIOS interrrupt 0x15
+						Enables the A20 line using BIOS interrupt 0x15
 					</td>
 					<td>n/a</td>
 					<td>n/a</td>
@@ -5692,7 +4436,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.12 - Memory Manager 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.11 - Memory Manager 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -5823,6 +4567,20 @@
 
 				<tr>
 					<td>
+						<code>MemMapPrint</code><br>
+						<br>
+						Prints the BIOS Memory Map
+					</td>
+					<td>
+						n/a
+					</td>
+					<td>
+						n/a
+					</td>
+				</tr>
+
+				<tr>
+					<td>
 						<code>MemPagesNeeded</code><br>
 						<br>
 						Returns the number of 4 KiB memory pages needed to hold data of the specified size
@@ -5859,7 +4617,7 @@
 					<td>
 						<code>MemSearchDWord</code><br>
 						<br>
-						Searches the memory range specified for the given dword value
+						Searches the memory range specified for the given DWord value
 					</td>
 					<td>
 						<ol>
@@ -5930,14 +4688,14 @@
 
 				<tr>
 					<td>
-						<code>MemSwapDwordWords</code><br>
+						<code>MemSwapDWordWords</code><br>
 						<br>
-						Swaps the words in a series of dwords starting at the address specified
+						Swaps the words in a series of DWords starting at the address specified
 					</td>
 					<td>
 						<ol>
 							<li>Source address</li>
-							<li>Number of dwords to process</li>
+							<li>Number of DWords to process</li>
 						</ol>
 					</td>
 					<td>
@@ -5953,7 +4711,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.13 - misc.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.12 - misc.asm 16-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -5980,7 +4738,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.14 - misc.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.13 - misc.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6013,7 +4771,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.15 - numbers.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.14 - numbers.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6091,7 +4849,7 @@
 					<td>
 						<code>QuadAdd</code><br>
 						<br>
-						Adds two quadwords
+						Adds two quaDWords
 					</td>
 					<td>
 						<ol>
@@ -6106,7 +4864,7 @@
 					<td>
 						<code>QuadShiftLeft</code><br>
 						<br>
-						Shifts a quadword left by the specified number of places
+						Shifts a quaDWord left by the specified number of places
 					</td>
 					<td>
 						<ol>
@@ -6121,7 +4879,7 @@
 					<td>
 						<code>QuadShiftRight</code><br>
 						<br>
-						Shifts a quadword right by the specified number of places
+						Shifts a quaDWord right by the specified number of places
 					</td>
 					<td>
 						<ol>
@@ -6156,7 +4914,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.16 - paging.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.15 - paging.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6229,7 +4987,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.17 - PCI Functions 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.16 - PCI Functions 16-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6256,7 +5014,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.18 - PCI Functions 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.17 - PCI Functions 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6577,7 +5335,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.19 - PIC.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.18 - PIC.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6664,7 +5422,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.20 - PS2 Controller.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.19 - PS2 Controller.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6937,7 +5695,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.21 - power.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.20 - power.asm 16-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -6972,7 +5730,7 @@
 					<td>
 						<code>APMShutdown</code><br>
 						<br>
-						Shuts down the PC via the APM intereface
+						Shuts down the PC via the APM interface
 					</td>
 					<td>n/a</td>
 					<td>n/a</td>
@@ -6986,7 +5744,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.22 - RTC.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.21 - RTC.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -7035,7 +5793,7 @@
 			<br>
 			16-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.23 - screen.asm 16-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.22 - screen.asm 16-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -7114,7 +5872,7 @@
 
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.24 - screen.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.23 - screen.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -7235,7 +5993,7 @@
 			<br>
 			32-bit Public Function Listing:<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.25 - serial.asm 32-bit public functions</i></b></caption>
+				<caption><b><i>Table A1.24 - serial.asm 32-bit public functions</i></b></caption>
 				<col width = '60%'>
 				<col width = '20%'>
 				<col width = '20%'>
@@ -7489,6 +6247,380 @@
 			<br>
 			<br>
 
+			<a name = 'NightFunctionReference_storage.asm'><b>Storage Manager Functions - <i>storage.asm</i></b></a><br>
+			<br>
+			32-bit Public Function Listing:<br>
+			<table style = 'width:100%'>
+				<caption><b><i>Table A1.25 - storage.asm 32-bit public functions</i></b></caption>
+				<col width = '60%'>
+				<col width = '20%'>
+				<col width = '20%'>
+
+				<tr>
+					<th>Name / Description</th>
+					<th>Stack Input</th>
+					<th>Register Output</th>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMDiskRead</code><br>
+						<br>
+						Reads sectors from the drive specified
+					</td>
+					<td>
+						<ol>
+							<li>Drive list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EBX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemCount</code><br>
+						<br>
+						Returns the number of items in the directory specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to path string</li>
+							<li>Attributes to match</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Number of matching items, or zero if error<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemDelete</code><br>
+						<br>
+						Deletes the file specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>EDX - Error code</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemExists</code><br>
+						<br>
+						Tests if the item specified already exists
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemInfoAccessedGet</code><br>
+						<br>
+						Returns the date of last access for the specified file
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX (Upper 16 bits) - Year<br>
+						AL - Month<br>
+						AH - Day<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemInfoCreatedGet</code><br>
+						<br>
+						Returns the date and time of creation for the specified file
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX (Upper 16 bits) - Year<br>
+						AL - Month<br>
+						AH - Day<br>
+						EBX (Upper 16 bits) - Hours<br>
+						BH - Minutes<br>
+						BL - Seconds<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemInfoModifiedGet</code><br>
+						<br>
+						Returns the date and time of last modification for the specified file
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX (Upper 16 bits) - Year<br>
+						AL - Month<br>
+						AH - Day<br>
+						EBX (Upper 16 bits) - Hours<br>
+						BH - Minutes<br>
+						BL - Seconds<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemInfoSizeGet</code><br>
+						<br>
+						Returns the size in bytes of the file specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						ECX - File size<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemLoad</code><br>
+						<br>
+						Returns a buffer containing the file specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+						</ol>
+					</td>
+					<td>
+						ESI - Buffer address<br>
+						EAX - Actual size of item loaded into buffer<br>
+						EBX - Starting cluster of chain which is loaded into buffer, or zero if root directory<br>
+						ECX - Buffer size in bytes<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemNew</code><br>
+						<br>
+						Creates a new empty file at the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>EDX - Error code</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMItemStore</code><br>
+						<br>
+						Stores the data at the address specified to the file specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Pointer to file path string</li>
+							<li>Address at which to load file</li>
+							<li>Length of file data</li>
+						</ol>
+					</td>
+					<td>EDX - Error code</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPartitionEnumerate</code><br>
+						<br>
+						Scans the drives list and discovers partitions on each drive
+					</td>
+					<td>n/a</td>
+					<td>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPartitionGetFromPath</code><br>
+						<br>
+						Returns the partition number based on the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Partition number<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPartitionMap</code><br>
+						<br>
+						Maps the specified partition to the drive letter specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition number</li>
+							<li>Drive number (0 = A, 1 = B, etc.)</li>
+						</ol>
+					</td>
+					<td>EAX - Error code</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPartitionRead</code><br>
+						<br>
+						Reads sectors from the partition specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPartitionWrite</code><br>
+						<br>
+						Reads sectors from the partition specified
+					</td>
+					<td>
+						<ol>
+							<li>Partition list number</li>
+							<li>Start sector</li>
+							<li>Sector count</li>
+							<li>Buffer pointer</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Handler response<br>
+						EDX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPathParentGet</code><br>
+						<br>
+						Shortens the path given to point to the parent path
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPathPartitionGet</code><br>
+						<br>
+						Returns the partition number based on the path specified
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Partition number<br>
+						EBX - Error code
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPathPartitionStripDrive</code><br>
+						<br>
+						Returns the path with the leading drive letter/partition specifier removed
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>n/a</td>
+				</tr>
+
+				<tr>
+					<td>
+						<code>SMPathValidate</code><br>
+						<br>
+						Verifies if a path specified is valid per usual DOS rules
+					</td>
+					<td>
+						<ol>
+							<li>Pointer to path string</li>
+						</ol>
+					</td>
+					<td>
+						EAX - Result<br>
+						&emsp;True - The path is valid<br>
+						&emsp;False - The path is not valid
+					</td>
+				</tr>
+			</table>
+			<br>
+			<br>
+			<br>
+
 			<a name = 'NightFunctionReference_strings.asm'><b>String Functions - <i>strings.asm</i></b></a><br>
 			<br>
 			16-bit Public Function Listing:<br>
@@ -7648,7 +6780,7 @@
 					<td>
 						<code>ConvertStringDecimalToNumber</code><br>
 						<br>
-						Returns the numeric value from the decimalstring specified
+						Returns the numeric value from the decimal string specified
 					</td>
 					<td>
 						<ol>
@@ -7784,7 +6916,7 @@
 					<td>
 						<code>StringCharReplace</code><br>
 						<br>
-						Replaces all occurrances of the specified character with another character specified
+						Replaces all occurrences of the specified character with another character specified
 					</td>
 					<td>
 						<ol>
@@ -7964,12 +7096,12 @@
 					<td>
 						<code>StringTokenBinary</code><br>
 						<br>
-						Finds the first occurrance of the ^ character and replaces it with a binary number, truncated to the length specified
+						Finds the first occurrence of the ^ character and replaces it with a binary number, truncated to the length specified
 					</td>
 					<td>
 						<ol>
 							<li>String address</li>
-							<li>Dword value to be added to the string</li>
+							<li>DWord value to be added to the string</li>
 							<li>Number trim value</li>
 						</ol>
 					</td>
@@ -7980,12 +7112,12 @@
 					<td>
 						<code>StringTokenDecimal</code><br>
 						<br>
-						Finds the first occurrance of the ^ character and replaces it with a decimal number, truncated to the length specified
+						Finds the first occurrence of the ^ character and replaces it with a decimal number, truncated to the length specified
 					</td>
 					<td>
 						<ol>
 							<li>String address</li>
-							<li>Dword value to be added to the string</li>
+							<li>DWord value to be added to the string</li>
 							<li>Number trim value</li>
 						</ol>
 					</td>
@@ -7996,12 +7128,12 @@
 					<td>
 						<code>StringTokenHexadecimal</code><br>
 						<br>
-						Finds the first occurrance of the ^ character and replaces it with a hexadecimal number, truncated to the length specified
+						Finds the first occurrence of the ^ character and replaces it with a hexadecimal number, truncated to the length specified
 					</td>
 					<td>
 						<ol>
 							<li>String address</li>
-							<li>Dword value to be added to the string</li>
+							<li>DWord value to be added to the string</li>
 							<li>Number trim value</li>
 						</ol>
 					</td>
@@ -8012,12 +7144,12 @@
 					<td>
 						<code>StringTokenOctal</code><br>
 						<br>
-						Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified
+						Finds the first occurrence of the ^ character and replaces it with a octal number, truncated to the length specified
 					</td>
 					<td>
 						<ol>
 							<li>String address</li>
-							<li>Dword value to be added to the string</li>
+							<li>DWord value to be added to the string</li>
 							<li>Number trim value</li>
 						</ol>
 					</td>
@@ -8028,7 +7160,7 @@
 					<td>
 						<code>StringTokenString</code><br>
 						<br>
-						Finds the first occurrance of the ^ character and replaces it with a octal number, truncated to the length specified
+						Finds the first occurrence of the ^ character and replaces it with a octal number, truncated to the length specified
 					</td>
 					<td>
 						<ol>
@@ -8044,7 +7176,7 @@
 					<td>
 						<code>StringTrimLeft</code><br>
 						<br>
-						Trims any occurrances of the character specified off the left side of the string
+						Trims any occurrences of the character specified off the left side of the string
 					</td>
 					<td>
 						<ol>
@@ -8059,7 +7191,7 @@
 					<td>
 						<code>StringTrimRight</code><br>
 						<br>
-						Trims any occurrances of the character specified off the right side of the string
+						Trims any occurrences of the character specified off the right side of the string
 					</td>
 					<td>
 						<ol>
@@ -8237,11 +7369,22 @@
 			<br>
 			<br>
 			<br>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
 
-			<a name = 'NightFunctionReference_StandardFunctionReturnCodes'><b>Standard Function Return Codes</b></a><br>
-			<br>
+
+
+
+
+		<hr>
+		<h2><a name = 'StandardFunctionReturnCodes'>Appendix 2 - Standard Function Return Codes</a></h2>
+		<p>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.29 - Parameter errors</i></b></caption>
+				<caption><b><i>Table A2.1 - Parameter errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8293,7 +7436,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.30 - List Manager errors</i></b></caption>
+				<caption><b><i>Table A2.2 - List Manager errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8327,7 +7470,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.31 - ELF executable errors</i></b></caption>
+				<caption><b><i>Table A2.3 - ELF executable errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8367,7 +7510,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.32 - Filesystem errors</i></b></caption>
+				<caption><b><i>Table A2.4 - Filesystem errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8443,7 +7586,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.33 - Partition errors</i></b></caption>
+				<caption><b><i>Table A2.5 - Partition errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8471,7 +7614,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.34 - Driver handler errors</i></b></caption>
+				<caption><b><i>Table A2.6 - Driver handler errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8493,7 +7636,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.35 - Memory errors</i></b></caption>
+				<caption><b><i>Table A2.7 - Memory errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8521,7 +7664,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A1.36 - PS/2 Controller errors</i></b></caption>
+				<caption><b><i>Table A2.8 - PS/2 Controller errors</i></b></caption>
 				<col width = '10%'>
 				<col width = '20%'>
 				<col width = '70%'>
@@ -8557,13 +7700,17 @@
 		<br>
 		<br>
 
+
+
+
+
 		<hr>
-		<h2><a name = 'DOSFunctionReference'>Appendix 2 - DOS Function Reference</a></h2>
+		<h2><a name = 'DOSFunctionReference'>Appendix 3 - DOS Function Reference</a></h2>
 		<p>
 			All interrupt vectors after 0x77 are null.<br>
 			<br>
 			<table style = 'width:100%'>
-				<caption><b><i>Table A2.1 - DOS Interrupt Handler Address Table</i></b></caption>
+				<caption><b><i>Table A3.1 - DOS Interrupt Handler Address Table</i></b></caption>
 				<tr>
 					<th width = '5%'><i>Interrupt Vector</i></th>
 					<th width = '15%'><i>Handler Address - VirtualBox BIOS</i></th>
@@ -8977,7 +8124,7 @@
 					<td>F000:FF53</td>
 					<td>00D8:118A</td>
 					<td>00D8:118A</td>
-					<td>No commonly known use pertaining to DOS, but revectored by FreeDOS anyway</td>
+					<td>No commonly known use pertaining to DOS, but re-vectored by FreeDOS anyway</td>
 				</tr>
 
 				<tr>
@@ -9537,7 +8684,7 @@
 			<br>
 
 			<table style = 'width:100%'>
-				<caption><b><i>Table A2.2 - DOS API</i></b></caption>
+				<caption><b><i>Table A3.2 - DOS API</i></b></caption>
 				<tr>
 					<th width = '10%'><i>AX Register</i></th>
 					<th width = '70%'><i>Name</i></th>
@@ -10872,6 +10019,1069 @@
 		<br>
 		<br>
 		<br>
+
+
+
+
+
+		<hr>
+		<h2><a name = 'Changelog'>Appendix 4 - Version History</a></h2>
+		<p>
+			<ul></ul>
+			<b>In progress, 0.1F Update, Build 4509 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements, event support</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
+				<li>Kernel: <i>debug.asm</i> - Added DebugVBoxLogRegs() to dump registers to the VirtualBox log.</li>
+				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBIntHalt to aid in debugging misfiring interrupts.</li>
+				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
+				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
+				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
+				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
+				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() and PopulationCountRange() to return the Hamming weight of a number or range of memory, respectively. Uses POPCNT for additional speed if supported by the CPU.</li>
+				<li>Kernel: <i>strings.asm</i> - Added ConvertNumberHexQuadToString() and StringTokenHexadecimalQuad() for printing QWord values.</li>
+				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
+				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
+				<li>Repo: Added 'testing files' folder. The files within can be used in place of kernel.asm to test out specific features in the future.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Changed prefix format for internal functions from <i>LM_Internal_</i> to <i>LM_Private_</i>.</li>
+				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
+				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
+				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is now allocated in 4 KiB blocks and aligned on a 4 KiB boundary.</li>
+				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Increased timeout for reads and writes to 0.25 seconds to improve compatibility with some older hardware.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Restructured driver to handle only the controller - device functions have been split off into their own files.</li>
+				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
+			</ul>
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Fixed an issue where LMElementSizeGet() was taking eight bytes off the stack upon exit instead of the appropriate four.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a bug causing boot failure on machines with under 4 GiB of memory.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a bug with A20Check() being called with too many parameters.</li>
+				<li>Kernel: <i>PIC.asm</i> - Improved handling of cascade IRQ in PICDisableAll().</li>
+				<li>Kernel: <i>PIC.asm</i> - Improved handling of IRQ acknowledge.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection fixed; several keyboards which previously did not work with Night are now detected and handled appropriately.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Malfunctioning ports are no longer left active.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Updated all functions to adhere to the convention of using EDX for returning error codes.</li>
+				<li>Manual: Removed some bugs in various HTML elements. Thanks, GitKraken. :/</li>
+				<li>Manual: Section 1 - Building and Running the Kernel - Added information about the floppy and CD image files in the <i>builds</i> folder.</li>
+				<li>Manual: Updated a bit of semantics and corrected some typos.</li>
+			</ul>
+
+			To do before release<br>
+			<ul>
+				<li>Put the driver launch result back into the PCI code</li>
+				<li>Only init PS/2 controller if it exists</li>
+				<li>Verify proper function of bitfield setcounts</li>
+				<li>Try to move A20 activation to 32-bit code</li>
+				<li>Implement events</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>10/15/2019, 0.1E Update, Build 2718 - Code integrity improvements</b><br>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: All <code>%define</code> statements now have matching <code>%undef</code> statements to make undefined references able to be caught immediately instead of inadvertently pointing to a value in another function.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: Bugs in various files regarding variable scope, code layout, and efficiency.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>10/14/2019, 0.1E Update, Build 2681 - Incorporated Antony's changes from Linker branch</b><br>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: Instead of having NASM build the whole kernel by using <code>%include</code> statements, NASM now builds each individual file separately and then uses LD to link them together. Modularity FTW!</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>10/10/2019, 0.1E Update, Build 2675 - Start of paging support, memory probe bug fixes, start of 64-bit math support</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: Moved all files toward a more standard format by adding <code>%include</code>s to the start of each file which needs defined structs, constants, or the like.</li>
+				<li>Kernel: <i>memory.asm</i> - Added <code>PageDirNew()</code> to create a new empty page directory.</li>
+				<li>Kernel: <i>numbers.asm</i> - Added <code>QuadAdd16()</code>, <code>QuadAdd()</code>, <code>QuadShiftLeft()</code>, and <code>QuadShiftRight()</code> to perform calculations on 64-bit values. Useful for totaling memory on machines with more than 4 GiB of RAM!</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>interrupts.asm</i> - Optimized some interrupt handling code.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Removed some stray error checking in <code>LM_Internal_ItemAddAtSlot()</code>.</li>
+				<li>Kernel: <i>lists.asm</i> - Streamlined error checking in numerous routines.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a use-without-initialization error causing <code>MemProbe()</code> to not reliably fetch proper information.</li>
+				<li>Kernel: <i>RTC.asm</i> - Fixed/improved stack handling in the ISR.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>9/25/2019, 0.1D Update, Build 2247 - Basic FAT16 driver complete</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16ItemCount()</code> to return how many items match the attributes specified in the folder specified.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16PartitionInfo()</code> to return free space on the drive</li>
+				<li>Kernel: <i>memory.asm</i> - Added a mechanism to <code>MemFindMostSuitable()</code> to track free memory as it works. This function is called in every memory allocation, so it should always maintain the current number of free bytes.</li>
+				<li>Manual: Added additional filesystem driver command codes.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - All routines which previously accepted a partition number now accept a pointer to a tPartitionInfo record instead, allowing them to be much more efficient.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Eliminated unnecessary path string copying in several functions</li>
+				<li>Kernel: <i>globals.asm</i> - <code>tPartitionInfo</code> now holds the partition number of itself as well. This is done to allow code optimizations in other functions.</li>
+				<li>Manual: Added new function error codes.</li>
+				<li>Manual: Removed <i>IDE Controller.asm</i> from the <i>Function Reference</i> section as it is a driver and its routines should never be called directly anyway.</li>
+				<li>Kernel: Combined <i>files.asm</i> and <i>disks.asm</i> into <i>storage.asm</i> and updated the NKRM accordingly.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: Improved error trapping after allocating memory in various routines.</li>
+				<li>Kernel: Worked on various files to begin establishing EDX as the standard register which holds returned error codes.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ChainGrow()</code> now zeros-out all clusters which it adds onto a cluster chain.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemExists()</code> now works.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed some local variable allocations.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Plugged a memory leak in <code>FAT16ServiceHandler()</code>.</li>
+				<li>Manual: Fixed error code return registers for several functions.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>9/20/2019, 0.1D Update, Build 2009 - FAT16 driver progress</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16EntryBuild()</code></li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - In addition to everything it already cached, <code>FAT16PartitionCacheData()</code> now caches the number of bytes and sectors occupied by the root directory.</li>
+				<li>Kernel: <i>files.asm</i> - Added <code>FMItemNew()</code> to create new empty files and directories.</li>
+				<li>Kernel: The old <code>ESI</code>-based method of accessing structs has been replaced by proper <code>struc</code> statements, removing the dependence on <code>ESI</code>, allowing numerous sections of code to be greatly optimized, <i>and</i> saving many bytes of space in the process.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: File paths are no longer passed to the FM routines with drive specifiers.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ChainRead()</code> and <code>FAT16ChainWrite()</code> now handle writing to 'sector 0' (the root directory) directly.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemMatch()</code> now works on its own local copy of the string it is passed instead of fouling up the caller's copy.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Increased the number of parameters which can be passed to filesystem driver routines.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>LM_Internal_ElementAddressGet()</code> is now used instead of <code>LMElementAddressGet()</code> for speed.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed an unused local variable from <code>FAT16ItemMatch()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16CalcClustersNeeded()</code> to <code>FAT16CalcSpaceNeeded()</code>, as it now returns the number of clusters <i>and</i> sectors to store a file.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16FileInfoAccessedGet()</code>, <code>FAT16FileInfoCreatedGet()</code>, <code>FAT16FileInfoModifiedGet()</code>, <code>FAT16FileInfoSizeGet()</code>, and <code>FAT16FileStore()</code> to <code>FAT16ItemInfoAccessedGet()</code>, <code>FAT16ItemInfoCreatedGet()</code>, <code>FAT16ItemInfoModifiedGet()</code>, <code>FAT16ItemInfoSizeGet()</code>, and <code>FAT16ItemStore()</code>, respectively.</li>
+				<li>Kernel: <i>files.asm</i> - Offloaded all the path preparation work into the FAT16 driver itself, greatly condensing the code in this file's routines.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemNew()</code> no longer marks a cluster as in use until it determines the item doesn't already exist.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemNew()</code> now properly writes the cluster number on '..' entries.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed a use-without-define error in <code>FAT16ItemLoad()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed some unused local variables in various functions.</li>
+				<li>Kernel: <i>files.asm</i> - Fixed an issue in <code>FMFileStore()</code> where the stack was not cleared properly prior to return.</li>
+				<li>Kernel: <i>memory.asm</i> - <code>MemAllocate()</code> now returns proper error codes.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>9/5/2019, 0.1D Update, Build 1397 - Start of FAT16 algorithmic improvements</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ItemLoad()</code> (formerly called <code>FAT16PathToDirEntry()</code>) now implements *insert echo here* RE-CUR-SION!</li>
+				<li>Kernel: <i>files.asm</i> - Added <code>FMPathParentGet()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringSearchCharRight()</code>.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - <code>FAT16ServiceHandler()</code> no longer adds its own kErrNone prior to returning; leave that up to the function which was called.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileInfoSizeSet()</code> since this function will be handled by the item / chain writing routines.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Removed <code>FAT16FileLoad()</code> since <code>FAT16ItemLoad()</code> has now been reworked to do everything it did, and more - like reliably loading directories as well as files! :D</li>
+				<li>Kernel: <i>files.asm</i> - <code>FMPathPartitionStripDrive()</code> now leaves the leading '/' on paths it processes (e.g. returns <i>/system/apps/program.exe</i> instead of <i>system/apps/program.exe.</i> </li>
+				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringSearchChar()</code> to <code>StringSearchCharLeft()</code>.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>strings.asm</i> - Fixed <code>StringSearchCharLeft()</code> to return null in EAX if no match is found.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16CalcLBAClusterToSector()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Calling <code>FAT16FileStore()</code> with the path of an already-existing file now successfully overwrites the file and correctly adjusts the number of clusters used to save the file on disk.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Optimized FAT16 info caching to happen in the service handler routine instead of in every single other one.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16ClustersNeeded()</code> to <code>FAT16CalcClustersNeeded()</code>.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16TableElementFromCluster()</code> to <code>FAT16CalcTableElementFromCluster()</code>.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed an issue where <code>FAT16ChainShrink()</code> was using <code>thisSector</code> instead of <code>lastSector</code> for disk writes.</li>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Fixed an issue where <code>FAT16ClustersNeeded()</code> was not calculating correctly due to edx not being set to zero prior to division.</li>
+				<li>Manual: Moved the text describing table 5.1 to accompany the table itself. What a novel idea!</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/25/2019, 0.1D Update, Build 1211</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Added <code>FAT16ChainGrow()</code>, <code>FAT16ChainShrink()</code>, and <code>FAT16ChainResize()</code>.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT Filesystem.asm</i> - Renamed <code>FAT16ItemClusterCount()</code> to <code>FAT16ChainLength()</code>.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>IDE Controller.asm</i> - Fixed an issue where <code>IDEATASectorWriteLBA28PIO()</code> was not polling after flushing the disk cache leading to intermittent sector I/O failures.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - Removed <i>ATA Controller.asm</i> and <i>partitions.asm</i> which somehow got added back into (or never got removed from) the project.</li>
+				<li>Manual: Fixed an erroneous entry in the previous version which said paging was added. It was not. Yet.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>kernel.asm</i> - Implemented new driver handling method</li>
+				<li>Kernel: <i>kernel.asm</i>, <i>screen.asm</i> - Made use of new global defines for ConfigBits options</li>
+				<li>Kernel: <i>PS/2 Controller.asm</i> - Added function info to the NKRM.</li>
+				<li>Manual: Added driver command code tables.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Removed PCI register dumps.</li>
+				<li>Kernel: <i>drives.asm</i> (Formerly <i>partitions.asm</i>) - Removed that <i>bloody</i> driver code! :)</li>
+				<li>Kernel: <i>drives.asm</i> Added <code>DiskRead()</code>, <code>PartitionMap()</code>, and <code>PartitionRead()</code>.</li>
+				<li>Kernel: <i>hardware.asm</i> - Eliminated the legacy driver loading system.</li>
+				<li>Kernel: <i>IDE Controller.asm</i>, <i>lists.asm</i>, <i>memory.asm</i>, <i>PCI.asm</i>, <i>strings.asm</i> - Added defines for input parameters.</li>
+				<li>Kernel: <i>PCI.asm</i> - Added <code>PCIHandlerGet()</code> and <code>PCIHandlerSet()</code>.</li>
+				<li>Kernel: <i>PCI.asm</i> - Added <code>PCIInfoClassGet()</code>, <code>PCIInfoDeviceGet()</code>, <code>PCIInfoProgIfGet()</code>, <code>PCIInfoRevisionGet()</code>, <code>PCIInfoSubclassGet()</code>, and <code>PCIInfoVendorGet()</code>.</li>
+				<li>Kernel: <i>PCI.asm</i> - Overhauled code, renamed functions for consistency.</li>
+				<li>Kernel: <i>PCI.asm</i> - Removed PCI register caching.</li>
+				<li>Kernel: <i>PCI.asm</i> - Removed the 'search' method of loading drivers in favor of the new table-based method.</li>
+				<li>Kernel: <i>PS/2 Controller.asm</i> - Changed all routines over to new method of returning values in registers instead of on the stack.</li>
+				<li>Kernel: <i>PS/2 Controller.asm</i> - Since this is the <i>only</i> legacy driver in the system, it made sense to just have Night handle it directly.</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringCharGet()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - Tidied up <code>StringWordCount()</code> and <code>StringWordGet()</code>.</li>
+				<li>Kernel: Condensed <i>FAT12.asm</i>, <i>FAT16.asm</i>, and <i>FAT32.asm</i>, into a single driver - <i>FAT Filesystem.asm</i>.</li>
+				<li>Manual: Added external links to MS-DOS function descriptions.</li>
+				<li>Manual: Added symbol names to error codes table.</li>
+				<li>Manual: Updated Coding Conventions section.</li>
+				<li>Manual: Updated drivers section.</li>
+				<li>Toolchain: Removed Xenops dependency. If we include one publicly-available utility, we may as well include all the others we use. And we're not doing that.</li>
+				<li>Toolchain: Included drive image is now FAT16 formatted.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>IDE Controller.asm</i> - All four possible IDE devices on a controller are now properly detected.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - Fixed a bug where a controller present with no drive attached was added to the drives list as a valid (albeit meaningless) drive.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - <code>IDEATASectorReadLBA28PIO()</code> and <code>IDEATASectorWriteLBA28PIO()</code> now wait and flush the disk cache properly between sectors during multi-sector operations.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - Optimized and compacted <code>IDEDetectChannelDevices()</code>.</li>
+				<li>Kernel: <i>IDE Controller.asm</i> - The model name and serial number of device number one on both channels is now properly recorded.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed improper stack clearing upon exit in <code>Mem_Internal_MemListShrink()</code>.</li>
+				<li>Kernel: <i>lists.asm</i> - Fixed an error in <code>LM_Internal_SlotFreeTest()</code> regarding address calculation.</li>
+				<li>Kernel: <i>screen.asm</i> - Fixed a bug in <code>PrintRegs16()</code> and <code>PrintRegs32()</code> which did not print correct values for BP/EBP.</li>
+				<li>Kernel: <i>strings.asm</i> - Eliminated a remnant of the prior stack-based parameter passing method.</li>
+				<li>Kernel: <i>strings.asm</i> - Fixed an errant local variable reference in <code>StringCharPrepend()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - Fixed an out-of-bounds write in <code>StringPadRight()</code>.</li>
+				<li>Kernel: <i>strings.asm</i> - <code>StringWordGet()</code> now returns a null string if the requested word is greater than the number of words in the string.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: Added a <i>build</i> value to the <code>tSystem</code> struct.</li>
+				<li>Manual: Added function listings for all remaining files.</li>
+				<li>Manual: Added Sub-section links in the index to the various sections of the Night Kernel Function Reference.</li>
+				<li>Toolchain: Integrated Maarten's awesome <a href = 'https://github.com/m44rtn/xenops'>Xenops</a> tool to allow autoincrementing of the build value in <i>globals.asm</i>. I seriously can't overstate how cool this little utility is.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>FAT12.asm</i> - Optimized bit tests in <code>FSType01Init()</code>.</li>
+				<li>Kernel: <i>globals.asm</i> - <code>tTaskInfo.taskFlags</code> is now a 32-bit value instead of an 8-bit one.</li>
+				<li>Kernel: <i>globals.asm</i> - Used <code>%define</code> for <code>true</code> and <code>false</code> instead of constants to save a couple doublewords of space.</li>
+				<li>Kernel: <i>screen.asm</i> - Optimized bit tests in <code>PrintIfConfigBits16()</code> and <code>PrintIfConfigBits32()</code>.</li>
+				<li>Kernel: <i>tasks.asm</i> - Majorly optimized task switching logic in <code>TaskSwitch()</code> resulting in a significant speed increase.</li>
+				<li>Kernel: Functions now return parameters in registers as opposed to on the stack.</li>
+				<li>Manual: Updated <i>Section 4 - Coding Conventions Used in Night</i>.</li>
+				<li>Manual: Updated List Manager Functions section to show new parameter return conventions.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>lists.asm</i> - Fixed bugs in <code>LMElementValidate()</code> and <code>LMListValidate()</code> which made them always return True.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a stack leak in <code>MemDispose()</code>.</li>
+				<li>Kernel: <i>memory.asm</i> - <code>MemAddressAlign()</code> now checks input to prevent possible division by zero errors.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Added a task browser.</li>
+				<li>Kernel: <i>debug.asm</i> - Added <code>DebugCPUFeaturesEnable()</code> to enable the debugging features of the x86 CPU; any addresses loaded into DR0 through DR3 will be set as global breakpoints and be trapped upon execution.</li>
+				<li>Kernel: <i>debug.asm</i> - Added <code>DebugTraceEnable()</code> and <code>DebugTraceDisable()</code>.</li>
+				<li>Kernel: <i>debug.asm</i> - Added <code>Debugger()</code> to support kernel-level single stepping of instructions</li>
+				<li>Kernel: <i>kernel.asm</i> - Added a simple performance counter task which displays how many times the CPU was able to add to a memory location in a single second along with a bare-bones load calculation.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Added contingencies to the critical error handler so that it can attempt to handle some situations without automatically insta-killing every task which crosses its path.</li>
+				<li>Kernel: <i>tasks.asm</i> - Added a priority system to running tasks. Every task is started at 0 priority, but if this value is raised that task will get more turns at the CPU than others.</li>
+				<li>Kernel: <i>tasks.asm</i> - Implemented task flags so that tasks can now be independently suspended and resumed.</li>
+				<li>Kernel: <i>tasks.asm</i> - <code>TaskNew()</code> now respects the setting of the <code>VM</code> bit in the <code>EFLAGS</code> register to specify that the task is to use Virtual-8086 mode, and extra stack handling logic has been added to accommodate the segment registers pushed by the CPU for V86 tasks.</li>
+				<li>Kernel: <i>tasks.asm</i> - Tasks now include a performance value based on the <code>RDTSC</code> instruction which is updated by the kernel at each task switch.</li>
+				<li>Manual: Added DOS function reference appendix.</li>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>globals.asm</i> - Increased the size of the <code>tTaskInfo</code> struct to 96 bytes to allow more room to keep track of task-y things.</li>
+				<li>Kernel: <i>globals.asm</i> - Moved the mouse-related globals to the <code>.data</code> section to ensure they are null if the mouse cannot be initialized.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Removed globals <code>exceptionSelector</code>, <code>exceptionAddress</code>, and <code>exceptionFlags</code> since this information is now all passed on the stack.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Tidied up the critical error handler.</li>
+				<li>Kernel: <i>tasks.asm</i> - Changed <code>TaskNew()</code> to now create tasks at user-level.</li>
+				<li>Manual: Fleshed out the section on multitasking.</li>
+			</ul>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Fixed a <i>stupid</i> bug in <code>DebugWaitForEscape()</code> which caused stack corruption.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Remedied a mismatched parameter in the critical error handler.</li>
+				<li>Kernel: <i>screen.asm</i> - An incorrect shift in <code>ScreenClear16()</code> and <code>ScreenClear32()</code> resulted in a multiply instead of a divide, causing too much memory to be cleared.</li>
+				<li>Kernel: <i>strings.asm</i> - Fixed a bug in <code>StringTokenBinary()</code>, <code>StringTokenDecimal()</code>, <code>StringTokenHexadecimal()</code>, and <code>StringTokenOctal()</code> which trimmed <i>all</i> leading zeros instead of leaving one.</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>4/17/2019, 0.1A Update - Preemptive Multitasking!</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: <i>interrupts.asm</i> - Added a call to <code>TaskSwitch()</code> to PIT interrupt 0x20</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>ConvertStringBinaryToNumber()</code>, <code>ConvertStringDecimalToNumber()</code>, <code>ConvertStringHexToNumber()</code>, and <code>ConvertStringOctalToNumber()</code> to convert numbers contained in strings to be extracted to actual numeric values</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringSearchChar()</code> to quickly find the first occurrence of a character in a string</li>
+				<li>Kernel: <i>strings.asm</i> - Added <code>StringTokenBinary()</code>, <code>StringTokenDecimal()</code>, <code>StringTokenHexadecimal()</code>, <code>StringTokenOctal()</code> and <code>StringTokenString()</code> as replacements for <code>StringBuild()</code></li>
+				<li>Kernel: <i>tasks.asm</i> - Preemptive multitasking for supervisor code is functional</li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: <i>debug.asm</i> - Added an interactive RAM browser</li>
+				<li>Kernel: <i>debug.asm</i> - Separated the code for each debugging feature out into individual functions.</li>
+				<li>Kernel: <i>debug.asm</i> - Separated the date and time and mouse output displays into their own tasks</li>
+				<li>Kernel: <i>GDT.asm</i> - Added a TSS descriptor slot to the GDT</li>
+				<li>Kernel: <i>globals.asm</i> - Removed the global kernel print string, <i>kPrintText$</i>. There's 0.25 KiB saved!</li>
+				<li>Kernel: <i>interrupts.asm</i> - Moved the RTC interrupt handler to RTC.asm</li>
+				<li>Kernel: <i>interrupts.asm</i> - Removed spurious <code>pushf</code> and <code>popf</code> instructions from some interrupt handlers which aren't necessary since the interrupt already automatically saves and restores the flags register itself.</li>
+				<li>Kernel: <i>interrupts.asm</i> - Revamped the critical error handler to show task information as well</li>
+				<li>Kernel: <i>interrupts.asm</i> - Trimmed some fat from all exception handlers</li>
+				<li>Kernel: <i>memory.asm</i> - Modified <code>MemAllocate()</code> to zero memory blocks out at allocate time. Geez, memory is dirty on some real hardware!</li>
+				<li>Kernel: <i>screen.asm</i> - Changed text printing routines to take text color and position as parameters instead of relying on system-level globals</li>
+				<li>Kernel: <i>screen.asm</i> - Modified algorithm used in <code>PrintRAM32()</code></li>
+				<li>Kernel: <i>strings.asm</i> - Improved efficiency and readability in some existing string routines</li>
+				<li>Kernel: <i>strings.asm</i> - Moved function listings into the NKRM</li>
+				<li>Kernel: <i>strings.asm</i> - Removed a couple comments with references to VESA since we don't deal with that anymore.</li>
+				<li>Kernel: <i>strings.asm</i> - Removed the clumsy and potentially stack-abusing <code>StringBuild()</code> and migrated all code which used it over to the new, more stable routines</li>
+				<li>Kernel: <i>strings.asm</i> - Renamed <code>StringCharInsert()</code> to <code>StringInsert()</code> since it isn't limited to just characters, but can handle entire strings</li>
+				<li>Toolchain: <i>makefile</i> - Added directive for list file generation</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: <i>ATA Controller.asm</i> - Partially fixed a bug concerning passing a dummy value to <code>LMSlotFindFirstFree()</code> as described by Maarten <a href = 'https://groups.google.com/d/msg/night-dos-kernel/lJaCvR_s2_I/RN5BjrRxCQAJ'>here</a></li>
+				<li>Kernel: <i>partitions.asm</i> - Fixed another dummy value bug concerning <code>LMSlotFindFirstFree()</code></li>
+				<li>Manual: Fixed a typo in the List Manager header format table</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>4/5/2019, 0.19 Update - Fixes for A20, PS/2, RTC, and PIC</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: A20 - Added functions to <i>memory.asm</i> to support additional A20 enabling methods</li>
+				<li>Kernel: Added <i>tasks.asm</i> for the upcoming shiny new Task Manager routines!</li>
+				<li>Kernel: PS2 Controller - Added support for 5-button mice</li>
+				<li>Kernel: PS2 Controller - Added hotplugging support (device initialization is now handled by the interrupt handler instead of only being performed once at startup)</li>
+				<li>Kernel: RTC - Added <code>BCDToDecimal()</code> and <code>RTCAdjustBCD()</code> to support new RTC handling method</li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: All files - added proper <code>section</code> directives to all files. Something that probably should've been done long ago... 8-)</li>
+				<li>Kernel: A20 - Moved A20 handling out of <i>hardware.asm</i> and into <i>memory.asm</i> since that just makes sense.</li>
+				<li>Kernel: CPU - Split CPUID code from <i>misc.asm</i> into its own file, <i>CPU.asm</i></li>
+				<li>Kernel: <i>debug.asm</i> - Added mouse coordinates to the Debug Menu</li>
+				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.century</code> since it's not supported by all RTC chips and isn't super necessary anyway</li>
+				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.delayValue</code> as it's no longer necessary since CPU cycle-based delay loops have been eliminated</li>
+				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.keyboardType</code> and <code>tSystem.mouseID</code> in favor of the more versatile <code>tSystem.PS2ControllerDeviceID1</code> and <code>tSystem.PS2ControllerDeviceID2</code></li>
+				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.lastError</code> since functions now return error codes</li>
+				<li>Kernel: <i>globals.asm</i> - Removed <code>tSystem.ticks</code> (and modified <i>TimerWait()</i> to do its job without it) since it's unnecessary to track both how many ticks have passed in a second as well as how many have passed since boot</li>
+				<li>Kernel: <i>hardware.asm</i> - Removed <code>CPUSpeedDetect()</code></li>
+				<li>Kernel: <i>interrupts.asm</i> - Added <code>InterruptHandlerGetAddress()</code>, <code>InterruptHandlerGetFlags()</code>, and <code>InterruptHandlerGetSelector()</code></li>
+				<li>Kernel: <i>interrupts.asm</i> - Streamlined <code>InterruptHandlerSet()</code></li>
+				<li>Kernel: <i>misc.asm</i> - Removed <code>SetSystemCPUSpeed()</code></li>
+				<li>Kernel: <i>PIC.asm</i> - Completed functions <code>PICIRQEnable()</code> and <code>PICIRQDisable()</code> for enabling individual IRQs, renamed other functions as needed for consistency</li>
+				<li>Kernel: PS/2 Controller - Changed timeout to use interrupt-based tick counters as opposed to the CPU-cycle based ones used before</li>
+				<li>Kernel: PS/2 Controller - Code set 2 is still used but hardware translation is now disabled, allowing the driver to handle a mouse on port 1 or a keyboard on port 2 without freaking out, in case the user accidentally gets the ports reversed</li>
+				<li>Kernel: PS/2 Controller - Moved existing PS/2 Controller code into its own legacy driver, <i>PS2 Controller.asm</i>, and made it <i>much</i> more robust with proper timeout and device response checking added</li>
+				<li>Kernel: PS/2 Controller - Reduced I/O timeout values to 1/16 of a second</li>
+				<li>Kernel: PS/2 Controller - Removed the <code>kKeyTable</code> array until we get a proper event queue in place which can handle keystrokes and such</li>
+				<li>Kernel: PS/2 Controller - The 256-byte keystroke buffer is now dynamically allocated with a call to <code>MemAllocate()</code> and is referred to by the name <code>kKeyBufferAddress</code> instead of the old name, <code>kKeyBuffer</code>. There's 0.25 KiB saved!</li>
+				<li>Kernel: RTC - Enabled interrupts on the RTC and moved time handling code to the interrupt 0x28 RTC handler instead of letting PIT interrupt 0x20 do the job. This means the time updating code is now only called once per second instead of every. Single. Tick. Big wins for efficiency!</li>
+				<li>Kernel: RTC - Split RTC code off into its own file, <i>RTC.asm</i></li>
+				<li>Manual: Reformatted <i>Version History</i> with HTML lists</li>
+				<li>Manual: Removed <i>Known Issues</i> section. There aren't any more, anyway!</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: A20 - Fixed A20 line enabling. Night can now use the BIOS, the Keyboard Controller, and I/O port 0xEE methods in addition to the Fast Enable method it always used. And it <i>even</i> works properly on real hardware! :D</li>
+				<li>Kernel: <i>hardware.asm</i> - Fixed bug where the entry point of legacy drivers was not being calculated correctly</li>
+				<li>Kernel: <i>kernel.asm</i> - Fixed a Bad Thing Waiting To Happen where calls to BIOS services made prior to entering Protected Mode were enabling interrupts even when they were disabled prior to the call. Come <i>on</i> guys, that's just lazy BIOS programming. Always leave things the way you found them!</li>
+				<li>Kernel: PS/2 Controller - Fixed a few errors in PS/2 Controller handling which caused some unnecessary I/O timeouts, causing the boot procedure to be roughly one second faster</li>
+				<li>Kernel: <i>RTC.asm</i> - Fixed RTC format handling. Instead of attempting to modify the RTC to work the way we want (since apparently not all RTC chips are cool with that), Night now reads how the RTC is already set and adapts accordingly. Tested working on real hardware, QEMU, and VirtualBox with the RTC in either binary or BCD mode and in either 12-hour or 24-hour format. Woohoo!</li>
+				<li>Kernel: <i>screen.asm</i> - Fixed bug in scrolling algorithm where text was getting printed before the screen was scrolled, meaning you couldn't write text to the bottom line of the screen</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>3/5/2019, 0.18 Update - Bugfixes for PCI handling on real hardware</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: Added <i>%define</i> symbols for various local variables in multiple files to improve readability</li>
+				<li>Kernel: Added Reboot option to Debug Menu</li>
+				<li>Kernel: Added <code>PCIProbe()</code> to <i>pci.asm</i></li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: Deleted the 32-bit PCIDetect() since we now have the 16-bit PCIProbe()</li>
+				<li>Kernel: Moved function listings from <i>pci.asm</i> into the NKRM</li>
+				<li>Manual: Updated <i>Known Issues</i> section</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: Fixed the use of a variable without assignment in one of the string routines</li>
+				<li>Kernel: PCI controller initialization is now handled properly, fixing an infinite loop on real hardware due to a poor detection technique</li>
+				<li>Manual: Removed some stray JavaScript left over from a previous design test of 'accordion' sections</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+			<b>3/4/2019, 0.17 Update - Memory Manager upgrades</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: Added <i>%define</i> symbols for various local variables in <i>lists.asm</i> and <i>memory.asm</i> to improve readability</li>
+				<li>Kernel: Added <code>MemAllocateAligned()</code>, <code>MemAddressToBlock()</code>, and <code>MemAddressAlign()</code> to <i>memory.asm</i></li>
+				<li>Kernel: Added <code>MemShrinkFromBeginning()</code> and <code>MemShrinkFromEnd()</code> to <i>memory.asm</i></li>
+				<li>Manual: Added <i>Coding Conventions Used in Night</i> section</li>
+				<li>Manual: Added <i>Known Issues</i> section</li>
+				<li>Manual: Added some sweet table captioning style to the NKRM!</li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: Moved error checking out of <code>LM_Internal_SlotFreeTest()</code> and into <code>LMSlotFreeTest()</code></li>
+				<li>Kernel: Moved function listings from <i>lists.asm</i> and <i>memory.asm</i> into the NKRM</li>
+				<li>Kernel: Removed the dynamic memory list/memory block border, implying a slight internal change in how memory is allocated.</li>
+				<li>Kernel: Split some existing memory management code off into <code>Mem_Internal_MemListGrow()</code> and <code>Mem_Internal_MemListShrink()</code></li>
+				<li>Manual: Rolled the existing <i>API Result Codes</i> section into its new replacement: the <i>Internal Function Reference</i> section</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: Fixed memory allocation algorithm to actually implement the 'best-fit' strategy</li>
+				<li>Kernel: Improved Memory Manager error checking/handling and corrected some other minor errors. Foresight is never a bad thing, kids.</li>
+				<li>Kernel: <code>MemMergeBlocks()</code> now updates the memory list properly</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>2/19/2019, 0.16 Update - Full physical memory management implementation</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: Added <code>LMElementDuplicate()</code> and <code>LMElementDelete()</code> to <i>lists.asm</i></li>
+				<li>Kernel: Added <code>MemDispose()</code> to <i>memory.asm</i></li>
+				<li>Kernel: Added <code>StackTrace()</code> to <i>debug.asm</i> so our BSOD can now dump the actual stack values</li>
+				<li>Manual: Added <i>API Result Codes</i> section</li>
+				<li>Manual: Added info on the Debug Menu's new <i>Memory Details</i> option</li>
+				<li>Manual: Waxed nostalgic on the history of Night's precursor</li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: Separated List Manager routines into an external and internal group to minimize duplication of list validity checking</li>
+				<li>Kernel: Updated titles of certain List Manager functions for uniformity</li>
+				<li>Manual: Minor updates to List Manager section</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: Further polished List Manager code</li>
+				<li>Kernel: Improper memory write in ATA Controller driver</li>
+				<li>Kernel: List Manager routines now have proper error testing and handling</li>
+				<li>Kernel: MemAllocate() now uses the List Manager to keep a list of blocks allocated</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>2/9/2019, 0.15 Update - Start of refinements for upcoming Memory Manager additions</b><br>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: List Manager code overhaul in preparation for upcoming Memory Manager feature additions</li>
+				<li>Kernel: Updated copyright dates in all files</li>
+				<li>Manual: Added section on Debugging Night using the VirtualBox debug console</li>
+				<li>Manual: List Manager details</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>12/26/2018, 0.14 Update - File system driver subsystem</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Kernel: Added <code>DriverLegacyLoad()</code> to hardware.asm</li>
+				<li>Kernel: Added <code>partitions.asm</code> for partition support</li>
+				<li>Kernel: Added PCI device list address to the Debug Menu</li>
+				<li>Manual: Added <i>Section 2 - The Kernel Debug Menu</i> and <i>Section 5 - The List Manager</i> to the reference manual</li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Kernel: Moved <i>globals.asm</i> to the beginning of includes so that all other files can take advantage of the things defined there</li>
+				<li>Kernel: PCIDriverSearch now looks specifically for PCI drivers <i>only</i></li>
+				<li>Kernel: Some minor code cleanups and fixes</li>
+				<li>Manual: <i>Major</i> structure overhaul</li>
+				<li>Manual: Updated driver details</li>
+				<li>Toolchain: Replaced <i>buildrun.sh</i> with a proper makefile using the one in Bird OS as a template (Thanks to Maarten for the inspiration!)</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>Kernel: Driver loading algorithm for both PCI and legacy drivers now loads more than just the first driver found</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>7/28/2018, 0.13 Update - Full exception handling</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Added <code>CriticalError()</code> and tied to it all existing exception traps for proper handling</li>
+				<li>Added CMOS interfacing routines</li>
+				<li>Added <code>DebugVBoxLogWrite()</code> to allow writing diagnostic messages to the VirtualBox log</li>
+				<li>Added the <i>docs</i> folder to the repo, containing the new <i>Night Kernel Reference Manual</i>, the official source of documentation and technical notes for the Night Kernel</li>
+				<li>Fleshed out Antony's <i>nd-ddskel.asm</i></li>
+			</ul>
+			<br>
+
+			Changed<br>
+			<ul>
+				<li>Cleaned up comments in <code>StringWordCount()</code> and <code>StringWordGet()</code></li>
+				<li>Replaced the kernel's floppy image <i>(night.img)</i> with a new 16 MiB hard drive image, <i>Night.vdi</i> and altered <i>buildrun.sh</i> accordingly</li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li>A minor typo in the function listing of ATA Controller.asm</li>
+				<li><code>ScreenClear16()</code> and <code>ScreenClear32()</code> now clear the screen to the background color instead of always using black</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>7/6/2018, 0.12 Update - Functional ATA driver</b><br>
+			<br>
+
+			New<br>
+			<ul>
+				<li>Added function listings to the beginnings of all files</li>
+				<li>Added GDT setting and getting routines to facilitate generation of GDT elements on-the-fly; a first step to multitasking</li>
+				<li>Added <code>MemSearchString()</code> - It works for now, but it's not elegant and will definitely need optimized later.</li>
+				<li>Added <code>MemCompare()</code>, <code>MemSwapWordBytes()</code>, and <code>MemSwapDWordWords()</code></li>
+				<li>Added PrintIfConfigBits16 and PrintIfConfigBits32 to only print messages if the flag is set in <code>configBits</code></li>
+				<li> Added a whole buncha string routines! (<code>StringCharAppend()</code>, <code>StringCharPrepend()</code>, <code>StringPadLeft()</code>, <code>StringPadRight()</code>, <code>StringSearchCharList()</code>, <code>StringTruncateLeft()</code>, <code>StringTruncateRight()</code>, <code>StringWordCount()</code>, and <code>StringWordGet()</code>, to be precise)</li>
+				<li>ATA Controller.asm (formerly IDE Controller.asm) is now operational for basic PIO mode</li>
+				<li>Finished <code>PCIDriverSearch()</code> and <code>PCILoadDrivers()</code></li>
+				<li>The ebp register is now used as it was intended in all functions, allowing more flexibility in stack tracing later</li>
+			<br>
+			</ul>
+
+			Changed<br>
+			<ul>
+				<li>All interrupt service routines now preserve the flags register when appropriate</li>
+				<li>Both <code>ScreenClear16()</code> and <code>ScreenClear32()</code> now honor the kBytesPerScreen value</li>
+				<li>Cleaned up pci.asm and PIC.asm with some %defines</li>
+				<li>Debug menu now shows the time/date/ticks info (previously on System Info screen) and updates the info in real time while waiting for you to make a choice</li>
+				<li>Local variables in all kernel routines are now allocated on the stack, making the kernel fully reentrant. Except for the StringBuild routine. Oh, well. Maybe next version.</li>
+				<li>Optimized List Manager code slightly</li>
+				<li>Optimized <code>StringLength()</code> for speed</li>
+				<li>Relocated GDT header to fit in null descriptor</li>
+				<li>Removed all those 'changes' lines from the function descriptions for sanity... besides, we shouldn't be counting on any certain registers being preserved anyway!</li>
+				<li>Removed <code>CRC32()</code></li>
+				<li>Renamed <code>ClearScreen16()</code> and <code>ClearScreen32()</code> to <code>ScreenClear16()</code> and <code>ScreenClear32()</code></li>
+				<li>Renamed <code>HomeCursor()</code> to <code>CursorHome()</code></li>
+				<li>Renamed <code>IDTWrite()</code> to <code>InterruptHandlerSet()</code></li>
+				<li>Renamed <code>InitGDT()</code> to <code>GDTInit()</code> and changed its function to now load an allocated GDT once protected mode is active</li>
+				<li>Renamed <code>InterruptSetHandlers()</code> to <code>ISRInitAll()</code></li>
+				<li>Renamed various string routines for consistency</li>
+				<li>Revamped existing LBA code into <code>C01ATASectorReadLBA28PIO()</code> and <code>C01ATASectorWriteLBA28PIO()</code></li>
+			</ul>
+			<br>
+
+			Fixed<br>
+			<ul>
+				<li><code>MemSearchDWord()</code> and <code>MemSearchWord()</code> now actually return values O.O</li>
+				<li><code>PrintRegs16()</code> and <code>PrintRegs32()</code> now preserve the flags register</li>
+				<li>Squashed a bug in <code>ScreenClear32()</code> which could potentially cause a triple fault depending on the value of ECX</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>6/10/2018, 0.11 Update - Fleshed out List Manager and PCI routines, other fixes</b><br>
+			<br>
+			<ul>
+				<li>Added check for PCI controller before attempting to init the PCI bus</li>
+				<li>Added function listing for lists.asm, memory.asm, and pci.asm</li>
+				<li>Added <code>PCICalculateNext()</code> in pci.asm</li>
+				<li>Added <code>PCIGetNextFunction()</code> in pci.asm</li>
+				<li>Added time and date data to system info page on debug menu</li>
+				<li>Changed folder locations and modified buildrun.sh accordingly</li>
+				<li>Finished <code>LMItemGetAddress()</code> in lists.asm</li>
+				<li>Finished <code>PCIGetFunctionCount()</code> (formerly <code>PCIGetDeviceCount()</code>) in pci.asm</li>
+				<li>Optimized (drastically!) the debug menu's PCI listing code and saved around 1.5 KiB</li>
+				<li>Removed duplicate code from <code>LMItemAddAtSlot()</code> in lists.asm</li>
+				<li>Removed <code>LMListSignatureCreate()</code> and <code>LMListSignatureTest()</code> from lists.asm</li>
+				<li>Replaced CRC checksumming in List Manager routines with a simple signature check for speed :/</li>
+				<li>Rewrote PCI routines to use List Manager for data shadowing</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>6/4/2018, 0.10 Update - Stupid little fixes</b><br>
+			<br>
+			<ul>
+				<li>Changed major and minor version numbers to byte size in globals.asm</li>
+				<li>Fixed a bug in the newly optimized PCI device name table where the data being written to screen wasn't coming from the right place. And also saved around 300 bytes!</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>6/4/2018, 0.10 Update - List Manager, 50-line text mode support</b><br>
+			<br>
+			<ul>
+				<li>Added 50-line text mode support. Nice for viewing those beautiful diagnostic messages at boot!</li>
+				<li>Added allocation for 8 KiB main stack (size set by global value)</li>
+				<li>Added configbits setting for screen lines at startup</li>
+				<li>Added <code>CRC32()</code> to misc.asm for data checksumming</li>
+				<li>Added <code>mouseXLimit</code> and <code>mouseYLimit</code> to the system struct (replaces old method of using the current VESA screen resolution)</li>
+				<li>Added <code>PCIDriverLoad()</code> and <code>PCIDriverSearch()</code> for the upcoming driver addition</li>
+				<li>Added the beginning of Night's first driver, IDE Controller.asm!</li>
+				<li>Added the List Manager (api/lists.asm) to manage lists of things; something the kernel will often need to do</li>
+				<li>Changed Debug menu PCI device list to now use List Manager to build its list live and cut the wasted space from hard-coding</li>
+				<li>Changed IDT memory to be allocated instead of using a static address</li>
+				<li>Changed <code>MemoryInit()</code> to respect the BIOS memory map and no longer allocate at an arbitrary address</li>
+				<li>Cleaned up interrupt code and merged 3 files (setints.asm, inthandle.asm, idt.asm) into a single file: interrupts.asm</li>
+				<li>Incorporated disks.asm into IDE driver</li>
+				<li>Made boot-time diagnostic messages and debug menu obey configbits settings</li>
+				<li>Made new folder (api) for accessory code to be used by the kernel and be made available via the Night API</li>
+				<li>Minor change to structure of all function descriptions</li>
+				<li>Moved <code>ConvertToHexString16()</code> from screen.asm to strings.asm</li>
+				<li>Moved keyboard-related globals to ps2.asm</li>
+				<li>Moved strings.asm from system folder to api folder</li>
+				<li>Moved temporary stack (the only stack we've been using up to this point!) from 0x9F800 to 0x600</li>
+				<li>Optimized <code>MemCopy()</code> to transfer 16 bytes at a time instead of just one</li>
+				<li>Optimized text scrolling algorithm to copy in 16-byte chunks, giving a 76.5% speed increase</li>
+				<li>Removed <code>kCRLF</code> from the globals, as it's no longer used</li>
+				<li>Removed VESA structs from the globals since we don't have VESA support anymore :/</li>
+				<li>Renamed system/api.asm to api/misc.asm</li>
+				<li>Trimmed unused routines (<code>PrintDebug()</code>, <code>PrintSimple()</code>, <code>SetSystemVESA()</code>) from misc.asm</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>4/25/2018, 0.0F Update - Final PCI system</b><br>
+			<br>
+			<ul>
+				<li>Added version information to kernel info screen</li>
+				<li>Changed PCI system to load device data into RAM and source all subsequent register reads from there</li>
+				<li>Made minor changes to folder structure</li>
+				<li>Other minor changes</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>1/19/2018, 0.0E Update - Now runs on real hardware!</b><br>
+			<br>
+			<ul>
+				<li>Added automatic sequential highlighted printing to <code>PrintRegsVESA()</code> (formerly <code>RegDump()</code>) for extra ease of use</li>
+				<li>Added PCI bus probing to kernel startup so it only needs done once because it takes so long</li>
+				<li>Added PCI device info dump to debug menu</li>
+				<li>Added <code>PCIGetDeviceCount()</code> to return the total number of PCI devices (functions) in the system</li>
+				<li>Added text color and location features <code>Print16()</code> and <code>Print32()</code> complete with autoscrolling text as the bottom of the screen is reached</li>
+				<li>Added <code>CursorHome()</code></li>
+				<li>Added handlers for breakpoint, invalid opcode and GPF exceptions</li>
+				<li>Removed VESA support in favor of later having a dedicated graphics driver handle video</li>
+				<li>Changed <code>PrintRegs()</code> (formerly <code>RegDump()</code>) to not use <code>StringBuild()</code> to do its job, since I needed <code>PrintRegs()</code> to debug <code>StringBuild()</code> O.O</li>
+				<li>Changed initial boot code in kernel.asm to print small diagnostic messages to assist debugging on real hardware</li>
+				<li>Changed the preferred method of clearing strings from MemCopy-ing an already cleared string over the working one to simply using MemFill to fill the string space with zeros to eliminate the wasted space of the blank strings</li>
+				<li>Changed the token used in <code>StringBuild()</code> to ^ instead of %. Why? Mac throwback! 8-)</li>
+				<li>Changed text printing routines to work identically in both 16 and 32 bit mode</li>
+				<li>Changed the formatting of the GPL text in the beginning of every. Single. File.</li>
+				<li>Fixed a read after end of string bug in <code>BuildString()</code> which gave weird results with tokens</li>
+				<li>Moved some data out of globals.asm and into the respective files with related routines and removed some unused data to tidy up the globals</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>12/6/2017, 0.0D Update - Milestone 1</b><br>
+			<br>
+			<ul>
+				<li>Added beginning of framework for PCI support (Exelyx C code which will be rewritten in assembly)</li>
+				<li>Moved some code around</li>
+				<li>Polished LBA code</li>
+				<li>Slight modifications to the Debug code</li>
+				<li>Structured the project into directories</li>
+				<li>Tested and polished the dummy memory allocation routine</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>12/2/2017, 0.0C Update</b><br>
+			<br>
+			<ul>
+				<li>Changed screen.asm to vesa.asm</li>
+				<li>Added <code>ConvertToOctalString()</code> and <code>ConvertToBinaryString()</code> to api.asm</li>
+				<li>Added <code>ticksSinceBoot</code> system variable for easier timing of events over spans of more than one second</li>
+				<li>Added strings.asm</li>
+				<li>Added <code>MemFill()</code> and <code>MemCopy()</code> to memory.asm</li>
+				<li>Added <code>VESALoadIcon()</code> to vesa.asm</li>
+				<li>Added <code>RegDump()</code> to debug.asm for more debugging ease</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>11/8/2017, 0.0B Update</b><br>
+			<br>
+			<ul>
+				<li>Modified <code>Random()</code> to return numbers within a requested limit</li>
+				<li>Added a starfield to the boot screen (Makes a nice test for <code>Random()</code>'s new feature! :) )</li>
+				<li>Made boot screen selectable by <code>ConfigBits</code> (Also made it disabled by default for now. See the notes at the bottom of globals.asm for details on what ConfigBits can control.)</li>
+				<li>Identified (and thus far did nothing about) a bug where the kernel throws an Invalid Opcode exception at 0008:0000001F when started with insufficient video RAM</li>
+				<li>Cleaned up kernel.asm and moved some IDT setup code that used to be there to idt.asm</li>
+				<li>Added a crosshair cursor (and a couple other surprises) to the Mouse Tracking Test</li>
+				<li>Modified <code>VESAPlot()</code> to clip pixels outside the LFB (Writing to memory outside your target is a Very Bad Thing)</li>
+				<li>Added the beginning of a RAM browser to the debug menu for inspecting memory without relying on the VirtualBox debugger</li>
+				<li>Added <code>ConvertDecimalToString()</code></li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>11/3/2017, 0.0A Update</b><br>
+			<br>
+			<ul>
+				<li>Fixed bug in <code>VESAInit()</code> where setting VESA mode fails silently if video hardware does not support VESA (The error message for the VESA init failing was being printed using VESA. Yes, that is as bad as it sounds. :) )</li>
+				<li>Fixed bug in <code>VESAPlot32()</code> where 16-bit registers were being used instead of 32-bit causing graphical errors when drawing at certain points on the screen</li>
+				<li>Fixed error message printing in <code>A20Enable()</code></li>
+				<li>Changed infinite loops (except the main one!) to a simple 'jmp $'</li>
+				<li>Added beginning of serial communication routines (Existing routines transmit data, but still need to add interrupt handlers that actually do something useful. Also only really works on port 1 for now.)</li>
+				<li>Added pushad/popad to all unused interrupt handlers for future sanity</li>
+				<li>Added <code>VESAClearScreen()</code></li>
+				<li>Added boot logo</li>
+				<li>Added <code>TimerWait()</code></li>
+				<li>Added the beginnings of a debug menu (debug.asm)</li>
+				<li>Beautification of teh codez1! (Tabs &gt; spaces, kids.)</li>
+				<li>Added GPL License.txt since this is kiiiiinda an open-source project and all</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>10/23/2017, 0.09 Update</b><br>
+			<br>
+			<ul>
+				<li>Added 32-bit random number generator <code>Random()</code></li>
+				<li>Added internal time maintenance based on RTC values at boot</li>
+				<li>Added <code>PrintSimple16()</code> and <code>PrintSimple32()</code></li>
+				<li>Added files for upcoming work on deeper hardware management</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>10/21/2017, 0.08 Cleanup</b><br>
+			<br>
+			<ul>
+				<li>Split some code from hardware.asm into PIC.asm, ps2.asm and screen.asm</li>
+				<li>Split some code from kernel.asm into api.asm and hardware.asm</li>
+				<li>Updated all copyright dates and copyright message</li>
+				<li>Merged build.sh and debug.sh into one script</li>
+				<li>Modified buildrun.sh to mount the floppy image on its own instead of relying on VirtualBox to already be configured with a specific image to allow more flexibility<br>
+				...and EVERYTHING STILL WORKS! :D</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/31/2016, 0.08 Update</b><br>
+			<br>
+			<ul>
+				<li>Fixed a horribly insidious bug in which the correct <code>VESAPrint()</code> function pointer is not used if the address of the low byte of the <code>VESAPrint32()</code> function address happens to be 0x18</li>
+				<li>Added limiters on mouse position counters</li>
+				<li>Added a <code>DebugPrint()</code> as a quick debug aid</li>
+				<li>Added jmp $ instructions to all exception handlers which are unimplemented as of yet to make it apparent if the system happens to fall into one. You can't miss a blatant hang lol</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/17/2016, 0.07 Update</b><br>
+			<br>
+			<ul>
+				<li>Finished mouse support</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/14/2016, 0.06 Update</b><br>
+			<br>
+			<ul>
+				<li>Fixed copyright dates</li>
+				<li>Modified timer tick interrupt</li>
+				<li>Beginning of mouse interface</li>
+				<li>Added background color option to <code>VESAPrint()</code></li>
+				<li>Added seconds since boot display to aid in seeing if anything has hung</li>
+				<li>Added some FAT structures</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/7/2016, v0.05 Update</b><br>
+			<br>
+			<ul>
+			<li>Added 24 bit color support</li>
+			<li>Made <code>VESAPrint()</code> and <code>VESAPlot()</code> function pointers to handle different underlying color depth routines</li>
+				<li>Added key buffer, basic keyboard interrupt handler and key fetch routine</li>
+				<li>Enabled interrupts - We've finally gone live!</li>
+				<li>Various minor fix-ups and corrections</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/6/2016, v0.04 update bugfixes</b><br>
+			<br>
+			<ul>
+				<li>Fixed Maarten's memory code</li>
+				<li>Added <code>PrintFail()</code> for printing pre-VESA init fatal errors</li>
+				<li>Other little fix-ups</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+
+
+			<b>8/3/2016, v0.04 update</b><br>
+			<br>
+			<ul>
+				<li>Beginning of VESA support</li>
+				<li>Condensed some code files</li>
+				<li>Text drawing in 32-bit graphics modes</li>
+				<li>Auto detect best mode and set</li>
+				<li>Fast A20 enable</li>
+				<li>Introduced system info structure</li>
+				<li>Maarten's memory code</li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
+			The few versions prior to this were experimental and did nothing noteworthy.
+
+		</p>
+		<br>
+		<br>
+		<br>
+
+
+
+
 
 		<hr>
 		<h2><a name = 'License'>GNU General Public License</a></h2>

@@ -30,6 +30,7 @@ extern ConvertWordToHexString16
 extern ConvertNumberBinaryToString
 extern ConvertNumberDecimalToString
 extern ConvertNumberHexToString
+extern ConvertNumberHexQuadToString
 extern ConvertNumberOctalToString
 extern ConvertStringBinaryToNumber
 extern ConvertStringDecimalToNumber
@@ -54,6 +55,7 @@ extern StringSearchCharList
 extern StringTokenBinary
 extern StringTokenDecimal
 extern StringTokenHexadecimal
+extern StringTokenHexadecimalQuad
 extern StringTokenOctal
 extern StringTokenString
 extern StringTrimLeft

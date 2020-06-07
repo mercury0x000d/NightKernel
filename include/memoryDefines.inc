@@ -61,6 +61,7 @@ global MemCopy
 global MemDispose
 global MemFill
 global MemInit
+global MemMapPrint
 global MemPagesNeeded
 global MemSearchWord
 global MemSearchDWord

@@ -116,6 +116,50 @@ ret
 
 
 section .text
+A20Delay:
+	; Enables the A20 line using all methods in order
+	; Since A20 support is critical, this code will print an error then intentionally hang if unsuccessful
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push bp
+	mov bp, sp
+
+	; allocate local variables
+	sub sp, 4
+	%define timerPtrSeg							dword [bp - 2]
+	%define timerPtrOffset						dword [bp - 4]
+
+
+	; reset ticks to zero
+	mov ah, 1
+	mov cx, 0
+	mov dx, cx
+	int 0x1A
+
+
+	; loop until ticks have passed
+	.DelayLoop:
+		mov ah, 0
+		int 0x1A
+
+		cmp dx, 40
+	jb .DelayLoop
+
+ 
+	mov sp, bp
+	pop bp
+ret
+
+
+
+
+
+section .text
 A20Enable:
 	; Enables the A20 line using all methods in order
 	; Since A20 support is critical, this code will print an error then intentionally hang if unsuccessful
@@ -129,47 +173,48 @@ A20Enable:
 	push bp
 	mov bp, sp
 
-
-	; check if already enabled
-	push word 0
-	call A20Check
-
-	cmp dx, true
-	jne .NotPreenabled
-		; if we get here, the A20 line is already enabled by... someone... or... something. Spooky! O.O
-		push .A20AlreadyEnabled$
-		call PrintIfConfigBits16
-		jmp .Exit
-	.NotPreenabled:
+	; allocate local variables
+	sub sp, 4
+	%define timerPtrSeg							dword [bp - 2]
+	%define timerPtrOffset						dword [bp - 4]
 
 
-	; attempt BIOS method
-	call A20EnableBIOS
+	; ; check if already enabled
+	; call A20Check
 
-	; check if it worked
-	push word 0
-	call A20Check
-
-	cmp dx, true
-	jne .BIOSFailed
-		; if we get here, the Port 0xEE method succeeded
-		push .BIOSSuccess$
-		call PrintIfConfigBits16
-		jmp .Exit
-	.BIOSFailed:
-
-	; print the fail
-	push .BIOSFail$
-	call PrintIfConfigBits16
+	; cmp dx, true
+	; jne .NotPreenabled
+	; 	; if we get here, the A20 line is already enabled by... someone... or... something. Spooky! O.O
+	; 	push .A20AlreadyEnabled$
+	; 	call PrintIfConfigBits16
+	; 	jmp .Exit
+	; .NotPreenabled:
 
 
-	; attempt Port EE method
+	; ; attempt BIOS method
+	; call A20EnableBIOS
+
+	; ; check if it worked
+	; call A20Check
+	; cmp dx, true
+	; jne .BIOSFailed
+	; 	; if we get here, the Port 0xEE method succeeded
+	; 	push .BIOSSuccess$
+	; 	call PrintIfConfigBits16
+	; 	jmp .Exit
+	; .BIOSFailed:
+
+	; ; print the fail
+	; push .BIOSFail$
+	; call PrintIfConfigBits16
+
+
+	; attempt Port EE method and wait
 	call A20EnablePortEE
+	call A20Delay
 
 	; check if it worked
-	push word 0
 	call A20Check
-
 	cmp dx, true
 	jne .PortEEFailed
 		; if we get here, the Port 0xEE method succeeded
@@ -183,13 +228,12 @@ A20Enable:
 	call PrintIfConfigBits16
 
 
-	; attempt Fast A20 method
+	; attempt Fast A20 method and wait
 	call A20EnableFastA20
+	call A20Delay
 
 	; check if it worked
-	push word 0
 	call A20Check
-
 	cmp dx, true
 	jne .FastA20Failed
 		; if we get here, the FastA20 method succeeded
@@ -203,13 +247,12 @@ A20Enable:
 	call PrintIfConfigBits16
 
 
-	; attempt Keyboard Controller method
+	; attempt Keyboard Controller method and wait
 	call A20EnableKeyboardController
+	call A20Delay
 
 	; check if it worked
-	push word 0
 	call A20Check
-
 	cmp dx, true
 	jne .KeyboardControllerFailed
 		; if we get here, the Port 0xEE method succeeded
@@ -467,7 +510,14 @@ MemMapCopy:
 		je .Done
 	jmp .ProbeLoop
 
+
 	.Done:
+	; save the memory map's size for later
+	mov eax, 0
+	mov ax, writePtr
+	mov dword [tSystem.memoryBIOSMapSize], eax
+
+
 	; no errors here!
 	mov ax, entryCount
 	mov dx, kErrNone
@@ -974,67 +1024,54 @@ MemInit:
 	; allocate local variables
 	sub esp, 16
 	%define memMapOffset						dword [ebp - 4]
-	%define bitsNeedesPerBitfield				dword [ebp - 8]
+	%define bitsNeededPerBitfield				dword [ebp - 8]
 	%define entryLengthPtr						dword [ebp - 12]
 	%define loopIndex							dword [ebp - 16]
 
 
-	; init important stuff
+	; calculate how many bits are needed to cover the address space in the machine and save to bitsNeededPerBitfield
+	; bitsNeededPerBitfield = (address of highest-addressed entry in the map / 4096) + (length of highest-addressed entry in the map / 4096)
 	mov memMapOffset, 0x80000
+	mov bitsNeededPerBitfield, 0
+	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
+	.CeilingFindLoop:
+		mov loopIndex, ecx
 
-	; calculate how many bits are needed to cover the address space in the machine and save to bitsNeedesPerBitfield
-	; bitsNeedesPerBitfield = (address of last entry in memory map / 4096) + (length of last entry in memory map / 4096)
+		; address calculation
+		mov eax, ecx
+		dec eax
+		mov ebx, 20
+		mul ebx
+		mov esi, 0x80000
+		add esi, eax
+		mov memMapOffset, esi
 
-	; address calculation
-	mov esi, memMapOffset
-	mov eax, dword [tSystem.memoryBIOSMapEntryCount]
-	dec eax
-	mov ebx, 20
-	mul ebx
-	add memMapOffset, eax
 
-	; We interrupt this calculation in progress to bring you the value of tSystem.memoryBIOSMapSize!
-	mov dword [tSystem.memoryBIOSMapSize], eax
-	add dword [tSystem.memoryBIOSMapSize], 20
+		; shift the address and length to divide by 4096 (turns bytes into pages)
+		; We must use our QuadShift routines here in case we have a machine which has over 4 GiB of RAM.
+		; The normal registers just won't cut it, son!
+		call .ShiftEntriesRight
 
-	; We now resume this scheduled calculation, already in progress
-	; resume calculating bitsNeedesPerBitfield
 
-	; shift the address and length to divide by 4096
-	; We must use our QuadShift routines here in case we have a machine which has over 4 GiB of RAM.
-	; The normal registers just won't cut it, son!
-	push 12
-	mov eax, memMapOffset
-	add eax, tBIOSMemMapEntry.address
-	push eax
-	call QuadShiftRight
+		; calculate the highest address in the block of memory specified by this entry into EBX
+		mov esi, memMapOffset
+		mov ebx, [esi + tBIOSMemMapEntry.address]
+		add ebx, [esi + tBIOSMemMapEntry.length]
 
-	push 12
-	mov eax, memMapOffset
-	add eax, tBIOSMemMapEntry.length
-	push eax
-	call QuadShiftRight
 
-	; calculate how large each bitfield must needs be
-	mov esi, memMapOffset
-	mov ebx, [esi + tBIOSMemMapEntry.address]
-	mov ecx, [esi + tBIOSMemMapEntry.length]
-	add ebx, ecx
-	mov bitsNeedesPerBitfield, ebx
+		; see if this value is higher than the current record holder, if so replace it
+		cmp ebx, bitsNeededPerBitfield
+		jna .NotHigher
+			mov bitsNeededPerBitfield, ebx
+		.NotHigher:
 
-	; put the address and length back the way they were - we'll need them in their original form later
-	push 12
-	mov eax, memMapOffset
-	add eax, tBIOSMemMapEntry.address
-	push eax
-	call QuadShiftLeft
 
-	; shift the length to divide by 4096
-	push 12
-	mov eax, memMapOffset
-	add eax, tBIOSMemMapEntry.length
-	push eax
-	call QuadShiftLeft
+		; put the address and length back the way they were - we'll need them in their original form later
+		call .ShiftEntriesLeft
+
+
+		mov ecx, loopIndex
+	loop .CeilingFindLoop
 
 
 	; Now we need to figure out where the memory management information will be stored. But how?? Memory management isn't fully set up yet!
@@ -1043,7 +1080,7 @@ MemInit:
 	; (e.g. under 4 GiB) and large enough to hold the two memory bitfields and the shadowed map data. 
 
 	; So, first step; figure out how much space we need for one bitfield.
-	push bitsNeedesPerBitfield
+	push bitsNeededPerBitfield
 	call LMBitfieldSpaceCalc
 	mov [tSystem.memoryBitfieldSize], eax
 
@@ -1052,7 +1089,7 @@ MemInit:
 	; pagesAllocated tracks which pages are allocated (0 if free, 1 if allocated).
 	; pagesReserved tracks which pages are reserved (0 if usable, 1 if reserved).
 
-	; total space = bitsNeedesPerBitfield * 2 + tSystem.memoryBIOSMapSize
+	; total space = bitsNeededPerBitfield * 2 + tSystem.memoryBIOSMapSize
 	shl eax, 1
 	add eax, dword [tSystem.memoryBIOSMapSize]
 	mov dword [tSystem.memoryManagementSpace], eax
@@ -1118,7 +1155,7 @@ MemInit:
 	; if we get here, we got a good block in which we can create a pair of bitfields and shadow the memory map
 
 	; First, create said bitfields.
-	push bitsNeedesPerBitfield
+	push bitsNeededPerBitfield
 	push dword [tSystem.memoryBitfieldAllocatedPtr]
 	call LMBitfieldInit
 
@@ -1128,7 +1165,7 @@ MemInit:
 	mov dword [tSystem.memoryBitfieldReservedPtr], eax
 
 	; create bitfield #2
-	push bitsNeedesPerBitfield
+	push bitsNeededPerBitfield
 	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitfieldInit
 
@@ -1172,10 +1209,11 @@ MemInit:
 	; Now that they are both created, we set every. Single. Bit. Why? Because the memory map of this system likely has 1.5 metric crap-tons
 	; of holes in it, and we don't want to allocate space in one of them in the future and upset the apple cart. Not the one in Cupertino - that
 	; would've been the Apple(TM) Cart, or perhaps the iCart. It would cost twice as much as any other cart, hold half as much, and break in
-	; two when dropped.
+	; two when dropped. But it's ok, because you get to feel superior to everyone else and you can buy an upgraded model next year which has the
+	; exact same amount of carrying capacity yet somehow costs even more money.
 
 	; mark the range as already allocated
-	mov eax, bitsNeedesPerBitfield
+	mov eax, bitsNeededPerBitfield
 	dec eax
 	push eax
 	push dword 0
@@ -1183,7 +1221,7 @@ MemInit:
 	call LMBitSetRange
 
 	; mark the range as already allocated
-	mov eax, bitsNeedesPerBitfield
+	mov eax, bitsNeededPerBitfield
 	dec eax
 	push eax
 	push dword 0
@@ -1192,45 +1230,34 @@ MemInit:
 
 
 	; Next, we parse the memory map to determine what gets marked as available. We do this by examining every entry at or above
-	; the 1 MiB mark and setting the corresponding bits in both bitfields. The algorithm employed to do so makes the assumption that every such
+	; the 1 MiB mark and clearing the corresponding bits in both bitfields. The algorithm employed to do so makes the assumption that every such
 	; memory map entry will have a length which is an even multiple of 4 KiB, and I believe that is a safe assumption to make, as every real
 	; machine which I have examined thus far (as well as VirtualBox) have all conformed to this pattern; not once did I see a memory entry at
 	; or over 1 MiB which was not an even multiple of 4 KiB.
-
-	; At this point, we have two copies of the BIOS memory map - one at the address denoted by tSystem.memoryBIOSMapPtr and the other
-	; at 0x80000. Since the operation of this loop is destructive, we use the "old" copy of the map at 0x80000.
 
 	; Init important... oh, you know the drill
 	mov memMapOffset, 0x80000
 	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
 
-	.MemReservedLoop:
+	.MemAvailableLoop:
 		mov loopIndex, ecx
 		; if this is not an entry for available RAM (Type 01) we can skip it
 		mov esi, memMapOffset
 		cmp dword [esi + tBIOSMemMapEntry.type], 1
-		jne .MemReservedLoopIterate
+		jne .MemAvailableLoopIterate
 
-		; If we get here, the entry was not for usable RAM; if this address is greater than 32 bits, we can proceed
+		; If we get here, the entry was for usable RAM
+		; if this address exceeds the 32 bit space, we can skip the next check since it would be guaranteed to be over the 1 MiB mark
 		cmp dword [esi + tBIOSMemMapEntry.address + 4], 0
-		jne .MarkReserved
-			; If we get here, this address is in the 32-bit address space. Let's see if it's over a meg.
+		jne .MarkAvailable
+			; If we get here, this address is in the 32-bit address space. Let's see if it's over a meg. If it is, we don't mark it available.
 			cmp dword [esi + tBIOSMemMapEntry.address], 0x100000
-			jb .MemReservedLoopIterate
-		.MarkReserved:
+			jb .MemAvailableLoopIterate
+		.MarkAvailable:
+
 
 		; if we get here, this memory range needs marked available; first, convert the 64-bit address and length to 32-bit "page" values
-		push 12
-		mov esi, memMapOffset
-		add esi, tBIOSMemMapEntry.address
-		push esi
-		call QuadShiftRight
-
-		push 12
-		mov esi, memMapOffset
-		add esi, tBIOSMemMapEntry.length
-		push esi
-		call QuadShiftRight
+		call .ShiftEntriesRight
 
 		; mark the range as available
 		mov esi, memMapOffset
@@ -1241,8 +1268,6 @@ MemInit:
 		push dword [esi + tBIOSMemMapEntry.address]
 		push dword [tSystem.memoryBitfieldAllocatedPtr]
 		call LMBitClearRange
-
-		; check for errors
 		cmp edx, kErrNone
 		jne .Exit
 
@@ -1255,6 +1280,74 @@ MemInit:
 		push dword [esi + tBIOSMemMapEntry.address]
 		push dword [tSystem.memoryBitfieldReservedPtr]
 		call LMBitClearRange
+		cmp edx, kErrNone
+		jne .Exit
+
+
+		; convert the "page" values back to "byte" values since we'll need them intact for the next (and final!) loop
+		call .ShiftEntriesLeft
+
+
+		.MemAvailableLoopIterate:
+		; increment the memMapOffset
+		add memMapOffset, 20
+
+		mov ecx, loopIndex
+	loop .MemAvailableLoop
+
+
+	; Next, we parse the memory map (again!) to determine what needs marked as reserved. We do this by examining every entry at or above
+	; the 1 MiB mark and setting the corresponding bits in both bitfields. The algorithm employed to do so makes the same assumptions about the
+	; memory map which the previous one did.
+
+	; At this point, we have two copies of the BIOS memory map - one at the address denoted by tSystem.memoryBIOSMapPtr and the other
+	; at 0x80000. Since the operation of this loop is destructive, we use the "old" copy of the map at 0x80000.
+
+	; Init important... oh, you know the drill
+	mov memMapOffset, 0x80000
+	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
+
+	.MemReservedLoop:
+		mov loopIndex, ecx
+		; if this is an entry for available RAM (Type 01) we can skip it
+		mov esi, memMapOffset
+		cmp dword [esi + tBIOSMemMapEntry.type], 1
+		je .MemReservedLoopIterate
+
+		; If we get here, the entry was not for usable RAM; if this address is greater than 32 bits, we can proceed
+		cmp dword [esi + tBIOSMemMapEntry.address + 4], 0
+		jne .MarkReserved
+			; If we get here, this address is in the 32-bit address space. Let's see if it's under a meg. If it is, we skip it.
+			cmp dword [esi + tBIOSMemMapEntry.address], 0x100000
+			jb .MemReservedLoopIterate
+		.MarkReserved:
+
+
+		; if we get here, this memory range needs marked reserved; first, convert the 64-bit address and length to 32-bit "page" values
+		call .ShiftEntriesRight
+
+
+		; mark the range as allocated
+		mov esi, memMapOffset
+		mov eax, dword [esi + tBIOSMemMapEntry.address]
+		add eax, dword [esi + tBIOSMemMapEntry.length]
+		dec eax
+		push eax
+		push dword [esi + tBIOSMemMapEntry.address]
+		push dword [tSystem.memoryBitfieldAllocatedPtr]
+		call LMBitSetRange
+		cmp edx, kErrNone
+		jne .Exit
+
+		; mark the range as reserved
+		mov esi, memMapOffset
+		mov eax, dword [esi + tBIOSMemMapEntry.address]
+		add eax, dword [esi + tBIOSMemMapEntry.length]
+		dec eax
+		push eax
+		push dword [esi + tBIOSMemMapEntry.address]
+		push dword [tSystem.memoryBitfieldReservedPtr]
+		call LMBitSetRange
 		cmp edx, kErrNone
 		jne .Exit
 
@@ -1275,10 +1368,10 @@ MemInit:
 
 	; Next, we have to mark the space occupied by these data structures as reserved as well. The total space occupied by everything we need
 	; to manage memory (both bitfields and the shadowed BIOS memory map) is stored in dword [tSystem.memoryManagementSpace], so we first need
-	; to convert that to a number of pages and save it for later (we can reuse bitsNeedesPerBitfield for this).
+	; to convert that to a number of pages and save it for later (we can reuse bitsNeededPerBitfield for this).
 	push dword [tSystem.memoryManagementSpace] 
 	call MemPagesNeeded
-	mov bitsNeedesPerBitfield, eax
+	mov bitsNeededPerBitfield, eax
 
 	; now convert the starting address (tSystem.memoryBitfieldAllocatedPtr) to a page / bit number / thingy
 	; bit number = tSystem.memoryBitfieldAllocatedPtr / 4096
@@ -1298,7 +1391,7 @@ MemInit:
 	; mark the range as reserved
 	mov ebx, dword [tSystem.memoryBitfieldAllocatedPtr]
 	shr ebx, 12
-	mov eax, bitsNeedesPerBitfield
+	mov eax, bitsNeededPerBitfield
 	add eax, ebx
 	dec eax
 	push eax
@@ -1306,72 +1399,153 @@ MemInit:
 	push dword [tSystem.memoryBitfieldReservedPtr]
 	call LMBitSetRange
 
+	jmp .Exit
+
+
+	.ShiftEntriesRight:
+		push 12
+		mov esi, memMapOffset
+		add esi, tBIOSMemMapEntry.address
+		push esi
+		call QuadShiftRight
+
+		push 12
+		mov esi, memMapOffset
+		add esi, tBIOSMemMapEntry.length
+		push esi
+		call QuadShiftRight
+	ret
+
+
+	.ShiftEntriesLeft:
+		push 12
+		mov esi, memMapOffset
+		add esi, tBIOSMemMapEntry.address
+		push esi
+		call QuadShiftLeft
+
+		push 12
+		mov esi, memMapOffset
+		add esi, tBIOSMemMapEntry.length
+		push esi
+		call QuadShiftLeft
+	ret
+
 
 	; and exit!
 	.Exit:
+	mov esp, ebp
+	pop ebp
 	%undef memMapOffset
-	%undef bitsNeedesPerBitfield
+	%undef bitsNeededPerBitfield
 	%undef entryLengthPtr
 	%undef loopIndex
+ret
+
+
+
+
+
+MemMapPrint:
+	; Prints the BIOS Memory Map
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; allocate local variables
+	sub esp, 16
+	%define loopIndex							dword [ebp - 4]
+	%define entryNumber							dword [ebp - 8]
+	%define memMapOffsetLow						dword [ebp - 12]
+	%define memMapOffsetHigh					dword [ebp - 16]
+
+
+	mov eax, 0x80000
+	mov memMapOffsetLow, eax
+	mov memMapOffsetHigh, eax
+	add memMapOffsetHigh, 4
+
+	mov entryNumber, 0
+
+	push .memoryTable$
+	call PrintIfConfigBits32
+
+	mov ecx, [tSystem.memoryBIOSMapEntryCount]
+
+	.MapLoop:
+	mov loopIndex, ecx
+
+		push 80
+		push .scratch$
+		push .mapFormat$
+		call MemCopy
+
+		push 2
+		push entryNumber
+		push .scratch$
+		call StringTokenDecimal
+
+		call .TokenTranslate
+
+		add memMapOffsetHigh, 8
+		add memMapOffsetLow, 8
+
+		call .TokenTranslate
+
+		push 2
+		mov esi, memMapOffsetHigh
+		add esi, 4
+		mov eax, [esi]
+		push eax
+		push .scratch$
+		call StringTokenHexadecimal
+
+		add memMapOffsetHigh, 12
+		add memMapOffsetLow, 12
+
+		push .scratch$
+		call PrintIfConfigBits32
+
+		inc entryNumber
+	mov ecx, loopIndex
+	loop .MapLoop
+
+	jmp .Exit
+
+	.TokenTranslate:
+		push 16
+		mov esi, memMapOffsetHigh
+		mov eax, [esi]
+		push eax
+		mov esi, memMapOffsetLow
+		mov eax, [esi]
+		push eax
+		push .scratch$
+		call StringTokenHexadecimalQuad
+	ret
+
+
+	.Exit:
+	%undef loopIndex
+	%undef entryNumber
+	%undef memMapOffsetLow
+	%undef memMapOffsetHigh
 	mov esp, ebp
 	pop ebp
 ret
-;	; calculate the total amount of bytes in the system and save to qTotalBytes
-;	mov ecx, dword [tSystem.memoryBIOSMapEntryCount]
-;	.MemAddLoop:
-;		mov loopIndex, ecx
-;
-;		; calculate the address of this entry's length
-;		mov esi, offset
-;		mov eax, [esi + tBIOSMemMapEntry.length]
-;		mov entryLengthPtr, eax
-;
-;		; add the size of this block to the total counter in the system struct
-;		push qTotalBytesPtr
-;		push entryLengthPtr
-;		call QuadAdd
-;
-;
-;		; see if this entry is available RAM (Type 01)
-;		mov esi, offset
-;		mov ebx, dword [esi + tBIOSMemMapEntry.type]
-;
-;		cmp ebx, 1
-;		jne .NotUsable
-;			; if we get here, the entry is for usable RAM, so we increment that counter as well
-;			push qUsableBytesPtr
-;			push entryLengthPtr
-;			call QuadAdd
-;		.NotUsable:
-;
-;
-;		; increment the offset
-;		add offset, 20
-;
-;		mov ecx, loopIndex
-;	loop .MemAddLoop
-;
-;
-;	; convert qTotalBytes and qUsableBytes to KiB
-;	push 10
-;	push qTotalBytesPtr
-;	call QuadShiftRight
-;
-;	push 10
-;	push qUsableBytesPtr
-;	call QuadShiftRight
-;
-;
-;	; copy qTotalBytes and qUsableBytes to the tSystem struct before we make any further changes
-;	mov eax, qTotalBytesPtr
-;	mov ebx, [eax]
-;	mov dword [tSystem.memoryKiBInstalled], ebx
-;
-;	mov eax, qUsableBytesPtr
-;	mov ebx, [eax]
-;	mov dword [tSystem.memoryKiBUsable], ebx
 
+section .data
+.memoryTable$									db '     Start              Length             Type', 0x00
+.mapFormat$										db '^   ^   ^   ^', 0x00
 
+section .bss
+.scratch$										resb 80
 
 
 

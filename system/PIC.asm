@@ -112,8 +112,8 @@ ret
 
 
 section .text
-PICIntComplete:
-	; Tells both PICs the pending interrupt has been handled
+PICIntCompleteMaster:
+	; Tells the Master PIC the pending interrupt has been handled
 	;
 	;  input:
 	;	n/a
@@ -124,6 +124,36 @@ PICIntComplete:
 
 	; Since it's called from within nearly all interrupt handlers, this routine has to be
 	; fast and not overwrite any registers; here we save only what's about to be changed
+	push eax
+	push edx
+
+	; set the interrupt complete bit
+	mov al, 0x20
+
+	; write bit to PIC 1
+	mov dx, kPIC1CmdPort
+	out dx, al
+
+	; restore that stuff
+	pop edx
+	pop eax
+ret
+
+
+
+
+
+section .text
+PICIntCompleteSlave:
+	; Tells both PICs the pending interrupt has been handled
+	;
+	;  input:
+	;	n/a
+	;
+	;  output:
+	;	n/a
+
+
 	push eax
 	push edx
 
@@ -217,24 +247,17 @@ PICIRQDisableAll:
 	;  output:
 	;	n/a
 
-	push ebp
-	mov ebp, esp
 
-
-	; disable IRQs
-	mov al, 0xFF
-
-	; write PIC 1
+	; disable PIC 1 (leaving the cascade IRQ on)
+	mov al, 0xFB
 	mov dx, kPIC1DataPort
 	out dx, al
 
-	; write PIC 2
+	; disable PIC 2
+	mov al, 0xFF
 	mov dx, kPIC2DataPort
 	out dx, al
 
-
-	mov esp, ebp
-	pop ebp
 ret
 
 

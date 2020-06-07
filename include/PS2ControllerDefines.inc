@@ -40,6 +40,7 @@
 ; device types
 %define kDevNone								0xFFFF		; technically, an oooooold AT keyboard would return this as well since it doesn't support the Identify commnad, but... we won't support that.
 %define kDevMouseStandard						0xFF00
+%define kDevTrackball							0xFF02
 %define kDevMouseWheel							0xFF03
 %define kDevMouse5Button						0xFF04
 %define kDevKeyboardMFWithTranslation1			0xAB41
