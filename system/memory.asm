@@ -51,9 +51,6 @@ A20Check:
 	;		High byte = 0 on success, non zero = fail
 	;		Low byte = 0 if disabled, 1 if enabled
 
-	push bp
-	mov bp, sp
-
 
 	; save ds and es since we'll be fiddling with them later
 	push ds
@@ -106,9 +103,6 @@ A20Check:
 	; restore the segment registers we saved in the beginning to avoid a freak out
 	pop es
 	pop ds
-
-	mov sp, bp
-	pop bp
 ret
 
 
@@ -126,14 +120,6 @@ A20Delay:
 	;  output:
 	;	n/a
 
-	push bp
-	mov bp, sp
-
-	; allocate local variables
-	sub sp, 4
-	%define timerPtrSeg							dword [bp - 2]
-	%define timerPtrOffset						dword [bp - 4]
-
 
 	; reset ticks to zero
 	mov ah, 1
@@ -142,7 +128,7 @@ A20Delay:
 	int 0x1A
 
 
-	; loop until ticks have passed
+	; loop until 4 ticks (just under one fourth of a second) have passed
 	.DelayLoop:
 		mov ah, 0
 		int 0x1A
@@ -150,9 +136,6 @@ A20Delay:
 		cmp dx, 4
 	jb .DelayLoop
 
- 
-	mov sp, bp
-	pop bp
 ret
 
 
@@ -170,14 +153,6 @@ A20Enable:
 	;  output:
 	;	n/a
 
-	push bp
-	mov bp, sp
-
-	; allocate local variables
-	sub sp, 4
-	%define timerPtrSeg							dword [bp - 2]
-	%define timerPtrOffset						dword [bp - 4]
-
 
 	; ; check if already enabled
 	; call A20Check
@@ -191,8 +166,9 @@ A20Enable:
 	; .NotPreenabled:
 
 
-	; ; attempt BIOS method
+	; ; attempt BIOS method and wait
 	; call A20EnableBIOS
+	; call A20Delay
 
 	; ; check if it worked
 	; call A20Check
@@ -277,8 +253,6 @@ A20Enable:
 
 
 	.Exit:
-	mov sp, bp
-	pop bp
 ret
 
 section .data
@@ -307,17 +281,11 @@ A20EnableBIOS:
 	;  output:
 	;	n/a
 
-	push bp
-	mov bp, sp
-
 
 	; ask the BIOS nicely, and it just may enable A20 for us
 	mov ax, 0x2401
 	int 0x15
 
-
-	mov sp, bp
-	pop bp
 ret
 
 
@@ -334,18 +302,12 @@ A20EnableFastA20:
 	;  output:
 	;	n/a
 
-	push bp
-	mov bp, sp
-
 
 	; attempt Fast A20 Enable
 	in al, 0x92
 	or al, 00000010b
 	out 0x92, al
 
-
-	mov sp, bp
-	pop bp
 ret
 
 
@@ -361,9 +323,6 @@ A20EnableKeyboardController:
 	;
 	;  output:
 	;	n/a
-
-	push bp
-	mov bp, sp
 
 
 	call .ReadyWait
@@ -426,8 +385,6 @@ A20EnableKeyboardController:
 
 
 	.Exit:
-	mov sp, bp
-	pop bp
 ret
 
 
@@ -444,16 +401,10 @@ A20EnablePortEE:
 	;  output:
 	;	n/a
 
-	push bp
-	mov bp, sp
-
 
 	; perform Port 0xEE Enable
-	out 0xEE, al
+	in al, 0xEE
 
-
-	mov sp, bp
-	pop bp
 ret
 
 

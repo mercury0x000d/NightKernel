@@ -10063,6 +10063,7 @@
 				<li>Kernel: <i>lists.asm</i> - Fixed an issue where LMElementSizeGet() was taking eight bytes off the stack upon exit instead of the appropriate four.</li>
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug causing boot failure on machines with under 4 GiB of memory.</li>
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug with A20Check() being called with too many parameters.</li>
+				<li>Kernel: <i>memory.asm</i> - Fixed a bug where A20EnablePortEE() was writing to port 0xEE instead of reading from it. Yes, that's right - a function to enable the A20 line was actually ensuring it would always be disabled.</li>
 				<li>Kernel: <i>PIC.asm</i> - Improved handling of cascade IRQ in PICDisableAll().</li>
 				<li>Kernel: <i>PIC.asm</i> - Improved handling of IRQ acknowledge.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection fixed; several keyboards which previously did not work with Night are now detected and handled appropriately.</li>
@@ -10078,7 +10079,7 @@
 				<li>Put the driver launch result back into the PCI code</li>
 				<li>Only init PS/2 controller if it exists</li>
 				<li>Verify proper function of bitfield setcounts</li>
-				<li>Try to move A20 activation to 32-bit code</li>
+				<li>Fix A20 activation</li>
 				<li>Implement events</li>
 			</ul>
 			<br>
