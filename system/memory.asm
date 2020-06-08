@@ -210,23 +210,23 @@ A20Enable:
 	; call PrintIfConfigBits16
 
 
-	; attempt Fast A20 method and wait
-	call A20EnableFastA20
-	call A20Delay
+	; ; attempt Fast A20 method and wait
+	; call A20EnableFastA20
+	; call A20Delay
 
-	; check if it worked
-	call A20Check
-	cmp dx, true
-	jne .FastA20Failed
-		; if we get here, the FastA20 method succeeded
-		push .fastA20Success$
-		call PrintIfConfigBits16
-		jmp .Exit
-	.FastA20Failed:
+	; ; check if it worked
+	; call A20Check
+	; cmp dx, true
+	; jne .FastA20Failed
+	; 	; if we get here, the FastA20 method succeeded
+	; 	push .fastA20Success$
+	; 	call PrintIfConfigBits16
+	; 	jmp .Exit
+	; .FastA20Failed:
 
-	; print the fail
-	push .fastA20Fail$
-	call PrintIfConfigBits16
+	; ; print the fail
+	; push .fastA20Fail$
+	; call PrintIfConfigBits16
 
 
 	; attempt Keyboard Controller method and wait
