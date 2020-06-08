@@ -43,9 +43,8 @@
 
 			.invisibleTable
 			{
-				border: none;
+				border: hidden;
 				page-break-inside: avoid;
-				rules: none;
 			}
 
 			.pagebreak
@@ -1344,13 +1343,13 @@
 			Every action taken by the user, be it a key press or a mouse click, triggers an event. These events are queued in a buffer awaiting processing by the application, and are classified as follows:<br>
 			<br>
 			<br>
-fgdfgdfg
+
 			<b>Key Events</b><br>
 			<code>
 				<table class = 'invisibleTable' style = 'width: 100%;'>
 					<tr>
-						<td>
-							<table style = 'width: 100%'>
+						<td align = 'center'>
+							<table style = 'width: 50%'>
 								<caption><b><i>Table 10.2 - Key Down event details</i></b></caption>
 
 								<tr>
@@ -1380,8 +1379,8 @@ fgdfgdfg
 
 							</table>
 						</td>
-						<td>
-							<table style = 'width: 100%'>
+						<td align = 'center'>
+							<table style = 'width: 50%'>
 								<caption><b><i>Table 10.3 - Key Up event details</i></b></caption>
 
 								<tr>
@@ -1415,116 +1414,108 @@ fgdfgdfg
 			</code>
 			<br>
 
-			<br>
+			Key events are generated from input by the user. <br>
 			<br>
 			<br>
 
-			<b>Mouse Down Events</b><br>
+			<b>Mouse Events</b><br>
 			<code>
-				<table style = 'width:100%'>
-					<caption><b><i>Table 10.4 - Mouse Down event details</i></b></caption>
+				<table class = 'invisibleTable' style = 'width: 100%;'>
+					<td align = 'center'>
+						<table style = 'width:80%'>
+							<caption><b><i>Table 10.4 - Mouse Down event details</i></b></caption>
 
-					<tr>
-						<col width = '20%'>
-						<col width = '80%'>
-					</tr>
+							<tr>
+								<col width = '20%'>
+								<col width = '80%'>
+							</tr>
 
-					<tr>
-						<td>what</td>
-						<td>kEvtMouseDown</td>
-					</tr>
+							<tr>
+								<td>what</td>
+								<td>kEvtMouseDown</td>
+							</tr>
 
-					<tr>
-						<td>message</td>
-						<td></td>
-					</tr>
+							<tr>
+								<td>message</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>whereX</td>
-						<td></td>
-					</tr>
+							<tr>
+								<td>whereX</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>whereY</td>
-						<td></td>
-					</tr>
+							<tr>
+								<td>whereY</td>
+								<td></td>
+							</tr>
 
-				</table>
-			</code>
-			<br>
+						</table>
+					</td>
 
-			<br>
-			<br>
-			<br>
+					<td align = 'center'>
+						<table style = 'width:80%'>
+							<caption><b><i>Table 10.5 - Mouse Move event details</i></b></caption>
 
-			<b>Mouse Move Events</b><br>
-			<code>
-				<table style = 'width:100%'>
-					<caption><b><i>Table 10.5 - Mouse Move event details</i></b></caption>
+							<tr>
+								<col width = '20%'>
+								<col width = '80%'>
+							</tr>
 
-					<tr>
-						<col width = '20%'>
-						<col width = '80%'>
-					</tr>
+							<tr>
+								<td>what</td>
+								<td>kEvtMouseMove</td>
+							</tr>
 
-					<tr>
-						<td>what</td>
-						<td>kEvtMouseMove</td>
-					</tr>
+							<tr>
+								<td>message</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>message</td>
-						<td></td>
-					</tr>
+							<tr>
+								<td>whereX</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>whereX</td>
-						<td></td>
-					</tr>
+							<tr>
+								<td>whereY</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>whereY</td>
-						<td></td>
-					</tr>
+						</table>
+					</td>
 
-				</table>
-			</code>
-			<br>
+					<td align = 'center'>
+						<table style = 'width:80%'>
+							<caption><b><i>Table 10.6 - Mouse Up event details</i></b></caption>
 
-			<br>
-			<br>
-			<br>
+							<tr>
+								<col width = '20%'>
+								<col width = '80%'>
+							</tr>
 
-			<b>Mouse Up Events</b><br>
-			<code>
-				<table style = 'width:100%'>
-					<caption><b><i>Table 10.6 - Mouse Up event details</i></b></caption>
+							<tr>
+								<td>what</td>
+								<td>kEvtMouseUp</td>
+							</tr>
 
-					<tr>
-						<col width = '20%'>
-						<col width = '80%'>
-					</tr>
+							<tr>
+								<td>message</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>what</td>
-						<td>kEvtMouseUp</td>
-					</tr>
+							<tr>
+								<td>whereX</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>message</td>
-						<td></td>
-					</tr>
+							<tr>
+								<td>whereY</td>
+								<td></td>
+							</tr>
 
-					<tr>
-						<td>whereX</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>whereY</td>
-						<td></td>
-					</tr>
-
+						</table>
+					</td>
 				</table>
 			</code>
 			<br>
@@ -1535,7 +1526,7 @@ fgdfgdfg
 
 			<b>System Events</b><br>
 			<code>
-				<table style = 'width:100%'>
+				<table style = 'width:50%'>
 					<caption><b><i>Table 10.7 - System event details</i></b></caption>
 
 					<tr>

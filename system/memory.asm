@@ -331,6 +331,10 @@ A20EnableKeyboardController:
 	;	n/a
 
 
+	; save current interrupt state
+	pushf
+	cli
+
 	call .ReadyWait
 	mov al, 0xAD
 	out 0x64, al
@@ -384,13 +388,15 @@ A20EnableKeyboardController:
 		.ReadyTimeoutLoop:
 			in al, 0x64
 			test al, 00000010b
-			jnz .Ready
+			jz .Ready
 		loop .ReadyTimeoutLoop
 		.Ready:
 	ret
 
 
 	.Exit:
+	; restore interrupt state
+	popf
 ret
 
 
