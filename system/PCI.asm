@@ -301,8 +301,8 @@ PCIDeviceInitAll:
 			; If we get here, there was an error. Let's see what it was.
 			cmp edx, kErrHandlerNotPresent
 			jne .NotHandlerNotPresent
-;				push .noDriver$
-;				call PrintIfConfigBits32
+				push .noDriver$
+				call PrintIfConfigBits32
 			.NotHandlerNotPresent:
 
 		.NextIteration:

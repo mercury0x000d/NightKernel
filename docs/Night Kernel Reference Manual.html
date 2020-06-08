@@ -69,7 +69,7 @@
 			<br>
 			<a href = '#Multitasking'>Section 9 - Multitasking, Night Style</a><br>
 			<br>
-			<a href = '#Events'>Section 10 - Things that Go Bump in the Night: Events in the Night Kernel</a><br>
+			<a href = '#Events'>Section 10 - Things that Go Bump in the <i>Night</i>: Events in the Night Kernel</a><br>
 			<br>
 			________________________________<br>
 			<br>
@@ -79,7 +79,7 @@
 			<br>
 			<a href = '#StandardFunctionReturnCodes'>Appendix 2 - Standard Function Return Codes</a><br>
 			<br>
-			<a href = '#DOSFunctionReference'>Appendix 3 - DOS Functions Reference</a><br>
+			<a href = '#DOSFunctionReference'>Appendix 3 - Default Interrupt Vectors and DOS Function Reference</a><br>
 			<br>
 			<a href = '#Changelog'>Appendix 4 - Version History</a><br>
 			<br>
@@ -1248,11 +1248,324 @@
 		<hr>
 		<h2><a name = 'Events'>Section 10 - Things that Go Bump in the <i>Night</i>: Events in the Night Kernel</a></h2>
 		<p>
-			User interaction among traditional DOS applications is quite non-uniform. Some programs reply only to text commands, others support keyboard and mouse input, others still expect in their designed crafted in such a way that the program .<br>
+			User interaction among traditional DOS applications is quite non-uniform. Some programs reply only to text commands, others support keyboard and mouse input. Besides that, there's the issue of inter-process communication which, although it was not an issue in DOS since it was not a multitasking system, will have great significance in Night. This is where the events come in.<br>
+			<br>
 			<br>
 
-			<a href = 'https://infogalactic.com/info/Computer_multitasking#Cooperative_multitasking'>things</a>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The structure of an event - the tEvent struct</i></b></caption>
+					<tr>
+						<col width = '20%'>
+						<col width = '10%'>
+						<col width = '70%'>
+					</tr>
+
+					<tr>
+						<th><i>Name</i></th>
+						<th><i>Size</i></th>
+						<th><i>Description</i></th>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>DWord</td>
+						<td>Contains a code indicating the type of event</td>
+					</tr>
+
+					<tr>
+						<td>from</td>
+						<td>DWord</td>
+						<td>The task number of the application from which the event came, or zero if it came directly from the user through keyboard, mouse, or other input</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td>DWord</td>
+						<td>Data on the event</td>
+					</tr>
+
+					<tr>
+						<td>when</td>
+						<td>DWord</td>
+						<td>A time stamp containing the value of <i>tSystem.ticksSinceBoot</i> at the time of the event</td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td>DWord</td>
+						<td>If this event was triggered by a pointing device, this contains its X-axis position, otherwise zero.</td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td>DWord</td>
+						<td>If this event was triggered by a pointing device, this contains its Y-axis position, otherwise zero.</td>
+					</tr>
+
+					<tr>
+						<td>evtFlags</td>
+						<td>DWord</td>
+						<td>A group of flags indicating the state of any modifier keys pressed at the time of the event.</td>
+					</tr>
+
+					<tr>
+						<td>reserved</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+
+				</table>
+			</code>
 			<br>
+			<br>
+
+			Every action taken by the user, be it a key press or a mouse click, triggers an event. These events are queued in a buffer awaiting processing by the application, and are classified as follows:<br>
+			<br>
+			<br>
+
+			<b>Key Down Events</b><br>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtKeyDown</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+
+			<br>
+			<br>
+			<br>
+
+			<b>Key Up Events</b><br>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtKeyUp</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+
+			<br>
+			<br>
+			<br>
+
+			<b>Mouse Down Events</b><br>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseDown</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+
+			<br>
+			<br>
+			<br>
+
+			<b>Mouse Move Events</b><br>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseMove</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+
+			<br>
+			<br>
+			<br>
+
+			<b>Mouse Up Events</b><br>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseUp</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+
+			<br>
+			<br>
+			<br>
+
+			<b>System Events</b><br>
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtSystem</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+
+			These events are used to provide both a way for applications to stay informed of the system landscape in which they exist, and also a mechanism for inter-process communication.<br>
+			<br>
+			In the first scenario, Night will send an application a System event as certain significant things occur, such as when an application has just been given focus, loses focus, needs to exit, a menu item has been selected, or even when a new disk becomes available. This helps applications stay on top of what's going on in the system as they run.<br>
+			<br>
+			The second - and arguably cooler - scenario allows applications to issue commands to other applications. Suppose you're a fancy new GUI, and your user wants to print a document but doesn't need any of the other dozens of features offered by the creating application. What do you do? Instead of making the user open the file, wait for the creating application to load, issue a Print command, and finally close the application, you can simply load the application and pass to it a System event letting it know that it's merely needed to print this file and exit. The application can then take care of the rest, perhaps even not going to all the trouble of loading all its resources since it knows it's only needed for a quick job, should it be coded with such intelligence. Another possibility - what if a user has a series of operations they need repeated over and over again with precision? A driver can be made which will dip into the event stream of another application and record what it finds there. This allows for some very cool scripting possibilities in which a user can thread together a flow of events across multiple programs to get work done in fully automated fashion.<br>
+			<br>
+			<br>
+
+			<b>Whose event is it, anyway?</b><br>
+			For security, only the application which currently holds focus will receive all events, and those running in the background will only receive System events. Night-aware applications can, however, indicate they wish to be notified when a certain key is pressed, allowing them to jump into action from the background when a required key combination has been made. Traditional DOS applications never receive events directly, per se, but they will be able to get the data from mouse and key events by using their typical means with Night handling the translation for them automatically as explained further below. Traditional DOS programs will never receive System events, as there is no common established interface for this data to be passed to them.<br>
+			<br>
+			<br>
+			
+			<b>Events and DOS applications</b><br>
+			Although traditional DOS applications will not be aware of the added functionality of this system of events, they can still benefit from them. Just like modern Night-aware apps, Night will set up a full event queue for traditional DOS programs even though they won't directly realize it. Any time they use typical methods of polling for input, however, - such as checking port 0x60, for example, or calling a mouse interrupt - the input they receive will actually be pulled from the data in their event queue instead of directly reading the hardware, and their scriptability potential will still be viable.<br>
+			<br>
+			<br>
+
 		</p>
 		<br>
 		<br>
@@ -1273,7 +1586,7 @@
 			<br>
 			<code>
 				<table style = 'width:100%'>
-					<caption><b><i>Table 10.1 - The tSystem structure</i></b></caption>
+					<caption><b><i>Table A0.1 - The tSystem structure</i></b></caption>
 					<tr>
 						<th width = '20%'><i>Name</i></th>
 						<th width = '10%'><i>Size</i></th>
@@ -7705,7 +8018,7 @@
 
 
 		<hr>
-		<h2><a name = 'DOSFunctionReference'>Appendix 3 - DOS Function Reference</a></h2>
+		<h2><a name = 'DOSFunctionReference'>Appendix 3 - Default Interrupt Vectors and DOS Function Reference</a></h2>
 		<p>
 			All interrupt vectors after 0x77 are null.<br>
 			<br>
@@ -10028,7 +10341,7 @@
 		<h2><a name = 'Changelog'>Appendix 4 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 4509 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements, event support</b><br>
+			<b>In progress, 0.1F Update, Build 4518 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements, event support</b><br>
 			<br>
 
 			New<br>
@@ -10076,7 +10389,6 @@
 
 			To do before release<br>
 			<ul>
-				<li>Put the driver launch result back into the PCI code</li>
 				<li>Only init PS/2 controller if it exists</li>
 				<li>Verify proper function of bitfield setcounts</li>
 				<li>Fix A20 activation</li>

@@ -19,13 +19,12 @@
 
 
 ; event types
-%define kEvtAction								1
-%define kEvtKeyDown								2
-%define kEvtKeyUp								4
-%define kEvtMouseDown							8
+%define kEvtKeyDown								1
+%define kEvtKeyUp								2
+%define kEvtMouseDown							4
+%define kEvtMouseMove							8
 %define kEvtMouseUp								16
-%define kEvtTaskResume							32
-%define kEvtTaskSuspend							64
+%define kEvtSystem								32
 
 
 %define kEvtFlagAlt								1
@@ -51,10 +50,10 @@ struc tEvent
 	.from										resd 1
 	.message									resd 1
 	.when										resd 1
-	.where										resd 1
+	.whereX										resd 1
+	.whereY										resd 1
 	.evtFlags									resd 1
-	.reserved1									resd 1
-	.reserved2									resd 1
+	.reserved									resd 1
 endstruc
 
 

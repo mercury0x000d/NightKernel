@@ -121,12 +121,15 @@ A20Delay:
 	;	n/a
 
 
+	; save current interrupt state and enable interrupts
+	pushf
+	sti
+
 	; reset ticks to zero
 	mov ah, 1
 	mov cx, 0
 	mov dx, cx
 	int 0x1A
-
 
 	; loop until 4 ticks (just under one fourth of a second) have passed
 	.DelayLoop:
@@ -135,6 +138,9 @@ A20Delay:
 
 		cmp dx, 4
 	jb .DelayLoop
+
+	; restore interrupt state
+	popf
 
 ret
 
@@ -185,23 +191,23 @@ A20Enable:
 	; call PrintIfConfigBits16
 
 
-	; attempt Port EE method and wait
-	call A20EnablePortEE
-	call A20Delay
+	; ; attempt Port EE method and wait
+	; call A20EnablePortEE
+	; call A20Delay
 
-	; check if it worked
-	call A20Check
-	cmp dx, true
-	jne .PortEEFailed
-		; if we get here, the Port 0xEE method succeeded
-		push .portEESuccess$
-		call PrintIfConfigBits16
-		jmp .Exit
-	.PortEEFailed:
+	; ; check if it worked
+	; call A20Check
+	; cmp dx, true
+	; jne .PortEEFailed
+	; 	; if we get here, the Port 0xEE method succeeded
+	; 	push .portEESuccess$
+	; 	call PrintIfConfigBits16
+	; 	jmp .Exit
+	; .PortEEFailed:
 
-	; print the fail
-	push .portEEFail$
-	call PrintIfConfigBits16
+	; ; print the fail
+	; push .portEEFail$
+	; call PrintIfConfigBits16
 
 
 	; attempt Fast A20 method and wait
