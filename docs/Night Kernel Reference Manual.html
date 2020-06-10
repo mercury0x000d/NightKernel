@@ -1346,178 +1346,169 @@
 
 			<b>Key Events</b><br>
 			<code>
-				<table class = 'invisibleTable' style = 'width: 100%;'>
+				<table style = 'width: 45%; float: left; margin: 15px;'>
+					<caption><b><i>Table 10.2 - Key Down event details</i></b></caption>
+
 					<tr>
-						<td align = 'center'>
-							<table style = 'width: 50%'>
-								<caption><b><i>Table 10.2 - Key Down event details</i></b></caption>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
 
-								<tr>
-									<col width = '20%'>
-									<col width = '80%'>
-								</tr>
+					<tr>
+						<td>what</td>
+						<td>kEvtKeyDown</td>
+					</tr>
 
-								<tr>
-									<td>what</td>
-									<td>kEvtKeyDown</td>
-								</tr>
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
 
-								<tr>
-									<td>message</td>
-									<td></td>
-								</tr>
+					<tr>
+						<td>whereX</td>
+						<td><i>n/a</i></td>
+					</tr>
 
-								<tr>
-									<td>whereX</td>
-									<td><i>n/a</i></td>
-								</tr>
+					<tr>
+						<td>whereY</td>
+						<td><i>n/a</i></td>
+					</tr>
 
-								<tr>
-									<td>whereY</td>
-									<td><i>n/a</i></td>
-								</tr>
+				</table>
 
-							</table>
-						</td>
-						<td align = 'center'>
-							<table style = 'width: 50%'>
-								<caption><b><i>Table 10.3 - Key Up event details</i></b></caption>
 
-								<tr>
-									<col width = '20%'>
-									<col width = '80%'>
-								</tr>
+				<table style = 'width: 45%; float: right; margin: 15px;'>
+					<caption><b><i>Table 10.3 - Key Up event details</i></b></caption>
 
-								<tr>
-									<td>what</td>
-									<td>kEvtKeyUp</td>
-								</tr>
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
 
-								<tr>
-									<td>message</td>
-									<td></td>
-								</tr>
+					<tr>
+						<td>what</td>
+						<td>kEvtKeyUp</td>
+					</tr>
 
-								<tr>
-									<td>whereX</td>
-									<td><i>n/a</i></td>
-								</tr>
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
 
-								<tr>
-									<td>whereY</td>
-									<td><i>n/a</i></td>
-								</tr>
-							</table>
-						</td>
+					<tr>
+						<td>whereX</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td><i>n/a</i></td>
 					</tr>
 				</table>
 			</code>
+			<br style = 'clear: both;'>
 			<br>
 
-			Key events are generated from input by the user. <br>
+			Key events are generated from input by the user. Pressing a key will cause a Key Down event, and releasing it causes a Key Up event. In either case, the <code>message</code> field of the event record will hold the scan code for the key pressed. <br>
 			<br>
 			<br>
 
 			<b>Mouse Events</b><br>
 			<code>
-				<table class = 'invisibleTable' style = 'width: 100%;'>
-					<td align = 'center'>
-						<table style = 'width:80%'>
-							<caption><b><i>Table 10.4 - Mouse Down event details</i></b></caption>
+				<table style = 'width:30%; float: left; margin: 15px;'>
+					<caption><b><i>Table 10.4 - Mouse Down event details</i></b></caption>
 
-							<tr>
-								<col width = '20%'>
-								<col width = '80%'>
-							</tr>
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
 
-							<tr>
-								<td>what</td>
-								<td>kEvtMouseDown</td>
-							</tr>
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseDown</td>
+					</tr>
 
-							<tr>
-								<td>message</td>
-								<td></td>
-							</tr>
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
 
-							<tr>
-								<td>whereX</td>
-								<td></td>
-							</tr>
+					<tr>
+						<td>whereX</td>
+						<td></td>
+					</tr>
 
-							<tr>
-								<td>whereY</td>
-								<td></td>
-							</tr>
+					<tr>
+						<td>whereY</td>
+						<td></td>
+					</tr>
 
-						</table>
-					</td>
-
-					<td align = 'center'>
-						<table style = 'width:80%'>
-							<caption><b><i>Table 10.5 - Mouse Move event details</i></b></caption>
-
-							<tr>
-								<col width = '20%'>
-								<col width = '80%'>
-							</tr>
-
-							<tr>
-								<td>what</td>
-								<td>kEvtMouseMove</td>
-							</tr>
-
-							<tr>
-								<td>message</td>
-								<td></td>
-							</tr>
-
-							<tr>
-								<td>whereX</td>
-								<td></td>
-							</tr>
-
-							<tr>
-								<td>whereY</td>
-								<td></td>
-							</tr>
-
-						</table>
-					</td>
-
-					<td align = 'center'>
-						<table style = 'width:80%'>
-							<caption><b><i>Table 10.6 - Mouse Up event details</i></b></caption>
-
-							<tr>
-								<col width = '20%'>
-								<col width = '80%'>
-							</tr>
-
-							<tr>
-								<td>what</td>
-								<td>kEvtMouseUp</td>
-							</tr>
-
-							<tr>
-								<td>message</td>
-								<td></td>
-							</tr>
-
-							<tr>
-								<td>whereX</td>
-								<td></td>
-							</tr>
-
-							<tr>
-								<td>whereY</td>
-								<td></td>
-							</tr>
-
-						</table>
-					</td>
 				</table>
+
+
+				<table style = 'width:30%; float: left; margin: 15px;'>
+					<caption><b><i>Table 10.5 - Mouse Move event details</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseMove</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td></td>
+					</tr>
+
+				</table>
+
+
+				<table style = 'width:30%; float: left; margin: 15px;'>
+					<caption><b><i>Table 10.6 - Mouse Up event details</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseUp</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereX</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>whereY</td>
+						<td></td>
+					</tr>
+
+				</table>
+
 			</code>
+			<br style = 'clear: both;'>
 			<br>
 
 			<br>
@@ -10403,6 +10394,7 @@
 			<ul>
 				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
 				<li>Kernel: <i>debug.asm</i> - Added DebugVBoxLogRegs() to dump registers to the VirtualBox log.</li>
+				<li>Kernel: <i>events.asm</i> - The start of the Event Manager.</li>
 				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBIntHalt to aid in debugging misfiring interrupts.</li>
 				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
@@ -10412,6 +10404,7 @@
 				<li>Kernel: <i>strings.asm</i> - Added ConvertNumberHexQuadToString() and StringTokenHexadecimalQuad() for printing QWord values.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
+				<li>Manual: Added section on events.</li>
 				<li>Repo: Added 'testing files' folder. The files within can be used in place of kernel.asm to test out specific features in the future.</li>
 			</ul>
 
@@ -10434,7 +10427,7 @@
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug where A20EnablePortEE() was writing to port 0xEE instead of reading from it. Yes, that's right - a function to enable the A20 line was actually ensuring it would always be disabled.</li>
 				<li>Kernel: <i>PIC.asm</i> - Improved handling of cascade IRQ in PICDisableAll().</li>
 				<li>Kernel: <i>PIC.asm</i> - Improved handling of IRQ acknowledge.</li>
-				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection fixed; several keyboards which previously did not work with Night are now detected and handled appropriately.</li>
+				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection improved; fixes a bug where keyboard and/or mouse were previously not detected on some machines due to variances in implementation of the PS/2 protocol in some devices.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Malfunctioning ports are no longer left active.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Updated all functions to adhere to the convention of using EDX for returning error codes.</li>
 				<li>Manual: Improved layout of elements for printing.</li>
@@ -10445,10 +10438,15 @@
 
 			To do before release<br>
 			<ul>
-				<li>Only init PS/2 controller if it exists</li>
+				<li>Remove dependency on CMOV</li>
+				<li>Task killing is broken: fix it</li>
 				<li>Verify proper function of bitfield setcounts</li>
-				<li>Fix A20 activation</li>
 				<li>Implement events</li>
+				<li>Implement keyboard command: Alt-Tab switch</li>
+				<li>Implement keyboard command: Ctrl-Alt-Del reboot</li>
+				<li>Implement keyboard command: Caps Lock</li>
+				<li>Implement keyboard command: Shift Lock</li>
+				<li>Implement keyboard command: Scroll Lock</li>
 			</ul>
 			<br>
 			<br>

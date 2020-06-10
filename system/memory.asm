@@ -309,10 +309,17 @@ A20EnableFastA20:
 	;	n/a
 
 
+	; save current interrupt state and disable interrupts
+	pushf
+	cli
+
 	; attempt Fast A20 Enable
 	in al, 0x92
 	or al, 00000010b
 	out 0x92, al
+
+	; restore interrupt state
+	popf
 
 ret
 
@@ -331,7 +338,7 @@ A20EnableKeyboardController:
 	;	n/a
 
 
-	; save current interrupt state
+	; save current interrupt state and disable interrupts
 	pushf
 	cli
 
@@ -414,9 +421,15 @@ A20EnablePortEE:
 	;	n/a
 
 
+	; save current interrupt state and disable interrupts
+	pushf
+	cli
+
 	; perform Port 0xEE Enable
 	in al, 0xEE
 
+	; restore interrupt state
+	popf
 ret
 
 

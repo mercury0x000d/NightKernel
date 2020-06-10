@@ -209,7 +209,7 @@ mov esp, 0x0009fb00
 call PrintCopyright
 call PrintVerison
 
-jmp $
+
 
 ; probe CPU
 push progressText08$
@@ -401,7 +401,7 @@ bt dword [tSystem.configBits], kCBDebugMode
 jnc .SkipStartDelay
 	; if we get here, we're in Debug Mode
 	; wouldn't it be nice if we gave the user a moment to admire all those handy debug messages?
-	push 4096
+	push 1024
 	call TimerWait
 .SkipStartDelay:
 

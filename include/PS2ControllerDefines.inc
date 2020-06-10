@@ -157,7 +157,7 @@
 %define kControllerTestPass						0x55
 %define kControllerTestFail						0xFC
 
-; commands common to both keyboards and mice
+; commands common to all (most?) devices
 %define kCmdGetDeviceID							0xF2
 %define kCmdSetRate								0xF3
 %define kCmdEnableDataReporting					0xF4
@@ -165,18 +165,6 @@
 %define kCmdDeviceUseDefaultSettings			0xF6
 %define kCmdDeviceResend						0xFE
 %define kCmdDeviceReset							0xFF
-
-; keyboard commands
-%define kCmdKeyboardSetLEDs						0xED
-%define kCmdKeyboardEcho						0xEE
-%define kCmdKeyboardGetSetScanCode				0xF0
-%define kCmdKeyboardSetAllKeysAutorepeat		0xF7
-%define kCmdKeyboardSetAllKeysMakeRelease		0xF8
-%define kCmdKeyboardSetAllKeysMake				0xF9
-%define kCmdKeyboardSetAllKeysAutorepeat		0xFA
-%define kCmdKeyboardSetKeyAutorepeat			0xFB
-%define kCmdKeyboardSetKeyMakeRelease			0xFC
-%define kCmdKeyboardSetKeyMake					0xFD
 
 ; device command responses
 %define kBufferOverrun1							0x00
@@ -191,16 +179,22 @@
 
 
 ; declare functions as global
+global PS2BufferClear
 global PS2ControllerCommand
 global PS2ControllerInit
 global PS2ControllerPortTest
-global PS2ControllerWaitDataRead
-global PS2ControllerWaitDataWrite
-global PS2DeviceCommand
+global PS2ControllerRead
+global PS2ControllerReadWait
+global PS2ControllerWrite
+global PS2ControllerWriteWait
+global PS2DeviceAnnounce
 global PS2DeviceIdentify
+global PS2DeviceWrite
 global PS2InputHandlerDispatch
 global PS2NewConnect
 global PS2Port1InterruptHandler
 global PS2Port2InterruptHandler
 global PS2PortInitDevice
-global PS2PortSendTo2
+global PS2PortsDisable
+global PS2PortsEnable
+global PS2TestPorts

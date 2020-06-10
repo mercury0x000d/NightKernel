@@ -26,20 +26,22 @@
 
 
 ; function definitions
+extern PS2BufferClear
 extern PS2ControllerCommand
 extern PS2ControllerInit
 extern PS2ControllerPortTest
-extern PS2ControllerWaitDataRead
-extern PS2ControllerWaitDataWrite
-extern PS2DeviceCommand
+extern PS2ControllerRead
+extern PS2ControllerReadWait
+extern PS2ControllerWrite
+extern PS2ControllerWriteWait
+extern PS2DeviceAnnounce
 extern PS2DeviceIdentify
-extern PS2InitKeyboard
-extern PS2InitMouse
+extern PS2DeviceWrite
 extern PS2InputHandlerDispatch
-extern PS2InputHandlerKeyboard
-extern PS2InputHandlerMouse
 extern PS2NewConnect
 extern PS2Port1InterruptHandler
 extern PS2Port2InterruptHandler
 extern PS2PortInitDevice
-extern PS2PortSendTo2
+extern PS2PortsDisable
+extern PS2PortsEnable
+extern PS2TestPorts
