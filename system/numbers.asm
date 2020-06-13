@@ -116,15 +116,15 @@ PopulationCount:
 	%define number								dword [ebp + 8]
 
 
-;	; see if we support POPCNT
-;	push kCPU_popcnt
-;	push tSystem.CPUFeatures
-;	call LMBitGet
-;	jnc .NoPOPCNT
-;
-;	; Thankfully POPCNT is supported!
-;	popcnt eax, number
-;	jmp .Exit
+	; see if we support POPCNT
+	push kCPU_popcnt
+	push tSystem.CPUFeatures
+	call LMBitGet
+	jnc .NoPOPCNT
+
+	; Thankfully POPCNT is supported!
+	popcnt edi, number
+	jmp .Exit
 
 
 	.NoPOPCNT:

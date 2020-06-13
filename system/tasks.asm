@@ -24,12 +24,14 @@
 ; includes
 %include "include/tasksDefines.inc"
 
+%include "include/debug.inc"
 %include "include/errors.inc"
 %include "include/globals.inc"
 %include "include/kernel.inc"
 %include "include/lists.inc"
 %include "include/memory.inc"
 %include "include/paging.inc"
+%include "include/screen.inc"
 %include "include/strings.inc"
 
 
@@ -109,16 +111,14 @@ TaskKill:
 	push ebp
 	mov ebp, esp
 
+
+	; define input parameters
+	%define taskNum								dword [ebp + 8]
+
 	; allocate local variables
 	sub esp, 4
 	%define taskSlot							dword [ebp - 4]
 
-
-	; See if we're trying to kill task 1 and exit if so. Killing task 1 isn't so bad per se, since it isn't technically used for anything,
-	; but doing so would free all memory which was marked as in use by task 1. Since task 1 is the number used by the kernel itself,
-	; spontaneously releasing all of its memory is a Certified Very Bad Thing.
-	cmp dword [ebp + 8], 1
-	je .Done
 
 	; preserve multitasking state
 	mov al, byte [tSystem.taskingEnable]
@@ -128,10 +128,11 @@ TaskKill:
 	mov byte [tSystem.taskingEnable], 0
 
 	; get the slot address of the task specified
-	push dword [ebp + 8]
+	push taskNum
 	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
 	mov taskSlot, esi
+
 
 	; release memory used by this task
 	push dword [esi + tTaskInfo.stackAddress]
@@ -141,26 +142,28 @@ TaskKill:
 	push dword [esi + tTaskInfo.kernelStackAddress]
 	call MemDispose
 
+
 	; zero out this task's memory slot
 	push 0x00000000
 	push tTaskInfo_size
-	push esi
+	push taskSlot
 	call MemFill
 
 	; and finally, we check to see if this task was the one that's currently running
 	; if it is, we also need to clear out the currently running task info
-	mov eax, dword [ebp + 8]
+	mov eax, taskNum
 	cmp al, byte [tSystem.currentTask]
 	jne .SkipClearing
 		mov dword [tSystem.currentTask], 0
 		mov dword [tSystem.currentTaskSlotAddress], 0
 	.SkipClearing:
 
+
+	.Done:
 	; put multitasking back as it was
 	pop eax
 	mov byte [tSystem.taskingEnable], al
 
-	.Done:
 	mov esp, ebp
 	pop ebp
 ret 4

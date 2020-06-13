@@ -1367,7 +1367,9 @@ SMPathPartitionGet:
 		mov edx, eax
 		sub edx, 32
 		cmp eax, 97
-		cmovae eax, edx
+		jnae .Skip
+			mov eax, edx
+		.Skip:
 
 		; save eax to driveLetter
 		mov driveLetter, eax

@@ -413,10 +413,39 @@ call ScreenClear32
 
 ; code testing area
 
-push 100
+push 130
 push 0x500
 call LMBitfieldInit
 
+
+
+push 0
+push 0x500
+call LMBitSet
+
+push 5
+push 0x500
+call LMBitSet
+
+push 8
+push 0x500
+call LMBitSet
+
+push 99
+push 0x500
+call LMBitSet
+
+push 99
+push 0x500
+call LMBitSet
+
+push 10
+push 0x500
+call LMBitClear
+
+push 10
+push 0x500
+call LMBitFlip
 
 push 10
 push 0x500
@@ -426,10 +455,6 @@ push 11
 push 0x500
 call LMBitFlip
 
-push 10
-push 0x500
-call LMBitClear
-
 push 0
 push 0x500
 call LMBitSet
@@ -438,28 +463,101 @@ push 99
 push 0x500
 call LMBitSet
 
+
+
+mov ecx, [0x504]
+call PrintRegs32 ; should be 0x05 here
+
+
+push 2
+push 0
+push 20
+push 1
+push 4
+push 0x500
+call PrintRAM32
+
+
+
 push 29
 push 29
 push 0x500
-call LMBitSetRange
+call LMBitSetRange ; should be 0x06 here
+mov ecx, [0x504]
+call PrintRegs32
 
 push 33
 push 31
 push 0x500
-call LMBitSetRange
+call LMBitSetRange ; should be 0x09 here
+mov ecx, [0x504]
+call PrintRegs32
 
 push 67
 push 42
 push 0x500
-call LMBitSetRange
+call LMBitSetRange ; should be 0x23 here
+mov ecx, [0x504]
+call PrintRegs32
 
-push 99
+push 53
+push 46
+push 0x500
+call LMBitClearRange ; should be 0x1B here
+mov ecx, [0x504]
+call PrintRegs32
+
+push 127
 push 0
 push 0x500
-call LMBitFlipRange
+call LMBitFlipRange ; should be 0x65 here
+mov ecx, [0x504]
+call PrintRegs32
 
-mov eax, 0x500
+push 127
+push 64
+push 0x500
+call LMBitClearRange ; should be 0x2A here
+mov ecx, [0x504]
+call PrintRegs32
+
+push 63
+push 0
+push 0x500
+call LMBitClearRange ; should be 0x00 here
+mov ecx, [0x504]
+call PrintRegs32
+
+push 127
+push 0
+push 0x500
+call LMBitClearRange ; should be 0x00 here
+mov ecx, [0x504]
+call PrintRegs32
+
+
+
+push 3
+push 0
+push 26
+push 1
+push 4
+push 0x500
+call PrintRAM32
 jmp $
+
+; 21 09 00 a0 03 3c c0 ff-0f 00 00 00 08 00 00 00
+; de f6 ff 5f fc c3 3f 00-f0 ff ff ff f7 ff ff ff
+
+; 00 - 07	0
+; 08 - 15	1
+; 16 - 23	2
+; 24 - 31	3
+; 32 - 39	4
+; 40 - 47	5
+; 48 - 55	6
+; 56 - 63	7
+; 64 - 71	8
 
 
 

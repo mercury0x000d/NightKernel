@@ -31,8 +31,7 @@
 %define kCCBPort2Disable						32
 %define kCCBPort1Translation					64
 
-;%define kPS2TimeoutTicks						64			; 0.25 seconds
-%define kPS2TimeoutTicks						256
+%define kPS2TimeoutTicks						64			; 0.25 seconds
 %define kPS2DataPort							0x60
 %define kPS2StatusRegister						0x64
 %define kPS2CommandRegister						0x64

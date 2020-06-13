@@ -860,23 +860,30 @@ IDEDriveIdentify:
 	add dx, kATARegisterLBA2
 	in al, dx
 
+
 	; set up our drive type return code
 	xor ecx, ecx
 	mov edx, 1
 	cmp eax, ecx
-	cmove ecx, edx
+	jne .NotEqual1
+		mov ecx, edx
+	.NotEqual1:
 	je .DriveTypeDone
 
 	mov ecx, 0x0101C33C
 	mov edx, 2
 	cmp eax, ecx
-	cmove ecx, edx
+	jne .NotEqual2
+		mov ecx, edx
+	.NotEqual2:
 	je .DriveTypeDone
 
 	mov ecx, 0x010114EB
 	mov edx, 3
 	cmp eax, ecx
-	cmove ecx, edx
+	jne .NotEqual3
+		mov ecx, edx
+	.NotEqual3:
 	je .DriveTypeDone
 
 	; if we get here, the drive didn't match any known type codes
