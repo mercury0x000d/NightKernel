@@ -21,14 +21,18 @@
 ; global konstant defines
 
 ; the BUILD define is used by Xenops, the version-updating tool with the most awesome name ever :D
-%define BUILD 4631
+%define BUILD 4656
 
 ; for configbits settings - great idea, Antony!
-%define kCBDebugMode							0
-%define kCBVerbose								1
-%define kCBLines50								2
-%define kCBVMEnable								3
-%define kCBIntHalt								4
+%define kCBLockScroll							0
+%define kCBLockNum								1
+%define kCBLockCaps								2
+%define kCBDebugMode							3
+%define kCBVerbose								4
+%define kCBLines50								5
+%define kCBVMEnable								6
+%define kCBIntHalt								7
+%define kCBCtrlAltDelEnable						8
 
 ; block and character driver commands
 %define kDriverInit								0x00

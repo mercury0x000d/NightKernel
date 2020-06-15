@@ -1,6 +1,6 @@
 ; Night Kernel
 ; Copyright 2015 - 2020 by mercury0x0d
-; events defines.inc is a part of the Night Kernel
+; eventsDefines.inc is a part of the Night Kernel
 
 ; The Night Kernel is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 ; License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later

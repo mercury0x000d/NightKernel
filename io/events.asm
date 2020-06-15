@@ -41,8 +41,8 @@ bits 32
 
 
 section .text
-AFunction:
-	; Does stuff
+EvtNew:
+	; Inserts an event into the event queue(s)
 	;
 	;  input:
 	;	n/a

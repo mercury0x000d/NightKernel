@@ -765,6 +765,7 @@ PS2InputHandlerDispatch:
 	; Chooses which device handler receives input given
 	;
 	;  input:
+	;	Port number
 	;	PS/2 Device ID
 	;	Data to be passed to the input handler
 	;
@@ -776,8 +777,9 @@ PS2InputHandlerDispatch:
 	mov ebp, esp
 
 	; define input parameters
-	%define deviceID							dword [ebp + 8]
-	%define handlerData							dword [ebp + 12]
+	%define portNum								dword [ebp + 8]
+	%define deviceID							dword [ebp + 12]
+	%define handlerData							dword [ebp + 16]
 
 
 	; load the device ID
@@ -786,6 +788,7 @@ PS2InputHandlerDispatch:
 	cmp ax, kDevMouseStandard
 	jne .NotFF00
 		push handlerData
+		push portNum
 		call PS2MouseInputHandler
 		jmp .Exit
 	.NotFF00:
@@ -793,6 +796,7 @@ PS2InputHandlerDispatch:
 	cmp ax, kDevMouseWheel
 	jne .NotFF03
 		push handlerData
+		push portNum
 		call PS2MouseInputHandler
 		jmp .Exit
 	.NotFF03:
@@ -800,6 +804,7 @@ PS2InputHandlerDispatch:
 	cmp ax, kDevMouse5Button
 	jne .NotFF04
 		push handlerData
+		push portNum
 		call PS2MouseInputHandler
 		jmp .Exit
 	.NotFF04:
@@ -807,6 +812,7 @@ PS2InputHandlerDispatch:
 	cmp ax, kDevKeyboardMFWithTranslation1
 	jne .NotAB41
 		push handlerData
+		push portNum
 		call PS2KeyboardInputHandler
 		jmp .Exit
 	.NotAB41:
@@ -814,6 +820,7 @@ PS2InputHandlerDispatch:
 	cmp ax, kDevKeyboardMFWithTranslation2
 	jne .NotABC1
 		push handlerData
+		push portNum
 		call PS2KeyboardInputHandler
 		jmp .Exit
 	.NotABC1:
@@ -821,16 +828,18 @@ PS2InputHandlerDispatch:
 	cmp ax, kDevKeyboardMF
 	jne .Exit
 		push handlerData
+		push portNum
 		call PS2KeyboardInputHandler
 	.NotAB83:
 
 
 	.Exit:
+	%undef portNum
 	%undef deviceID
 	%undef handlerData
 	mov esp, ebp
 	pop ebp
-ret 8
+ret 12
 
 
 
@@ -979,6 +988,7 @@ sti
 		; the device is known and already set up, so let its handler handle this data
 		push eax
 		push dword [tSystem.PS2Port1DeviceID]
+		push 1
 		call PS2InputHandlerDispatch
 
 		jmp .Exit
@@ -1053,6 +1063,7 @@ sti
 		; the device is known and already set up, so let its handler handle this data
 		push eax
 		push dword [tSystem.PS2Port2DeviceID]
+		push 2
 		call PS2InputHandlerDispatch
 
 		jmp .Exit

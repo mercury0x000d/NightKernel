@@ -881,33 +881,58 @@
 
 					<tr>
 						<td>00</td>
+						<td>kCBLockScroll</td>
+						<td>Default Scroll Lock state</td>
+					</tr>
+
+					<tr>
+						<td>01</td>
+						<td>kCBLockNum</td>
+						<td>Default Num Lock state</td>
+					</tr>
+
+					<tr>
+						<td>02</td>
+						<td>kCBLockCaps</td>
+						<td>Default Caps Lock state</td>
+					</tr>
+
+					<tr>
+						<td>03</td>
 						<td>kCBDebugMode</td>
 						<td>Enable Debug Mode</td>
 					</tr>
 
 					<tr>
-						<td>01</td>
+						<td>04</td>
 						<td>kCBVerbose</td>
 						<td>Verbose boot (Displays startup and diagnostic messages during boot)</td>
 					</tr>
 
 					<tr>
-						<td>02</td>
+						<td>05</td>
 						<td>kCBLines50</td>
 						<td>Use 50-line text mode instead of 25-line mode</td>
 					</tr>
 
 					<tr>
-						<td>03</td>
+						<td>06</td>
 						<td>kCBVMEnable</td>
 						<td>Enable paging to disk</td>
 					</tr>
 
 					<tr>
-						<td>04</td>
+						<td>07</td>
 						<td>kCBIntHalt</td>
 						<td>Calls to any undefined interrupt handlers will push the interrupt number onto the stack and trigger a halt with register and stack dump.</td>
 					</tr>
+
+					<tr>
+						<td>08</td>
+						<td>kCBCtrlAltDelEnable</td>
+						<td>Allows a Ctrl-Alt-Delete key combination to restart the kernel.</td>
+					</tr>
+
 				</table>
 			</code>
 			<br>
@@ -1268,7 +1293,7 @@
 		<hr>
 		<h2 class = 'pagebreak'><a name = 'Events'>Section 10 - Things that Go Bump in the <i>Night</i>: Events in the Night Kernel</a></h2>
 		<p>
-			User interaction among traditional DOS applications is quite non-uniform. Some programs reply only to text commands, others support keyboard and mouse input. Besides that, there's the issue of inter-process communication which, although it was not an issue in DOS since it was not a multitasking system, will have great significance in Night. This is where the events come in.<br>
+			User interaction among traditional DOS applications is quite non-uniform. Some programs reply only to text commands, others support keyboard and mouse input. Besides that, there's the issue of inter-process communication which, although it was not an issue in a non-multitasking system such as DOS, will have great significance in Night. This is where the events come in.<br>
 			<br>
 			<br>
 
@@ -1326,13 +1351,91 @@
 					<tr>
 						<td>evtFlags</td>
 						<td>DWord</td>
-						<td>A group of flags indicating the state of any modifier keys pressed at the time of the event.</td>
+						<td>A group of flags indicating the state of any modifier keys pressed at the time of the event. (See the "Event flags" table below.)</td>
 					</tr>
 
 					<tr>
 						<td>reserved</td>
 						<td>DWord</td>
 						<td></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+			<br>
+
+			<code>
+				<table style = 'width:100%'>
+					<caption><b><i>Table 10.2 - Event flags</i></b></caption>
+					<tr>
+						<col width = '30%'>
+						<col width = '70%'>
+					</tr>
+
+					<tr>
+						<th><i>Symbol</i></th>
+						<th><i>Description</i></th>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagAlt</td>
+						<td>Set if an Alt key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagAltLeft</td>
+						<td>Set if the left Alt key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagAltRight</td>
+						<td>Set if the right Alt key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagCtrl</td>
+						<td>Set if a Ctrl key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagCtrlLeft</td>
+						<td>Set if the left Ctrl key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagCtrlRight</td>
+						<td>Set if the right Ctrl key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagLockCaps</td>
+						<td>Set if Caps Lock was on at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagLockNum</td>
+						<td>Set if Num Lock was on at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagLockScroll</td>
+						<td>Set if Scroll Lock was on at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagShift</td>
+						<td>Set if a Shift key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagShiftLeft</td>
+						<td>Set if the left Shift key was down at the time of this key press</td>
+					</tr>
+
+					<tr>
+						<td>kEvtFlagShiftRight</td>
+						<td>Set if the right Shift key was down at the time of this key press</td>
 					</tr>
 
 				</table>
@@ -1347,7 +1450,7 @@
 			<b>Key Events</b><br>
 			<code>
 				<table style = 'width: 45%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.2 - Key Down event details</i></b></caption>
+					<caption><b><i>Table 10.3 - Key Down event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1378,7 +1481,7 @@
 
 
 				<table style = 'width: 45%; float: right; margin: 15px;'>
-					<caption><b><i>Table 10.3 - Key Up event details</i></b></caption>
+					<caption><b><i>Table 10.4 - Key Up event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1416,7 +1519,7 @@
 			<b>Mouse Events</b><br>
 			<code>
 				<table style = 'width:30%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.4 - Mouse Down event details</i></b></caption>
+					<caption><b><i>Table 10.5 - Mouse Down event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1447,7 +1550,7 @@
 
 
 				<table style = 'width:30%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.5 - Mouse Move event details</i></b></caption>
+					<caption><b><i>Table 10.6 - Mouse Move event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1478,7 +1581,7 @@
 
 
 				<table style = 'width:30%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.6 - Mouse Up event details</i></b></caption>
+					<caption><b><i>Table 10.7 - Mouse Up event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1518,7 +1621,7 @@
 			<b>System Events</b><br>
 			<code>
 				<table style = 'width:50%'>
-					<caption><b><i>Table 10.7 - System event details</i></b></caption>
+					<caption><b><i>Table 10.8 - System event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -10387,7 +10490,7 @@
 		<h2 class = 'pagebreak'><a name = 'Changelog'>Appendix 4 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 4631 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements, event support</b><br>
+			<b>In progress, 0.1F Update, Build 4656 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements, event support</b><br>
 			<br>
 
 			New<br>
@@ -10396,11 +10499,14 @@
 				<li>Kernel: <i>debug.asm</i> - Added DebugVBoxLogRegs() to dump registers to the VirtualBox log.</li>
 				<li>Kernel: <i>events.asm</i> - The start of the Event Manager.</li>
 				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBIntHalt to aid in debugging misfiring interrupts.</li>
+				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBLockScroll, kCBLockNum, and kCBLockCaps to allow setting the default states of modifier keys.</li>
+				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBCtrlAltDelEnable to allow Ctrl-Alt-Delete reboots.</li>
 				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
 				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
 				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
 				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() and PopulationCountRange() to return the Hamming weight of a number or range of memory, respectively. Uses POPCNT for additional speed if supported by the CPU.</li>
+				<li>Kernel: <i>PS2Keyboard.asm</i> - Caps Lock, Num Lock, and Scroll Lock now all properly toggle their internal state and update the keyboard LEDs appropriately.</li>
 				<li>Kernel: <i>strings.asm</i> - Added ConvertNumberHexQuadToString() and StringTokenHexadecimalQuad() for printing QWord values.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
@@ -10419,9 +10525,11 @@
 				<li>Kernel: <i>PS2Controller.asm</i> - Restructured driver to handle only the controller - device functions have been split off into their own files.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
 			</ul>
+
 			Fixed<br>
 			<ul>
 				<li>Kernel: <i>lists.asm</i> - Fixed an issue where LMElementSizeGet() was taking eight bytes off the stack upon exit instead of the appropriate four.</li>
+				<li>Kernel: <i>lists.asm</i> - LMBitfieldInit() and LMListInit() both zero out the newly created list to avoid dirty memory issues on real hardware.</li>
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug causing boot failure on machines with under 4 GiB of memory.</li>
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug with A20Check() being called with too many parameters.</li>
 				<li>Kernel: <i>memory.asm</i> - Fixed a bug where A20EnablePortEE() was writing to port 0xEE instead of reading from it. Yes, that's right - a function to enable the A20 line was actually ensuring it would always be disabled.</li>
@@ -10441,9 +10549,6 @@
 				<li>Implement events</li>
 				<li>Implement keyboard command: Alt-Tab switch</li>
 				<li>Implement keyboard command: Ctrl-Alt-Del reboot</li>
-				<li>Implement keyboard command: Caps Lock</li>
-				<li>Implement keyboard command: Shift Lock</li>
-				<li>Implement keyboard command: Scroll Lock</li>
 			</ul>
 			<br>
 			<br>

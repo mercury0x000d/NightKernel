@@ -81,23 +81,6 @@ PS2KeyboardInit:
 	push dword 2
 	push portNum
 	call PS2DeviceWrite
-	cmp edx, kErrNone
-	jne .Exit
-
-
-	; illuminate all LEDs (remember, bit 7 must be zero!)
-	; debug - this is just a test that the keyboard is inited on real hardware - remove this for actual use
-	push kCmdKeyboardSetLEDs
-	push portNum
-	call PS2DeviceWrite
-	cmp edx, kErrNone
-	jne .Exit
-
-	push dword 0x0F
-	push portNum
-	call PS2DeviceWrite
-	cmp edx, kErrNone
-	jne .Exit
 
 
 	.Exit:
@@ -115,6 +98,7 @@ PS2KeyboardInputHandler:
 	; Handles input from a PS/2 Keyboard
 	;
 	;  input:
+	;	Port number
 	;	Input data
 	;
 	;  output:
@@ -124,7 +108,8 @@ PS2KeyboardInputHandler:
 	mov ebp, esp
 
 	; define input parameters
-	%define inputByte							dword [ebp + 8]
+	%define portNum								dword [ebp + 8]
+	%define inputByte							dword [ebp + 12]
 
 
 	; get the input byte
@@ -132,31 +117,94 @@ PS2KeyboardInputHandler:
 
 
 	; deal with spurious Acks
-	cmp al, 0xfa
-	jne .Continue
-		cmp byte [tSystem.mousePacketByteCount], 0
-		je .Exit
-	.Continue:
+	cmp al, kCmdAcknowledged
+	je .Exit
 
 
-;--------------------------------------------------------------------------------
-; temporary - only for use until we get a proper event queue in place
-; if this is a break key, this lets it safely disappear from the input stream
+	cmp al, 0xF0
+	jne .NotKeyup
+		; If we get here, this was a key up. Set the flag and discard this byte. Don't clear the buffer yet since there's more to come.
+		bts dword [.keyFlags], 0
 
-; and when that happens, this may come in handy:
-; https://techdocs.altium.com/display/FPGA/PS2+Keyboard+Scan+Codes
+		jmp .Exit
+	.NotKeyup:
 
-cmp al, 0xF0
-je .Adjust
 
-cmp al, 0xE0
-je .Exit
+	; if we get here the byte needs added to the buffer
+	mov ebx, [.buffer]
+	shl ebx, 8
+	mov bl, al
+	mov [.buffer], ebx
 
-cmp byte [.tempLastByte], 0xF0
-jne .NotF0
-	jmp .Adjust
-.NotF0:
-;--------------------------------------------------------------------------------
+
+	; if we're in the middle of a multi-byte key, exit so that we don't prematurely send them 
+	cmp ebx, 0xE114
+	je .Exit
+
+	cmp ebx, 0xE07CE0
+	je .Exit
+
+	cmp ebx, 0xE012E0
+	je .Exit
+
+	cmp ebx, 0xE07C
+	je .Exit
+
+	cmp ebx, 0xE012
+	je .Exit
+
+	cmp ebx, 0xE1
+	je .Exit
+
+	cmp ebx, 0xE0
+	je .Exit
+
+
+
+	; if we get here, we have a full set of key press bytes... now, to handle them
+
+	; first, see if this is something we can handle directly
+	cmp dword [.keyFlags], 0
+	jne .SkipModifierKeys
+		cmp bl, 0x58
+		jne .NotCapsLock
+			; if we get here, Caps Lock was pressed
+			push kLockCaps
+			call ToggleLock
+			jmp .KeyComplete
+		.NotCapsLock:
+
+		cmp bl, 0x77
+		jne .NotNumLock
+			; if we get here, Num Lock was pressed
+			push kLockNum
+			call ToggleLock
+			jmp .KeyComplete
+		.NotNumLock:
+
+		cmp bl, 0x7E
+		jne .NotScrollLock
+			; if we get here, Scroll Lock was pressed
+			push kLockScroll
+			call ToggleLock
+			jmp .KeyComplete
+		.NotScrollLock:
+	.SkipModifierKeys:
+
+
+pusha
+mov eax, [.keyFlags]
+call PrintRegs32
+popa
+
+
+
+	.KeyComplete:
+	; clear the buffer and flags
+	mov dword [.buffer], 0
+	mov dword [.keyFlags], 0
+
+	jmp .Exit
 
 
 	; load the buffer position
@@ -177,10 +225,58 @@ jne .NotF0
 		jmp .Exit
 	.skipIncrement:
 
-;--------------------------------------------------------------------------------
-.Adjust:
-mov byte [.tempLastByte], al
-;--------------------------------------------------------------------------------
+
+	.Exit:
+	%undef portNum
+	%undef inputByte
+	mov esp, ebp
+	pop ebp
+ret 8
+
+section .data
+.counter						dd 0x00000000
+.keyFlags						dd 0x00000000
+.buffer							dd 0x00000000
+
+
+
+
+
+ToggleLock:
+	; Toggles the keyboard lock state specified
+	;
+	;  input:
+	;	Port number
+	;	Lock bits
+	;
+	;  output:
+	;	n/a
+
+	push ebp
+	mov ebp, esp
+
+	; define input parameters
+	%define portNum								dword [ebp + 8]
+	%define lockBits							dword [ebp + 12]
+
+
+	; toggle the bits
+	mov eax, lockBits
+	btc dword [tSystem.configBits], eax
+
+	push kCmdKeyboardSetLEDs
+	push portNum
+	call PS2DeviceWrite
+	cmp edx, kErrNone
+	jne .Exit
+
+	mov eax, [tSystem.configBits]
+	and eax, 00000000000000000000000000000111b
+	push eax
+	push portNum
+	call PS2DeviceWrite
+	cmp edx, kErrNone
+	jne .Exit
 
 
 	.Exit:
@@ -188,6 +284,3 @@ mov byte [.tempLastByte], al
 	mov esp, ebp
 	pop ebp
 ret 4
-
-section .data
-.tempLastByte					db 0x00

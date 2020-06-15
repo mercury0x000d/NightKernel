@@ -19,6 +19,13 @@
 
 
 ; keyboard commands
+%define kLockScroll								0
+%define kLockNum								1
+%define kLockCaps								2
+
+
+
+; keyboard commands
 %define kCmdKeyboardSetLEDs						0xED
 %define kCmdKeyboardEcho						0xEE
 %define kCmdKeyboardGetSetScanCode				0xF0

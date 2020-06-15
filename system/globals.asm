@@ -27,7 +27,7 @@
 section .data
 tSystem:
 	.configBitsHint$							db 'ConfigBits'
-	.configBits									dd 00000000000000000000000000000111b
+	.configBits									dd 00000000000000000000000100111010b
 	.copyright$									db 'Night Kernel, Copyright 2015 - 2020', 0x00
 
 	.versionMajor								db 0x00

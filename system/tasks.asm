@@ -72,14 +72,8 @@ TaskInit:
 	call LMListInit
 
 
-	; Use up slots 0 and 1 so that they won't get assigned to tasks. Why do this? It all goes back to the fact that a task number
-	; of zero tells the Memory Manager that the memory block is empty, and task number 1 is the kernel itself.
+	; Use up slot 0 so it won't get assigned to tasks. Why do this? A task number of "0" refers to the kernel itself.
 	push 0
-	push dword [tSystem.listPtrTasks]
-	call LMElementAddressGet
-	mov [esi], dword 0xFFFFFFFF
-
-	push 1
 	push dword [tSystem.listPtrTasks]
 	call LMElementAddressGet
 	mov [esi], dword 0xFFFFFFFF

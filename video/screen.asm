@@ -193,7 +193,7 @@ PrintIfConfigBits16:
 	%define stringPtr							word [bp + 4]
 
 
-	bt dword [tSystem.configBits], 1
+	bt dword [tSystem.configBits], kCBVerbose
 	jnc .Exit
 
 	push stringPtr

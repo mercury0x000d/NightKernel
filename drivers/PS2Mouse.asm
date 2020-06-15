@@ -261,6 +261,7 @@ PS2MouseInputHandler:
 	; Handles input from a PS/2 Mouse
 	;
 	;  input:
+	;	Port number
 	;	Input data
 	;
 	;  output:
@@ -270,7 +271,8 @@ PS2MouseInputHandler:
 	mov ebp, esp
 
 	; define input parameters
-	%define inputByte							dword [ebp + 8]
+	%define portNum								dword [ebp + 8]
+	%define inputByte							dword [ebp + 12]
 
 
 	; get the input byte
@@ -454,7 +456,8 @@ PS2MouseInputHandler:
 
 
 	.Exit:
+	%undef portNum
 	%undef inputByte
 	mov esp, ebp
 	pop ebp
-ret 4
+ret 8
