@@ -62,89 +62,238 @@
 
 	<body>
 		<h1 align = 'center'>Night Kernel Reference Manual</h1>
-		<p align = 'center'>
+		<p style = 'text-align: center;'>
 			<i>Internal details and technical notes.</i><br>
 			<br>
 			<br>
 			<br>
-			<b>Index</b><br>
 			<br>
-			<a href = '#About'>Section 0 - About the Night Kernel</a><br>
 			<br>
-			<a href = '#Building'>Section 1 - Building and Running the Kernel</a><br>
-			<br>
-			<a href = '#DebugMenu'>Section 2 - The Kernel Debug Menu</a><br>
-			<br>
-			<a href = '#Debugging'>Section 3 - Debugging the Night Kernel</a><br>
-			<br>
-			<a href = '#Conventions'>Section 4 - Coding Conventions Used in Night</a><br>
-			<br>
-			<a href = '#Drivers'>Section 5 - The Night Kernel Driver Model</a><br>
-			<br>
-			<a href = '#Config'>Section 6 - Setting Options with ConfigBits</a><br>
-			<br>
-			<a href = '#Lists'>Section 7 - The List Manager</a><br>
-			<br>
-			<a href = '#MemoryManagement'>Section 8 - Memory Management in Night</a><br>
-			<br>
-			<a href = '#Multitasking'>Section 9 - Multitasking, Night Style</a><br>
-			<br>
-			<a href = '#Events'>Section 10 - Things that Go Bump in the <i>Night</i>: Events in the Night Kernel</a><br>
-			<br>
-			________________________________<br>
-			<br>
-			<a href = '#SystemStruct'>Appendix 0 - The System Structure</a><br>
-			<br>
-			<a href = '#NightFunctionReference'>Appendix 1 - Night Kernel Function Reference</a><br>
-			<br>
-			<a href = '#StandardFunctionReturnCodes'>Appendix 2 - Standard Function Return Codes</a><br>
-			<br>
-			<a href = '#DOSFunctionReference'>Appendix 3 - Default Interrupt Vectors and DOS Function Reference</a><br>
-			<br>
-			<a href = '#Changelog'>Appendix 4 - Version History</a><br>
-			<br>
-			<a href = '#License'>GNU General Public License</a><br>
-			<br>
+
+			<h3 align = 'center'>Contents</h1>
 		</p>
-		<br>
+
+		<p style = 'width: 45%; float: left; margin: 15px; vertical-align: top; text-align: center;'>
+			<a href = '#About'>
+				Section 0 - About the Night Kernel
+			</a><br>
+			<br>
+
+			<a href = '#Building'>
+				Section 1 - Building and Running the Kernel
+			</a><br>
+			<br>
+
+			<a href = '#DebugMenu'>
+				Section 2 - The Kernel Debug Menu
+			</a><br>
+			<br>
+
+			<a href = '#Debugging'>
+				Section 3 - Debugging the Night Kernel
+			</a><br>
+			<br>
+
+			<a href = '#Conventions'>
+				Section 4 - Coding Conventions Used in Night
+			</a><br>
+			<br>
+
+			<a href = '#Drivers'>
+				Section 5 - The Night Kernel Driver Model
+			</a><br>
+			<br>
+
+			<a href = '#Config'>
+				Section 6 - Setting Options with ConfigBits
+			</a><br>
+			<br>
+
+			<a href = '#Lists'>
+				Section 7 - The List Manager
+			</a><br>
+			<br>
+
+			<a href = '#MemoryManagement'>
+				Section 8 - Memory Management in Night
+			</a><br>
+			<br>
+
+			<a href = '#Multitasking'>
+				Section 9 - Multitasking, Night Style
+			</a><br>
+			<br>
+
+			<a href = '#Events'>
+				Section 10 - Things that Go Bump in the <i>Night</i>:<br>
+				Events in the Night Kernel
+			</a><br>
+			<br>
+
+		</p>
+
+		<p style = 'width: 45%; float: right; margin: 15px; vertical-align: top; text-align: center;'>
+			<a href = '#SystemStruct'>
+				Appendix 0 - The System Structure
+			</a><br>
+			<br>
+
+			<a href = '#NightFunctionReference'>
+				Appendix 1 - Night Kernel Function Reference
+			</a><br>
+			<br>
+
+			<a href = '#StandardFunctionReturnCodes'>
+				Appendix 2 - Standard Function Return Codes
+			</a><br>
+			<br>
+
+			<a href = '#DOSFunctionReference'>
+				Appendix 3 - Default Interrupt Vectors<br>
+				and DOS Function Reference
+			</a><br>
+			<br>
+
+			<a href = '#KeyboardScanCodes'>
+				Appendix 4 - Keyboard Scan Codes
+			</a><br>
+			<br>
+
+			<a href = '#Changelog'>
+				Appendix 5 - Version History
+			</a><br>
+			<br>
+
+			<a href = '#License'>
+				GNU General Public License
+			</a><br>
+			<br>
+
+		</p>
+		<br style = 'clear: both;'>
 		<br>
 		<br>
 		<br>
 		<br>
 
+
 		<hr>
 		<h2 class = 'pagebreak'><a name = 'About'>Section 0 - About the Night Kernel</a></h2>
 		<p>
-			<b>A synopsis of <i>Night</i>:</b><br>
+			<b>A synopsis of <i>Night</i></b><br>
 			<br>
-			The Night kernel has been designed from the ground up to be a full 32-bit drop-in replacement for the original 16-bit kernel of the FreeDOS operating system, and is intended to be loaded by the existing FreeDOS bootloader. Night is built with handcrafted assembly code using the NASM assembler, employs linear memory addressing, and operates in Protected Mode on the Intel x86 architecture. The completed kernel will allow users to enjoy modern abilities such as task switching between applications, protected memory, and increased overall performance in a DOS environment while maintaining full compatibility with their existing DOS applications.<br>
+			The Night kernel has been designed from the ground up to be a full 32-bit drop-in replacement for the original 16-bit kernel of the FreeDOS operating system, and is intended to be loaded by the existing FreeDOS bootloader. Night is built with GCC C and handcrafted assembly code using the NASM assembler, employs linear memory addressing and operates in Protected Mode on the Intel x86 architecture. The completed kernel will allow users to enjoy modern abilities such as task switching between applications, protected memory, and increased overall performance in a DOS environment while maintaining full compatibility with their existing DOS applications.<br>
 			<br>
-			Currently, the Night Kernel is a work in progress; most of the code written to this point is providing internal functionality, and as such the kernel is not yet suitable for everyday use. Night will not, at present, run user applications.<br>
+			Currently, the Night Kernel is a work in progress; most of the code written to this point is providing internal functionality, and as such the kernel is not yet suitable for everyday use. Night will not, at present, run existing DOS applications.<br>
 			<br>
 			<br>
 			<br>
-			<b>Days before the <i>Night</i>:</b><br>
+			<b>Days before the <i>Night</i></b><br>
 			<br>
 			Although the Night project itself began in June of 2015, its roots go back much further. Its creator originally got the idea to build a custom operating system from scratch after the lackluster release of Microsoft's Windows 95. Initially, this idea manifest as a simple shell with the goal of bringing multitasking and other modern features to older hardware... and 'older hardware' is no joke - the original project featured character graphics and was coded in IBM BASICA on a PC XT!<br>
 			<br>
-			After a subsequent upgrade to a 80486 machine, the project - then known simply as 'PCOS' - evolved as well. The next version was the first to feature color graphics (albeit in only 16 shades), a rudimentary UI and windowing toolkit, and mouse control. It was initially coded with QBASIC but quickly migrated to Visual BASIC as it outgrew the former language. As the project continued, it naturally became desirable to add true preemptive multitasking. Alas, the problem with that is that running multiple simultaneous DOS programs at once, reliably, under a mere shell would be much too complex to be feasible.<br>
+
+			After a subsequent upgrade to a 80486 machine, the project - then known simply as the <i>Personal Computer Operating System</i> or <i>'PCOS'</i> for short - evolved as well. The next version was the first to feature color graphics (albeit in only 16 shades), a rudimentary UI and windowing toolkit, and mouse control. It was initially coded with QBASIC but quickly migrated to Visual BASIC as it outgrew the former language. As the project continued, it naturally became desirable to add true preemptive multitasking. Alas, the problem with that is that running multiple simultaneous DOS programs at once, reliably, under a mere shell would be much too complex to be feasible.<br>
 			<br>
+
 			After a series of code refinements and feature enhancements pressed the limits of the development rig in use at the time, hardware was upgraded once again, this time to a 667 MHz Celeron machine. The project's source code was migrated to PowerBASIC, and the added processing power of the new PC made possible the incorporation of a virtual machine of sorts which would allow applications compiled for it to run concurrently. The result was a tech demo featuring multiple applications coded in an Assembly language designed especially for the virtual machine, all running under a preemptive scheduler. In time, the project - which had by now taken on the name <i>Exelyx</i> - grew to have not only its own assembler, but a BASIC-to-assembly-bytecode converter as well.<br>
 			<br>
+
 			Exelyx was evolved to one last form before being retired permanently in August of 2016; a DPMI-powered MS-DOS program with a code base rewritten in Watcom C. Though Exelyx is dead, some key sections of code developed during its lifespan have now been adapted, in part, for use in a new and refined platform; one which will rely on no underlying operating system or drivers, but shall supply the facilities to manage every aspect of the user's machine completely on its own.<br>
 			<br>
+
 			That project is <i>Night</i>.<br>
 			<br>
 			<br>
 			<br>
+
+			<b>A Night on the Web</b><br>
+			<br>
+			<a href = "https://groups.google.com/g/night-dos-kernel" target = "_blank">The Night Kernel on Google Groups</a><br>
+			<a href = "https://github.com/mercury0x000d/NightKernel" target = "_blank">The Night Kernel GitHub</a><br>
+			<br>
+			<br>
+			<br>
+
+			<b>Milestones</b><br>
+			<br>
+
+			Legend: 
+			<span style = "color: green;">complete</span> &bull;
+			<span style = "color: blue;">started, in progress</span> &bull;
+			<span style = "color: grey;">not yet started</span><br>
+			<br>
+
+			<u>Milestone 1 - by end of 2017</u> - <i>Completed 12/6/2017</i>
+			<ul>
+				<li><span style = "color: green">Boot</span></li>
+				<li><span style = "color: green">Enter Protected Mode</span></li>
+				<li><span style = "color: green">Can read and write hard disk sectors using LBA</span></li>
+				<li><span style = "color: green">Can manage basic hardware (timer, keyboard, etc.) interrupts</span></li>
+				<li><span style = "color: green">Basic "dummy" memory allocation</span></li>
+				<li><span style = "color: green">PS/2 keyboard support</span></li>
+				<li><span style = "color: green">PS/2 mouse support</span></li>
+				<li><span style = "color: green">RTC integration</span></li>
+			</ul>
+			<br>
+
+			<u>Milestone 2 - by end of 2018</u> - <i>Completed 12/26/2018</i><br>
+			<br>
+			<ul>
+				<li><span style = "color: green">PCI bus scanning to enumerate attached devices</span></li>
+				<li><span style = "color: green">Device driver loading system based on PCI bus scan</span></li>
+				<li><span style = "color: green">ATA/ATAPI driver</span></li>
+				<li><span style = "color: green">Full trap/fault/exception handling ability</span></li>
+				<li><span style = "color: green">Enumeration of MBR partitions</span></li>
+				<li><span style = "color: green">File system driver subsystem</span></li>
+			</ul>
+			<br>
+
+			<u>Milestone 3</u><br>
+			<br>
+			<ul>
+				<li><span style = "color: green">FAT16 driver</span></li>
+				<li><span style = "color: green">Can enter Virtual-8086 mode to run 16-bit Real Mode code</span></li>
+				<li><span style = "color: green">Functional physical memory manager</span></li>
+				<li><span style = "color: blue">Paging support</span></li>
+				<li><span style = "color: green">Preemptive multitasking (kernel level)</span></li>
+				<li><span style = "color: green">Multitasking on multiple privilege levels</span></li>
+			</ul>
+			<br>
+
+			<u>Milestone 4</u><br>
+			<br>
+			<ul>
+				<li><span style = "color: blue">FAT32 driver</span></li>
+				<li><span style = "color: gray">exFAT driver</span></li>
+				<li><span style = "color: gray">Can run .com programs</span></li>
+				<li><span style = "color: gray">Can run .exe programs</span></li>
+				<li><span style = "color: blue">Can run .elf programs</span></li>
+			</ul>
+			<br>
+
+			<u>Future milestones</u><br>
+			<br>
+			<ul>
+				<li><span style = "color: gray">Enumeration of GPT partitions</span></li>
+				<li><span style = "color: gray">Supports Night app packages</span></li>
+				<li><span style = "color: blue">Basic kernel API (string routines, memory routines, etc.)</span></li>
+				<li><span style = "color: blue">Power management (APM, ACPI) support</span></li>
+			</ul>
+			<br>
+			<br>
+			<br>
+
 			<b>About this manual:</b><br>
 			<br>
 			The <i>Night Kernel Reference Manual</i> is intended to reflect the current design state of the Night Kernel and is updated alongside each release as necessary to include details about the inner workings of the kernel. The information herein may be confidently adhered to and trusted above any other, possibly conflicting, sources. Only the current in-use code of the kernel itself could be considered more authoritative.<br>
 			<br>
 			<br>
 			<br>
+
 			<b>Recommended minimum system requirements</b><br>
 			<br>
+
 			CPU:<br>
 			<ul>
 				<li>A 386 or higher due to some instructions used (STOSD, et. al.) and the availability of Protected Mode</li>
@@ -183,6 +332,8 @@
 			<br>
 			To create a virtual machine suitable for testing out Night, the default DOS configuration offered by VirtualBox can, for the most part, be used without alteration, however you should name the machine <i>Night</i> for compatibility with the included makefile.<br>
 			<br>
+			Note: VirtualBox 6 brought changes over the previous version to how virtual machines are launched from the command line, so the Night makefile has a pair of lines to handle either situation. If you're still using VirtualBox 5.x, simply comment out the default 6.x line and uncomment the 5.x one as noted in the comment inside the makefile itself.<br>
+			<br>
 			<br>
 			<br>
 
@@ -193,9 +344,10 @@
 			<br>
 
 			<b>Building from source</b><br>
-			If you're running in a Linux environment and have both VirtualBox and NASM installed, you can use the included makefile found in the root of the repo to streamline building and testing. The rules it accepts are as follows:<br>
+			If you're running in a Linux environment and have both VirtualBox and NASM (there were changes in version 2.14 which will not allow Night to compile, so instead use version 2.13.03, available <a href = 'https://www.nasm.us/pub/nasm/releasebuilds/2.13.03' target = '_blank'>here</a>) installed, you can use the included makefile found in the root of the repo to streamline building and testing. The rules it accepts are as follows:<br>
 			<br>
-			<table style = 'width:100%'>
+			<a name = 'Table1.1'></a>
+			<table style = 'width: 95%; margin: auto; vertical-align: top'>
 				<caption><b><i>Table 1.1 - Make options</i></b></caption>
 				<tr>
 					<th width = '10%'><i>Rule</i></th>
@@ -274,7 +426,8 @@
 			<br>
 			The menu provides the following options:<br>
 			<br>
-			<table style = 'width:100%'>
+			<a name = 'Table2.1'></a>
+			<table style = 'width: 95%; margin: auto; vertical-align: top'>
 				<caption><b><i>Table 2.1 - Debug Menu selection summary</i></b></caption>
 				<tr>
 					<th width = '10%'><i>Menu Selection</i></th>
@@ -296,30 +449,12 @@
 				</tr>
 
 				<tr>
-					<td>Memory Details</td>
-					<td>
-						Provides a dump of the memory list used to track both free and allocated physical RAM.
-					</td>
-				</tr>
-
-				<tr>
-					<td>RAM Browser</td>
-					<td>
-						An interactive memory browser. Use the Plus and Minus keys on the number pad to scroll through memory addresses or use Page Up or Page down to jump by larger chunks. Typing a hexadecimal address and pressing enter will jump instantly to that memory location. Keep in mind that some modern systems have protected ranges of RAM used by UEFI or SMM/TPM software which are not permitted to be read. Accessing these with the RAM Browser can cause a triple-fault and reset the system.
-					</td>
-				</tr>
-
-				<tr>
 					<td>Task Browser</td>
 					<td>
-						Allows browsing of all slots in the Task List. Use Page Up and Page Down to change the task number, the Plus and Minus keys on the number pad to adjust the priority of running tasks, Spacebar to toggle a task's suspended state, or Enter to kill the task entirely. Keep in mind there is nothing preventing the Debug Menu itself from being suspended or killed, leaving no way to interact with the kernel until the system is restarted.
+						Allows browsing of all slots in the Task List. Use Page Up and Page Down to change the task number, the Plus and Minus keys on the number pad to adjust the priority of running tasks, Spacebar to toggle a task's suspended state, or Enter to kill the task entirely. If the the Debug Menu itself is killed, another copy can be launched by pressing the F1 key.
 					</td>
 				</tr>
 
-				<tr>
-					<td>Reboot</td>
-					<td>Reboots the machine.</td>
-				</tr>
 			</table>
 		</p>
 		<br>
@@ -337,7 +472,8 @@
 			<br>
 			Some of the most useful VirtualBox debugger commands are listed below:<br>
 			<br>
-			<table style = 'width:100%'>
+			<a name = 'Table3.1'></a>
+			<table style = 'width: 95%; margin: auto; vertical-align: top'>
 				<caption><b><i>Table 3.1 - Useful VirtualBox Debugger commands</i></b></caption>
 				<tr>
 					<th width = '30%'><i>Command</i></th>
@@ -439,6 +575,8 @@
 			Usually the active register set and memory range upon which the above commands work are the guest's (e.g. Night's), but if VirtualBox hits a triple fault (Guru Meditation), these will switch to the hypervisor's. For these situations, some commands support adding a 'g' to their ends to explicitly specify VirtualBox uses the guest's data.<br>
 			<br>
 			The VirtualBox debugger has many more features as well. You can type <i>help commands</i> in the debug console for a complete list of commands available or <i>help</i> for a summary of help options. You can even type <i>help (command name)</i> to get help on a specific command.<br>
+			<br>
+			Bochs also has a very capable debugger, for which you can find the manual <a href = 'http://bochs.sourceforge.net/doc/docbook/user' target = '_blank'>here</a> and a listing of useful commands <a href = 'http://bochs.sourceforge.net/doc/docbook/user/internal-debugger.html' target = '_blank'>here</a>.<br>
 		</p>
 		<br>
 		<br>
@@ -449,15 +587,19 @@
 		<hr>
 		<h2 class = 'pagebreak'><a name = 'Conventions'>Section 4 - Coding Conventions Used in Night</a></h2>
 		<p>
-			<i>'C ... all the power of assembly language programming with all the ease of assembly language programming.'</i><br>
-			&emsp; - Stuart Cheshire, <i>Tricks of the Mac Game Programming Gurus</i><br>
+			<p align = 'right' style = 'width: 80%; margin: auto;'>
+				<i>'C ... all the power of assembly language programming with all the ease of assembly language programming.'</i><br>
+				&emsp; - Stuart Cheshire, <i>Tricks of the Mac Game Programming Gurus</i><br>
+			</p>
 			<br>
+
 			Assembly has gotten a bad rap as a language both difficult to use and ill-suited for many modern programming projects. Perhaps this is due to Assembly code of days gone by being written in long, rambling blocks with little structure of any kind, or maybe due to certain assemblers of old being rather rigid in the syntax they accepted, but there is no reason why this must be. With a little structure and finesse, Assembly can be forged with no worse readability than comparable C code.<br>
 			<br>
 			To illustrate this, let's take a look at a function from the Night source code and discuss its structure. Below, we have an example from an older version of the Memory Manager:<br>
+			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: Turquoise'>&nbsp; section</span> <span style = 'color: Chartreuse'>.text</span><br>
 					<span style = 'color: Chartreuse'>&nbsp; MemAllocateAligned:</span><br>
@@ -475,6 +617,7 @@
 					</span>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			Every function in Night begins by stating it is part of the <i>.text</i> section of the final binary image, so that the assembler knows to group this function in with the rest of the runnable code. Following this designation is the function label, which in this case is <i>MemAllocateAligned</i>. Immediately after, there is a short description of what the function does, what it expects for input on the stack, what it returns as output, and in what registers that output is returned.<br>
@@ -483,12 +626,13 @@
 			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: DeepPink'>&nbsp;&nbsp;&nbsp;&nbsp; push</span> <span style = 'color: Orange'>ebp</span><br>
 					<span style = 'color: DeepPink'>&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style = 'color: Orange'>ebp</span><span style = 'color: White'>,</span> <span style = 'color: Orange'>esp</span><br>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			Next EBP, the current base pointer, is preserved to the stack and reloaded with the current stack pointer. This provides a reference so that we can more directly access parameters passed to this function and use local variables in the function as well. This is the standard entry procedure for every Night function which accepts input parameters or uses internal variables.<br>
@@ -497,7 +641,7 @@
 			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: LightGray'>&nbsp;&nbsp;&nbsp;&nbsp; ; define input parameters</span><br>
 
@@ -508,6 +652,7 @@
 					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>alignment</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>+</span> <span style = 'color: Fuchsia'>16</span><span style = 'color: White'>]</span><br>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			Now that EBP has been preserved and set, offsets from it may be defined to represent parameters passed to this function. Values pushed onto the stack by the caller begin at <code>[EBP + 8]</code> and ascend from there. Since all of Night's functions expect 32-bit parameters, this means that the first parameter passed will live at <code>[EBP + 8]</code>, the second at <code>[EBP + 12]</code>, the third at <code>[EBP + 16]</code>, and so on. As for <code>[EBP + 0]</code> and <code>[EBP + 4]</code>, those stack locations are where the saved <code>EBP</code> register and the return address, respectively, live.<br>
@@ -518,7 +663,7 @@
 			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: LightGray'>&nbsp;&nbsp;&nbsp;&nbsp; ; allocate local variables</span><br>
 
@@ -535,6 +680,7 @@
 					<span style = 'color: Turquoise'>&nbsp;&nbsp;&nbsp;&nbsp; %define</span> <span style = 'color: Chartreuse'>blockRequestedSize</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style = 'color: Turquoise'>DWord</span> <span style = 'color: White'>[</span><span style = 'color: Orange'>ebp</span> <span style = 'color: White'>-</span> <span style = 'color: Fuchsia'>20</span><span style = 'color: White'>]</span><br>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			Variables local to this function can be represented in a manner similar to that of parameters. To do this, we first must adjust the stack pointer to clear out enough space in the stack area for the variables we will need: in this case 20 bytes, enough space for five double-word values. After that, the individual variables can be defined.<br>
@@ -545,7 +691,7 @@
 			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: LightGray'>&nbsp;&nbsp;&nbsp;&nbsp; ; make sure alignment is 2 or greater to avoid both wasted time (1) and division by zero errors (0)</span><br>
 
@@ -556,6 +702,7 @@
 					<span style = 'color: White'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</span><br>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			Next in this function is an example of how passed parameters are accessed. As mentioned earlier, using <code>cmp DWord [ebp + 12], 2</code> here would be totally acceptable by NASM, but thanks to the <code>define</code>s we set in place earlier, we can make the code much more easy to read. This code performs a simple check on the <code>alignment</code> passed and exits if it is below two.<br>
@@ -564,7 +711,7 @@
 			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: White'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</span><br>
 					<br>
@@ -575,6 +722,7 @@
 					<span style = 'color: DeepPink'>&nbsp;&nbsp;&nbsp;&nbsp; mov</span> <span style = 'color: Orange'>eax</span><span style = 'color: White'>,</span> <span style = 'color: Chartreuse'>blockAddress</span><br>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			And now, skipping ahead to the end, the work of this function is complete. Remember those registers mentioned above in the function description? This is where they get set prior to exiting the function.<br>
@@ -583,7 +731,7 @@
 			<br>
 
 			<code>
-				<p style = 'background-color: DimGray'>
+				<p style = 'width: 95%; margin: auto; background-color: DimGray'>
 					<br>
 					<span style = 'color: Chartreuse'>&nbsp;&nbsp;&nbsp;&nbsp; .Exit:</span><br>
 
@@ -610,21 +758,31 @@
 					<span style = 'color: DeepPink'>&nbsp; ret</span> <span style = 'color: Fuchsia'>12</span><br>
 					<br>
 				</p>
+				<br>
 			</code>
 
 			And finally, it's time to exit!<br>
 			<br>
-			The series of <code>%undef</code> statements remove from the preprocessor's memory the variable names we <code>%define</code>d earlier. Why is this done? Consider a scenario in which a variable exists in another function later on in the same file, has the same name as a variable in this function, and was accidentally never <code>%define</code>d in its own function. Such a variable name would point to the last existing definition of that name - the one in this function. This essentially would allow functions to alter variables in other functions which, as bad as that is on its own, would be especially nightmarish if one of these functions called the other in a nested fashion.<br>
+			The series of <code>%undef</code> statements remove from the preprocessor's memory the variable names we <code>%define</code>d earlier. Why is this done? Consider a scenario in which a variable exists in another function later on in the same file, has the same name as a variable in this function, and was accidentally never <code>%define</code>d in its own function. Such a variable name would point to the last existing definition of that name - the one in this function. This essentially would allow functions to alter variables in other functions which, as bad as that is on its own, would be especially nightmarish if one of these functions called the other in a nested fashion. Using <code>%undef</code> prevents this.<br>
 			<br>
 			The <code>mov</code> and <code>pop</code> lines comprise the standard exit procedure for nearly all functions in the Night kernel. In short, they undo the entry procedure performed at the start of this function and restore the stack to the state it was prior.<br>
 			<br>
 			The <code>ret 12</code> instruction will not only return to the caller, but also takes an additional twelve bytes off the stack. Why twelve bytes? The answer lies in the number of input parameters passed to this function. <code>MemAllocateAligned</code> takes three double-word parameters as input, and we can clear out the space they use (in essence popping them all back off the stack in one fell swoop) by specifying the total size at the end of the <code>ret</code> instruction. By the same token, if a function instead takes no parameters, a simple <code>ret</code> could be used since there would be no parameter space on the stack of which to be rid.<br>
 			<br>
+
+			<i>Note:</i> If you're using <a href = 'https://www.sublimetext.com' target = '_blank'><i>Sublime Text</i></a> as your code editor of choice, install <a href = 'https://github.com/Nessphoro/sublimeassembly' target = '_blank'>Nessphoro's NASM x86 Assembly</a> package to get the fancy color coding shown above. :)<br>
 			<br>
 			<br>
-			P.S.: If you're using <i>Sublime Text</i> as your code editor of choice, install <a href = 'https://github.com/Nessphoro/sublimeassembly' target = '_blank'>Nessphoro's NASM x86 Assembly</a> package to get the fancy color coding shown above. :)<br>
 			<br>
-			Tip: Following are two very good quick references of the x86 assembly command set.<br>
+
+			<b>Bit Suffixes</b><br>
+			Some modules in the kernel, such as <i>screen.asm</i>, have both 16 and 32 bit variants of their functions. In these cases, it is customary to add a "16" to the end of the 16-bit function to denote it is 16 bit code; the 32 bit version has no suffix since it is assumed all code in the kernel is 32 bit unless otherwise specified.<br>
+			<br>
+			<br>
+			<br>
+
+			<b>Tip</b><br>
+			For details on the x86 assembly instruction set, see these excellent quick references:<br>
 			<a href = 'http://www.posix.nl/linuxassembly/nasmdochtml/nasmdoc0.html' target = '_blank'>The Netwide Assembler: NASM manual</a><br>
 			<a href = 'https://www.felixcloutier.com/x86/index.html' target = '_blank'>x86 and amd64 instruction reference at felixcloutier.com</a><br>
 		</p>
@@ -654,12 +812,13 @@
 
 			The <code>driverFlags</code> field is a bank of flags to identify attributes about this driver. Currently, the following bit definitions are supported:<br>
 			<br>
-			<code>
-				<table style = 'width:100%'>
+			<code style = 'width: 45%; float: left; margin: 15px; vertical-align: top'>
+				<a name = 'Table5.1'></a>
+				<table width = 100%>
 					<caption><b><i>Table 5.1 - Driver flags bit definitions</i></b></caption>
 					<tr>
-						<th width = '10%'><i>Bit</i></th>
-						<th width = '90%'><i>Description</i></th>
+						<th width = '20%'><i>Bit</i></th>
+						<th width = '80%'><i>Description</i></th>
 					</tr>
 
 					<tr>
@@ -687,14 +846,73 @@
 						<td>PCI driver</td>
 					</tr>
 				</table>
-			</code>
-			<br>
-			<br>
-			<br>
+				<br>
+				<br>
 
-			<code>
-				<table style = 'width:100%'>
-					<caption><b><i>Table 5.2 - Driver command codes - Block and character driver commands</i></b></caption>
+				<a name = 'Table5.2'></a>
+				<table width = 100%>
+					<caption><b><i>Table 5.2 - Driver command codes - Filesystem driver commands</i></b></caption>
+					<tr>
+						<th width = '10%'><i>Value</i></th>
+						<th width = '90%'><i>Symbol</i></th>
+					</tr>
+
+					<tr>
+						<td>0xF0</td>
+						<td>kDriverFileLoad</td>
+					</tr>
+
+					<tr>
+						<td>0xF1</td>
+						<td>kDriverFileInfoAccessedGet</td>
+					</tr>
+
+					<tr>
+						<td>0xF2</td>
+						<td>kDriverFileInfoCreatedGet</td>
+					</tr>
+
+					<tr>
+						<td>0xF3</td>
+						<td>kDriverFileInfoModifiedGet</td>
+					</tr>
+
+					<tr>
+						<td>0xF4</td>
+						<td>kDriverFileInfoSizeGet</td>
+					</tr>
+
+					<tr>
+						<td>0xF5</td>
+						<td>kDriverItemLoad</td>
+					</tr>
+
+					<tr>
+						<td>0xF6</td>
+						<td>kDriverItemNew</td>
+					</tr>
+
+					<tr>
+						<td>0xF7</td>
+						<td>kDriverItemStore</td>
+					</tr>
+
+					<tr>
+						<td>0xF8</td>
+						<td>kDriverPartitionInfo</td>
+					</tr>
+
+					<tr>
+						<td>0xF9</td>
+						<td>kDriverItemCount</td>
+					</tr>
+				</table>
+			</code>
+
+			<code style = 'width: 45%; float: left; margin: 15px; vertical-align: top'>
+				<a name = 'Table5.3'></a>
+				<table width = 100%>
+					<caption><b><i>Table 5.3 - Driver command codes - Block and character driver commands</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Value</i></th>
 						<th width = '90%'><i>Symbol</i></th>
@@ -786,70 +1004,7 @@
 					</tr>
 				</table>
 			</code>
-			<br>
-			<br>
-			<br>
-
-			<code>
-				<table style = 'width:100%'>
-					<caption><b><i>Table 5.3 - Driver command codes - Filesystem driver commands</i></b></caption>
-					<tr>
-						<th width = '10%'><i>Value</i></th>
-						<th width = '90%'><i>Symbol</i></th>
-					</tr>
-
-					<tr>
-						<td>0xF0</td>
-						<td>kDriverFileLoad</td>
-					</tr>
-
-					<tr>
-						<td>0xF1</td>
-						<td>kDriverFileInfoAccessedGet</td>
-					</tr>
-
-					<tr>
-						<td>0xF2</td>
-						<td>kDriverFileInfoCreatedGet</td>
-					</tr>
-
-					<tr>
-						<td>0xF3</td>
-						<td>kDriverFileInfoModifiedGet</td>
-					</tr>
-
-					<tr>
-						<td>0xF4</td>
-						<td>kDriverFileInfoSizeGet</td>
-					</tr>
-
-					<tr>
-						<td>0xF5</td>
-						<td>kDriverItemLoad</td>
-					</tr>
-
-					<tr>
-						<td>0xF6</td>
-						<td>kDriverItemNew</td>
-					</tr>
-
-					<tr>
-						<td>0xF7</td>
-						<td>kDriverItemStore</td>
-					</tr>
-
-					<tr>
-						<td>0xF8</td>
-						<td>kDriverPartitionInfo</td>
-					</tr>
-
-					<tr>
-						<td>0xF9</td>
-						<td>kDriverItemCount</td>
-					</tr>
-				</table>
-			</code>
-			<br>
+			<br style = 'clear: both;'>
 			<br>
 			<br>
 		</p>
@@ -865,7 +1020,8 @@
 			The Night Kernel offers configurable options which can be selected by altering certain bits in a specific value located within the kernel itself. Currently, the sole method of changing these options in an already-compiled kernel is to use a hex editor to locate the string <i>ConfigBits</i> in the binary and changing the 32-bit value immediately following it. This allows options in the kernel to be changed without the need to recompile the kernel entirely. A utility will be created at later date which can automate selecting these options. At this point in time, the following options are defined:<br>
 			<br>
 			<code>
-				<table style = 'width:100%'>
+				<a name = 'Table6.1'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
 					<caption><b><i>Table 6.1 - Configbits options</i></b></caption>
 					<tr>
 						<col width = '10%'>
@@ -881,62 +1037,61 @@
 
 					<tr>
 						<td>00</td>
-						<td>kCBLockScroll</td>
-						<td>Default Scroll Lock state</td>
-					</tr>
-
-					<tr>
-						<td>01</td>
-						<td>kCBLockNum</td>
-						<td>Default Num Lock state</td>
-					</tr>
-
-					<tr>
-						<td>02</td>
-						<td>kCBLockCaps</td>
-						<td>Default Caps Lock state</td>
-					</tr>
-
-					<tr>
-						<td>03</td>
 						<td>kCBDebugMode</td>
 						<td>Enable Debug Mode</td>
 					</tr>
 
 					<tr>
-						<td>04</td>
-						<td>kCBVerbose</td>
-						<td>Verbose boot (Displays startup and diagnostic messages during boot)</td>
+						<td>01</td>
+						<td>kCBLogEchoScreen</td>
+						<td>Echos any strings sent to the kernel log to the screen as well.</td>
 					</tr>
 
 					<tr>
-						<td>05</td>
+						<td>02</td>
+						<td>kCBLogEchoBochs</td>
+						<td>Echos any strings sent to the kernel log to the Bochs debug console as well.</td>
+					</tr>
+
+					<tr>
+						<td>03</td>
+						<td>kCBLogEchoVBox</td>
+						<td>Echos any strings sent to the kernel log to the VirtualBox Guest Log as well.</td>
+					</tr>
+
+					<tr>
+						<td>04</td>
 						<td>kCBLines50</td>
 						<td>Use 50-line text mode instead of 25-line mode</td>
 					</tr>
 
 					<tr>
-						<td>06</td>
+						<td>05</td>
 						<td>kCBVMEnable</td>
-						<td>Enable paging to disk</td>
+						<td>Enable Virtual Memory (paging to disk)</td>
 					</tr>
 
 					<tr>
-						<td>07</td>
+						<td>06</td>
 						<td>kCBIntHalt</td>
 						<td>Calls to any undefined interrupt handlers will push the interrupt number onto the stack and trigger a halt with register and stack dump.</td>
 					</tr>
 
 					<tr>
-						<td>08</td>
+						<td>07</td>
 						<td>kCBCtrlAltDelEnable</td>
 						<td>Allows a Ctrl-Alt-Delete key combination to restart the kernel.</td>
+					</tr>
+
+					<tr>
+						<td>08 - 31</td>
+						<td><i>Reserved</i></td>
+						<td></td>
 					</tr>
 
 				</table>
 			</code>
 			<br>
-			All unlisted bits are reserved.<br>
 		</p>
 		<br>
 		<br>
@@ -952,17 +1107,20 @@
 			Each list begins with a <code>tListInfo</code> header, the structure of which is detailed below.<br>
 			<br>
 			<code>
-				<table style = 'width:100%'>
+				<a name = 'Table7.1'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
 					<caption><b><i>Table 7.1 - List header format</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Offset</i></th>
 						<th width = '10%'><i>Name</i></th>
-						<th width = '80%'><i>Description</i></th>
+						<th width = '10%'><i>Size</i></th>
+						<th width = '70%'><i>Description</i></th>
 					</tr>
 
 					<tr>
 						<td>0x00</td>
 						<td>signature</td>
+						<td>DWord</td>
 						<td>
 							A string (<i>'list'</i>) identifying the beginning of a List Manager list.
 						</td>
@@ -971,24 +1129,27 @@
 					<tr>
 						<td>0x04</td>
 						<td>elementSize</td>
+						<td>DWord</td>
 						<td>Size in bytes of each element in this list.</td>
 					</tr>
 
 					<tr>
 						<td>0x08</td>
 						<td>elementCount</td>
+						<td>DWord</td>
 						<td>Total number of elements in this list.</td>
 					</tr>
 
 					<tr>
 						<td>0x0C</td>
 						<td>listSize</td>
+						<td>DWord</td>
 						<td>Total size of this list (header and data space) in bytes.</td>
 					</tr>
 
 					<tr>
 						<td>0x10</td>
-						<td colspan = '2'><i>List data</i></td>
+						<td colspan = '3'><i>List data</i></td>
 					</tr>
 				</table>
 			</code>
@@ -1003,17 +1164,20 @@
 			Each bitfield begins with a <code>tBitfieldInfo</code> header, the structure of which is detailed below.<br>
 			<br>
 			<code>
-				<table style = 'width:100%'>
+				<a name = 'Table7.2'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
 					<caption><b><i>Table 7.2 - Bitfield header format</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Offset</i></th>
 						<th width = '10%'><i>Name</i></th>
-						<th width = '80%'><i>Description</i></th>
+						<th width = '10%'><i>Size</i></th>
+						<th width = '70%'><i>Description</i></th>
 					</tr>
 
 					<tr>
 						<td>0x00</td>
 						<td>signature</td>
+						<td>DWord</td>
 						<td>
 							A string (<i>'bits'</i>) identifying the beginning of a List Manager bitfield.
 						</td>
@@ -1022,24 +1186,110 @@
 					<tr>
 						<td>0x04</td>
 						<td>setCount</td>
+						<td>DWord</td>
 						<td>Number of set bits in this bitfield.</td>
 					</tr>
 
 					<tr>
 						<td>0x08</td>
 						<td>elementCount</td>
+						<td>DWord</td>
 						<td>Total number of bits in this bitfield.</td>
 					</tr>
 
 					<tr>
 						<td>0x0C</td>
 						<td>listSize</td>
+						<td>DWord</td>
 						<td>Total size of this bitfield (header and data space) in bytes.</td>
 					</tr>
 
 					<tr>
 						<td>0x10</td>
-						<td colspan = '2'><i>List data</i></td>
+						<td colspan = '3'><i>Bitfield data</i></td>
+					</tr>
+				</table>
+			</code>
+			<br>
+			<br>
+			<br>
+
+			<b>Buffers need lists too!</b><br>
+			<br>
+			The List Manager also handles ring buffers with the same ease as lists and bitfields.<br>
+			<br>
+			Each ring buffer begins with a <code>tRingBuffer</code> header, the structure of which is detailed below.<br>
+			<br>
+			<code>
+				<a name = 'Table7.3'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
+					<caption><b><i>Table 7.3 - Ring buffer header format</i></b></caption>
+					<tr>
+						<th width = '10%'><i>Offset</i></th>
+						<th width = '10%'><i>Name</i></th>
+						<th width = '10%'><i>Size</i></th>
+						<th width = '70%'><i>Description</i></th>
+					</tr>
+
+					<tr>
+						<td>0x00</td>
+						<td>signature</td>
+						<td>DWord</td>
+						<td>A string (<i>'ring'</i>) identifying the beginning of a List Manager ring buffer.</td>
+					</tr>
+
+					<tr>
+						<td>0x04</td>
+						<td>elementSize</td>
+						<td>DWord</td>
+						<td>The size of each slot of this buffer.</td>
+					</tr>
+
+					<tr>
+						<td>0x08</td>
+						<td>initialPtr</td>
+						<td>DWord</td>
+						<td>A saved copy of the initial value of both the read and write pointer. This is used to quickly direct a pointer to the start of the buffer when "wrapping around" to the beginning without performing any mathematical functions.</td>
+					</tr>
+
+					<tr>
+						<td>0x0C</td>
+						<td>listSize</td>
+						<td>DWord</td>
+						<td>Total size of this bitfield (header and data space) in bytes.</td>
+					</tr>
+
+					<tr>
+						<td>0x10</td>
+						<td>readPtr</td>
+						<td>DWord</td>
+						<td>The address of the next read from the buffer.</td>
+					</tr>
+
+					<tr>
+						<td>0x14</td>
+						<td>writePtr</td>
+						<td>DWord</td>
+						<td>The address of the next write to the buffer.</td>
+					</tr>
+
+					<tr>
+						<td>0x18</td>
+						<td>usedCount</td>
+						<td>DWord</td>
+						<td>Number of used slots in this buffer.</td>
+					</tr>
+
+					<tr>
+						<td>0x1C</td>
+						<td>elementCount</td>
+						<td>DWord</td>
+						<td>Total number of slots in this buffer.</td>
+					</tr>
+
+					<tr>
+						<td>0x20</td>
+						<td colspan = '3'><i>Buffer data</i></td>
 					</tr>
 				</table>
 			</code>
@@ -1092,22 +1342,29 @@
 			<br>
 			<br>
 			<br>
+
 			<b>An Overview of Tasking on Night</b><br>
 			<br>
-			The Programmable Interval Timer is set to fire 256 times per second, and its interrupt handler simply adds one to the <code>tSystem.ticksSinceBoot</code> value, then checks if the global multitasking switch, <code>tSystem.taskingEnable</code>, is non-zero. If it is, task-switching logic is performed to determine the next valid task to be run in a round-robin manner.<br>
+
+			The Programmable Interval Timer is set to fire 256 times per second. Its interrupt handler simply adds one to the <code>tSystem.ticksSinceBoot</code> value, then checks if the global multitasking switch, <code>tSystem.taskingEnable</code>, is non-zero. If it is, task-switching logic is performed to determine the next valid task to be run in a round-robin manner.<br>
 			<br>
+
 			In computing, as in life, certain tasks are sometimes more crucial to complete than others. Extending this principle to the digital workspace, Night's task management structure contains a <code>priority</code> value which dictates how many turns at the CPU the task will have in a row before being switched out for the next waiting task. Currently the priority levels supported range from 0 (one turn before switch) to 255 (an over-the-top value which is mainly there simply for future-proofing. One caveat exists: since the PIT interrupts fire 256 times per second, maxing out the priority value to 255 can cause near-total lockup of other running tasks. Therefore, it is not recommended to use a priority value over 3 so that other tasks do not visibly suffer from lost CPU time. A future version will incorporate a global execution cap, preventing tasks from being set to too high of a priority.<br>
 			<br>
+
 			When a task is switched in, Night reads the CPU's Time Stamp Counter and stores the result in <code>switchInLow</code> and <code>switchInHigh</code>. When it is switched back out, the TSC is read once again and the original switch-in values are subtracted from this reading. The resulting value is stored in <code>cycleCountLow</code> and <code>cycleCountHigh</code> and can be used as an estimated number of cycles the task spent doing work during its turn at the CPU. This information can be used by Task Manager-type programs to easily calculate how well tasks are utilizing the time slices they are allocated.<br>
 			<br>
+
 			Although the x86 architecture does provide a method of performing multitasking in hardware, Night - like many other operating systems - does not use it. Instead, the faster software method is used via a single Task State Segment which is updated at every task switch.<br>
 			<br>
-			Night tracks task data using a list of <code>tTaskInfo</code> structures, each of which is 96 bytes in length.<br>
+
+			Night tracks task data using a list of <code>tTaskInfo</code> structures, one per task, each 128 bytes in length.<br>
 			<br>
 			<br>
 			<br>
 			<code>
-				<table style = 'width:100%'>
+				<a name = 'Table9.1'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
 					<caption><b><i>Table 9.1 - The tTaskInfo structure</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Offset</i></th>
@@ -1146,101 +1403,127 @@
 
 					<tr>
 						<td>0x10</td>
-						<td>stackAddress</td>
+						<td>eventQueueAddress</td>
 						<td>DWord</td>
-					<td>The memory address of the user stack as returned by <code>MemAllocate()</code>.</td>
+						<td>
+							The memory address of the task's event queue. It is a single page of memory initialized as a ring buffer, yielding enough space for 338 events of twelve bytes each.<br>
+						</td>
 					</tr>
 
 					<tr>
 						<td>0x14</td>
+						<td>stackAddress</td>
+						<td>DWord</td>
+						<td>The memory address of the user stack as returned by <code>MemAllocate()</code>.</td>
+					</tr>
+
+					<tr>
+						<td>0x18</td>
 						<td>kernelStackAddress</td>
 						<td>DWord</td>
 						<td>The memory address of the kernel stack as returned by <code>MemAllocate()</code>.</td>
 					</tr>
 
 					<tr>
-						<td>0x18</td>
+						<td>0x1C</td>
 						<td>priority</td>
-						<td>byte</td>
+						<td>Byte</td>
 						<td>The priority value for this task. May be 0 - 255, but values over 3 can cause noticeable lag in other tasks.</td>
 					</tr>
 
 					<tr>
-						<td>0x19</td>
+						<td>0x1D</td>
 						<td>turnsRemaining</td>
-						<td>byte</td>
+						<td>Byte</td>
 						<td>A temporary value used by the task switching code to track how many turns at the CPU this task has left before a task switch will occur. The value of <code>priority</code> is copied into this location initially and then subsequently decremented each pass through the task switching code, at which point <code>priority</code> is copied into this value again for the next time this task is swapped in.</td>
 					</tr>
 
 					<tr>
-						<td>0x1A</td>
-						<td>unused</td>
-						<td>word</td>
-						<td>Free for future allocation</td>
+						<td>0x1E</td>
+						<td>eventMask</td>
+						<td>Byte</td>
+						<td>A mask value specifying which types of events this task will accept. Defaults to 255 to permit all events.</td>
 					</tr>
 
 					<tr>
-						<td>0x1C</td>
+						<td>0x1F</td>
+						<td><i>Reserved</i></td>
+						<td>Byte</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>0x20</td>
 						<td>switchInLow</td>
 						<td>DWord</td>
 						<td>The low DWord of the TSC value when this task is switched to.</td>
 					</tr>
 
 					<tr>
-						<td>0x20</td>
+						<td>0x24</td>
 						<td>switchInHigh</td>
 						<td>DWord</td>
 						<td>The high DWord of the TSC value when this task is switched to.</td>
 					</tr>
 
 					<tr>
-						<td>0x24</td>
+						<td>0x28</td>
 						<td>cycleCountLow</td>
 						<td>DWord</td>
 						<td>The low DWord of the total cycles this task used during its most recent turn at the CPU.</td>
 					</tr>
 
 					<tr>
-						<td>0x28</td>
+						<td>0x2C</td>
 						<td>cycleCountHigh</td>
 						<td>DWord</td>
 						<td>The high DWord of the total cycles this task used during its most recent turn at the CPU</td>
 					</tr>
 
 					<tr>
-						<td>0x2C</td>
+						<td>0x30</td>
 						<td>spawnedBy</td>
 						<td>DWord</td>
 						<td>The task number of the task which spawned this task.</td>
 					</tr>
 
 					<tr>
-						<td>0x30</td>
+						<td>0x34</td>
 						<td>taskFlags</td>
-						<td>byte</td>
-						<td>Flags indicating certain aspects of the task. See table 9.2 for definitions.</td>
+						<td>DWord</td>
+						<td>Flags indicating certain aspects of the task. See <a href = '#Table9.2'><i>table 9.2</i></a> for definitions.</td>
 					</tr>
 
 					<tr>
-						<td>0x34 - 0x3F</td>
-						<td>Reserved</td>
-						<td>12 bytes</td>
-						<td>Free for future allocation</td>
+						<td>0x38</td>
+						<td>magicKey</td>
+						<td>DWord</td>
+						<td rowspan = 2>
+							Triggers for automatic task focus change.<br>
+						</td>
+					</tr>
+
+					<tr>
+						<td>0x3C</td>
+						<td>magicFlags</td>
+						<td>DWord</td>
 					</tr>
 
 					<tr>
 						<td>0x40</td>
 						<td>name</td>
-						<td>32 bytes</td>
-						<td>The task's name; 31 characters with an added null byte at the end.</td>
+						<td>64 bytes</td>
+						<td>The task's name; 63 characters with an added null byte at the end.</td>
 					</tr>
 				</table>
 			</code>
 			<br>
 			<br>
 			<br>
+
 			<code>
-				<table style = 'width:100%'>
+				<a name = 'Table9.2'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
 					<caption><b><i>Table 9.2 - Task flags definitions</i></b></caption>
 					<tr>
 						<th width = '10%'><i>Bit</i></th>
@@ -1250,24 +1533,30 @@
 
 					<tr>
 						<td>0</td>
-						<td>Interrupts</td>
+						<td>kTaskInterruptEnable</td>
 						<td>Holds the state of this task's interrupt preference, since tasks can't actually disable interrupts</td>
 					</tr>
 
 					<tr>
 						<td>1</td>
-						<td>Suspend</td>
-						<td>Suspends the task from executing when set</td>
+						<td>kTaskPause</td>
+						<td>Pauses task execution when set</td>
 					</tr>
 
 					<tr>
 						<td>2</td>
-						<td>V86 Task</td>
+						<td>kTaskV86</td>
 						<td>Specifies this task is a Virtual 8086 task (e.g. a 'DOS' application)</td>
 					</tr>
 
 					<tr>
-						<td>3 - 31</td>
+						<td>3</td>
+						<td>kTaskInvincible</td>
+						<td>Specifies this task cannot be killed.</td>
+					</tr>
+
+					<tr>
+						<td>4 - 31</td>
 						<td>Reserved</td>
 						<td></td>
 					</tr>
@@ -1276,6 +1565,25 @@
 			<br>
 			<br>
 			<br>
+
+			Occasionally, the kernel will need to determine whether or not a specific slot in the task list is currently in use by a task. The official way of doing this is to examine the <code>kernelStackAddress</code> field of the task's slot in the tasks list; if it is zero, the slot is not in use.<br>
+			<br>
+			<br>
+			<br>
+
+			<b>Automatic task focus changing</b><br>
+			Each running task has the option of specifying a certain key combination it would like to use to regain focus. Once this specification has been made, the task's tTaskInfo record will contain the scan code of the key to reactivate the task in the <code>magicKey</code> field and the state of the modifier keys in the <code>magicFlags</code> field. This works <i>even if the task is paused at the time of the key press.</i> In fact, the focus switching code built into Night uses this exact technique to trap presses of the Alt-Tab key combination and immediately jump into focus to display the task changing interface.<br>
+			<br>
+			<br>
+
+			For added security, however, there are some restrictions on this practice.<br>
+			<ol>
+				<li style = 'margin: 15px'>A task may not trap simple letter, number, or symbol keys alone - the key must be accompanied by a modifier. That is, <i>Shift + R</i> can be trapped, but <i>R</i> by itself is disallowed.</li>
+
+				<li style = 'margin: 15px'>A task cannot trap a key combination already in use by an existing task - trapping of the key combination must be canceled by the existing task before another task can use the same combination. This prevents newer tasks from "hijacking" the key combinations of any existing tasks.</li>
+
+				<li style = 'margin: 15px'>Any successfully trapped key combination will not appear in any event queue - neither the task losing focus nor the task gaining focus will register it as a key press. The task gaining focus, however, will receive a special type of System event to let it know it has not only just gained focus, but has done so as a direct result of a key trap.</li>
+			</ol>
 			<br>
 			<br>
 			<br>
@@ -1297,160 +1605,154 @@
 			<br>
 			<br>
 
-			<code>
-				<table style = 'width:100%'>
+			<code style = 'width: 60%; float: left; margin: 15px; vertical-align: top'>
+				<a name = 'Table10.1'></a>
+				<table width = 100%>
 					<caption><b><i>Table 10.1 - The structure of an event - the tEvent struct</i></b></caption>
 					<tr>
-						<col width = '20%'>
 						<col width = '10%'>
-						<col width = '70%'>
+						<col width = '20%'>
+						<col width = '20%'>
+						<col width = '50%'>
 					</tr>
 
 					<tr>
+						<th><i>Offset</i></th>
 						<th><i>Name</i></th>
 						<th><i>Size</i></th>
 						<th><i>Description</i></th>
 					</tr>
 
 					<tr>
+						<td>0x00</td>
 						<td>what</td>
-						<td>DWord</td>
-						<td>Contains a code indicating the type of event</td>
+						<td>Byte</td>
+						<td>Event type code</td>
 					</tr>
 
 					<tr>
-						<td>from</td>
-						<td>DWord</td>
-						<td>The task number of the application from which the event came, or zero if it came directly from the user through keyboard, mouse, or other input</td>
+						<td>0x01</td>
+						<td>evtFlags</td>
+						<td>3 bytes</td>
+						<td>The state of <a href = '#TableA0.2'><i>tSystem.keyFlags</i></a> at the time of this event.</td>
 					</tr>
 
 					<tr>
+						<td>0x04</td>
 						<td>message</td>
 						<td>DWord</td>
-						<td>Data on the event</td>
+						<td>Event data</td>
 					</tr>
 
 					<tr>
+						<td>0x08</td>
 						<td>when</td>
 						<td>DWord</td>
 						<td>A time stamp containing the value of <i>tSystem.ticksSinceBoot</i> at the time of the event</td>
 					</tr>
 
+				</table>
+			</code>
+
+			<code style = 'width: 30%; float: right; margin: 15px; vertical-align: top'>
+				<a name = 'Table10.2'></a>
+				<table width = 100%>
+					<caption><b><i>Table 10.2 - Event type codes</i></b></caption>
 					<tr>
-						<td>whereX</td>
-						<td>DWord</td>
-						<td>If this event was triggered by a pointing device, this contains its X-axis position, otherwise zero.</td>
+						<col width = '10%'>
+						<col width = '90%'>
 					</tr>
 
 					<tr>
-						<td>whereY</td>
-						<td>DWord</td>
-						<td>If this event was triggered by a pointing device, this contains its Y-axis position, otherwise zero.</td>
+						<th><i>Value</i></th>
+						<th><i>Name</i></th>
 					</tr>
 
 					<tr>
-						<td>evtFlags</td>
-						<td>DWord</td>
-						<td>A group of flags indicating the state of any modifier keys pressed at the time of the event. (See the "Event flags" table below.)</td>
+						<td>0</td>
+						<td>kEvtNull</td>
 					</tr>
 
 					<tr>
-						<td>reserved</td>
-						<td>DWord</td>
-						<td></td>
+						<td>1</td>
+						<td>kEvtKeyDown</td>
+					</tr>
+
+					<tr>
+						<td>2</td>
+						<td>kEvtKeyUp</td>
+					</tr>
+
+					<tr>
+						<td>4</td>
+						<td>kEvtMouseDown</td>
+					</tr>
+
+					<tr>
+						<td>8</td>
+						<td>kEvtMouseUp</td>
+					</tr>
+
+					<tr>
+						<td>16</td>
+						<td>kEvtMouseMove</td>
+					</tr>
+
+					<tr>
+						<td>32</td>
+						<td>kEvtMouseScroll</td>
+					</tr>
+
+					<tr>
+						<td>64</td>
+						<td>kEvtSystem</td>
 					</tr>
 
 				</table>
 			</code>
-			<br>
-			<br>
-
-			<code>
-				<table style = 'width:100%'>
-					<caption><b><i>Table 10.2 - Event flags</i></b></caption>
-					<tr>
-						<col width = '30%'>
-						<col width = '70%'>
-					</tr>
-
-					<tr>
-						<th><i>Symbol</i></th>
-						<th><i>Description</i></th>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagAlt</td>
-						<td>Set if an Alt key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagAltLeft</td>
-						<td>Set if the left Alt key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagAltRight</td>
-						<td>Set if the right Alt key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagCtrl</td>
-						<td>Set if a Ctrl key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagCtrlLeft</td>
-						<td>Set if the left Ctrl key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagCtrlRight</td>
-						<td>Set if the right Ctrl key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagLockCaps</td>
-						<td>Set if Caps Lock was on at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagLockNum</td>
-						<td>Set if Num Lock was on at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagLockScroll</td>
-						<td>Set if Scroll Lock was on at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagShift</td>
-						<td>Set if a Shift key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagShiftLeft</td>
-						<td>Set if the left Shift key was down at the time of this key press</td>
-					</tr>
-
-					<tr>
-						<td>kEvtFlagShiftRight</td>
-						<td>Set if the right Shift key was down at the time of this key press</td>
-					</tr>
-
-				</table>
-			</code>
-			<br>
+			<br style = 'clear: both;'>
 			<br>
 
 			Every action taken by the user, be it a key press or a mouse click, triggers an event. These events are queued in a buffer awaiting processing by the application, and are classified as follows:<br>
 			<br>
 			<br>
 
+			<b>Null Events</b><br>
+			<code>
+				<a name = 'Table10.3'></a>
+				<table style = 'width: 50%; margin: auto;'>
+					<caption><b><i>Table 10.3 - Null event details</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtNull</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td><i>n/a</i></td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+			<br>
+
+			Null events are what an application receives when it asks for an event but there are none in the event queue to be returned. The <code>message</code> field will be blank, but the <code>evtFlags</code> and <code>when</code> fields are still populated, allowing an application to continue to monitor modifier keys even when there are no other keys being pressed.<br>
+			<br>
+			<br>
+			<br>
+
 			<b>Key Events</b><br>
 			<code>
+				<a name = 'Table10.4'></a>
 				<table style = 'width: 45%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.3 - Key Down event details</i></b></caption>
+					<caption><b><i>Table 10.4 - Key Down event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1464,24 +1766,18 @@
 
 					<tr>
 						<td>message</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>whereX</td>
-						<td><i>n/a</i></td>
-					</tr>
-
-					<tr>
-						<td>whereY</td>
-						<td><i>n/a</i></td>
+						<td>
+							32-bit scan code of the key pressed.<br>
+							See <a href = '#KeyboardScanCodes'><i>Appendix 4 - Keyboard Scan Codes</i></a> for details.
+						</td>
 					</tr>
 
 				</table>
 
 
+				<a name = 'Table10.5'></a>
 				<table style = 'width: 45%; float: right; margin: 15px;'>
-					<caption><b><i>Table 10.4 - Key Up event details</i></b></caption>
+					<caption><b><i>Table 10.5 - Key Up event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1495,31 +1791,27 @@
 
 					<tr>
 						<td>message</td>
-						<td></td>
+						<td>
+							32-bit scan code of the key released.<br>
+							See <a href = '#KeyboardScanCodes'><i>Appendix 4 - Keyboard Scan Codes</i></a> for details.
+						</td>
 					</tr>
 
-					<tr>
-						<td>whereX</td>
-						<td><i>n/a</i></td>
-					</tr>
-
-					<tr>
-						<td>whereY</td>
-						<td><i>n/a</i></td>
-					</tr>
 				</table>
 			</code>
 			<br style = 'clear: both;'>
 			<br>
 
-			Key events are generated from input by the user. Pressing a key will cause a Key Down event, and releasing it causes a Key Up event. In either case, the <code>message</code> field of the event record will hold the scan code for the key pressed. <br>
+			Key events are generated from input by the user. Pressing a key will cause a Key Down event, and releasing it causes a Key Up event. In either case, the <code>message</code> field of the event record will hold the scan code for the key pressed.<br>
+			<br>
 			<br>
 			<br>
 
 			<b>Mouse Events</b><br>
-			<code>
-				<table style = 'width:30%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.5 - Mouse Down event details</i></b></caption>
+			<code style = 'width: 45%; float: left; margin: 15px; vertical-align: top'>
+				<a name = 'Table10.6'></a>
+				<table width = 100%>
+					<caption><b><i>Table 10.6 - Mouse Down event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1533,54 +1825,17 @@
 
 					<tr>
 						<td>message</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>whereX</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>whereY</td>
-						<td></td>
+						<td>
+							Mouse buttons pressed
+						</td>
 					</tr>
 
 				</table>
+				<br>
+				<br>
 
-
-				<table style = 'width:30%; float: left; margin: 15px;'>
-					<caption><b><i>Table 10.6 - Mouse Move event details</i></b></caption>
-
-					<tr>
-						<col width = '20%'>
-						<col width = '80%'>
-					</tr>
-
-					<tr>
-						<td>what</td>
-						<td>kEvtMouseMove</td>
-					</tr>
-
-					<tr>
-						<td>message</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>whereX</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>whereY</td>
-						<td></td>
-					</tr>
-
-				</table>
-
-
-				<table style = 'width:30%; float: left; margin: 15px;'>
+				<a name = 'Table10.7'></a>
+				<table width = 100%>
 					<caption><b><i>Table 10.7 - Mouse Up event details</i></b></caption>
 
 					<tr>
@@ -1595,17 +1850,112 @@
 
 					<tr>
 						<td>message</td>
-						<td></td>
+						<td>
+							Mouse buttons pressed
+						</td>
+					</tr>
+
+				</table>
+			</code>
+
+			<code style = 'width: 45%; float: right; margin: 15px; vertical-align: top'>
+				<a name = 'Table10.8'></a>
+				<table width = 100%>
+					<caption><b><i>Table 10.8 - Mouse Down / Mouse Up event <code>message</code> field breakdown</i></b></caption>
+					<tr>
+						<col width = '10%'>
+						<col width = '90%'>
 					</tr>
 
 					<tr>
-						<td>whereX</td>
-						<td></td>
+						<th><i>Bit</i></th>
+						<th><i>Button</i></th>
 					</tr>
 
 					<tr>
-						<td>whereY</td>
-						<td></td>
+						<td>0</td>
+						<td>Left</td>
+					</tr>
+
+					<tr>
+						<td>1</td>
+						<td>Right</td>
+					</tr>
+
+					<tr>
+						<td>2</td>
+						<td>Middle (3-button and 5-button mice)</td>
+					</tr>
+
+					<tr>
+						<td>4</td>
+						<td>Back (5-button mice)</td>
+					</tr>
+
+					<tr>
+						<td>5</td>
+						<td>Forward (5-button mice)</td>
+					</tr>
+
+				</table>
+			</code>
+			<br style = 'clear: both;'>
+			<br>
+
+			Mouse events are generated by the user's interaction with the mouse; pressing or releasing a mouse button will cause a Mouse Down or Mouse Up event, respectively. In both cases, the <code>message</code> field will have set bits set in accordance with which buttons are down, as follows:<br>
+			<br>
+
+			<code>
+			</code>
+			<br>
+			<br>
+			<br>
+
+			<code>
+				<a name = 'Table10.9'></a>
+				<table style = 'width: 45%; float: left; margin: 15px;'>
+					<caption><b><i>Table 10.9 - Mouse Scroll event details</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseScroll</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td>
+							Mouse scroll wheel index
+						</td>
+					</tr>
+
+				</table>
+
+
+				<a name = 'Table10.10'></a>
+				<table style = 'width: 45%; float: left; margin: 15px;'>
+					<caption><b><i>Table 10.10 - Mouse Move event details</i></b></caption>
+
+					<tr>
+						<col width = '20%'>
+						<col width = '80%'>
+					</tr>
+
+					<tr>
+						<td>what</td>
+						<td>kEvtMouseMove</td>
+					</tr>
+
+					<tr>
+						<td>message</td>
+						<td>
+							Lower word: X-Axis of mouse pointer<br>
+							Upper word: Y-Axis of mouse pointer</td>
+						</td>
 					</tr>
 
 				</table>
@@ -1614,14 +1964,19 @@
 			<br style = 'clear: both;'>
 			<br>
 
+			Turning the mouse's scroll wheel generates a Mouse Scroll event, with the <code>message</code> field containing the wheel's 16-bit index value. The index begins with a value of 32768 and is not signed, meaning "wrap-around" will occur when the index is brought below zero or above 65,535.<br>
+			<br>
+
+			Moving the mouse triggers a Mouse Move event in which case the <code>message</code> field of the event record will hold both the X and Y axis of the mouse pointer. Both axes begin with a value of 31 and are initially limited to 639 horizontally and 479 vertically by the mouse driver.<br>
 			<br>
 			<br>
 			<br>
 
 			<b>System Events</b><br>
 			<code>
-				<table style = 'width:50%'>
-					<caption><b><i>Table 10.8 - System event details</i></b></caption>
+				<a name = 'Table10.11'></a>
+				<table style = 'width: 45%; margin: auto;'>
+					<caption><b><i>Table 10.11 - System event details</i></b></caption>
 
 					<tr>
 						<col width = '20%'>
@@ -1656,7 +2011,7 @@
 			<br>
 			In the first scenario, Night will send an application a System event as certain significant things occur, such as when an application has just been given focus, loses focus, needs to exit, a menu item has been selected, or even when a new disk becomes available. This helps applications stay on top of what's going on in the system as they run.<br>
 			<br>
-			The second - and arguably cooler - scenario allows applications to issue commands to other applications. Suppose you're a fancy new GUI, and your user wants to print a document but doesn't need any of the other dozens of features offered by the creating application. What do you do? Instead of making the user open the file, wait for the creating application to load, issue a Print command, and finally close the application, you can simply load the application and pass to it a System event letting it know that it's merely needed to print this file and exit. The application can then take care of the rest, perhaps even not going to all the trouble of loading all its resources since it knows it's only needed for a quick job, should it be coded with such intelligence. Another possibility - what if a user has a series of operations they need repeated over and over again with precision? A driver can be made which will dip into the event stream of another application and record what it finds there. This allows for some very cool scripting possibilities in which a user can thread together a flow of events across multiple programs to get work done in fully automated fashion.<br>
+			The second - and arguably cooler - scenario allows applications to issue commands to other applications. Suppose you're a fancy new GUI, and your user wants to print a document but doesn't need any of the other dozens of features offered by the creating application. What do you do? Instead of making the user open the file, wait for the creating application to load, issue a Print command, and finally close the application, you can simply load the application and pass to it a System event letting it know that it's merely needed to print this file and exit. The application can then take care of the rest, perhaps even not going to all the trouble of loading all its resources since it knows it's only needed for a quick job, should it be coded with such intelligence. Another possibility - what if a user has a series of operations they need repeated over and over again with precision? A driver can be made which will dip into the event stream of another application and record what it finds there. This allows for some very cool scripting possibilities in which a user can thread together a flow of events across multiple programs at the kernel level to get work done in fully automated fashion.<br>
 			<br>
 			<br>
 			<br>
@@ -1692,7 +2047,8 @@
 			<br>
 			<br>
 			<code>
-				<table style = 'width:100%'>
+				<a name = 'TableA0.1'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
 					<caption><b><i>Table A0.1 - The tSystem structure</i></b></caption>
 					<tr>
 						<th width = '20%'><i>Name</i></th>
@@ -1761,15 +2117,9 @@
 					</tr>
 
 					<tr>
-						<td>currentTask</td>
+						<td>keyFlags</td>
 						<td>DWord</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td>currentTaskSlotAddress</td>
-						<td>DWord</td>
-						<td></td>
+						<td>A set of flags used to track the current state of modifier keys. See the <a href = '#TableA0.2'>table below</a> for details.</td>
 					</tr>
 
 					<tr>
@@ -2049,6 +2399,24 @@
 					</tr>
 
 					<tr>
+						<td>taskCurrent</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>taskCurrentSlotAddress</td>
+						<td>DWord</td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>taskFocused</td>
+						<td>DWord</td>
+						<td>The task number of the task which currently has focus</td>
+					</tr>
+
+					<tr>
 						<td>taskKernelStackSize</td>
 						<td>DWord</td>
 						<td></td>
@@ -2088,6 +2456,106 @@
 			<br>
 			<br>
 			<br>
+
+			<code>
+				<a name = 'TableA0.2'></a>
+				<table style = 'width: 95%; margin: auto; vertical-align: top'>
+					<caption><b><i>Table A0.2 - keyFLags layout</i></b></caption>
+					<tr>
+						<col width = '10%'>
+						<col width = '20%'>
+						<col width = '70%'>
+					</tr>
+
+					<tr>
+						<th><i>Bit</i></th>
+						<th><i>Symbol</i></th>
+						<th><i>Description</i></th>
+					</tr>
+
+					<tr>
+						<td>0</td>
+						<td>kEvtFlagLockScroll</td>
+						<td>Set if Scroll Lock is on</td>
+					</tr>
+
+					<tr>
+						<td>1</td>
+						<td>kEvtFlagLockNum</td>
+						<td>Set if Num Lock is on</td>
+					</tr>
+
+					<tr>
+						<td>2</td>
+						<td>kEvtFlagLockCaps</td>
+						<td>Set if Caps Lock is on</td>
+					</tr>
+
+					<tr>
+						<td>3 - 7</td>
+						<td><i>Reserved</i></td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td>8</td>
+						<td>kEvtFlagAlt</td>
+						<td>Set if an Alt key is down</td>
+					</tr>
+
+					<tr>
+						<td>9</td>
+						<td>kEvtFlagAltLeft</td>
+						<td>Set if the left Alt key is down</td>
+					</tr>
+
+					<tr>
+						<td>10</td>
+						<td>kEvtFlagAltRight</td>
+						<td>Set if the right Alt key is down</td>
+					</tr>
+
+					<tr>
+						<td>11</td>
+						<td>kEvtFlagCtrl</td>
+						<td>Set if a Ctrl key is down</td>
+					</tr>
+
+					<tr>
+						<td>12</td>
+						<td>kEvtFlagCtrlLeft</td>
+						<td>Set if the left Ctrl key is down</td>
+					</tr>
+
+					<tr>
+						<td>13</td>
+						<td>kEvtFlagCtrlRight</td>
+						<td>Set if the right Ctrl key is down</td>
+					</tr>
+
+					<tr>
+						<td>14</td>
+						<td>kEvtFlagShift</td>
+						<td>Set if a Shift key is down</td>
+					</tr>
+
+					<tr>
+						<td>15</td>
+						<td>kEvtFlagShiftLeft</td>
+						<td>Set if the left Shift key is down</td>
+					</tr>
+
+					<tr>
+						<td>16</td>
+						<td>kEvtFlagShiftRight</td>
+						<td>Set if the right Shift key is down</td>
+					</tr>
+
+				</table>
+			</code>
+			<br>
+			<br>
+
 		</p>
 		<br>
 		<br>
@@ -2102,60 +2570,91 @@
 		<hr>
 		<h2 class = 'pagebreak'><a name = 'NightFunctionReference'>Appendix 1 - Night Kernel Function Reference</a></h2>
 		<p>
-			<table style = 'width:100%' rules = 'none'>
+			<table style = 'width: 95%; margin: auto; vertical-align: top; text-align: center; border: hidden;' rules = 'none'>
 				<tr>
 					<td>
 						<a href = '#NightFunctionReference_CMOS.asm' style = 'font-size: 14px'>CMOS Functions - CMOS.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_CPU.asm' style = 'font-size: 14px'>CPU Functions - CPU.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_debug.asm' style = 'font-size: 14px'>Debug Functions - debug.asm</a><br>
 						<br>
+
+						<a href = '#NightFunctionReference_events.asm' style = 'font-size: 14px'>Event Manager functions - events.asm</a><br>
+						<br>
+
 						<a href = '#NightFunctionReference_GDT.asm' style = 'font-size: 14px'>GDT Functions - GDT.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_hardware.asm' style = 'font-size: 14px'>Hardware Functions - hardware.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_interrupts.asm' style = 'font-size: 14px'>Interrupt Functions - interrupts.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_lists.asm' style = 'font-size: 14px'>List Manager Functions - lists.asm</a><br>
 						<br>
+
 					</td>
+
+
 					<td>
+						<a href = '#NightFunctionReference_logging.asm' style = 'font-size: 14px'>Logging Functions - logging.asm</a><br>
+						<br>
+
 						<a href = '#NightFunctionReference_memory.asm' style = 'font-size: 14px'>Memory Manager Functions - memory.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_misc.asm' style = 'font-size: 14px'>Miscellaneous Functions - misc.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_numbers.asm' style = 'font-size: 14px'>Number Functions - numbers.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_paging.asm' style = 'font-size: 14px'>Paging Support - paging.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_PCI.asm' style = 'font-size: 14px'>PCI Functions - PCI.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_PIC.asm' style = 'font-size: 14px'>PIC Functions - PIC.asm</a><br>
 						<br>
+
+					</td>
+
+
+					<td>
 						<a href = '#NightFunctionReference_PS2Controller.asm' style = 'font-size: 14px'>PS/2 Functions - PS2 Controller.asm</a><br>
 						<br>
-					</td>
-					<td>
+
 						<a href = '#NightFunctionReference_power.asm' style = 'font-size: 14px'>Power Functions - power.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_RTC.asm' style = 'font-size: 14px'>RTC Functions - RTC.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_screen.asm' style = 'font-size: 14px'>Screen Interface Functions - screen.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_serial.asm' style = 'font-size: 14px'>Serial Communications Functions - serial.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_storage.asm' style = 'font-size: 14px'>Storage Manager Functions - storage.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_strings.asm' style = 'font-size: 14px'>String Functions - strings.asm</a><br>
 						<br>
+
 						<a href = '#NightFunctionReference_tasks.asm' style = 'font-size: 14px'>Task Management Functions - tasks.asm</a><br>
 						<br>
+
 					</td>
 				</tr>
 			</table>
 			<br>
-			Note: Public functions can be called from any other function. Private functions cannot be called from code outside the file in which they reside.<br>
+			Note: Functions beginning with the "_16_" prefix are comprised of 16-bit code and must not be called from normal 32-bit code.<br>
 			<br>
 			<br>
 			<br>
@@ -2163,12 +2662,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_CMOS.asm'><b>CMOS Functions - <i>CMOS.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.1'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.1 - CMOS.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.1 - CMOS.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -2215,12 +2714,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_CPU.asm'><b>CPU Functions - <i>CPU.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.2'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.2 - CPU.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.2 - CPU.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -2252,9 +2751,10 @@
 				<br>
 				<br>
 
-				Public Constants:<br>
+				<b>Constants:</b><br>
+				<a name = 'TableA1.3'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.3 - CPU.asm public constants</i></b></caption>
+					<caption><b><i>Table A1.3 - CPU.asm constants</i></b></caption>
 					<col width = '30%'>
 					<col width = '10%'>
 					<col width = '60%'>
@@ -3445,12 +3945,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_debug.asm'><b>Debug Functions - <i>debug.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.4'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.4 - CPU.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.4 - debug.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -3460,9 +3960,39 @@
 
 					<tr>
 						<td>
-							DebugCPUFeaturesEnable<br>
+							<code>DebugCPUFeaturesEnable</code><br>
 							<br>
 							Enables debugging facilities of the CPU, if supported
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>DebugTraceDisable</code><br>
+							<br>
+							Disables the single-step feature of the CPU
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>DebugTraceEnable</code><br>
+							<br>
+							Enables the single-step feature of the CPU
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>Debugger</code><br>
+							<br>
+							The kernel's built-in debugger
 						</td>
 						<td>
 							<ol>
@@ -3485,37 +4015,7 @@
 
 					<tr>
 						<td>
-							DebugTraceDisable<br>
-							<br>
-							Disables the single-step feature of the CPU
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							DebugTraceEnable<br>
-							<br>
-							Enables the single-step feature of the CPU
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							Debugger<br>
-							<br>
-							The kernel's built-in debugger
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							DebugInstacrash<br>
+							<code>DebugInstacrash</code><br>
 							<br>
 							Causes an instant crash
 						</td>
@@ -3525,47 +4025,7 @@
 
 					<tr>
 						<td>
-							DebugMemoryDetails<br>
-							<br>
-							Displays memory allocation
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							DebugMenu<br>
-							<br>
-							Implements the in-kernel debugging menu
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							DebugPCIDevices<br>
-							<br>
-							Displays all PCI devices in the system
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							DebugRAMBrowser<br>
-							<br>
-							An interactive memory browser
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							DebugStackTrace<br>
+							<code>DebugStackTrace</code><br>
 							<br>
 							Traces the stack and prints a list of return addresses
 						</td>
@@ -3581,49 +4041,81 @@
 						<td>n/a</td>
 					</tr>
 
+				</table>
+				<br>
+				<br>
+				<br>
+			</div>
+
+			<div class = 'nopagebreak'>
+				<a name = 'NightFunctionReference_events.asm'><b>Event Manager Functions - <i>events.asm</i></b></a><br>
+				<br>
+				<a name = 'TableA1.5'></a>
+				<table style = 'width:100%'>
+					<caption><b><i>Table A1.5 - events.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
+
 					<tr>
-						<td>
-							DebugSystemInfo<br>
-							<br>
-							Displays information about the system on which Night is running
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
+						<th>Name / Description</th>
+						<th>Stack Input</th>
+						<th>Register Output</th>
 					</tr>
 
 					<tr>
 						<td>
-							DebugTaskBrowser<br>
+							<code>EventGet</code><br>
 							<br>
-							Browse information on all loaded tasks
+							Returns the oldest event from the event queue
 						</td>
 						<td>n/a</td>
-						<td>n/a</td>
+						<td>
+							EAX - What (upper 8 bits)<br>
+							EAX - EvtFlags (lower 24 bits)<br>
+							EBX - Message<br>
+							ECX - When<br>
+							EDX - Result code<br>
+						</td>
 					</tr>
 
 					<tr>
 						<td>
-							DebugVBOXLogWrite<br>
+							<code>EventPut</code><br>
 							<br>
-							Writes a string specified to the VirtualBOX guest log
+							Inserts an event into the event queue(s)
 						</td>
 						<td>
 							<ol>
-								<li>String address</li>
+								<li>What</li>
+								<li>Message</li>
 							</ol>
 						</td>
-						<td>n/a</td>
+						<td>
+							EDX - Result code
+						</td>
 					</tr>
 
 					<tr>
 						<td>
-							DebugWaitForEscape<br>
+							<code>EventWait</code><br>
 							<br>
-							Waits for the Escape key to be pressed, then returns
+							Waits until an event of the specified type(s) occur(s), then returns it
 						</td>
-						<td>n/a</td>
-						<td>n/a</td>
+						<td>
+							<ol>
+								<li>Event Mask (8 bits)</li>
+							</ol>
+						</td>
+						<td>
+							EAX - What (upper 8 bits)<br>
+							EAX - Event Flags (lower 24 bits)<br>
+							EBX - Message<br>
+							ECX - When<br>
+							EDX - Result code<br>
+						</td>
 					</tr>
+
 				</table>
 				<br>
 				<br>
@@ -3633,12 +4125,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_GDT.asm'><b>GDT Functions - <i>GDT.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.6'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.5 - GDT.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.6 - GDT.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -3796,12 +4288,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_hardware.asm'><b>Hardware Functions - <i>hardware.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.7'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.6 - hardware.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.7 - hardware.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -3837,12 +4329,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_interrupts.asm'><b>Interrupt Functions - <i>interrupts.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.8'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.7 - interrupts.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.8 - interrupts.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -3981,12 +4473,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_lists.asm'><b>List Manager Functions - <i>lists.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.9'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.8 - List Manager 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.9 - List Manager functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -4007,7 +4499,8 @@
 							</ol>
 						</td>
 						<td>
-							EAX - Total bytes occupied by this bitfield
+							EAX - Total bytes occupied by this bitfield<br>
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -4135,6 +4628,23 @@
 
 					<tr>
 						<td>
+							<code>LMBitCountSet</code><br>
+							<br>
+							Returns the total number of set bits in the memory range specified
+						</td>
+						<td>
+							<ol>
+								<li>Start address</li>
+								<li>Number of bytes to process</li>
+							</ol>
+						</td>
+						<td>
+							EDI - Result
+						</td>
+					</tr>
+
+					<tr>
+						<td>
 							<code>LMBitFlip</code><br>
 							<br>
 							Flips (toggles) the bit specified within the bitfield at the address specified
@@ -4221,24 +4731,7 @@
 						</td>
 					</tr>
 
-					<tr>
-						<td>
-							<code>LMCountBitsSet</code><br>
-							<br>
-							Returns the total number of set bits in the memory range specified
-						</td>
-						<td>
-							<ol>
-								<li>Start address</li>
-								<li>Number of bytes to process</li>
-							</ol>
-						</td>
-						<td>
-							EDI - Result
-						</td>
-					</tr>
-
-					<tr>
+ 					<tr>
 						<td>
 							<code>LMElementAddressGet</code><br>
 							<br>
@@ -4409,7 +4902,8 @@
 							</ol>
 						</td>
 						<td>
-							EAX - Total bytes occupied by this list
+							EAX - Total bytes occupied by this list<br>
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -4464,6 +4958,92 @@
 
 					<tr>
 						<td>
+							<code>LMRingInit</code><br>
+							<br>
+							Creates a new ring buffer from the parameters specified at the address specified
+						</td>
+						<td>
+							<ol>
+								<li>Ring buffer address</li>
+								<li>Number of elements</li>
+								<li>Size of each element</li>
+							</ol>
+						</td>
+						<td>
+							EAX - Total number of bytes occupied by this ring buffer<br>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>LMRingRead</code><br>
+							<br>
+							Reads the next item out of the ring buffer specified
+						</td>
+						<td>
+							<ol>
+								<li>Ring buffer address</li>
+								<li>Pointer to a buffer large enough to hold the data read</li>
+							</ol>
+						</td>
+						<td>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>LMRingReset</code><br>
+							<br>
+							Resets the ring buffer specified
+						</td>
+						<td>
+							<ol>
+								<li>Ring buffer address</li>
+							</ol>
+						</td>
+						<td>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>LMRingValidate</code><br>
+							<br>
+							Tests the ring buffer specified for the 'circ' signature at the beginning
+						</td>
+						<td>
+							<ol>
+								<li>Ring buffer address</li>
+								<li>Pointer to the data to be written to the ring buffer</li>
+							</ol>
+						</td>
+						<td>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>LMRingWrite</code><br>
+							<br>
+							Writes the item specified into the ring buffer at the next free slot
+						</td>
+						<td>
+							<ol>
+								<li>Ring buffer address</li>
+								<li>Pointer to the data to be written to the ring buffer</li>
+							</ol>
+						</td>
+						<td>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
 							<code>LMSlotFindFirstFree</code><br>
 							<br>
 							Finds the first free slot available in the list specified
@@ -4499,12 +5079,17 @@
 				<br>
 				<br>
 
-				32-bit Private Function Listing:<br>
+
+
+			<div class = 'nopagebreak'>
+				<a name = 'NightFunctionReference_logging.asm'><b>Logging Functions - <i>logging.asm</i></b></a><br>
+				<br>
+				<a name = 'TableA1.10'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.9 - List Manager 32-bit private functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.10 - logging.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -4514,254 +5099,43 @@
 
 					<tr>
 						<td>
-							<code>LM_Private_BitfieldMath</code><br>
+							<code>Log</code><br>
 							<br>
-							Returns the byte and bit based upon the address and element number specified
+							Writes a string to the specified log
 						</td>
 						<td>
 							<ol>
-								<li>Address</li>
-								<li>Element</li>
+								<li>String address</li>
 							</ol>
 						</td>
-						<td>
-							EBX - byte address<br>
-							ECX - bit number
-						</td>
+						<td>n/a</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>LM_Private_ByteClearRange</code><br>
+							<code>LogRAM</code><br>
 							<br>
-							Clears a range of bits in a single byte
+							Dumps a range of RAM bytes to the specified log
 						</td>
 						<td>
 							<ol>
-								<li>Byte address</li>
-								<li>Start of bit range</li>
-								<li>End of bit range</li>
+								<li>Starting address</li>
+								<li>Number of 16-byte lines</li>
 							</ol>
 						</td>
-						<td>
-							n/a
-						</td>
+						<td>n/a</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>LM_Private_ByteFlipRange</code><br>
+							<code>LogRegs</code><br>
 							<br>
-							Flips a range of bits in a single byte
+							Dumps registers to the specified log
 						</td>
-						<td>
-							<ol>
-								<li>Byte address</li>
-								<li>Start of bit range</li>
-								<li>End of bit range</li>
-							</ol>
-						</td>
-						<td>
-							n/a
-						</td>
+						<td>n/a</td>
+						<td>n/a</td>
 					</tr>
 
-					<tr>
-						<td>
-							<code>LM_Private_ByteSetRange</code><br>
-							<br>
-							Sets a range of bits in a single byte
-						</td>
-						<td>
-							<ol>
-								<li>Bitfield address</li>
-								<li>Byte address</li>
-								<li>Start of bit range</li>
-								<li>End of bit range</li>
-							</ol>
-						</td>
-						<td>
-							n/a
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ElementAddressGet</code><br>
-							<br>
-							Returns the address of the specified element in the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-								<li>Element number</li>
-							</ol>
-						</td>
-						<td>
-							ESI - Element address
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ElementCountGet</code><br>
-							<br>
-							Returns the number of elements in the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-							</ol>
-						</td>
-						<td>
-							ECX - Number of total element slots in this list
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ElementCountSet</code><br>
-							<br>
-							Sets the total number of elements in the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-								<li>New number of total element slots in this list</li>
-							</ol>
-						</td>
-						<td>
-							n/a
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ElementDelete</code><br>
-							<br>
-							Deletes the element at the slot number specified from the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-								<li>Element number to be deleted</li>
-							</ol>
-						</td>
-						<td>
-							n/a
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ElementDuplicate</code><br>
-							<br>
-							Duplicates the element at the slot number specified in the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-								<li>Element number to be duplicated</li>
-							</ol>
-						</td>
-						<td>
-							n/a
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ElementSizeGet</code><br>
-							<br>
-							Returns the size of elements in the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-							</ol>
-						</td>
-						<td>
-							EAX - List element size
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ItemAddAtSlot</code><br>
-							<br>
-							Adds an item to the list specified at the list slot specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-								<li>Slot at which to add element</li>
-								<li>New item address</li>
-								<li>New item size</li>
-							</ol>
-						</td>
-						<td>
-							n/a
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ListCompact</code><br>
-							<br>
-							Compacts the list specified (eliminates empty slots to make list contiguous)
-						</td>
-						<td>
-						</td>
-						<td>
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_ListSearch</code><br>
-							<br>
-							Searches the list specified for the element specified
-						</td>
-						<td>
-						</td>
-						<td>
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_SlotFindFirstFree</code><br>
-							<br>
-							Finds the first free slot available in the list specified
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-							</ol>
-						</td>
-						<td>
-							EAX - Element number of first free slot
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>LM_Private_SlotFreeTest</code><br>
-							<br>
-							Tests the element specified in the list specified to see if it is free
-						</td>
-						<td>
-							<ol>
-								<li>List address</li>
-								<li>Element number</li>
-							</ol>
-						</td>
-						<td>
-							Result<br>
-							&emsp;True - Element empty<br>
-							&emsp;False - Element not empty
-						</td>
-					</tr>
 				</table>
 				<br>
 				<br>
@@ -4771,110 +5145,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_memory.asm'><b>Memory Manager Functions - <i>memory.asm</i></b></a><br>
 				<br>
-				16-bit Public Function Listing:<br>
+				<a name = 'TableA1.11'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.10 - Memory Manager 16-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
-
-					<tr>
-						<th>Name / Description</th>
-						<th>Stack Input</th>
-						<th>Register Output</th>
-					</tr>
-
-					<tr>
-						<td>
-							<code>A20Check</code><br>
-							<br>
-							Checks status of the A20 line
-						</td>
-						<td>
-							<ol>
-								<li>n/a</li>
-							</ol>
-						</td>
-						<td>
-							DX - Result code<br>
-							&emsp;High byte = 0 on success, non zero = fail<br>
-							&emsp;Low byte = 0 if disabled, 1 if enabled
-						</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>A20Enable</code><br>
-							<br>
-							Enables the A20 line using all methods in the preferred order
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>A20EnableBIOS</code><br>
-							<br>
-							Enables the A20 line using BIOS interrupt 0x15
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>A20EnableFastA20</code><br>
-							<br>
-							Enables the A20 line using the Fast A20 method
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>A20EnableKeyboardController</code><br>
-							<br>
-							Attempts to enables the A20 line using the keyboard controller method
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>A20EnablePortEE</code><br>
-							<br>
-							Enables the A20 line using the Port 0xEE method
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>MemMapCopy</code><br>
-							<br>
-							Copies the BIOS memory map to the segment specified by ES
-						</td>
-						<td>n/a</td>
-						<td>
-							EAX - Bytes copied<br>
-							EDX - Error code
-						</td>
-					</tr>
-				</table>
-				<br>
-				<br>
-				<br>
-
-				32-bit Public Function Listing:<br>
-				<table style = 'width:100%'>
-					<caption><b><i>Table A1.11 - Memory Manager 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.11 - Memory Manager functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -4910,7 +5186,24 @@
 						</td>
 						<td>
 							EAX - Address of requested block, or zero if call fails<br>
-							EDX - Error code
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>MemAllocatePages</code><br>
+							<br>
+							Allocates the specified number of contiguous pages
+						</td>
+						<td>
+							<ol>
+								<li>Number of pages</li>
+							</ol>
+						</td>
+						<td>
+							EAX - Address of first requested block, or zero if call fails<br>
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -5137,6 +5430,88 @@
 							n/a
 						</td>
 					</tr>
+
+					<tr>
+						<td>
+							<code>_16_A20Check</code><br>
+							<br>
+							Checks status of the A20 line
+						</td>
+						<td>
+							<ol>
+								<li>n/a</li>
+							</ol>
+						</td>
+						<td>
+							DX - Result code<br>
+							&emsp;High byte = 0 on success, non zero = fail<br>
+							&emsp;Low byte = 0 if disabled, 1 if enabled
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_A20Enable</code><br>
+							<br>
+							Enables the A20 line using all methods in the preferred order
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_A20EnableBIOS</code><br>
+							<br>
+							Enables the A20 line using BIOS interrupt 0x15
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_A20EnableFastA20</code><br>
+							<br>
+							Enables the A20 line using the Fast A20 method
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_A20EnableKeyboardController</code><br>
+							<br>
+							Attempts to enables the A20 line using the keyboard controller method
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_A20EnablePortEE</code><br>
+							<br>
+							Enables the A20 line using the Port 0xEE method
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_MemMapCopy</code><br>
+							<br>
+							Copies the BIOS memory map to the segment specified by ES
+						</td>
+						<td>n/a</td>
+						<td>
+							EAX - Bytes copied<br>
+							EDX - Result code
+						</td>
+					</tr>
+
 				</table>
 				<br>
 				<br>
@@ -5146,12 +5521,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_misc.asm'><b>Miscellaneous Functions - <i>misc.asm</i></b></a><br>
 				<br>
-				16-bit Public Function Listing:<br>
+				<a name = 'TableA1.12'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.12 - misc.asm 16-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.12 - misc.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -5161,29 +5536,22 @@
 
 					<tr>
 						<td>
-							<code>SetSystemAPM</code><br>
+							<code>PrintCopyright</code><br>
 							<br>
-							Gets the APM interface version and saves results to the tSystem structure
+							Prints the kernel copyright string
 						</td>
 						<td>n/a</td>
 						<td>n/a</td>
 					</tr>
-				</table>
-				<br>
-				<br>
-				<br>
-
-				32-bit Public Function Listing:<br>
-				<table style = 'width:100%'>
-					<caption><b><i>Table A1.13 - misc.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
 
 					<tr>
-						<th>Name / Description</th>
-						<th>Stack Input</th>
-						<th>Register Output</th>
+						<td>
+							<code>PrintVerison</code><br>
+							<br>
+							Prints the kernel version string
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
 					</tr>
 
 					<tr>
@@ -5199,6 +5567,16 @@
 						</td>
 						<td>n/a</td>
 					</tr>
+
+					<tr>
+						<td>
+							<code>_16_SetSystemAPM</code><br>
+							<br>
+							Gets the APM interface version and saves results to the tSystem structure
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
 				</table>
 				<br>
 				<br>
@@ -5208,12 +5586,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_numbers.asm'><b>Number Functions - <i>numbers.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.13'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.14 - numbers.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.13 - numbers.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -5353,12 +5731,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_paging.asm'><b>Paging Support - <i>paging.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.14'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.15 - paging.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.14 - paging.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -5374,7 +5752,7 @@
 						</td>
 						<td>n/a</td>
 						<td>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -5403,7 +5781,7 @@
 						<td>Flags</td>
 						<td>
 							ESI - Address of new page directory<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -5416,7 +5794,7 @@
 						<td>Flags</td>
 						<td>
 							ESI - Address of new page table<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 				</table>
@@ -5428,39 +5806,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_PCI.asm'><b>PCI Functions - <i>PCI.asm</i></b></a><br>
 				<br>
-				16-bit Public Function Listing:<br>
+				<a name = 'TableA1.15'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.16 - PCI Functions 16-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
-
-					<tr>
-						<th>Name / Description</th>
-						<th>Stack Input</th>
-						<th>Register Output</th>
-					</tr>
-
-					<tr>
-						<td>
-							<code>PCIProbe</code><br>
-							<br>
-							Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-				</table>
-				<br>
-				<br>
-				<br>
-
-				32-bit Public Function Listing:<br>
-				<table style = 'width:100%'>
-					<caption><b><i>Table A1.17 - PCI Functions 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.15 - PCI.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -5496,7 +5847,7 @@
 						</td>
 						<td>n/a</td>
 						<td>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -5573,7 +5924,7 @@
 						</td>
 						<td>
 							EAX - Handler response<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -5769,6 +6120,17 @@
 						</td>
 						<td>n/a</td>
 					</tr>
+
+					<tr>
+						<td>
+							<code>_16_PCIProbe</code><br>
+							<br>
+							Probes the PCI BIOS to see if it exists and saves version info to the tSystem struct
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
 				</table>
 				<br>
 				<br>
@@ -5778,12 +6140,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_PIC.asm'><b>PIC Functions - <i>PIC.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.16'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.18 - PIC.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.16 - PIC.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -5867,12 +6229,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_PS2Controller.asm'><b>PS/2 Functions - <i>PS2 Controller.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.17'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.19 - PS2 Controller.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.17 - PS2 Controller.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -5882,22 +6244,12 @@
 
 					<tr>
 						<td>
-							<code>KeyGet</code><br>
+							<code>PS2BufferClear</code><br>
 							<br>
-							Returns the oldest key in the key buffer, or null if it's empty
+							Clears the PS/2 buffer
 						</td>
 						<td>n/a</td>
-						<td>AL - Key pressed</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>KeyWait</code><br>
-							<br>
-							Waits until a key is pressed, then returns that key
-						</td>
 						<td>n/a</td>
-						<td>AL - Key pressed</td>
 					</tr>
 
 					<tr>
@@ -5909,12 +6261,10 @@
 						<td>
 							<ol>
 								<li>Command byte</li>
-								<li>Data byte</li>
 							</ol>
 						</td>
 						<td>
-							EAX - Controller response (if any)<br>
-							EBX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -5922,10 +6272,12 @@
 						<td>
 							<code>PS2ControllerInit</code><br>
 							<br>
-							Initializes the driver and controller
+							Initializes the PS/2 controller
 						</td>
 						<td>n/a</td>
-						<td>n/a</td>
+						<td>
+							EDX - Result code
+						</td>
 					</tr>
 
 					<tr>
@@ -5941,47 +6293,71 @@
 						</td>
 						<td>
 							EAX - Port status<br>
-							EBX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>PS2ControllerWaitDataRead</code><br>
+							<code>PS2ControllerRead</code><br>
+							<br>
+							Reads a data byte from the PS/2 controller
+						</td>
+						<td>n/a</td>
+						<td>
+							AL - Data byte<br>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>PS2ControllerReadWait</code><br>
 							<br>
 							Waits until data is ready to be read from the PS/2 controller
 						</td>
 						<td>n/a</td>
-						<td>EAX - Error code</td>
+						<td>EDX - Result code</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>PS2ControllerWaitDataWrite</code><br>
+							<code>PS2ControllerWrite</code><br>
+							<br>
+							Writes a data byte to the PS/2 controller
+						</td>
+						<td>
+							<ol>
+								<li>AL - Data byte</li>
+							</ol>
+						</td>
+						<td>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>PS2ControllerWriteWait</code><br>
 							<br>
 							Waits until the PS/2 controller is ready to accept data
 						</td>
 						<td>n/a</td>
-						<td>EAX - Error code</td>
+						<td>EDX - Result code</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>PS2DeviceCommand</code><br>
+							<code>PS2DeviceAnnounce</code><br>
 							<br>
-							Sends a command to a PS/2 device
+							Prints a message describing the PS/2 device specified
 						</td>
 						<td>
 							<ol>
-								<li>Port number of the device to receive the command</li>
-								<li>Command byte</li>
-								<li>Data byte</li>
+								<li>Device ID</li>
 							</ol>
 						</td>
-						<td>
-							EAX - Controller response (if any)<br>
-							EBX - Error code
-						</td>
+						<td>n/a</td>
 					</tr>
 
 					<tr>
@@ -5997,36 +6373,25 @@
 						</td>
 						<td>
 							EAX - Device identification (with 0xFF for bytes that were not returned by the driver)<br>
-							EBX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>PS2InitKeyboard</code><br>
+							<code>PS2DeviceWrite</code><br>
 							<br>
-							Initializes the PS/2 keyboard
+							Writes a data byte to a PS/2 device
 						</td>
 						<td>
 							<ol>
-								<li>Port number on which the keyboard resides</li>
+								<li>Port number</li>
+								<li>Data byte</li>
 							</ol>
 						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
 						<td>
-							<code>PS2InitMouse</code><br>
-							<br>
-							Initializes the PS/2 mouse
+							EDX - Result code
 						</td>
-						<td>
-							<ol>
-								<li>Port number on which the mouse resides</li>
-							</ol>
-						</td>
-						<td>n/a</td>
 					</tr>
 
 					<tr>
@@ -6037,36 +6402,9 @@
 						</td>
 						<td>
 							<ol>
+								<li>Port number</li>
 								<li>PS/2 Device ID</li>
 								<li>Data to be passed to the input handler</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>PS2InputHandlerKeyboard</code><br>
-							<br>
-							Handles input from a PS/2 Keyboard
-						</td>
-						<td>
-							<ol>
-								<li>Input data</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>PS2InputHandlerMouse</code><br>
-							<br>
-							Handles input from a PS/2 Mouse
-						</td>
-						<td>
-							<ol>
-								<li>Input data</li>
 							</ol>
 						</td>
 						<td>n/a</td>
@@ -6117,22 +6455,45 @@
 								<li>Port number on which the device resides</li>
 							</ol>
 						</td>
-						<td>n/a</td>
+						<td>
+							EDX - Result code
+						</td>
 					</tr>
 
 					<tr>
 						<td>
-							<code>PS2PortSendTo2</code><br>
+							<code>PS2PortsDisable</code><br>
 							<br>
-							Tells the PS/2 Controller the next command goes to port 2 if necessary
-						</td>
-						<td>
-							<ol>
-								<li>Port number being addressed</li>
-							</ol>
+							Disables IRQs and clocks for both PS/2 devices
 						</td>
 						<td>n/a</td>
+						<td>
+							EDX - Result code
+						</td>
 					</tr>
+
+					<tr>
+						<td>
+							<code>PS2PortsEnable</code><br>
+							<br>
+							Enables IRQs and clocks for both PS/2 devices
+						</td>
+						<td>n/a</td>
+						<td>
+							EDX - Result code
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>PS2TestPorts</code><br>
+							<br>
+							Tests all available PS/2 controller ports
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
 				</table>
 				<br>
 				<br>
@@ -6142,12 +6503,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_power.asm'><b>Power Functions - <i>power.asm</i></b></a><br>
 				<br>
-				16-bit Public Function Listing:<br>
+				<a name = 'TableA1.18'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.20 - power.asm 16-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.18 - power.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -6157,7 +6518,7 @@
 
 					<tr>
 						<td>
-							<code>APMEnable</code><br>
+							<code>_16_APMEnable</code><br>
 							<br>
 							Activates the APM interface for all devices managed by the APM BIOS
 						</td>
@@ -6167,7 +6528,7 @@
 
 					<tr>
 						<td>
-							<code>APMDisable</code><br>
+							<code>_16_APMDisable</code><br>
 							<br>
 							Disables the APM interface for all devices managed by the APM BIOS
 						</td>
@@ -6177,7 +6538,7 @@
 
 					<tr>
 						<td>
-							<code>APMShutdown</code><br>
+							<code>_16_APMShutdown</code><br>
 							<br>
 							Shuts down the PC via the APM interface
 						</td>
@@ -6193,12 +6554,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_RTC.asm'><b>RTC Functions - <i>RTC.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.19'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.21 - RTC.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.19 - RTC.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -6244,12 +6605,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_screen.asm'><b>Screen Functions - <i>screen.asm</i></b></a><br>
 				<br>
-				16-bit Public Function Listing:<br>
+				<a name = 'TableA1.20'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.22 - screen.asm 16-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.20 - screen.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -6259,81 +6620,21 @@
 
 					<tr>
 						<td>
-							<code>Print16</code><br>
+							<code>BoxDraw</code><br>
 							<br>
-							Prints an ASCIIZ string directly to the screen
+							Draws a box on screen at the location specified
 						</td>
 						<td>
 							<ol>
-								<li>Address of string to print</li>
+								<li>X Position of upper right corner</li>
+								<li>Y Position of upper right corner</li>
+								<li>Width</li>
+								<li>Height</li>
 							</ol>
 						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
 						<td>
-							<code>PrintIfConfigBits16</code><br>
-							<br>
-							Prints an ASCIIZ string directly to the screen only if the configbits option is set
+							EDX - Result code
 						</td>
-						<td>
-							<ol>
-								<li>Address of string to print</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>PrintRegs16</code><br>
-							<br>
-							Quick register dump routine for real mode
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>ScreenClear16</code><br>
-							<br>
-							Clears the text mode screen
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>ScreenScroll16</code><br>
-							<br>
-							Scrolls the text mode screen by the specified number of lines
-						</td>
-						<td>
-							<ol>
-								<li>Number of lines to scroll</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-				</table>
-				<br>
-				<br>
-				<br>
-
-				32-bit Public Function Listing:<br>
-				<table style = 'width:100%'>
-					<caption><b><i>Table A1.23 - screen.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
-
-					<tr>
-						<th>Name / Description</th>
-						<th>Stack Input</th>
-						<th>Register Output</th>
 					</tr>
 
 					<tr>
@@ -6348,7 +6649,7 @@
 
 					<tr>
 						<td>
-							<code>Print32</code><br>
+							<code>Print</code><br>
 							<br>
 							Prints an ASCIIZ string directly to the screen
 						</td>
@@ -6369,50 +6670,7 @@
 
 					<tr>
 						<td>
-							<code>PrintIfConfigBits32</code><br>
-							<br>
-							Prints an ASCIIZ string directly to the screen only if the configbits option is set
-						</td>
-						<td>
-							<ol>
-								<li>Address of string to print</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>PrintRAM32</code><br>
-							<br>
-							Prints a range of RAM bytes to the screen
-						</td>
-						<td>
-							<ol>
-								<li>Starting address</li>
-								<li>Number of 16-byte lines</li>
-								<li>X position</li>
-								<li>Y position</li>
-								<li>Text color</li>
-								<li>Background color</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>PrintRegs32</code><br>
-							<br>
-							Quick register dump routine for protected mode
-						</td>
-						<td>n/a</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>ScreenClear32</code><br>
+							<code>ScreenClear</code><br>
 							<br>
 							Clears the text mode screen
 						</td>
@@ -6426,7 +6684,45 @@
 
 					<tr>
 						<td>
-							<code>ScreenScroll32</code><br>
+							<code>ScreenScroll</code><br>
+							<br>
+							Scrolls the text mode screen by the specified number of lines
+						</td>
+						<td>
+							<ol>
+								<li>Number of lines to scroll</li>
+							</ol>
+						</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_Print</code><br>
+							<br>
+							Prints an ASCIIZ string directly to the screen
+						</td>
+						<td>
+							<ol>
+								<li>Address of string to print</li>
+							</ol>
+						</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_ScreenClear</code><br>
+							<br>
+							Clears the text mode screen
+						</td>
+						<td>n/a</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_ScreenScroll</code><br>
 							<br>
 							Scrolls the text mode screen by the specified number of lines
 						</td>
@@ -6446,12 +6742,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_serial.asm'><b>Serial Communications Functions - <i>serial.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.21'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.24 - serial.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.21 - serial.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -6706,12 +7002,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_storage.asm'><b>Storage Manager Functions - <i>storage.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.22'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.25 - storage.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.22 - storage.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -6735,7 +7031,7 @@
 						</td>
 						<td>
 							EAX - Handler response<br>
-							EBX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6754,7 +7050,7 @@
 						</td>
 						<td>
 							EAX - Number of matching items, or zero if error<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6770,7 +7066,7 @@
 								<li>Pointer to file path string</li>
 							</ol>
 						</td>
-						<td>EDX - Error code</td>
+						<td>EDX - Result code</td>
 					</tr>
 
 					<tr>
@@ -6786,7 +7082,7 @@
 							</ol>
 						</td>
 						<td>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6806,7 +7102,7 @@
 							EAX (Upper 16 bits) - Year<br>
 							AL - Month<br>
 							AH - Day<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6829,7 +7125,7 @@
 							EBX (Upper 16 bits) - Hours<br>
 							BH - Minutes<br>
 							BL - Seconds<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6852,7 +7148,7 @@
 							EBX (Upper 16 bits) - Hours<br>
 							BH - Minutes<br>
 							BL - Seconds<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6870,7 +7166,7 @@
 						</td>
 						<td>
 							ECX - File size<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6891,7 +7187,7 @@
 							EAX - Actual size of item loaded into buffer<br>
 							EBX - Starting cluster of chain which is loaded into buffer, or zero if root directory<br>
 							ECX - Buffer size in bytes<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6907,7 +7203,7 @@
 								<li>Pointer to path string</li>
 							</ol>
 						</td>
-						<td>EDX - Error code</td>
+						<td>EDX - Result code</td>
 					</tr>
 
 					<tr>
@@ -6924,7 +7220,7 @@
 								<li>Length of file data</li>
 							</ol>
 						</td>
-						<td>EDX - Error code</td>
+						<td>EDX - Result code</td>
 					</tr>
 
 					<tr>
@@ -6935,7 +7231,7 @@
 						</td>
 						<td>n/a</td>
 						<td>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6952,7 +7248,7 @@
 						</td>
 						<td>
 							EAX - Partition number<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -6968,7 +7264,7 @@
 								<li>Drive number (0 = A, 1 = B, etc.)</li>
 							</ol>
 						</td>
-						<td>EAX - Error code</td>
+						<td>EDX - Result code</td>
 					</tr>
 
 					<tr>
@@ -6987,7 +7283,7 @@
 						</td>
 						<td>
 							EAX - Handler response<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -7007,7 +7303,7 @@
 						</td>
 						<td>
 							EAX - Handler response<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -7038,7 +7334,7 @@
 						</td>
 						<td>
 							EAX - Partition number<br>
-							EBX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -7082,59 +7378,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_strings.asm'><b>String Functions - <i>strings.asm</i></b></a><br>
 				<br>
-				16-bit Public Function Listing:<br>
+				<a name = 'TableA1.23'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.26 - strings.asm 16-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
-
-					<tr>
-						<th>Name / Description</th>
-						<th>Stack Input</th>
-						<th>Register Output</th>
-					</tr>
-
-					<tr>
-						<td>
-							<code>ConvertByteToHexString16</code><br>
-							<br>
-							Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode
-						</td>
-						<td>
-							<ol>
-								<li>Numeric byte value</li>
-								<li>String address</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-
-					<tr>
-						<td>
-							<code>ConvertWordToHexString16</code><br>
-							<br>
-							Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
-						</td>
-						<td>
-							<ol>
-								<li>Numeric word value</li>
-								<li>String address</li>
-							</ol>
-						</td>
-						<td>n/a</td>
-					</tr>
-				</table>
-				<br>
-				<br>
-				<br>
-
-				32-bit Public Function Listing:<br>
-				<table style = 'width:100%'>
-					<caption><b><i>Table A1.27 - strings.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.23 - strings.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -7417,7 +7666,7 @@
 						</td>
 						<td>
 							ESX - Buffer address<br>
-							EDX - Error code
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -7560,7 +7809,7 @@
 						<td>
 							<ol>
 								<li>String address</li>
-								<li>DWord value to be added to the string</li>
+								<li>DWord value to be inserted into the string</li>
 								<li>Number trim value</li>
 							</ol>
 						</td>
@@ -7576,7 +7825,7 @@
 						<td>
 							<ol>
 								<li>String address</li>
-								<li>DWord value to be added to the string</li>
+								<li>DWord value to be inserted into the string</li>
 								<li>Number trim value</li>
 							</ol>
 						</td>
@@ -7592,7 +7841,7 @@
 						<td>
 							<ol>
 								<li>String address</li>
-								<li>DWord value to be added to the string</li>
+								<li>DWord value to be inserted into the string</li>
 								<li>Number trim value</li>
 							</ol>
 						</td>
@@ -7608,7 +7857,7 @@
 						<td>
 							<ol>
 								<li>String address</li>
-								<li>DWord value to be added to the string</li>
+								<li>DWord value to be inserted into the string</li>
 								<li>Number trim value</li>
 							</ol>
 						</td>
@@ -7619,12 +7868,12 @@
 						<td>
 							<code>StringTokenString</code><br>
 							<br>
-							Finds the first occurrence of the ^ character and replaces it with a octal number, truncated to the length specified
+							Finds the first occurrence of the ^ character and replaces it with the string specified, truncated to the length specified
 						</td>
 						<td>
 							<ol>
 								<li>String address</li>
-								<li>Address of string to be added</li>
+								<li>Address of the string to be inserted</li>
 								<li>String trim value</li>
 							</ol>
 						</td>
@@ -7724,6 +7973,53 @@
 						</td>
 						<td>n/a</td>
 					</tr>
+
+					<tr>
+						<td>
+							<code>_16_ConvertByteToHexString</code><br>
+							<br>
+							Translates the byte value specified to a hexadecimal number in a zero-padded 2 byte string in real mode
+						</td>
+						<td>
+							<ol>
+								<li>Numeric byte value</li>
+								<li>String address</li>
+							</ol>
+						</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_ConvertWordToHexString</code><br>
+							<br>
+							Translates the word value specified to a hexadecimal number in a zero-padded 4 byte string in real mode
+						</td>
+						<td>
+							<ol>
+								<li>Numeric word value</li>
+								<li>String address</li>
+							</ol>
+						</td>
+						<td>n/a</td>
+					</tr>
+
+					<tr>
+						<td>
+							<code>_16_StringLength</code><br>
+							<br>
+							Returns the length of the string specified
+						</td>
+						<td>
+							<ol>
+								<li>String address</li>
+							</ol>
+						</td>
+						<td>
+							AX - String length
+						</td>
+					</tr>
+
 				</table>
 				<br>
 				<br>
@@ -7733,12 +8029,12 @@
 			<div class = 'nopagebreak'>
 				<a name = 'NightFunctionReference_tasks.asm'><b>Task Management Functions - <i>tasks.asm</i></b></a><br>
 				<br>
-				32-bit Public Function Listing:<br>
+				<a name = 'TableA1.24'></a>
 				<table style = 'width:100%'>
-					<caption><b><i>Table A1.28 - tasks.asm 32-bit public functions</i></b></caption>
-					<col width = '60%'>
-					<col width = '20%'>
-					<col width = '20%'>
+					<caption><b><i>Table A1.24 - tasks.asm functions</i></b></caption>
+					<col width = '50%'>
+					<col width = '25%'>
+					<col width = '25%'>
 
 					<tr>
 						<th>Name / Description</th>
@@ -7812,8 +8108,8 @@
 							</ol>
 						</td>
 						<td>
-							EAX - Task number
-							EDX - Error code
+							EAX - Task number<br>
+							EDX - Result code
 						</td>
 					</tr>
 
@@ -7845,6 +8141,7 @@
 		<hr>
 		<h2 class = 'pagebreak'><a name = 'StandardFunctionReturnCodes'>Appendix 2 - Standard Function Return Codes</a></h2>
 		<p>
+			<a name = 'TableA2.1'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.1 - Parameter errors</i></b></caption>
 				<col width = '10%'>
@@ -7897,6 +8194,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA2.2'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.2 - List Manager errors</i></b></caption>
 				<col width = '10%'>
@@ -7917,20 +8215,45 @@
 
 				<tr>
 					<td>0xF901</td>
+					<td>kErrListTooLarge</td>
+					<td>The list attempting initialization would be larger than 4 GiB.</td>
+				</tr>
+
+				<tr>
+					<td>0xF902</td>
 					<td>kErrElementSizeInvalid</td>
 					<td>The item being added is larger than the element size of this list</td>
 				</tr>
 
 				<tr>
-					<td>0xF902</td>
+					<td>0xF903</td>
 					<td>kErrBitfieldInvalid</td>
 					<td>The bitfield at the address specified does not contain the 'bits' signature</td>
+				</tr>
+
+				<tr>
+					<td>0xF904</td>
+					<td>kErrRingBufferInvalid</td>
+					<td>The ring buffer at the address specified does not contain the 'ring' signature</td>
+				</tr>
+
+				<tr>
+					<td>0xF905</td>
+					<td>kErrRingBufferEmpty</td>
+					<td>The ring buffer contains nothing to return</td>
+				</tr>
+
+				<tr>
+					<td>0xF906</td>
+					<td>kErrRingBufferFull</td>
+					<td>The ring buffer is full and cannot accept new entries</td>
 				</tr>
 			</table>
 			<br>
 			<br>
 			<br>
 
+			<a name = 'TableA2.3'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.3 - ELF executable errors</i></b></caption>
 				<col width = '10%'>
@@ -7971,6 +8294,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA2.4'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.4 - Filesystem errors</i></b></caption>
 				<col width = '10%'>
@@ -8047,6 +8371,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA2.5'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.5 - Partition errors</i></b></caption>
 				<col width = '10%'>
@@ -8075,6 +8400,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA2.6'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.6 - Driver handler errors</i></b></caption>
 				<col width = '10%'>
@@ -8097,6 +8423,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA2.7'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.7 - Memory errors</i></b></caption>
 				<col width = '10%'>
@@ -8125,6 +8452,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA2.8'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A2.8 - PS/2 Controller errors</i></b></caption>
 				<col width = '10%'>
@@ -8171,6 +8499,7 @@
 		<p>
 			All interrupt vectors after 0x77 are null.<br>
 			<br>
+			<a name = 'TableA3.1'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A3.1 - DOS Interrupt Handler Address Table</i></b></caption>
 				<tr>
@@ -9145,6 +9474,7 @@
 			<br>
 			<br>
 
+			<a name = 'TableA3.2'></a>
 			<table style = 'width:100%'>
 				<caption><b><i>Table A3.2 - DOS API</i></b></caption>
 				<tr>
@@ -10475,6 +10805,7 @@
 					<td>Windows 95</td>
 				</tr>
 			</table>
+
 		</p>
 		<br>
 		<br>
@@ -10487,43 +10818,1802 @@
 
 
 		<hr>
-		<h2 class = 'pagebreak'><a name = 'Changelog'>Appendix 4 - Version History</a></h2>
+		<h2 class = 'pagebreak'><a name = 'KeyboardScanCodes'>Appendix 4 - Keyboard Scan Codes</a></h2>
+		<p>
+			<b>Grouped by Key Type</b>
+			<a name = 'TableA4.1'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.1 - Scan Codes - ACPI Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Power</td>
+								<td>0x0000E037</td>
+							</tr>
+
+							<tr>
+								<td>Sleep</td>
+								<td>0x0000E03F</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Wake</td>
+								<td>0x0000E05E</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.2'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.2 - Scan Codes - Function Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>F1</td>
+								<td>0x00000005</td>
+							</tr>
+
+							<tr>
+								<td>F2</td>
+								<td>0x00000006</td>
+							</tr>
+
+							<tr>
+								<td>F3</td>
+								<td>0x00000004</td>
+							</tr>
+
+							<tr>
+								<td>F4</td>
+								<td>0x0000000C</td>
+							</tr>
+
+							<tr>
+								<td>F5</td>
+								<td>0x00000003</td>
+							</tr>
+
+							<tr>
+								<td>F6</td>
+								<td>0x0000000B</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>F7</td>
+								<td>0x00000083</td>
+							</tr>
+
+							<tr>
+								<td>F8</td>
+								<td>0x0000000A</td>
+							</tr>
+
+							<tr>
+								<td>F9</td>
+								<td>0x00000001</td>
+							</tr>
+
+							<tr>
+								<td>F10</td>
+								<td>0x00000009</td>
+							</tr>
+
+							<tr>
+								<td>F11</td>
+								<td>0x00000078</td>
+							</tr>
+
+							<tr>
+								<td>F12</td>
+								<td>0x00000007</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.3'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.3 - Scan Codes - Keypad</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>0</td>
+								<td>0x00000070</td>
+							</tr>
+
+							<tr>
+								<td>1</td>
+								<td>0x00000069</td>
+							</tr>
+
+							<tr>
+								<td>2</td>
+								<td>0x00000072</td>
+							</tr>
+
+							<tr>
+								<td>3</td>
+								<td>0x0000007A</td>
+							</tr>
+
+							<tr>
+								<td>4</td>
+								<td>0x0000006B</td>
+							</tr>
+
+							<tr>
+								<td>5</td>
+								<td>0x00000073</td>
+							</tr>
+
+							<tr>
+								<td>6</td>
+								<td>0x00000074</td>
+							</tr>
+
+							<tr>
+								<td>7</td>
+								<td>0x0000006C</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>8</td>
+								<td>0x00000075</td>
+							</tr>
+
+							<tr>
+								<td>9</td>
+								<td>0x0000007D</td>
+							</tr>
+
+							<tr>
+								<td>.</td>
+								<td>0x00000071</td>
+							</tr>
+
+							<tr>
+								<td>+</td>
+								<td>0x00000079</td>
+							</tr>
+
+							<tr>
+								<td>-</td>
+								<td>0x0000007B</td>
+							</tr>
+
+							<tr>
+								<td>*</td>
+								<td>0x0000007C</td>
+							</tr>
+
+							<tr>
+								<td>/</td>
+								<td>0x0000E04A</td>
+							</tr>
+
+							<tr>
+								<td>Enter</td>
+								<td>0x0000E05A</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.4'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.4 - Scan Codes - Launch Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Calculator</td>
+								<td>0x0000E02B</td>
+							</tr>
+
+							<tr>
+								<td>E-Mail</td>
+								<td>0x0000E048</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>My Computer</td>
+								<td>0x0000E040</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.5'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.5 - Scan Codes - Letters</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>A</td>
+								<td>0x0000001C</td>
+							</tr>
+
+							<tr>
+								<td>B</td>
+								<td>0x00000032</td>
+							</tr>
+
+							<tr>
+								<td>C</td>
+								<td>0x00000021</td>
+							</tr>
+
+							<tr>
+								<td>D</td>
+								<td>0x00000023</td>
+							</tr>
+
+							<tr>
+								<td>E</td>
+								<td>0x00000024</td>
+							</tr>
+
+							<tr>
+								<td>F</td>
+								<td>0x0000002B</td>
+							</tr>
+
+							<tr>
+								<td>G</td>
+								<td>0x00000034</td>
+							</tr>
+
+							<tr>
+								<td>H</td>
+								<td>0x00000033</td>
+							</tr>
+
+							<tr>
+								<td>I</td>
+								<td>0x00000043</td>
+							</tr>
+
+							<tr>
+								<td>J</td>
+								<td>0x0000003B</td>
+							</tr>
+
+							<tr>
+								<td>K</td>
+								<td>0x00000042</td>
+							</tr>
+
+							<tr>
+								<td>L</td>
+								<td>0x0000004B</td>
+							</tr>
+
+							<tr>
+								<td>M</td>
+								<td>0x0000003A</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>N</td>
+								<td>0x00000031</td>
+							</tr>
+
+							<tr>
+								<td>O</td>
+								<td>0x00000044</td>
+							</tr>
+
+							<tr>
+								<td>P</td>
+								<td>0x0000004D</td>
+							</tr>
+
+							<tr>
+								<td>Q</td>
+								<td>0x00000015</td>
+							</tr>
+
+							<tr>
+								<td>R</td>
+								<td>0x0000002D</td>
+							</tr>
+
+							<tr>
+								<td>S</td>
+								<td>0x0000001B</td>
+							</tr>
+
+							<tr>
+								<td>T</td>
+								<td>0x0000002C</td>
+							</tr>
+
+							<tr>
+								<td>U</td>
+								<td>0x0000003C</td>
+							</tr>
+
+							<tr>
+								<td>V</td>
+								<td>0x0000002A</td>
+							</tr>
+
+							<tr>
+								<td>W</td>
+								<td>0x0000001D</td>
+							</tr>
+
+							<tr>
+								<td>X</td>
+								<td>0x00000022</td>
+							</tr>
+
+							<tr>
+								<td>Y</td>
+								<td>0x00000035</td>
+							</tr>
+
+							<tr>
+								<td>Z</td>
+								<td>0x0000001A</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.6'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.6 - Scan Codes - Media Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Media Select</td>
+								<td>0x0000E050</td>
+							</tr>
+
+							<tr>
+								<td>Mute</td>
+								<td>0x0000E023</td>
+							</tr>
+
+							<tr>
+								<td>Next Track</td>
+								<td>0x0000E04D</td>
+							</tr>
+
+							<tr>
+								<td>Play / Pause</td>
+								<td>0x0000E034</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Previous Track</td>
+								<td>0x0000E015</td>
+							</tr>
+
+							<tr>
+								<td>Stop</td>
+								<td>0x0000E03B</td>
+							</tr>
+
+							<tr>
+								<td>Volume Down</td>
+								<td>0x0000E021</td>
+							</tr>
+
+							<tr>
+								<td>Volume Up</td>
+								<td>0x0000E032</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.7'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.7 - Scan Codes - Modifier / Special Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Alt - Left</td>
+								<td>0x00000011</td>
+							</tr>
+
+							<tr>
+								<td>Alt - Right</td>
+								<td>0x0000E011</td>
+							</tr>
+
+							<tr>
+								<td>Caps Lock</td>
+								<td>0x00000058</td>
+							</tr>
+
+							<tr>
+								<td>Contextual Menu ("Apps" key)</td>
+								<td>0x0000E02F</td>
+							</tr>
+
+							<tr>
+								<td>Ctrl - Left</td>
+								<td>0x00000014</td>
+							</tr>
+
+							<tr>
+								<td>Ctrl - Right</td>
+								<td>0x0000E014</td>
+							</tr>
+
+							<tr>
+								<td>Num Lock</td>
+								<td>0x00000077</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Pause</td>
+								<td>0x00E11477</td>
+							</tr>
+
+							<tr>
+								<td>Print Screen</td>
+								<td>0x0000E07C</td>
+							</tr>
+
+							<tr>
+								<td>Scroll Lock</td>
+								<td>0x0000007E</td>
+							</tr>
+
+							<tr>
+								<td>Shift - Left</td>
+								<td>0x00000012</td>
+							</tr>
+
+							<tr>
+								<td>Shift - Right</td>
+								<td>0x00000059</td>
+							</tr>
+
+							<tr>
+								<td>Super ("Windows" key) - Left</td>
+								<td>0x0000E01F</td>
+							</tr>
+
+							<tr>
+								<td>Super ("Windows" key) - Right</td>
+								<td>0x0000E027</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+			<a name = 'TableA4.8'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.8 - Scan Codes - Navigation Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Backspace</td>
+								<td>0x00000066</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Down</td>
+								<td>0x0000E072</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Left</td>
+								<td>0x0000E06B</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Right</td>
+								<td>0x0000E074</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Up</td>
+								<td>0x0000E075</td>
+							</tr>
+
+							<tr>
+								<td>Del</td>
+								<td>0x0000E071</td>
+							</tr>
+
+							<tr>
+								<td>End</td>
+								<td>0x0000E069</td>
+							</tr>
+
+							<tr>
+								<td>Enter</td>
+								<td>0x0000005A</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Escape</td>
+								<td>0x00000076</td>
+							</tr>
+
+							<tr>
+								<td>Home</td>
+								<td>0x0000E06C</td>
+							</tr>
+
+							<tr>
+								<td>Ins</td>
+								<td>0x0000E070</td>
+							</tr>
+
+							<tr>
+								<td>Page Down</td>
+								<td>0x0000E07A</td>
+							</tr>
+
+							<tr>
+								<td>Page Up</td>
+								<td>0x0000E07D</td>
+							</tr>
+
+							<tr>
+								<td>Spacebar</td>
+								<td>0x00000029</td>
+							</tr>
+
+							<tr>
+								<td>Tab</td>
+								<td>0x0000000D</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.9'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.9 - Scan Codes - Numbers</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>0</td>
+								<td>0x00000045</td>
+							</tr>
+
+							<tr>
+								<td>1</td>
+								<td>0x00000016</td>
+							</tr>
+
+							<tr>
+								<td>2</td>
+								<td>0x0000001E</td>
+							</tr>
+
+							<tr>
+								<td>3</td>
+								<td>0x00000026</td>
+							</tr>
+
+							<tr>
+								<td>4</td>
+								<td>0x00000025</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>5</td>
+								<td>0x0000002E</td>
+							</tr>
+
+							<tr>
+								<td>6</td>
+								<td>0x00000036</td>
+							</tr>
+
+							<tr>
+								<td>7</td>
+								<td>0x0000003D</td>
+							</tr>
+
+							<tr>
+								<td>8</td>
+								<td>0x0000003E</td>
+							</tr>
+
+							<tr>
+								<td>9</td>
+								<td>0x00000046</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.10'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.10 - Scan Codes - Symbols</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>`</td>
+								<td>0x0000000E</td>
+							</tr>
+
+							<tr>
+								<td>,</td>
+								<td>0x00000041</td>
+							</tr>
+
+							<tr>
+								<td>.</td>
+								<td>0x00000049</td>
+							</tr>
+
+							<tr>
+								<td>/</td>
+								<td>0x0000004A</td>
+							</tr>
+
+							<tr>
+			 					<td>;</td>
+								<td>0x0000004C</td>
+			 				</tr>
+
+							<tr>
+								<td>-</td>
+								<td>0x0000004E</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>'</td>
+								<td>0x00000052</td>
+							</tr>
+
+							<tr>
+								<td>[</td>
+								<td>0x00000054</td>
+							</tr>
+
+							<tr>
+								<td>=</td>
+								<td>0x00000055</td>
+							</tr>
+
+							<tr>
+								<td>]</td>
+								<td>0x0000005B</td>
+							</tr>
+
+							<tr>
+								<td>\</td>
+								<td>0x0000005D</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<a name = 'TableA4.11'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.11 - Scan Codes - Web Keys</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Back</td>
+								<td>0x0000E038</td>
+							</tr>
+
+							<tr>
+								<td>Favorites</td>
+								<td>0x0000E018</td>
+							</tr>
+
+							<tr>
+								<td>Forward</td>
+								<td>0x0000E030</td>
+							</tr>
+
+							<tr>
+								<td>Home</td>
+								<td>0x0000E03A</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>Refresh</td>
+								<td>0x0000E020</td>
+							</tr>
+
+							<tr>
+								<td>Search</td>
+								<td>0x0000E010</td>
+							</tr>
+
+							<tr>
+								<td>Stop</td>
+								<td>0x0000E028</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+			<br>
+			<br>
+
+
+
+			<b>Grouped by Scan Code</b>
+			<a name = 'TableA4.12'></a>
+			<table style = 'width: 100%;'>
+				<caption><b><i>Table A4.12 - Scan Codes - All</i></b></caption>
+				<col width = 100%>
+
+				<tr>
+					<td>
+
+						<table style = 'width: 45%; float: left; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>F9</td>
+								<td>0x00000001</td>
+							</tr>
+
+							<tr>
+								<td>F5</td>
+								<td>0x00000003</td>
+							</tr>
+
+							<tr>
+								<td>F3</td>
+								<td>0x00000004</td>
+							</tr>
+
+							<tr>
+								<td>F1</td>
+								<td>0x00000005</td>
+							</tr>
+
+							<tr>
+								<td>F2</td>
+								<td>0x00000006</td>
+							</tr>
+
+							<tr>
+								<td>F12</td>
+								<td>0x00000007</td>
+							</tr>
+
+							<tr>
+								<td>F10</td>
+								<td>0x00000009</td>
+							</tr>
+
+							<tr>
+								<td>F8</td>
+								<td>0x0000000A</td>
+							</tr>
+
+							<tr>
+								<td>F6</td>
+								<td>0x0000000B</td>
+							</tr>
+
+							<tr>
+								<td>F4</td>
+								<td>0x0000000C</td>
+							</tr>
+
+							<tr>
+								<td>Tab</td>
+								<td>0x0000000D</td>
+							</tr>
+
+							<tr>
+								<td>`</td>
+								<td>0x0000000E</td>
+							</tr>
+
+							<tr>
+								<td>Alt - Left</td>
+								<td>0x00000011</td>
+							</tr>
+
+							<tr>
+								<td>Shift - Left</td>
+								<td>0x00000012</td>
+							</tr>
+
+							<tr>
+								<td>Ctrl - Left</td>
+								<td>0x00000014</td>
+							</tr>
+
+							<tr>
+								<td>Q</td>
+								<td>0x00000015</td>
+							</tr>
+
+							<tr>
+								<td>1</td>
+								<td>0x00000016</td>
+							</tr>
+
+							<tr>
+								<td>Z</td>
+								<td>0x0000001A</td>
+							</tr>
+
+							<tr>
+								<td>S</td>
+								<td>0x0000001B</td>
+							</tr>
+
+							<tr>
+								<td>A</td>
+								<td>0x0000001C</td>
+							</tr>
+
+							<tr>
+								<td>W</td>
+								<td>0x0000001D</td>
+							</tr>
+
+							<tr>
+								<td>2</td>
+								<td>0x0000001E</td>
+							</tr>
+
+							<tr>
+								<td>C</td>
+								<td>0x00000021</td>
+							</tr>
+
+							<tr>
+								<td>X</td>
+								<td>0x00000022</td>
+							</tr>
+
+							<tr>
+								<td>D</td>
+								<td>0x00000023</td>
+							</tr>
+
+							<tr>
+								<td>E</td>
+								<td>0x00000024</td>
+							</tr>
+
+							<tr>
+								<td>4</td>
+								<td>0x00000025</td>
+							</tr>
+
+							<tr>
+								<td>3</td>
+								<td>0x00000026</td>
+							</tr>
+
+							<tr>
+								<td>Spacebar</td>
+								<td>0x00000029</td>
+							</tr>
+
+							<tr>
+								<td>V</td>
+								<td>0x0000002A</td>
+							</tr>
+
+							<tr>
+								<td>F</td>
+								<td>0x0000002B</td>
+							</tr>
+
+							<tr>
+								<td>T</td>
+								<td>0x0000002C</td>
+							</tr>
+
+							<tr>
+								<td>R</td>
+								<td>0x0000002D</td>
+							</tr>
+
+							<tr>
+								<td>5</td>
+								<td>0x0000002E</td>
+							</tr>
+
+							<tr>
+								<td>N</td>
+								<td>0x00000031</td>
+							</tr>
+
+							<tr>
+								<td>B</td>
+								<td>0x00000032</td>
+							</tr>
+
+							<tr>
+								<td>H</td>
+								<td>0x00000033</td>
+							</tr>
+
+							<tr>
+								<td>G</td>
+								<td>0x00000034</td>
+							</tr>
+
+							<tr>
+								<td>Y</td>
+								<td>0x00000035</td>
+							</tr>
+
+							<tr>
+								<td>6</td>
+								<td>0x00000036</td>
+							</tr>
+
+							<tr>
+								<td>M</td>
+								<td>0x0000003A</td>
+							</tr>
+
+							<tr>
+								<td>J</td>
+								<td>0x0000003B</td>
+							</tr>
+
+							<tr>
+								<td>U</td>
+								<td>0x0000003C</td>
+							</tr>
+
+							<tr>
+								<td>7</td>
+								<td>0x0000003D</td>
+							</tr>
+
+							<tr>
+								<td>8</td>
+								<td>0x0000003E</td>
+							</tr>
+
+							<tr>
+								<td>,</td>
+								<td>0x00000041</td>
+							</tr>
+
+							<tr>
+								<td>K</td>
+								<td>0x00000042</td>
+							</tr>
+
+							<tr>
+								<td>I</td>
+								<td>0x00000043</td>
+							</tr>
+
+							<tr>
+								<td>O</td>
+								<td>0x00000044</td>
+							</tr>
+
+							<tr>
+								<td>0</td>
+								<td>0x00000045</td>
+							</tr>
+
+							<tr>
+								<td>9</td>
+								<td>0x00000046</td>
+							</tr>
+
+							<tr>
+								<td>.</td>
+								<td>0x00000049</td>
+							</tr>
+
+							<tr>
+								<td>/</td>
+								<td>0x0000004A</td>
+							</tr>
+
+							<tr>
+								<td>L</td>
+								<td>0x0000004B</td>
+							</tr>
+
+							<tr>
+			 					<td>;</td>
+								<td>0x0000004C</td>
+			 				</tr>
+
+							<tr>
+								<td>P</td>
+								<td>0x0000004D</td>
+							</tr>
+
+							<tr>
+								<td>-</td>
+								<td>0x0000004E</td>
+							</tr>
+
+							<tr>
+								<td>'</td>
+								<td>0x00000052</td>
+							</tr>
+
+							<tr>
+								<td>[</td>
+								<td>0x00000054</td>
+							</tr>
+
+							<tr>
+								<td>=</td>
+								<td>0x00000055</td>
+							</tr>
+
+							<tr>
+								<td>Caps Lock</td>
+								<td>0x00000058</td>
+							</tr>
+
+							<tr>
+								<td>Shift - Right</td>
+								<td>0x00000059</td>
+							</tr>
+
+							<tr>
+								<td>Enter</td>
+								<td>0x0000005A</td>
+							</tr>
+
+						</table>
+
+
+
+						<table style = 'width: 45%; float: right; margin: 15px;'>
+							<col width = 70%>
+							<col width = 30%>
+
+							<tr>
+								<th>Key</th>
+								<th>Scan Code</th>
+							</tr>
+
+							<tr>
+								<td>]</td>
+								<td>0x0000005B</td>
+							</tr>
+
+							<tr>
+								<td>\</td>
+								<td>0x0000005D</td>
+							</tr>
+
+							<tr>
+								<td>Backspace</td>
+								<td>0x00000066</td>
+							</tr>
+
+							<tr>
+								<td>1 (Keypad)</td>
+								<td>0x00000069</td>
+							</tr>
+
+							<tr>
+								<td>4 (Keypad)</td>
+								<td>0x0000006B</td>
+							</tr>
+
+							<tr>
+								<td>7 (Keypad)</td>
+								<td>0x0000006C</td>
+							</tr>
+
+							<tr>
+								<td>0 (Keypad)</td>
+								<td>0x00000070</td>
+							</tr>
+
+							<tr>
+								<td>. (Keypad)</td>
+								<td>0x00000071</td>
+							</tr>
+
+							<tr>
+								<td>2 (Keypad)</td>
+								<td>0x00000072</td>
+							</tr>
+
+							<tr>
+								<td>5 (Keypad)</td>
+								<td>0x00000073</td>
+							</tr>
+
+							<tr>
+								<td>6 (Keypad)</td>
+								<td>0x00000074</td>
+							</tr>
+
+							<tr>
+								<td>8 (Keypad)</td>
+								<td>0x00000075</td>
+							</tr>
+
+							<tr>
+								<td>Escape</td>
+								<td>0x00000076</td>
+							</tr>
+
+							<tr>
+								<td>Num Lock</td>
+								<td>0x00000077</td>
+							</tr>
+
+							<tr>
+								<td>F11</td>
+								<td>0x00000078</td>
+							</tr>
+
+							<tr>
+								<td>+ (Keypad)</td>
+								<td>0x00000079</td>
+							</tr>
+
+							<tr>
+								<td>3 (Keypad)</td>
+								<td>0x0000007A</td>
+							</tr>
+
+							<tr>
+								<td>- (Keypad)</td>
+								<td>0x0000007B</td>
+							</tr>
+
+							<tr>
+								<td>* (Keypad)</td>
+								<td>0x0000007C</td>
+							</tr>
+
+							<tr>
+								<td>9 (Keypad)</td>
+								<td>0x0000007D</td>
+							</tr>
+
+							<tr>
+								<td>Scroll Lock</td>
+								<td>0x0000007E</td>
+							</tr>
+
+							<tr>
+								<td>F7</td>
+								<td>0x00000083</td>
+							</tr>
+
+							<tr>
+								<td>Search (Web)</td>
+								<td>0x0000E010</td>
+							</tr>
+
+							<tr>
+								<td>Alt - Right</td>
+								<td>0x0000E011</td>
+							</tr>
+
+							<tr>
+								<td>Ctrl - Right</td>
+								<td>0x0000E014</td>
+							</tr>
+
+							<tr>
+								<td>Previous Track (Media)</td>
+								<td>0x0000E015</td>
+							</tr>
+
+							<tr>
+								<td>Favorites (Web)</td>
+								<td>0x0000E018</td>
+							</tr>
+
+							<tr>
+								<td>Super ("Windows" key) - Left</td>
+								<td>0x0000E01F</td>
+							</tr>
+
+							<tr>
+								<td>Refresh (Web)</td>
+								<td>0x0000E020</td>
+							</tr>
+
+							<tr>
+								<td>Volume Down (Media)</td>
+								<td>0x0000E021</td>
+							</tr>
+
+							<tr>
+								<td>Mute (Media)</td>
+								<td>0x0000E023</td>
+							</tr>
+
+							<tr>
+								<td>Super ("Windows" key) - Right</td>
+								<td>0x0000E027</td>
+							</tr>
+
+							<tr>
+								<td>Stop (Web)</td>
+								<td>0x0000E028</td>
+							</tr>
+
+							<tr>
+								<td>Calculator (Launch)</td>
+								<td>0x0000E02B</td>
+							</tr>
+
+							<tr>
+								<td>Contextual Menu ("Apps" key)</td>
+								<td>0x0000E02F</td>
+							</tr>
+
+							<tr>
+								<td>Forward (Web)</td>
+								<td>0x0000E030</td>
+							</tr>
+
+							<tr>
+								<td>Volume Up (Media)</td>
+								<td>0x0000E032</td>
+							</tr>
+
+							<tr>
+								<td>Play / Pause (Media)</td>
+								<td>0x0000E034</td>
+							</tr>
+
+							<tr>
+								<td>Power (ACPI)</td>
+								<td>0x0000E037</td>
+							</tr>
+
+							<tr>
+								<td>Back (Web)</td>
+								<td>0x0000E038</td>
+							</tr>
+
+							<tr>
+								<td>Home (Web)</td>
+								<td>0x0000E03A</td>
+							</tr>
+
+							<tr>
+								<td>Stop (Media)</td>
+								<td>0x0000E03B</td>
+							</tr>
+
+							<tr>
+								<td>Sleep (ACPI)</td>
+								<td>0x0000E03F</td>
+							</tr>
+
+							<tr>
+								<td>My Computer (Launch)</td>
+								<td>0x0000E040</td>
+							</tr>
+
+							<tr>
+								<td>E-Mail (Launch)</td>
+								<td>0x0000E048</td>
+							</tr>
+
+							<tr>
+								<td>/ (Keypad)</td>
+								<td>0x0000E04A</td>
+							</tr>
+
+							<tr>
+								<td>Next Track (Media)</td>
+								<td>0x0000E04D</td>
+							</tr>
+
+							<tr>
+								<td>Media Select (Media)</td>
+								<td>0x0000E050</td>
+							</tr>
+
+							<tr>
+								<td>Enter (Keypad)</td>
+								<td>0x0000E05A</td>
+							</tr>
+
+							<tr>
+								<td>Wake (ACPI)</td>
+								<td>0x0000E05E</td>
+							</tr>
+
+							<tr>
+								<td>End</td>
+								<td>0x0000E069</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Left</td>
+								<td>0x0000E06B</td>
+							</tr>
+
+							<tr>
+								<td>Home</td>
+								<td>0x0000E06C</td>
+							</tr>
+
+							<tr>
+								<td>Ins</td>
+								<td>0x0000E070</td>
+							</tr>
+
+							<tr>
+								<td>Del</td>
+								<td>0x0000E071</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Down</td>
+								<td>0x0000E072</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Right</td>
+								<td>0x0000E074</td>
+							</tr>
+
+							<tr>
+								<td>Cursor Up</td>
+								<td>0x0000E075</td>
+							</tr>
+
+							<tr>
+								<td>Page Down</td>
+								<td>0x0000E07A</td>
+							</tr>
+
+							<tr>
+								<td>Print Screen</td>
+								<td>0x0000E07C</td>
+							</tr>
+
+							<tr>
+								<td>Page Up</td>
+								<td>0x0000E07D</td>
+							</tr>
+
+							<tr>
+								<td>Pause</td>
+								<td>0x00E11477</td>
+							</tr>
+
+						</table>
+					</td>
+				</tr>
+			</table>
+			<br style = 'clear: both;'>
+		</p>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+
+
+
+
+		<hr>
+		<h2 class = 'pagebreak'><a name = 'Changelog'>Appendix 5 - Version History</a></h2>
 		<p>
 			<ul></ul>
-			<b>In progress, 0.1F Update, Build 4656 - Bitfield support, SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements, event support</b><br>
+			<b>//2020, 0.1F Update, Build 5684</b><br>
+			SSE optimizations, revamped memory management, PS/2 driver enhancements, List Manager improvements (including Bitfield and Ring Buffer support), event support, task focus switching, Alt-Tab and Ctrl-Alt-Del reboot handlers<br>
 			<br>
 
 			New<br>
 			<ul>
 				<li>Kernel: <i>CPU.asm</i> - Added CPUInit() to set up processor features used elsewhere in the kernel (e.g. SSE).</li>
-				<li>Kernel: <i>debug.asm</i> - Added DebugVBoxLogRegs() to dump registers to the VirtualBox log.</li>
-				<li>Kernel: <i>events.asm</i> - The start of the Event Manager.</li>
+				<li>Kernel: <i>debug.asm</i> - Added DebugLogRegsBochs() and DebugLogRegsVBox() to dump registers to the Bochs/VirtualBox log.</li>
+				<li>Kernel: <i>debug.asm</i> - Added DebugLogBochs() to write a string to the Bochs log.</li>
+				<li>Kernel: <i>events.asm</i> - The Event Manager.</li>
 				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBIntHalt to aid in debugging misfiring interrupts.</li>
 				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBLockScroll, kCBLockNum, and kCBLockCaps to allow setting the default states of modifier keys.</li>
-				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBCtrlAltDelEnable to allow Ctrl-Alt-Delete reboots.</li>
-				<li>Kernel: <i>lists.asm</i> - Added bitfield functionality.</li>
+				<li>Kernel: <i>globalsDefines.inc</i> - Added kCBCtrlAltDelEnable to control whether or not Ctrl-Alt-Delete reboots are allowed.</li>
+				<li>Kernel: <i>lists.asm</i> - Added bitfield and ring buffer functionality.</li>
 				<li>Kernel: <i>lists.asm</i> - Added LMListSpaceGet() to return the amount of memory needed to hold a list.</li>
+				<li>Kernel: <i>logging.asm</i> - Added to hold all diagnostic logging routines.</li>
 				<li>Kernel: <i>memory.asm</i> - Added MemPagesNeeded().</li>
 				<li>Kernel: <i>memory.asm</i> - MemCopy() has a newly improved algorithm and now uses SSE registers when supported for much zippier bit-blasting: 128 bytes per loop iteration compared to the previous 8.</li>
 				<li>Kernel: <i>numbers.asm</i> - Added PopulationCount() and PopulationCountRange() to return the Hamming weight of a number or range of memory, respectively. Uses POPCNT for additional speed if supported by the CPU.</li>
 				<li>Kernel: <i>PS2Keyboard.asm</i> - Caps Lock, Num Lock, and Scroll Lock now all properly toggle their internal state and update the keyboard LEDs appropriately.</li>
+				<li>Kernel: <i>PS2Keyboard.asm</i> - Ctrl-Alt-Del now properly result in a reboot, if permitted by configBits.</li>
 				<li>Kernel: <i>strings.asm</i> - Added ConvertNumberHexQuadToString() and StringTokenHexadecimalQuad() for printing QWord values.</li>
+				<li>Kernel: <i>tasks.asm</i> - Added TaskFocus() as the default task focus switching handler.</li>
+				<li>Kernel: <i>tasks.asm</i> - Alt-Tab can now be used to change task focus.</li>
+				<li>Kernel: <i>tasksDefines.inc</i> - Increased the size of the tTaskInfo struct to 128 bytes to accommodate event buffer data and longer names.</li>
+				<li>Manual: Added appendix - <i>Keyboard Scan Codes</i>.</li>
 				<li>Manual: Added list of new kCPU_ defines to CPU.asm section.</li>
 				<li>Manual: Added recommended minimum system requirements to Section 0.</li>
-				<li>Manual: Added section on events.</li>
+				<li>Manual: Added section - <i>Things that Go Bump in the Night: Events in the Night Kernel</i>.</li>
+				<li>Manual: Named all tables so that they can be directly hyperlinked to.</li>
 				<li>Repo: Added 'testing files' folder. The files within can be used in place of kernel.asm to test out specific features in the future.</li>
 			</ul>
 
 			Changed<br>
 			<ul>
+				<li>Kernel: <i>debug.asm</i> - All register logging/printing functions now show the segment registers, EIP, and EFlags as well.</li>
 				<li>Kernel: <i>lists.asm</i> - Changed prefix format for internal functions from <i>LM_Internal_</i> to <i>LM_Private_</i>.</li>
 				<li>Kernel: <i>lists.asm</i> - LMListInit() now returns the amount of memory occupied by the list created.</li>
+				<li>Kernel: <i>logging.asm</i> - Improved unneeded delays for outputting strings to the VirtualBox console.</li>
 				<li>Kernel: <i>memory.asm</i> - MemFill() uses an improved algorithm for more speed.</li>
 				<li>Kernel: <i>memory.asm</i> - Physical memory is now tracked using a pair of bitfields as opposed to a list, eliminating potential lag during memory management under extreme load conditions. All memory is now allocated in 4 KiB blocks and aligned on a 4 KiB boundary.</li>
 				<li>Kernel: <i>memory.asm</i> - Removed some Memory Manager functions (e.g. MemAllocateAligned()) as they are no longer necessary under the new memory allocation scheme.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Increased timeout for reads and writes to 0.25 seconds to improve compatibility with some older hardware.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Restructured driver to handle only the controller - device functions have been split off into their own files.</li>
+				<li>Kernel: <i>PS2Keyboard.asm</i> - The DebugMenu can now be launched anew by pressing the F1 key.</li>
+				<li>Kernel: <i>screen.asm</i> - Removed _16_PrintIfConfigBits() and PrintIfConfigBits() in favor of the new logging scheme.</li>
 				<li>Kernel: <i>screen.asm</i> - ScreenScroll32() now uses MemCopy to do its job, making even something as simple as scrolling text happen lightning-fast.</li>
+				<li>Kernel: <i>screen.asm</i> - Tidied up some code using the newer parameter declaration standards.</li>
+				<li>Kernel: <i>tasks.asm</i> - TaskInit() now allocated memory based upon an automatic calculation of the size of the tTaskInfo struct instead of requiring manual updating.</li>
+				<li>Kernel: <i>tasks.asm</i> - Tasks now use 4 KiB stacks.</li>
+				<li>Manual: Night Kernel Function Reference - Removes Private function listings, as they are not intended to be called from outside the module anyway.</li>
+				<li>Kernel: Split code for all running tasks out to separate source files.</li>
+				<li>Manual: Spruced up table layout a bit.</li>
 			</ul>
 
 			Fixed<br>
@@ -10538,25 +12628,22 @@
 				<li>Kernel: <i>PS2Controller.asm</i> - Device ID detection improved; fixes a bug where keyboard and/or mouse were previously not detected on some machines due to variances in implementation of the PS/2 protocol in some devices.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Malfunctioning ports are no longer left active.</li>
 				<li>Kernel: <i>PS2Controller.asm</i> - Updated all functions to adhere to the convention of using EDX for returning error codes.</li>
+				<li>Kernel: <i>strings.asm</i> - String output to the VirtualBox Guest Log no longer assumes StringLength() leaves the string's address in ESI untouched.</li>
+				<li>Kernel: <i>tasks.asm</i> - TaskSwitch() now disables interrupts during operation for safety.</li>
+				<li>Kernel: Stack alignment is better kept across all functions.</li>
 				<li>Manual: Improved layout of elements for printing.</li>
 				<li>Manual: Removed some bugs in various HTML elements. Thanks, GitKraken. :/</li>
 				<li>Manual: Section 1 - Building and Running the Kernel - Added information about the floppy and CD image files in the <i>builds</i> folder.</li>
 				<li>Manual: Updated a bit of semantics and corrected some typos.</li>
 			</ul>
-
-			To do before release<br>
-			<ul>
-				<li>Implement events</li>
-				<li>Implement keyboard command: Alt-Tab switch</li>
-				<li>Implement keyboard command: Ctrl-Alt-Del reboot</li>
-			</ul>
 			<br>
 			<br>
 			<br>
 
 
 
-			<b>10/15/2019, 0.1E Update, Build 2718 - Code integrity improvements</b><br>
+			<b>10/15/2019, 0.1E Update, Build 2718</b><br>
+			Code integrity improvements<br>
 			<br>
 
 			Changed<br>
@@ -10574,7 +12661,8 @@
 
 
 
-			<b>10/14/2019, 0.1E Update, Build 2681 - Incorporated Antony's changes from Linker branch</b><br>
+			<b>10/14/2019, 0.1E Update, Build 2681</b><br>
+			Incorporated Antony's changes from Linker branch<br>
 			<br>
 
 			Changed<br>
@@ -10587,7 +12675,8 @@
 
 
 
-			<b>10/10/2019, 0.1E Update, Build 2675 - Start of paging support, memory probe bug fixes, start of 64-bit math support</b><br>
+			<b>10/10/2019, 0.1E Update, Build 2675</b><br>
+			Start of paging support, memory probe bug fixes, start of 64-bit math support<br>
 			<br>
 
 			New<br>
@@ -10615,7 +12704,8 @@
 
 
 
-			<b>9/25/2019, 0.1D Update, Build 2247 - Basic FAT16 driver complete</b><br>
+			<b>9/25/2019, 0.1D Update, Build 2247</b><br>
+			Basic FAT16 driver complete<br>
 			<br>
 
 			New<br>
@@ -10652,7 +12742,8 @@
 
 
 
-			<b>9/20/2019, 0.1D Update, Build 2009 - FAT16 driver progress</b><br>
+			<b>9/20/2019, 0.1D Update, Build 2009</b><br>
+			FAT16 driver progress<br>
 			<br>
 
 			New<br>
@@ -10691,7 +12782,8 @@
 
 
 
-			<b>9/5/2019, 0.1D Update, Build 1397 - Start of FAT16 algorithmic improvements</b><br>
+			<b>9/5/2019, 0.1D Update, Build 1397</b><br>
+			Start of FAT16 algorithmic improvements<br>
 			<br>
 
 			New<br>
@@ -10720,7 +12812,8 @@
 
 
 
-			<b>8/30/2019, 0.1D Update, Build 1275 - Commit prior to FAT16 algorithmic optimizations</b><br>
+			<b>8/30/2019, 0.1D Update, Build 1275</b><br>
+			Commit prior to FAT16 algorithmic optimizations<br>
 			<br>
 
 			New<br>
@@ -10773,7 +12866,8 @@
 
 
 
-			<b>8/11/2019, 0.1D Update, Build 1019 - Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver</b><br>
+			<b>8/11/2019, 0.1D Update, Build 1019</b><br>
+			Revamped driver framework, PCI overhaul, beginning of FAT filesystem driver<br>
 			<br>
 
 			New<br>
@@ -10830,7 +12924,8 @@
 
 
 
-			<b>5/21/2019, 0.1C Update - Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations</b><br>
+			<b>5/21/2019, 0.1C Update</b><br>
+			Function calling standard changes, large NKRM additions, Xenops addition, bugfixes, and optimizations<br>
 			<br>
 
 			New<br>
@@ -10865,7 +12960,8 @@
 
 
 
-			<b>5/1/2019, 0.1B Update - Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D</b><br>
+			<b>5/1/2019, 0.1B Update</b><br>
+			Tasking and debugging improvements, user-level code, _AND_ Virtual-8086 Mode task support :D<br>
 			<br>
 
 			New<br>
@@ -10906,7 +13002,8 @@
 
 
 
-			<b>4/17/2019, 0.1A Update - Preemptive Multitasking!</b><br>
+			<b>4/17/2019, 0.1A Update</b><br>
+			Preemptive Multitasking!<br>
 			<br>
 
 			New<br>
@@ -10954,7 +13051,8 @@
 
 
 
-			<b>4/5/2019, 0.19 Update - Fixes for A20, PS/2, RTC, and PIC</b><br>
+			<b>4/5/2019, 0.19 Update</b><br>
+			Fixes for A20, PS/2, RTC, and PIC<br>
 			<br>
 
 			New<br>
@@ -11011,7 +13109,8 @@
 
 
 
-			<b>3/5/2019, 0.18 Update - Bugfixes for PCI handling on real hardware</b><br>
+			<b>3/5/2019, 0.18 Update</b><br>
+			Bugfixes for PCI handling on real hardware<br>
 			<br>
 
 			New<br>
@@ -11040,7 +13139,8 @@
 			<br>
 			<br>
 
-			<b>3/4/2019, 0.17 Update - Memory Manager upgrades</b><br>
+			<b>3/4/2019, 0.17 Update</b><br>
+			Memory Manager upgrades<br>
 			<br>
 
 			New<br>
@@ -11076,7 +13176,8 @@
 
 
 
-			<b>2/19/2019, 0.16 Update - Full physical memory management implementation</b><br>
+			<b>2/19/2019, 0.16 Update</b><br>
+			Full physical memory management implementation<br>
 			<br>
 
 			New<br>
@@ -11111,7 +13212,8 @@
 
 
 
-			<b>2/9/2019, 0.15 Update - Start of refinements for upcoming Memory Manager additions</b><br>
+			<b>2/9/2019, 0.15 Update</b><br>
+			Start of refinements for upcoming Memory Manager additions<br>
 			<br>
 
 			Changed<br>
@@ -11127,7 +13229,8 @@
 
 
 
-			<b>12/26/2018, 0.14 Update - File system driver subsystem</b><br>
+			<b>12/26/2018, 0.14 Update</b><br>
+			File system driver subsystem<br>
 			<br>
 
 			New<br>
@@ -11160,7 +13263,8 @@
 
 
 
-			<b>7/28/2018, 0.13 Update - Full exception handling</b><br>
+			<b>7/28/2018, 0.13 Update</b><br>
+			Full exception handling<br>
 			<br>
 
 			New<br>
@@ -11191,7 +13295,8 @@
 
 
 
-			<b>7/6/2018, 0.12 Update - Functional ATA driver</b><br>
+			<b>7/6/2018, 0.12 Update</b><br>
+			Functional ATA driver<br>
 			<br>
 
 			New<br>
@@ -11242,7 +13347,8 @@
 
 
 
-			<b>6/10/2018, 0.11 Update - Fleshed out List Manager and PCI routines, other fixes</b><br>
+			<b>6/10/2018, 0.11 Update</b><br>
+			Fleshed out List Manager and PCI routines, other fixes<br>
 			<br>
 			<ul>
 				<li>Added check for PCI controller before attempting to init the PCI bus</li>
@@ -11265,7 +13371,8 @@
 
 
 
-			<b>6/4/2018, 0.10 Update - Stupid little fixes</b><br>
+			<b>6/4/2018, 0.10 Update</b><br>
+			Stupid little fixes<br>
 			<br>
 			<ul>
 				<li>Changed major and minor version numbers to byte size in globals.asm</li>
@@ -11277,7 +13384,8 @@
 
 
 
-			<b>6/4/2018, 0.10 Update - List Manager, 50-line text mode support</b><br>
+			<b>6/4/2018, 0.10 Update</b><br>
+			List Manager, 50-line text mode support<br>
 			<br>
 			<ul>
 				<li>Added 50-line text mode support. Nice for viewing those beautiful diagnostic messages at boot!</li>
@@ -11313,7 +13421,8 @@
 
 
 
-			<b>4/25/2018, 0.0F Update - Final PCI system</b><br>
+			<b>4/25/2018, 0.0F Update</b><br>
+			Final PCI system<br>
 			<br>
 			<ul>
 				<li>Added version information to kernel info screen</li>
@@ -11327,7 +13436,8 @@
 
 
 
-			<b>1/19/2018, 0.0E Update - Now runs on real hardware!</b><br>
+			<b>1/19/2018, 0.0E Update</b><br>
+			Now runs on real hardware!<br>
 			<br>
 			<ul>
 				<li>Added automatic sequential highlighted printing to <code>PrintRegsVESA()</code> (formerly <code>RegDump()</code>) for extra ease of use</li>
@@ -11353,7 +13463,8 @@
 
 
 
-			<b>12/6/2017, 0.0D Update - Milestone 1</b><br>
+			<b>12/6/2017, 0.0D Update</b><br>
+			Milestone 1<br>
 			<br>
 			<ul>
 				<li>Added beginning of framework for PCI support (Exelyx C code which will be rewritten in assembly)</li>
@@ -11513,7 +13624,8 @@
 
 
 
-			<b>8/6/2016, v0.04 update bugfixes</b><br>
+			<b>8/6/2016, v0.04 Update</b><br>
+			Bugfixes<br>
 			<br>
 			<ul>
 				<li>Fixed Maarten's memory code</li>
@@ -11526,7 +13638,7 @@
 
 
 
-			<b>8/3/2016, v0.04 update</b><br>
+			<b>8/3/2016, v0.04 Update</b><br>
 			<br>
 			<ul>
 				<li>Beginning of VESA support</li>
