@@ -26,8 +26,8 @@ TARGET			:= $(OUTPUTDIR)/kernel.sys
 
 # Compilers
 # CC 				:= $(ARCH)-$(FRMT)-gcc
-# LD				:= $(ARCH)-$(FRMT)-ld
-LD				:= ld
+ LD				:= $(ARCH)-$(FRMT)-ld
+# LD				:= ld
 ASM				:= nasm
 RM				:= rm
 ASMFLAGS 		:= -f elf -I$(ASMINCLUDEPATH)
