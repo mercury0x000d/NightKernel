@@ -1,0 +1,23 @@
+!define BLANK ""
+C:\PROJECTS\C\SMBIOS\OLD\sbtest.obj : C:\PROJECTS\C\SMBIOS\OLD\sbtest.cpp .A&
+UTODEPEND
+ @C:
+ cd C:\PROJECTS\C\SMBIOS\OLD
+ *wpp sbtest.cpp -i="C:\WATCOM/h" -w4 -e25 -zq -od -d2 -bt=dos -fo=.obj -ml &
+-xs -xr
+
+C:\PROJECTS\C\SMBIOS\OLD\smbios.obj : C:\PROJECTS\C\SMBIOS\OLD\smbios.cpp .A&
+UTODEPEND
+ @C:
+ cd C:\PROJECTS\C\SMBIOS\OLD
+ *wpp smbios.cpp -i="C:\WATCOM/h" -w4 -e25 -zq -od -d2 -bt=dos -fo=.obj -ml &
+-xs -xr
+
+C:\PROJECTS\C\SMBIOS\OLD\SMB.exe : C:\PROJECTS\C\SMBIOS\OLD\sbtest.obj C:\PR&
+OJECTS\C\SMBIOS\OLD\smbios.obj .AUTODEPEND
+ @C:
+ cd C:\PROJECTS\C\SMBIOS\OLD
+ @%write SMB.lk1 FIL sbtest.obj,smbios.obj
+ @%append SMB.lk1 
+ *wlink name SMB d all sys dos op m op maxe=25 op q op symf @SMB.lk1
+

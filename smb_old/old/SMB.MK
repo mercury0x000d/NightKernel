@@ -1,0 +1,3 @@
+project : C:\PROJECTS\C\SMBIOS\OLD\SMB.exe .SYMBOLIC
+
+!include C:\PROJECTS\C\SMBIOS\OLD\SMB.mk1

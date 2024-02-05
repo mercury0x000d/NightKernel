@@ -1,0 +1,17 @@
+/*
+	Partial implementation of STDINT.H ISO C99 Stuff
+	and other requirements for SMBIOS
+
+*/
+
+#ifndef _STDINT_H
+#define _STDINT_H               1
+#pragma pack(1)
+
+typedef unsigned char BYTE;
+typedef unsigned char uchar;
+typedef unsigned short WORD;
+typedef unsigned short ushort;
+typedef unsigned long ULONG;
+
+#endif

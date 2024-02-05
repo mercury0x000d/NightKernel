@@ -1,0 +1,17 @@
+sbiotest.cpp(17): Warning! W131: No prototype found for function 'clrscr'
+sbiotest.cpp(19): Error! E1058: Cannot use typedef 'LPSMBIOS' as a variable
+sbiotest.cpp(19): Error! E1009: Expecting ';' but found 's'
+sbiotest.cpp(19): Error! E1063: Missing operand
+sbiotest.cpp(20): Error! E1011: Symbol 's' has not been declared
+sbiotest.cpp(20): Warning! W102: Type mismatch (warning)
+sbiotest.cpp(20): Note! I2003: source conversion type is 'struct {...} __far *'
+sbiotest.cpp(20): Note! I2004: target conversion type is 'int '
+sbiotest.cpp(23): Error! E1033: Expression for '->' must be 'pointer to struct or union'
+sbiotest.cpp(24): Error! E1033: Expression for '->' must be 'pointer to struct or union'
+sbiotest.cpp(25): Error! E1033: Expression for '->' must be 'pointer to struct or union'
+sbiotest.cpp(25): Error! E1033: Expression for '->' must be 'pointer to struct or union'
+sbiotest.cpp(26): Error! E1077: Missing '}'
+sbiotest.cpp(26): Error! E1077: Missing '}'
+sbiotest.cpp(27): Error! E1099: Statement must be inside function. Probable cause: missing {
+sbiotest.cpp(35): Error! E1099: Statement must be inside function. Probable cause: missing {
+sbiotest.cpp(39): Warning! W138: No newline at end of file

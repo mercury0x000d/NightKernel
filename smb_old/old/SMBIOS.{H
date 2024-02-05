@@ -1,0 +1,103 @@
+#ifndef _SMBIOS_H
+#define _SMBIOS_H              1
+#include "stdint.h"
+
+typedef void far *FP;
+#ifdef _MSC_VER
+typedef __int64 qword_t;
+#else
+#ifdef INT64_C
+typedef uint64_t qword_t;
+#else
+typedef (unsigned long long) qwordt_t;
+#endif
+#endif
+#ifndef MK_FP
+#define MK_FP(seg,ofs)  ((FP)((unsigned long)(seg) << 16 | (ofs)))
+#endif
+
+  typedef struct {
+    char anchor[4];
+    BYTE eps_checksum;
+    BYTE entrypointlength;
+    BYTE majorversion;
+    BYTE minorversion;
+    WORD maxstructsize;
+    BYTE entrypointrevision;
+    char formattedarea[5];
+    char intermediateanchor[5];
+    BYTE intermediatechecksum;
+    WORD tablelength;
+    FP tableaddress;
+    WORD smbiosstructcnt;
+    BYTE revision;
+  } SMBIOS, far * LPSMBIOS;
+
+  typedef struct Entry {
+    struct Entry* next;
+    struct header* HEADER;
+  } Entry;
+
+  #pragma pack(push, 1)
+  typedef struct {
+    BYTE Type;
+    BYTE Length;
+    WORD Handle;
+  } HEADER;
+
+  enum {
+	smbios_type_bios_info                   =   0, // Required
+	smbios_type_system_info                 =   1, // Required
+	smbios_type_baseboard_info              =   2,
+	smbios_type_module_info                 =   2,
+	smbios_type_system_enclosure            =   3, // Required
+	smbios_type_system_chassis              =   3, // Required
+	smbios_type_processor_info              =   4, // Required
+	smbios_type_memory_controller_info      =   5, // Obsolete
+	smbios_type_memory_module_info          =   6, // Obsolete
+	smbios_type_cache_info                  =   7, // Required
+	smbios_type_port_connector_info         =   8,
+	smbios_type_system_slots                =   9, // Required
+	smbios_type_onboard_device_info         =  10, // Obsolete
+	smbios_type_oem_strings                 =  11,
+	smbios_type_system_config_options       =  12,
+	smbios_type_language_info               =  13,
+	smbios_type_group_associations          =  14,
+	smbios_type_system_event_log            =  15,
+	smbios_type_memory_array                =  16, // Required
+	smbios_type_memory_device               =  17, // Required
+	smbios_type_memory_error_info_32bit     =  18,
+	smbios_type_memory_array_mapped_addr    =  19, // Required
+	smbios_type_memory_device_mapped_addr   =  20,
+	smbios_type_builtin_pointing_device     =  21,
+	smbios_type_portable_battery            =  22,
+	smbios_type_system_reset                =  23,
+	smbios_type_hardware_security           =  24,
+	smbios_type_system_power_controls       =  25,
+	smbios_type_voltage_probe               =  26,
+	smbios_type_cooling_device              =  27,
+	smbios_type_temperature_probe           =  28,
+	smbios_type_electrical_current_probe    =  29,
+	smbios_type_out_of_band_remote_access   =  30,
+	smbios_type_bis_entry_point             =  31, // Required
+	smbios_type_system_boot_info            =  32, // Required
+	smbios_type_memory_error_info_64bit     =  33,
+	smbios_type_management_device           =  34,
+	smbios_type_management_device_component =  35,
+	smbios_type_management_device_threshold =  36,
+	smbios_type_memory_channel              =  37,
+	smbios_type_ipmi_device_info            =  38,
+	smbios_type_system_power_supply         =  39,
+	smbios_type_additional_info             =  40,
+	smbios_type_onboard_device_extinfo      =  41,
+	smbios_type_management_controller_host  =  42,
+	smbios_type_inactive                    = 126,
+	smbios_type_end_of_table                = 127, // Always last structure
+};
+
+char far * findSMBIOS ();
+char far * findSMBIOSUEFI ();
+WORD FindStructure (char * TableAddress, WORD StructureCount, BYTE Type);
+#endif
+
+

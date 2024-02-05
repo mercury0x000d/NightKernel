@@ -1,0 +1,15 @@
+/* Partial implementation of STDINT.H ISO C99 Stuff
+*/
+
+#ifndef _STDINT_H
+#define _STDINT_H               1
+#pragma pack(1)
+
+typedef unsigned char BYTE;
+typedef unsigned short WORD;
+typedef unsigned long ULONG;
+typedef void far *FP;
+typedef FP far *FPP;
+
+
+#endif

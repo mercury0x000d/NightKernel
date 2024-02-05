@@ -1,0 +1,55 @@
+/*
+        BCD.C - Functions for dealing with BCD representations.
+                Based on code written by J. Pyle in DOS 6 Developer's
+                Guide. The original source code is copyrighted by
+                SAMS Publishing and/or J. Pyle
+
+*/
+
+#include <dos.h>
+#include "const.h"
+
+
+WORD BCD_ASC ( char bcd )
+{
+        asm xor ah, ah;
+        asm mov al, bcd;
+        asm mov cl, 4;
+        asm shl ax, cl;
+        asm shr al, cl;
+        asm xchg ah, al;
+        asm add ax, 0x3030;
+}
+
+WORD BCD_Bin ( UBYTE bcd )
+{
+        asm xor ah, ah;
+        asm mov al, bcd;
+        asm mov cl, 4;
+        asm shl ax, cl;
+        asm shr al, cl;
+        asm xor bx, bx;
+        asm xchg ah, al;
+        asm mov ch, 10;
+        asm mul ch;
+        asm add ax, bx;
+}
+
+UBYTE ASC_BCD ( UBYTE hi, UBYTE lo)
+{
+        asm mov ah, hi;                  /* convert to unpacked BCD */
+        asm mov al, lo;
+        asm and ax, 0x0F0F;
+        asm mov cl, 4;                   /* pack up the BCD         */
+        asm shl al, cl;
+        asm shr ax, cl;
+}
+
+UBYTE Bin_BCD ( UBYTE bin )
+{
+        asm mov al, bin;                /* convert to unpacked BCD */
+        asm aam;
+        asm mov cl, 4;                  /* pack up the BCD         */
+        asm shl al, cl;
+        asm shr ax, cl;
+}

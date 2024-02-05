@@ -1,0 +1,4 @@
+stdint.h(471): Error! E1022: Missing or misspelled data type near 'int64_t'
+stdint.h(472): Error! E1022: Missing or misspelled data type near 'uint64_t'
+stdint.h(531): Error! E1022: Missing or misspelled data type near 'int64_t'
+stdint.h(532): Error! E1022: Missing or misspelled data type near 'uint64_t'

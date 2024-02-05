@@ -1,0 +1,14 @@
+Error: findsmbios() defined in module SMBIOS.CPP is duplicated in module SMBIOS.CPP
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0015EH 0015FH _TEXT              CODE
+ 00160H 001B4H 00055H _DATA              DATA
+ 001B6H 001B6H 00000H _BSS               BSS
+
+Error: Undefined symbol _GETCH in module SBIOTEST.CPP
+Error: Undefined symbol _PRINTF in module SBIOTEST.CPP
+Error: Undefined symbol _CLRSCR in module SBIOTEST.CPP
+Program entry point at 0000:0000
+Warning: No stack
+

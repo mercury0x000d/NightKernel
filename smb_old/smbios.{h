@@ -1,0 +1,39 @@
+/* SMBIOS support file
+*/
+
+#ifndef _SMBIOS_H
+#define _SMBIOS_H               1
+
+#ifndef MK_FP
+#define MK_FP( seg,ofs )\
+  ((void far *)(((unsigned long)(seg) << 16) | (ofs)))
+#endif
+
+#include "stdint.h"
+
+  typedef struct {
+    char anchor[4];
+    uint8_t eps_checksum;
+    uint8_t entrypointlength;
+    uint8_t majorversion;
+    uint8_t minorversion;
+    uint16_t maxstructsize;
+    uint8_t entrypointrevision;
+    char formattedarea[5];
+    char intermediateanchor[5];
+    uint8_t intermediatechecksum;
+    uint16_t tablelength;
+    char far *tableaddress;
+    uint16_t smbiosstructcnt;
+    uint8_t revision;
+  } SMBIOS, far * LPSMBIOS;
+
+  typedef struct {
+    uint8_t Type;
+    uint8_t Length;
+    ushort Handle;
+  } HEADER;
+
+  uchar far * findSMBIOS ();
+
+#endif

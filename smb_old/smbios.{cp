@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <conio.h>
+
+void main() {
+  char *a;
+  char *anchor;
+
+  int proceed, match;
+
+  anchor = "_SM_";
+
+  a = (char *)0xF0000000;
+  proceed =1;
+  match =1;
+
+  while (proceed == 1) {
+    for (int i=0; i<4; i++) {
+      if(a[i] != anchor[i]) {
+	match = 0;
+	break;
+      } else {
+	match = 1;
+      }
+    }
+    if (match == 1) {
+      proceed = 0;
+    } else {
+      a += 4;
+    }
+
+  }
+  printf("SMBIOS Address: %lx",a);
+}
