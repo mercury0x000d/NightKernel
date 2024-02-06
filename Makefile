@@ -25,7 +25,7 @@ ASMINCLUDEPATH	:= ./include/
 TARGET			:= $(OUTPUTDIR)/kernel.sys
 
 # Compilers
-# CC 				:= $(ARCH)-$(FRMT)-gcc
+ CC 				:= $(ARCH)-$(FRMT)-gcc
  LD				:= $(ARCH)-$(FRMT)-ld
 # LD				:= ld
 ASM				:= nasm
@@ -45,6 +45,7 @@ PROJDIRS			:= api drivers include io system video
 
 # Get the folders together
 ASMSRCFILES		:= kernel.asm $(shell find $(PROJDIRS) -type f -name "*.asm")
+CSRCFILES		:= $(shell find $(PROJDIRS) -type f -name "*.c")
 SRCFILES		:=  kernel.asm $(foreach DIR, $(PROJDIRS), $(wildcard $(DIR)/*.asm $(DIR)/*.c))
 # ASMSRCFILES		:= $(foreach DIR, $(PROJDIRS), $(wildcard $(DIR/*.asm)))
 ASMINCFILES		:= $(shell find $(PROJDIRS) -type f -name "*.inc")
