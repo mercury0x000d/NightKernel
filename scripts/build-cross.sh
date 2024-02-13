@@ -87,4 +87,10 @@ main() {
   stuff
 }
 
-main
+while getopts "h" a; do
+  case "${a}" in
+    h)
+      usage
+      ;;
+  esac
+done
